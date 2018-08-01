@@ -128,15 +128,19 @@ bool Localizer::initialize(PerformanceLog *performance_log)
 			if (dup_check.find(p) != dup_check.end())
 				dups.push_back(p);
 			dup_check.emplace(p);
+			par2mat[p] = p;
 		}
 		else if (pargp_map.find(p) != pargp_map.end())
 		{
 			par_map.push_back(pargp_map[p]);
+
 			for (auto &pp : pargp_map[p])
 			{
+				par2mat[pp] = p;
 				if (dup_check.find(pp) != dup_check.end())
 					dups.push_back(pp);
 				dup_check.emplace(pp);
+
 			}
 		}
 		else
@@ -179,7 +183,8 @@ bool Localizer::initialize(PerformanceLog *performance_log)
 
 	//populate the localizer map
 	vector<string> vobs, vpar;
-	
+	vector<string> row_names = mat.get_row_names();
+
 	for (auto &idx : idx_map)
 	{
 		vobs = obs_map[idx.first];
@@ -189,7 +194,8 @@ bool Localizer::initialize(PerformanceLog *performance_log)
 			vpar.insert(vpar.end(), par_map[i].begin(), par_map[i].end());
 		}
 		pair<vector<string>, vector<string>> p(vobs,vpar);
-		localizer_map.push_back(p);
+		//localizer_map.push_back(p);
+		localizer_map[row_names[idx.first]] = p;
 	}
 
 	//cout << "done" << endl;

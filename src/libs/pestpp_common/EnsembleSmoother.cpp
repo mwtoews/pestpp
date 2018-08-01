@@ -2562,7 +2562,7 @@ bool IterEnsembleSmoother::solve_new()
 				ss.str("");
 				ss << "localized upgrade part " << i + 1 << " of " << lsize;
 				message(1, ss.str());
-				ParameterEnsemble pe_local = calc_upgrade(local_pair.first, local_pair.second, cur_lam, pe.shape().first);
+				ParameterEnsemble pe_local = calc_upgrade(local_pair.second.first, local_pair.second.second, cur_lam, pe.shape().first);
 				pe_upgrade.add_2_cols_ip(pe_local);
 				i++;
 			}
