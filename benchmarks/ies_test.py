@@ -2029,11 +2029,119 @@ def clues_longnames_test():
                                 slave_root=model_d, master_dir=test_d,port=port)
 
 
+def freyberg_dist_local_test():
+    import flopy
+    model_d = "ies_freyberg"
+    test_d = os.path.join(model_d, "test_dist_local")
+    template_d = os.path.join(model_d, "template")
+    m = flopy.modflow.Modflow.load("freyberg.nam",model_ws=template_d,load_only=[],check=False)
+    if os.path.exists(test_d):
+        shutil.rmtree(test_d)
+    print("loading pst")
+    pst = pyemu.Pst(os.path.join(template_d, "pest.pst"))
+
+    par = pst.parameter_data
+    par.loc[:,"partrans"] = "fixed"
+    par.loc[par.pargp=="hk","partrans"] = "log"
+
+    par_adj = par.loc[pst.adj_par_names,:].copy()
+    par_adj.loc[:,"i"] = par_adj.parnme.apply(lambda x: int(x.split('_')[1][1:]))
+    par_adj.loc[:,"j"] = par_adj.parnme.apply(lambda x: int(x.split('_')[2][1:]))
+    par_adj.loc[:,"x"] = par_adj.apply(lambda x: m.sr.xcentergrid[x.i,x.j],axis=1)
+    par_adj.loc[:,"y"] = par_adj.apply(lambda x: m.sr.ycentergrid[x.i,x.j],axis=1)
+
+    pst.observation_data.loc["flx_river_l_19700102","weight"] = 0.0
+    obs_nz = pst.observation_data.loc[pst.nnz_obs_names,:].copy()
+    obs_nz.loc[:,"i"] = obs_nz.obsnme.apply(lambda x: int(x[6:8]))
+    obs_nz.loc[:,"j"] = obs_nz.obsnme.apply(lambda x: int(x[9:11]))
+    obs_nz.loc[:,'x'] = obs_nz.apply(lambda x: m.sr.xcentergrid[x.i,x.j],axis=1)
+    obs_nz.loc[:,'y'] = obs_nz.apply(lambda x: m.sr.ycentergrid[x.i,x.j],axis=1)
+
+    dfs = []
+    v = pyemu.geostats.ExpVario(contribution=1.0, a=1000)
+    for name in pst.nnz_obs_names:
+        x,y = obs_nz.loc[name,['x','y']].values
+        #print(name,x,y)
+        p = par_adj.copy()
+        #p.loc[:,"dist"] = p.apply(lambda xx: np.sqrt((xx.x - x)**2 + (xx.y - y)**2),axis=1)
+        #print(p.dist.max(),p.dist.min())
+        cc = v.covariance_points(x,y,p.x,p.y)
+        #print(cc.min(),cc.max())
+        dfs.append(cc)
+
+    df = pd.concat(dfs,axis=1)
+    df.columns = pst.nnz_obs_names
+
+
+
+
+
+    #mat = pyemu.Matrix.from_names(pst.nnz_obs_names,pst.adj_par_names).to_dataframe()
+    #mat.loc[:,:] = 1.0
+ 
+
+    mat = pyemu.Matrix.from_dataframe(df.T)
+    tol = 0.5
+
+    mat.x[mat.x<tol] = 0.0
+    #mat.to_ascii(os.path.join(template_d,"localizer.mat"))
+    df_tol = mat.to_dataframe()
+    arr = np.zeros((m.nrow,m.ncol))
+    for oname in df_tol.index:
+        arr[par_adj.i,par_adj.j] += df_tol.loc[oname,:]
+    plt.imshow(arr)
+    plt.show()
+    return
+    cov = pyemu.Cov.from_parameter_data(pst)
+    pe = pyemu.ParameterEnsemble.from_gaussian_draw(pst=pst,cov=cov,num_reals=10)
+    pe.enforce()
+    pe.to_csv(os.path.join(template_d,"par_local.csv"))
+   
+    
+    pst.pestpp_options = {}
+    pst.pestpp_options["ies_num_reals"] = 10
+    pst.pestpp_options["ies_subset_size"] = 3
+    pst.pestpp_options["ies_lambda_mults"] = 1.0
+    pst.pestpp_options["lambda_scale_fac"] = 1.0
+    pst.pestpp_options["ies_include_base"] = False
+    pst.pestpp_options["ies_par_en"] = "par_local.csv"
+    pst.pestpp_options["ies_localizer"] = "localizer.mat"
+    pst.pestpp_options["ies_verbose_level"] = 3
+    pst.control_data.noptmax = 3
+    print("writing pst")
+    pst.write(os.path.join(template_d, "pest_base.pst"))
+    print("starting slaves")
+    pyemu.helpers.start_slaves(template_d, exe_path, "pest_base.pst", num_slaves=11, master_dir=test_d,
+                               slave_root=model_d,port=port)
+    par_df = pd.read_csv(os.path.join(test_d,"pest_base.{0}.par.csv".format(pst.control_data.noptmax)),index_col=0)
+    #par_df.index = pe.index
+    par_df.columns = par_df.columns.str.lower()
+
+    par_df_org = pd.read_csv(os.path.join(test_d, "pest_base.0.par.csv"), index_col=0)
+    #par_df_org.index = pe.index
+    par_df_org.columns = par_df_org.columns.str.lower()
+
+    broke = []
+    for pg in ["r1","w1"]:
+        o = par_df_org.loc[:,par.loc[par.pargp==pg,"parnme"]]
+
+        omn,ostd = o.mean(),o.std()
+        u = par_df.loc[:,par.loc[par.pargp==pg,"parnme"]]
+        for col in o.columns:
+            diff = o.loc[:,col] - u.loc[:,col]
+            ad = np.abs(diff).sum()
+            if ad > 1.0e-7:
+                print(col,ad)
+                broke.append(col)
+        umn,ustd = u.mean(),u.std()
+    if len(broke) > 0:
+        raise Exception("future pars too diff:{0}".format(','.join(broke)))
+
 if __name__ == "__main__":
     # write_empty_test_matrix()
 
     #prep_10par_for_travis("ies_10par_xsec")
-    setup_suite_dir("ies_10par_xsec")
+    #setup_suite_dir("ies_10par_xsec")
     # setup_suite_dir("ies_freyberg")
     # run_suite("ies_10par_xsec")
     # run_suite("ies_freyberg")
@@ -2061,11 +2169,12 @@ if __name__ == "__main__":
     # tenpar_localizer_test1()
     # tenpar_localizer_test2()
     # tenpar_localizer_test3()
-    # freyberg_localizer_eval1()
+    #freyberg_localizer_eval1()
     # freyberg_localizer_eval2()
     # freyberg_localizer_test3()
+    freyberg_dist_local_test()
     # tenpar_restart_test()
     # csv_tests()
     # tenpar_rns_test()
-    clues_longnames_test()
+    #clues_longnames_test()
 
