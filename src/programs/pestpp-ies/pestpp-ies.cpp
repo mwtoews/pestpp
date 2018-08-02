@@ -40,7 +40,7 @@ int main(int argc, char* argv[])
 	{
 #endif
 		cout << endl << endl;
-		cout << "             pestpp-ies.exe - a GLM iterative ensemble smoother" << endl;
+		cout << "             pestpp-ies: a GLM iterative ensemble smoother" << endl;
 		cout << "                     for PEST(++) datasets " << endl << endl;
 		cout << "                 by the PEST++ development team" << endl << endl << endl;
 		// build commandline

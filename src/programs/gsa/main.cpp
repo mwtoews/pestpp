@@ -53,7 +53,7 @@ int main(int argc, char* argv[])
 {
 	string version = PESTPP_VERSION;
 	cout << endl << endl;
-	cout << "             GSA++ Version " << version << endl << endl;
+	cout << "             pestpp-gsa: a tool for global sensitivity analysis, version " << version << endl << endl;
 	cout << "                 by Dave Welter" << endl;
 	cout << "     Computational Water Resource Engineering"<< endl << endl << endl;
 	// build commandline

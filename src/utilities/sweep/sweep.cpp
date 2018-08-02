@@ -269,7 +269,7 @@ int main(int argc, char* argv[])
 	{
 #endif
 		cout << endl << endl;
-		cout << "             sweep.exe - a parameteric sweep utility" << endl;
+		cout << "             pestpp-swp - a parameteric sweep utility" << endl;
 		cout << "                     for PEST(++) datasets " << endl << endl;
 		cout << "                 by the PEST++ development team" << endl << endl << endl;
 		// build commandline

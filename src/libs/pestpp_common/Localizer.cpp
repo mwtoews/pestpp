@@ -128,7 +128,6 @@ bool Localizer::initialize(PerformanceLog *performance_log)
 			if (dup_check.find(p) != dup_check.end())
 				dups.push_back(p);
 			dup_check.emplace(p);
-			par2mat[p] = p;
 		}
 		else if (pargp_map.find(p) != pargp_map.end())
 		{
@@ -136,7 +135,6 @@ bool Localizer::initialize(PerformanceLog *performance_log)
 
 			for (auto &pp : pargp_map[p])
 			{
-				par2mat[pp] = p;
 				if (dup_check.find(pp) != dup_check.end())
 					dups.push_back(pp);
 				dup_check.emplace(pp);
@@ -199,4 +197,18 @@ bool Localizer::initialize(PerformanceLog *performance_log)
 	}
 
 	//cout << "done" << endl;
+}
+
+Eigen::VectorXd Localizer::get_localizing_vector(string row_name)
+{
+
+	vector<double> values;
+	vector<string> mat_rows = mat.get_row_names();
+	vector<string>::iterator it = find(mat_rows.begin(), mat_rows.end(), row_name);
+	if (it == mat_rows.end())
+		throw runtime_error("Localizer::get_localizing_vector() error: row_name not found: " + row_name);
+	int idx = it - mat_rows.begin();
+	Eigen::VectorXd mat_vec = mat.e_ptr()->row(idx);
+	return mat_vec;
+
 }

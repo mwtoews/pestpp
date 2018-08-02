@@ -66,7 +66,7 @@ int main(int argc, char* argv[])
 #endif
 		string version = PESTPP_VERSION;
 		cout << endl << endl;
-		cout << "             PEST++ Version " << version << endl << endl;
+		cout << "             pestpp: a tool for GLM parameter estimation,  version " << version << endl << endl;
 		cout << "                 by Dave Welter" << endl;
 		cout << "     Computational Water Resource Engineering" << endl << endl << endl;
 		// build commandline
