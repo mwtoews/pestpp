@@ -78,10 +78,15 @@ bool Localizer::initialize(PerformanceLog *performance_log)
 	vector<string> missing, dups;
 	vector<vector<string>> obs_map;
 	set<string> dup_check;
-	for (auto &o : mat.get_row_names())
+	//for (auto &o : mat.get_row_names())
+	string o;
+	vector<string> row_names = mat.get_row_names();
+	for (int i=0;i<mat.nrow();i++)
 	{
+		o = row_names[i];
 		if (obs_names.find(o) != obs_names.end())
 		{
+			obs2row_map[o] = i;
 			obs_map.push_back(vector<string>{o});
 			if (dup_check.find(o) != dup_check.end())
 				dups.push_back(o);
@@ -90,8 +95,10 @@ bool Localizer::initialize(PerformanceLog *performance_log)
 		else if (obgnme_map.find(o) != obgnme_map.end())
 		{
 			obs_map.push_back(obgnme_map[o]);
+			
 			for (auto &oo : obgnme_map[o])
 			{
+				obs2row_map[oo] = i;
 				if (dup_check.find(oo) != dup_check.end())
 					dups.push_back(oo);
 				dup_check.emplace(oo);
@@ -199,16 +206,28 @@ bool Localizer::initialize(PerformanceLog *performance_log)
 	//cout << "done" << endl;
 }
 
-Eigen::VectorXd Localizer::get_localizing_vector(string row_name)
+Eigen::MatrixXd Localizer::get_localizing_hadamard_matrix(int num_reals, string col_name, vector<string> &obs_names)
 {
 
 	vector<double> values;
-	vector<string> mat_rows = mat.get_row_names();
-	vector<string>::iterator it = find(mat_rows.begin(), mat_rows.end(), row_name);
-	if (it == mat_rows.end())
-		throw runtime_error("Localizer::get_localizing_vector() error: row_name not found: " + row_name);
-	int idx = it - mat_rows.begin();
-	Eigen::VectorXd mat_vec = mat.e_ptr()->row(idx);
-	return mat_vec;
+	vector<string> mat_cols = mat.get_col_names();
+	vector<string>::iterator it = find(mat_cols.begin(), mat_cols.end(), col_name);
+	if (it == mat_cols.end())
+		throw runtime_error("Localizer::get_localizing_vector() error: row_name not found: " + col_name);
+	int idx = it - mat_cols.begin();
+	Eigen::VectorXd mat_vec = mat.e_ptr()->col(idx);
+	vector<double> full_vec;
+	int col_idx;
+	Eigen::MatrixXd loc(obs_names.size(), num_reals);
+	//loc.setOnes();
+	//for (auto &name : obs_names)
+	for (int i=0;i<obs_names.size();i++)
+	{
+		col_idx = obs2row_map[obs_names[i]];
+		loc.col(i).setConstant(mat_vec[col_idx]);
+
+	}
+	
+	return loc;
 
 }

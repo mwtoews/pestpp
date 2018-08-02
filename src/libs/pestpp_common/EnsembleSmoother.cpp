@@ -2225,7 +2225,7 @@ bool IterEnsembleSmoother::should_terminate()
 	return false;
 }
 
-ParameterEnsemble IterEnsembleSmoother::calc_upgrade(vector<string> &obs_names, vector<string> &par_names,double cur_lam, int num_reals, string local_row_name)
+ParameterEnsemble IterEnsembleSmoother::calc_upgrade(vector<string> &obs_names, vector<string> &par_names,double cur_lam, int num_reals, string local_col_name)
 {
 
 	stringstream ss;
@@ -2278,17 +2278,25 @@ ParameterEnsemble IterEnsembleSmoother::calc_upgrade(vector<string> &obs_names, 
 		}
 	}
 
-	Eigen::VectorXd lvec(oe_upgrade.shape().second);
-	lvec.setOnes();
-	if (local_row_name.size() > 0)
+	Eigen::MatrixXd loc(oe_upgrade.shape().second, oe_upgrade.shape().first);
+	loc.setOnes();
+	if (local_col_name.size() > 0)
 	{
 		message(1, "getting localizing vector");
+		loc = localizer.get_localizing_hadamard_matrix(oe_upgrade.shape().first,local_col_name, obs_names);
 		
 	}
 	
 	//performance_log->log_event("calculate scaled obs diff");
 	message(2, "calculating obs diff matrix");
 	Eigen::MatrixXd diff = oe_upgrade.get_eigen_mean_diff().transpose();
+	if (local_col_name.size() > 0)
+	{
+		cout << diff.rows() << "," << diff.cols() << endl;
+		cout << loc.rows() << "," << loc.cols() << endl;
+		diff = diff.cwiseProduct(loc);
+	}
+		
 	Eigen::MatrixXd obs_diff = scale * (weights * diff);
 	if (verbose_level > 1)
 	{
@@ -2570,7 +2578,7 @@ bool IterEnsembleSmoother::solve_new()
 				ss.str("");
 				ss << "localized upgrade part " << i + 1 << " of " << lsize;
 				message(2, ss.str());
-				ParameterEnsemble pe_local = calc_upgrade(local_pair.second.first, local_pair.second.second, cur_lam, pe.shape().first);
+				ParameterEnsemble pe_local = calc_upgrade(local_pair.second.first, local_pair.second.second, cur_lam, pe.shape().first,local_pair.first);
 				pe_upgrade.add_2_cols_ip(pe_local);
 				i++;
 			}
