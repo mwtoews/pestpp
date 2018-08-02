@@ -169,10 +169,10 @@ bool Localizer::initialize(PerformanceLog *performance_log)
 	{
 		for (Eigen::SparseMatrix<double>::InnerIterator it(*mat.e_ptr(), k); it; ++it)
 		{
-			if (idx_map.find(it.row()) == idx_map.end())
-				idx_map[it.row()] = vector<int>{ it.col() };
+			if (idx_map.find(it.col()) == idx_map.end())
+				idx_map[it.col()] = vector<int>{ it.row() };
 			else
-				idx_map[it.row()].push_back(it.col());
+				idx_map[it.col()].push_back(it.row());
 			//std::cout << "(" << it.row() << ","; // row index
 			//std::cout << it.col() << ")\t"; // col index (here it is equal to k)
 
@@ -181,19 +181,19 @@ bool Localizer::initialize(PerformanceLog *performance_log)
 
 	//populate the localizer map
 	vector<string> vobs, vpar;
-	vector<string> row_names = mat.get_row_names();
+	vector<string> col_names = mat.get_col_names();
 
 	for (auto &idx : idx_map)
 	{
-		vobs = obs_map[idx.first];
-		vpar.clear();
+		vpar = par_map[idx.first];
+		vobs.clear();
 		for (auto &i : idx.second)
 		{
-			vpar.insert(vpar.end(), par_map[i].begin(), par_map[i].end());
+			vobs.insert(vobs.end(), obs_map[i].begin(), obs_map[i].end());
 		}
 		pair<vector<string>, vector<string>> p(vobs,vpar);
 		//localizer_map.push_back(p);
-		localizer_map[row_names[idx.first]] = p;
+		localizer_map[col_names[idx.first]] = p;
 	}
 
 	//cout << "done" << endl;

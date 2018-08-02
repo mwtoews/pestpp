@@ -1011,8 +1011,8 @@ void IterEnsembleSmoother::message(int level, string _message, vector<T, A> _ext
 	}
 	if (level == 0)
 		ss << "  ---  ";
-
-	cout << ss.str() << endl;
+	if ((verbose_level >= 2) || (level < 2))
+		cout << ss.str() << endl;
 	file_manager.rec_ofstream() <<ss.str() << endl;
 	performance_log->log_event(ss.str());
 
@@ -2225,7 +2225,7 @@ bool IterEnsembleSmoother::should_terminate()
 	return false;
 }
 
-ParameterEnsemble IterEnsembleSmoother::calc_upgrade(vector<string> &obs_names, vector<string> &par_names,double cur_lam, int num_reals)
+ParameterEnsemble IterEnsembleSmoother::calc_upgrade(vector<string> &obs_names, vector<string> &par_names,double cur_lam, int num_reals, string local_row_name)
 {
 
 	stringstream ss;
@@ -2244,7 +2244,7 @@ ParameterEnsemble IterEnsembleSmoother::calc_upgrade(vector<string> &obs_names, 
 		parcov_inv = parcov.get(par_names).inv().get_matrix().diagonal().cwiseSqrt().asDiagonal();
 	else
 	{
-		message(1, "first extracting diagonal from prior parameter covariance matrix");
+		message(2, "first extracting diagonal from prior parameter covariance matrix");
 		Covariance parcov_diag;
 		Covariance parcov_local = parcov.get(par_names);
 		parcov_diag.from_diagonal(parcov_local);
@@ -2263,7 +2263,7 @@ ParameterEnsemble IterEnsembleSmoother::calc_upgrade(vector<string> &obs_names, 
 	performance_log->log_event("calculate residual matrix");
 	//oe_base var_names should be ordered by act_obs_names, so only reorder real_names
 	//oe should only include active realizations, so only reorder var_names
-	message(1, "calculating residual matrix");
+	message(2, "calculating residual matrix");
 	//Eigen::MatrixXd scaled_residual = obscov_inv_sqrt * ph.get_obs_resid(oe).transpose();
 	Eigen::MatrixXd scaled_residual = weights * ph.get_obs_resid_subset(oe_upgrade).transpose();
 
@@ -2278,8 +2278,16 @@ ParameterEnsemble IterEnsembleSmoother::calc_upgrade(vector<string> &obs_names, 
 		}
 	}
 
-	performance_log->log_event("calculate scaled obs diff");
-	message(1, "calculating obs diff matrix");
+	Eigen::VectorXd lvec(oe_upgrade.shape().second);
+	lvec.setOnes();
+	if (local_row_name.size() > 0)
+	{
+		message(1, "getting localizing vector");
+		
+	}
+	
+	//performance_log->log_event("calculate scaled obs diff");
+	message(2, "calculating obs diff matrix");
 	Eigen::MatrixXd diff = oe_upgrade.get_eigen_mean_diff().transpose();
 	Eigen::MatrixXd obs_diff = scale * (weights * diff);
 	if (verbose_level > 1)
@@ -2290,7 +2298,7 @@ ParameterEnsemble IterEnsembleSmoother::calc_upgrade(vector<string> &obs_names, 
 	}
 
 	performance_log->log_event("calculate scaled par diff");
-	message(1, "calculating par diff matrix");
+	message(2, "calculating par diff matrix");
 	pe.transform_ip(ParameterEnsemble::transStatus::NUM);
 	diff = pe_upgrade.get_eigen_mean_diff().transpose();
 	Eigen::MatrixXd par_diff;
@@ -2312,8 +2320,8 @@ ParameterEnsemble IterEnsembleSmoother::calc_upgrade(vector<string> &obs_names, 
 			save_mat("par_diff.dat", diff);
 		}
 	}
-	performance_log->log_event("SVD of obs diff");
-	message(1, "calculating SVD of obs diff matrix");
+	//performance_log->log_event("SVD of obs diff");
+	message(2, "calculating SVD of obs diff matrix");
 	Eigen::MatrixXd ivec, upgrade_1, s, V, Ut;
 
 	
@@ -2349,8 +2357,8 @@ ParameterEnsemble IterEnsembleSmoother::calc_upgrade(vector<string> &obs_names, 
 	message(0, "starting lambda calcs for lambda", cur_lam);\
 	performance_log->log_event(ss.str());*/
 
-	performance_log->log_event("form scaled identity matrix");
-	message(1, "calculating scaled identity matrix");
+	//performance_log->log_event("form scaled identity matrix");
+	message(2, "calculating scaled identity matrix");
 	ivec = ((Eigen::VectorXd::Ones(s2.size()) * (cur_lam + 1.0)) + s2).asDiagonal().inverse();
 	if (verbose_level > 1)
 	{
@@ -2360,7 +2368,7 @@ ParameterEnsemble IterEnsembleSmoother::calc_upgrade(vector<string> &obs_names, 
 	}
 
 
-	message(1, "forming X1");
+	message(2, "forming X1");
 	Eigen::MatrixXd X1 = Ut * scaled_residual;
 	if (verbose_level > 1)
 	{
@@ -2371,7 +2379,7 @@ ParameterEnsemble IterEnsembleSmoother::calc_upgrade(vector<string> &obs_names, 
 	//scaled_residual.resize(0, 0);
 	//Ut.resize(0, 0);
 
-	message(1, "forming X2");
+	message(2, "forming X2");
 	Eigen::MatrixXd X2 = ivec * X1;
 	if (verbose_level > 1)
 	{
@@ -2381,7 +2389,7 @@ ParameterEnsemble IterEnsembleSmoother::calc_upgrade(vector<string> &obs_names, 
 	}
 	X1.resize(0, 0);
 
-	message(1, "forming X3");
+	message(2, "forming X3");
 	Eigen::MatrixXd X3 = V * s.asDiagonal() * X2;
 	if (verbose_level > 1)
 	{
@@ -2391,7 +2399,7 @@ ParameterEnsemble IterEnsembleSmoother::calc_upgrade(vector<string> &obs_names, 
 	}
 	X2.resize(0, 0);
 
-	message(1, "forming upgrade_1");
+	message(2, "forming upgrade_1");
 	if (pest_scenario.get_pestpp_options().get_ies_use_prior_scaling())
 	{
 		upgrade_1 = -1.0 * parcov_inv * par_diff * X3;
@@ -2416,8 +2424,8 @@ ParameterEnsemble IterEnsembleSmoother::calc_upgrade(vector<string> &obs_names, 
 	Eigen::MatrixXd upgrade_2;
 	if ((!pest_scenario.get_pestpp_options().get_ies_use_approx()) && (iter > 1))
 	{
-		performance_log->log_event("calculating parameter correction (full solution)");
-		message(1, "calculating parameter correction (full solution, MAP)");
+		//performance_log->log_event("calculating parameter correction (full solution)");
+		message(2, "calculating parameter correction (full solution, MAP)");
 		performance_log->log_event("forming scaled par resid");
 		Eigen::MatrixXd scaled_par_resid;
 		if (pest_scenario.get_pestpp_options().get_ies_use_prior_scaling())
@@ -2432,8 +2440,8 @@ ParameterEnsemble IterEnsembleSmoother::calc_upgrade(vector<string> &obs_names, 
 
 		//scaled_par_resid.transposeInPlace();
 
-		performance_log->log_event("forming x4");
-		message(1, "forming X4");
+		//performance_log->log_event("forming x4");
+		message(2, "forming X4");
 		if (verbose_level > 1)
 		{
 			cout << "scaled_par_resid: " << scaled_par_resid.rows() << ',' << scaled_par_resid.cols() << endl;
@@ -2449,8 +2457,8 @@ ParameterEnsemble IterEnsembleSmoother::calc_upgrade(vector<string> &obs_names, 
 				save_mat("x4.dat", x4);
 		}
 
-		performance_log->log_event("forming x5");
-		message(1, "forming X5");
+		//performance_log->log_event("forming x5");
+		message(2, "forming X5");
 		Eigen::MatrixXd x5 = Am * x4;
 		if (verbose_level > 1)
 		{
@@ -2459,7 +2467,7 @@ ParameterEnsemble IterEnsembleSmoother::calc_upgrade(vector<string> &obs_names, 
 				save_mat("x5.dat", x5);
 		}
 
-		message(1, "forming X6");
+		message(2, "forming X6");
 		performance_log->log_event("forming x6");
 		Eigen::MatrixXd x6 = par_diff.transpose() * x5;
 		if (verbose_level > 1)
@@ -2469,8 +2477,8 @@ ParameterEnsemble IterEnsembleSmoother::calc_upgrade(vector<string> &obs_names, 
 				save_mat("x6.dat", x6);
 		}
 
-		message(1, "forming X7");
-		performance_log->log_event("forming x7");
+		message(2, "forming X7");
+		//performance_log->log_event("forming x7");
 		if (verbose_level > 1)
 		{
 			cout << "V: " << V.rows() << ',' << V.cols() << endl;
@@ -2485,8 +2493,8 @@ ParameterEnsemble IterEnsembleSmoother::calc_upgrade(vector<string> &obs_names, 
 				save_mat("x7.dat", x7);
 		}
 
-		performance_log->log_event("forming upgrade_2");
-		message(1, "forming upgrade_2");
+		//performance_log->log_event("forming upgrade_2");
+		message(2, "forming upgrade_2");
 
 		if (pest_scenario.get_pestpp_options().get_ies_use_prior_scaling())
 		{
@@ -2550,7 +2558,7 @@ bool IterEnsembleSmoother::solve_new()
 		ss.str("");
 		double cur_lam = last_best_lam * lam_mult;
 		ss << "starting calcs for lambda" << cur_lam;
-		message(0, "starting lambda calcs for lambda", cur_lam);
+		message(1, "starting lambda calcs for lambda", cur_lam);
 		ParameterEnsemble pe_upgrade = pe.zeros_like();
 		if (use_localizer)
 		{
@@ -2561,7 +2569,7 @@ bool IterEnsembleSmoother::solve_new()
 			{
 				ss.str("");
 				ss << "localized upgrade part " << i + 1 << " of " << lsize;
-				message(1, ss.str());
+				message(2, ss.str());
 				ParameterEnsemble pe_local = calc_upgrade(local_pair.second.first, local_pair.second.second, cur_lam, pe.shape().first);
 				pe_upgrade.add_2_cols_ip(pe_local);
 				i++;
