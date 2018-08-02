@@ -1830,7 +1830,7 @@ void IterEnsembleSmoother::initialize()
 		message(1, "need at least ", error_min_reals);
 		throw_ies_error(string("too few active realizations, cannot continue"));
 	}
-	if (oe.shape().first <= warn_min_reals)
+	if (oe.shape().first < warn_min_reals)
 	{
 		ss.str("");
 		ss << "WARNING: less than " << warn_min_reals << " active realizations...might not be enough";
