@@ -71,6 +71,15 @@ Mat::Mat(vector<string> _row_names, vector<string> _col_names,
 	mattype = _mattype;
 }
 
+void Mat::update_sets()
+{
+	row_set.clear();
+	//row_set.emplace(row_names.begin(), row_names.end());
+	row_set = set<string>(row_names.begin(), row_names.end());
+	col_set.clear();
+	//col_set.emplace(col_names.begin(), col_names.end());
+	col_set = set<string>(col_names.begin(), col_names.end());
+}
 
 
 const Eigen::SparseMatrix<double>* Mat::e_ptr()
@@ -794,21 +803,24 @@ Mat Mat::rightCols(const int idx)
 	return Mat(row_names,cnames,matrix.rightCols(idx));
 }
 
-Mat Mat::get(const vector<string> &new_row_names, const vector<string> &new_col_names)
+Mat Mat::get(const vector<string> &new_row_names, const vector<string> &new_col_names, bool update)
 {
 	//check that every row and col name is listed
 	if (new_row_names.size() == 0) throw runtime_error("Mat::get() error: new_row_names is empty");
 	if (new_col_names.size() == 0) throw runtime_error("Mat::get() error: new_col_names is empty");
 	vector<string> row_not_found;
 	
-	set<string> row_set(row_names.begin(), row_names.end());
+	if (update)
+		update_sets();
+
+	//set<string> row_set(row_names.begin(), row_names.end());
 	set<string>::iterator end = row_set.end();
 	for (auto &n : new_row_names)
 		if (row_set.find(n) == end)
 			row_not_found.push_back(n);
 
 	vector<string> col_not_found;
-	set<string> col_set(col_names.begin(), col_names.end());
+	//set<string> col_set(col_names.begin(), col_names.end());
 	end = col_set.end();
 	for (auto &n : new_col_names)
 		if (col_set.find(n) == end)
@@ -1196,9 +1208,9 @@ string Covariance::try_from(Pest &pest_scenario, FileManager &file_manager, bool
 }
 
 
-Covariance Covariance::get(const vector<string> &other_names)
+Covariance Covariance::get(const vector<string> &other_names, bool update)
 {
-	Covariance new_cov(Mat::get(other_names, other_names));
+	Covariance new_cov(Mat::get(other_names, other_names, update));
 	return new_cov;
 }
 

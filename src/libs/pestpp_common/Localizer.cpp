@@ -224,10 +224,10 @@ Eigen::MatrixXd Localizer::get_localizing_hadamard_matrix(int num_reals, string 
 	for (int i=0;i<obs_names.size();i++)
 	{
 		col_idx = obs2row_map[obs_names[i]];
-		loc.col(i).setConstant(mat_vec[col_idx]);
+		loc.row(i).setConstant(mat_vec[col_idx]);
 
 	}
-	
+	//cout << loc << endl;
 	return loc;
 
 }

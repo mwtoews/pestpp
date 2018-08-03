@@ -1528,8 +1528,6 @@ void IterEnsembleSmoother::initialize()
 	if (bad_phi < 1.0e+30)
 		message(1, "using bad_phi: ", bad_phi);
 
-	
-
 	int num_reals = pest_scenario.get_pestpp_options().get_ies_num_reals();
 
 	bool pe_drawn = initialize_pe(parcov);
@@ -1842,7 +1840,7 @@ void IterEnsembleSmoother::initialize()
 	message(0, "initial phi summary");
 	ph.report();
 	ph.write(0, run_mgr_ptr->get_total_runs());
-	
+	best_mean_phis.push_back(ph.get_mean(PhiHandler::phiType::COMPOSITE));
 	if (!pest_scenario.get_pestpp_options().get_ies_use_approx())
 	{
 		message(1, "using full (MAP) update solution");
@@ -2234,10 +2232,14 @@ ParameterEnsemble IterEnsembleSmoother::calc_upgrade(vector<string> &obs_names, 
 
 	//use num_reals to select out a block from eigen, rather than getting and reordering ensembles
 
-	ObservationEnsemble oe_upgrade = oe;
-	oe_upgrade.reorder(vector<string>(), obs_names);
-	ParameterEnsemble pe_upgrade = pe;
-	pe_upgrade.reorder(vector<string>(), par_names);
+	/*ObservationEnsemble oe_upgrade = oe;
+	oe_upgrade.reorder(vector<string>(), obs_names);*/
+	ObservationEnsemble oe_upgrade(oe.get_pest_scenario_ptr(), oe.get_eigen(vector<string>(), obs_names, false), oe.get_real_names(), obs_names);
+
+	
+	/*ParameterEnsemble pe_upgrade = pe;
+	pe_upgrade.reorder(vector<string>(), par_names);*/
+	ParameterEnsemble pe_upgrade(pe.get_pest_scenario_ptr(), pe.get_eigen(vector<string>(), par_names, false), pe.get_real_names(), par_names);
 
 	Eigen::DiagonalMatrix<double, Eigen::Dynamic> parcov_inv;// = parcov.get(par_names).inv().e_ptr()->toDense().cwiseSqrt().asDiagonal();
 	if (parcov.isdiagonal())
@@ -2246,7 +2248,7 @@ ParameterEnsemble IterEnsembleSmoother::calc_upgrade(vector<string> &obs_names, 
 	{
 		message(2, "first extracting diagonal from prior parameter covariance matrix");
 		Covariance parcov_diag;
-		Covariance parcov_local = parcov.get(par_names);
+		Covariance parcov_local = parcov.get(par_names,false);
 		parcov_diag.from_diagonal(parcov_local);
 		parcov_inv = parcov_diag.inv().get_matrix().diagonal().cwiseSqrt().asDiagonal();
 	}
@@ -2278,22 +2280,22 @@ ParameterEnsemble IterEnsembleSmoother::calc_upgrade(vector<string> &obs_names, 
 		}
 	}
 
-	Eigen::MatrixXd loc(oe_upgrade.shape().second, oe_upgrade.shape().first);
-	loc.setOnes();
-	if (local_col_name.size() > 0)
-	{
-		message(1, "getting localizing vector");
-		loc = localizer.get_localizing_hadamard_matrix(oe_upgrade.shape().first,local_col_name, obs_names);
-		
-	}
 	
 	//performance_log->log_event("calculate scaled obs diff");
 	message(2, "calculating obs diff matrix");
 	Eigen::MatrixXd diff = oe_upgrade.get_eigen_mean_diff().transpose();
 	if (local_col_name.size() > 0)
+
 	{
-		cout << diff.rows() << "," << diff.cols() << endl;
-		cout << loc.rows() << "," << loc.cols() << endl;
+		Eigen::MatrixXd loc(oe_upgrade.shape().second, oe_upgrade.shape().first);
+		message(2, "getting localizing hadamard matrix");
+		loc = localizer.get_localizing_hadamard_matrix(oe_upgrade.shape().first, local_col_name, obs_names);
+		if (verbose_level > 1)
+		{
+			cout << "loc:" << loc.rows() << ',' << loc.cols() << endl;
+			if (verbose_level > 2)
+				save_mat("local_mat.dat", loc);
+		}
 		diff = diff.cwiseProduct(loc);
 	}
 		
@@ -2523,9 +2525,10 @@ ParameterEnsemble IterEnsembleSmoother::calc_upgrade(vector<string> &obs_names, 
 		//pe_lam.set_eigen(*pe_lam.get_eigen_ptr() + upgrade_2.transpose());
 
 	}
-	ParameterEnsemble upgrade_pe(&pest_scenario);
-	upgrade_pe.from_eigen_mat(upgrade_1,pe.get_real_names(), par_names);
-	return upgrade_pe;
+	//ParameterEnsemble upgrade_pe(&pest_scenario);
+	//upgrade_pe.from_eigen_mat(upgrade_1,pe.get_real_names(), par_names);
+	pe_upgrade.set_eigen(upgrade_1);
+	return pe_upgrade;
 }
 
 
@@ -2561,6 +2564,12 @@ bool IterEnsembleSmoother::solve_new()
 	
 	vector<ParameterEnsemble> pe_lams;
 	vector<double> lam_vals, scale_vals;
+	//update all the fast-lookup structures
+	oe.update_var_map();
+	pe.update_var_map();
+	parcov.update_sets();
+	obscov.update_sets();
+
 	for (auto &lam_mult : lam_mults)
 	{
 		ss.str("");
@@ -2568,11 +2577,12 @@ bool IterEnsembleSmoother::solve_new()
 		ss << "starting calcs for lambda" << cur_lam;
 		message(1, "starting lambda calcs for lambda", cur_lam);
 		ParameterEnsemble pe_upgrade = pe.zeros_like();
+		//pe_upgrade.to_csv("test.csv");
 		if (use_localizer)
 		{
 			int i = 0;
 			int lsize = localizer.get_localizer_map().size();
-
+			
 			for (auto local_pair : localizer.get_localizer_map())
 			{
 				ss.str("");
@@ -2582,6 +2592,7 @@ bool IterEnsembleSmoother::solve_new()
 				pe_upgrade.add_2_cols_ip(pe_local);
 				i++;
 			}
+			
 		}
 		else
 			pe_upgrade = calc_upgrade(act_obs_names, act_par_names, cur_lam, pe.shape().first);
