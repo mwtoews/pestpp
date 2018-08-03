@@ -2049,7 +2049,6 @@ def freyberg_dist_local_test():
     model_d = "ies_freyberg"
     test_d = os.path.join(model_d, "test_dist_local")
     template_d = os.path.join(model_d, "template")
-    m = flopy.modflow.Modflow.load("freyberg.nam",model_ws=template_d,load_only=[],check=False)
     if os.path.exists(test_d):
        shutil.rmtree(test_d)
     # print("loading pst")
@@ -2099,12 +2098,6 @@ def freyberg_dist_local_test():
     print(zero_cond_pars)
 
 
-    arr = np.zeros((m.nrow,m.ncol))
-    arr[par_adj.i,par_adj.j] = par_sum.values
-    arr[arr==0] = np.NaN
-    # plt.imshow(arr)
-    # plt.show()
-    # return
 
     cov = pyemu.Cov.from_parameter_data(pst)
     num_reals = 10
@@ -2132,17 +2125,6 @@ def freyberg_dist_local_test():
     par_df_org = pd.read_csv(os.path.join(test_d, "pest_local.0.par.csv"), index_col=0)
     #par_df_org.index = pe.index
     par_df_org.columns = par_df_org.columns.str.lower()
-    fig = plt.figure(figsize=(10*pst.control_data.noptmax,10))
-    #axes = [plt.subplot(2,pst.control_data.noptmax+1,i+1) for i in range(pst.control_data.noptmax+1)]
-    #axes[0].imshow(arr)
-    ax = plt.subplot2grid((1,pst.control_data.noptmax+1),(0,0))
-    cb = ax.imshow(arr)
-    ax.set_xticklabels([])
-    ax.set_yticklabels([])
-    ax.set_title("localizer function")
-    #plt.colorbar(cb)
-
-    diff_arrs = []
     for i in range(0,pst.control_data.noptmax):
         try:
             par_df = pd.read_csv(os.path.join(test_d, "pest_local.{0}.par.csv".format(i+1)),
@@ -2166,6 +2148,11 @@ def freyberg_dist_local_invest():
     # print("loading pst")
     pst = pyemu.Pst(os.path.join(template_d, "pest.pst"))
 
+    obs = pst.observation_data
+    pobs = obs.loc[obs.obgnme=="pothead","obsnme"]
+    obs.loc[pobs[::3],"weight"] = 1.0
+    obs.loc[pobs[::3],"obsval"] += np.random.normal(0.0,2.0,pobs[::3].shape[0])
+
     par = pst.parameter_data
     par.loc[:, "partrans"] = "fixed"
     par.loc[par.pargp == "hk", "partrans"] = "log"
@@ -2178,8 +2165,8 @@ def freyberg_dist_local_invest():
 
     pst.observation_data.loc["flx_river_l_19700102", "weight"] = 0.0
     obs_nz = pst.observation_data.loc[pst.nnz_obs_names, :].copy()
-    obs_nz.loc[:, "i"] = obs_nz.obsnme.apply(lambda x: int(x[6:8]))
-    obs_nz.loc[:, "j"] = obs_nz.obsnme.apply(lambda x: int(x[9:11]))
+    obs_nz.loc[:, "i"] = obs_nz.obsnme.apply(lambda x: int(x[6:8])-1)
+    obs_nz.loc[:, "j"] = obs_nz.obsnme.apply(lambda x: int(x[9:11])-1)
     obs_nz.loc[:, 'x'] = obs_nz.apply(lambda x: m.sr.xcentergrid[x.i, x.j], axis=1)
     obs_nz.loc[:, 'y'] = obs_nz.apply(lambda x: m.sr.ycentergrid[x.i, x.j], axis=1)
 
@@ -2199,8 +2186,7 @@ def freyberg_dist_local_invest():
     df.columns = pst.nnz_obs_names
 
     mat = pyemu.Matrix.from_dataframe(df.T)
-    tol = 0.35
-
+    tol = 0.15
     mat.x[mat.x < tol] = 0.0
     mat.to_ascii(os.path.join(template_d, "localizer.mat"))
     df_tol = mat.to_dataframe()
@@ -2217,23 +2203,25 @@ def freyberg_dist_local_invest():
     # return
 
     cov = pyemu.Cov.from_parameter_data(pst)
-    num_reals = 100
+    num_reals = 8
     pe = pyemu.ParameterEnsemble.from_gaussian_draw(pst=pst, cov=cov, num_reals=num_reals)
     pe.enforce()
     pe.to_csv(os.path.join(template_d, "par_local.csv"))
 
     pst.pestpp_options = {}
     pst.pestpp_options["ies_num_reals"] = num_reals
-    pst.pestpp_options["ies_subset_size"] = num_reals
-    pst.pestpp_options["ies_lambda_mults"] = 1.0
-    pst.pestpp_options["lambda_scale_fac"] = 1.0
+    pst.pestpp_options["ies_subset_size"] = 3
+    pst.pestpp_options["ies_lambda_mults"] = [0.1,1.0,5.0]
+    pst.pestpp_options["lambda_scale_fac"] = [0.5,1.0,1.1]
     pst.pestpp_options["ies_include_base"] = False
     pst.pestpp_options["ies_par_en"] = "par_local.csv"
     pst.pestpp_options["ies_localizer"] = "localizer.mat"
     pst.pestpp_options["ies_verbose_level"] = 1
     pst.pestpp_options["ies_subset_how"] = "random"
     pst.pestpp_options["ies_accept_phi_fac"] = 1000.0
-    pst.control_data.noptmax = 4
+    pst.control_data.nphinored = 20
+    #pst.pestpp_options["ies_initial_lambda"] = 0.1
+    pst.control_data.noptmax = 10
     pst.write(os.path.join(template_d, "pest_local.pst"))
     pyemu.os_utils.start_slaves(template_d, exe_path, "pest_local.pst", num_slaves=20, master_dir=test_d,
                                 slave_root=model_d, port=port)
@@ -2262,7 +2250,7 @@ def freyberg_dist_local_invest():
         par_df.columns = par_df.columns.str.lower()
         diff = par_df_org - par_df
         # print(diff.loc[:,zero_cond_pars].max(axis=1))
-        assert diff.loc[:, zero_cond_pars].max().max() < 1.0e-6, diff.loc[:, zero_cond_pars].max().max()
+        #assert diff.loc[:, zero_cond_pars].max().max() < 1.0e-6, diff.loc[:, zero_cond_pars].max().max()
         dsum = diff.apply(np.abs).sum().loc[par_adj.index]
         d_arr = np.zeros((m.nrow, m.ncol))
         d_arr[par_adj.i, par_adj.j] = dsum
@@ -2287,7 +2275,24 @@ def freyberg_dist_local_invest():
         ax.set_xticklabels([])
         ax.set_yticklabels([])
         ax.set_title("HK diff from initial en, iteration {0}".format(i + 1))
-    plt.show()
+    plt.savefig(os.path.join(test_d,"hk_compare.pdf"))
+
+    pst.pestpp_options.pop("ies_localizer")
+    pst.write(os.path.join(template_d, "pest_base.pst"))
+    pyemu.os_utils.start_slaves(template_d, exe_path, "pest_base.pst", num_slaves=20, master_dir=test_d+"_base",
+                                slave_root=model_d, port=port)
+
+    phi_loc = pd.read_csv(os.path.join(test_d,"pest_local.phi.meas.csv"),index_col=0)
+    phi_all = pd.read_csv(os.path.join(test_d+"_base","pest_base.phi.meas.csv"),index_col=0)
+
+    fig = plt.figure()
+    ax = plt.subplot(111)
+    phi_loc.loc[:,"mean"].plot(ax=ax,color='g', label="local")
+    phi_all.loc[:,"mean"].plot(ax=ax,color='b', label="full")
+    ax.set_ylabel("phi")
+    ax.legend()
+    plt.savefig(os.path.join(test_d,"phi.pdf"))
+
 
 
 if __name__ == "__main__":
@@ -2322,10 +2327,11 @@ if __name__ == "__main__":
     # tenpar_localizer_test1()
     # tenpar_localizer_test2()
     # tenpar_localizer_test3()
-    freyberg_localizer_eval1()
-    freyberg_localizer_eval2()
-    freyberg_localizer_test3()
-    freyberg_dist_local_test()
+    # freyberg_localizer_eval1()
+    # freyberg_localizer_eval2()
+    # freyberg_localizer_test3()
+    # freyberg_dist_local_test()
+    freyberg_dist_local_invest()
     # tenpar_restart_test()
     # csv_tests()
     # tenpar_rns_test()
