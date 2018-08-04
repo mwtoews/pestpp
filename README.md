@@ -1,15 +1,15 @@
 # PEST++
 Object Oriented Inverse Modeling Software
 <br><br><br>
-[![Travis Status](https://travis-ci.org/dwelter/pestpp.svg?branch=develop)](https://travis-ci.org/dwelter/pestpp)
+[![Travis Status](https://travis-ci.org/jtwhite79/pestpp.svg?branch=develop)](https://travis-ci.org/jtwhite79/pestpp)
 [![Build status](https://ci.appveyor.com/api/projects/status/6tktqgy67d47wkjf?svg=true)](https://ci.appveyor.com/project/jtwhite79/pestpp)
 
 ## links to latest binaries
 
-* [windows (users with current visual studio installed)](https://github.com/dwelter/pestpp/tree/develop/exe/windows/x64/Release).  Direct zip download [here](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/dwelter/pestpp/tree/develop/exe/windows/x64/Release)
-* [windows compiled with intel C++ (the 'i' prefix)](https://github.com/dwelter/pestpp/tree/intel_c_windows/exe/windows/x64/Release).  Direct zip download [here](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/dwelter/pestpp/tree/intel_c_windows/exe/windows/x64/Release)
-* [mac OS](https://github.com/dwelter/pestpp/tree/develop/exe/mac).  Direct zip download [here](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/dwelter/pestpp/tree/develop/exe/mac)
-* [linux static compiled with intel C++](https://github.com/dwelter/pestpp/tree/develop/exe/linux). Direct zip download [here](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/dwelter/pestpp/tree/develop/exe/linux). (makefiles for GCC provides in src/ directory)
+* [windows (users with current visual studio installed)](https://github.com/jtwhite79/pestpp/tree/develop/exe/windows/x64/Release).  Direct zip download [here](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/jtwhite79/pestpp/tree/develop/exe/windows/x64/Release)
+* [windows compiled with intel C++ (the 'i' prefix)](https://github.com/jtwhite79/pestpp/tree/intel_c_windows/exe/windows/x64/Release).  Direct zip download [here](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/jtwhite79/pestpp/tree/intel_c_windows/exe/windows/x64/Release)
+* [mac OS](https://github.com/jtwhite79/pestpp/tree/develop/exe/mac).  Direct zip download [here](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/jtwhite79/pestpp/tree/develop/exe/mac)
+* [linux static compiled with intel C++](https://github.com/jtwhite79/pestpp/tree/develop/exe/linux). Direct zip download [here](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/jtwhite79/pestpp/tree/develop/exe/linux). (makefiles for GCC provides in src/ directory)
 
 ## Overview
 The PEST++ software suite includes several stand-alone tools for model-independent (non-intrusive) computer model parameter estimation and uncertainty analysis.  Codes include:
@@ -27,6 +27,8 @@ The PEST++ software suite includes several stand-alone tools for model-independe
 All members of the software suite can be compiled for PC, MAC, or Linux and have several run managers to support parallelization.  precompiled binaries are available in the "exe" folder.  Windows users should use the ``intel_c_windows`` branch binaries to avoid the dreaded MSVC missing runtime DLL issue
 
 ## Recent Updates
+
+<b> update 5 August 2018 </b>: Welcome to the active fork of ``pestpp-ies``, ``pestpp-opt``, and ``pestpp-swp``. I strive to actively support users, so please raise issues related to these codes as needed.  I will also try to support ``pestpp`` users are best I can although this code is a lower priority for me.
 
 <b> update 30 July 2018 </b>: The PEST++ now supports parameter and observation names up to 200 characters in length. This allows for more descriptive naming and better support for problems with very large numbers of pars and obs.  Note that if a parameter name exceeds 12 chars or an observation name exceeds 20 chars, the resulting jacobian binary file will include truncated names (at 12 and 20 chars, respectively) and names exceeding these lengths are not backward compatible with PEST. 
 
