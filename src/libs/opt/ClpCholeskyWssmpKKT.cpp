@@ -69,7 +69,7 @@ void F77_FUNC(wsetmaxthrds,WSETMAXTHRDS)(const int* NTHREADS);
 void F77_FUNC(wssmp,WSSMP)(const int* N, const int* IA,
                            const int* JA, const double* AVALS,
                            double* DIAG,  int* PERM,
-                           int* INVP,  double* B,   
+                           int* INVP,  double* B,
                            const int* LDB, const int* NRHS,
                            double* AUX, const int* NAUX,
                            int* MRP, int* IPARM,

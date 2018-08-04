@@ -96,7 +96,11 @@ int main(int argc, char* argv[])
 		string filename = complete_path;
 		string pathname = ".";
 		file_manager.initialize_path(get_filename_without_ext(filename), pathname);
-
+		//jwhite - something weird is happening with the machine is busy and an existing
+		//rns file is really large. so let's remove it explicitly and wait a few seconds before continuing...
+		string rns_file = file_manager.build_filename("rns");
+		int flag = remove(rns_file.c_str());
+		w_sleep(2000);
 		//by default use the serial run manager.  This will be changed later if another
 		//run manger is specified on the command line.
 		RunManagerType run_manager_type = RunManagerType::SERIAL;
@@ -226,7 +230,7 @@ int main(int argc, char* argv[])
 
 		// create pest run and process control file to initialize it
 		Pest pest_scenario;
-		
+
 		try {
 			performance_log.log_event("starting to process control file", 1);
 			pest_scenario.process_ctl_file(file_manager.open_ifile_ext("pst"), file_manager.build_filename("pst"));
@@ -245,9 +249,9 @@ int main(int argc, char* argv[])
 		pest_scenario.check_inputs(fout_rec);
 
 
-		
+
 		//Initialize OutputFileWriter to handle IO of suplementary files (.par, .par, .svd)
-		//bool save_eign = pest_scenario.get_svd_info().eigwrite > 0;	
+		//bool save_eign = pest_scenario.get_svd_info().eigwrite > 0;
 		pest_scenario.get_pestpp_options_ptr()->set_iter_summary_flag(false);
 		OutputFileWriter output_file_writer(file_manager, pest_scenario, restart_flag);
 		//output_file_writer.scenario_report(fout_rec);
@@ -257,13 +261,20 @@ int main(int argc, char* argv[])
 		output_file_writer.scenario_obs_report(fout_rec);
 		//fout_rec << "    pestpp-ies parameter csv file = " << left << setw(50) << ppopt.get_ies_par_csv() << endl;
 		//fout_rec << "    pestpp-ies observation csv file = " << left << setw(50) << ppopt.get_ies_obs_csv() << endl;
-		
+
+
+		//reset some default args for ies here:
 		PestppOptions *ppo = pest_scenario.get_pestpp_options_ptr();
 		set<string> pp_args = ppo->get_passed_args();
 		if (pp_args.find("MAX_RUN_FAIL") == pp_args.end())
 			ppo->set_max_run_fail(1);
-
+		if (pp_args.find("OVERDUE_GIVEUP_FAC") == pp_args.end())
+			ppo->set_overdue_giveup_fac(2.0);
+		if (pp_args.find("OVERDUE_resched_FAC") == pp_args.end())
+			ppo->set_overdue_giveup_fac(1.15);
 		RunManagerAbstract *run_manager_ptr;
+
+
 		if (run_manager_type == RunManagerType::PANTHER)
 		{
 			string port = socket_str;
@@ -271,7 +282,7 @@ int main(int argc, char* argv[])
 			strip_ip(port, "front", ":");
 			const ModelExecInfo &exi = pest_scenario.get_model_exec_info();
 			run_manager_ptr = new RunManagerPanther(
-				file_manager.build_filename("rns"), port,
+				rns_file, port,
 				file_manager.open_ofile_ext("rmr"),
 				pest_scenario.get_pestpp_options().get_max_run_fail(),
 				pest_scenario.get_pestpp_options().get_overdue_reched_fac(),
@@ -289,7 +300,7 @@ int main(int argc, char* argv[])
 			const ModelExecInfo &exi = pest_scenario.get_model_exec_info();
 			run_manager_ptr = new RunManagerSerial(exi.comline_vec,
 				exi.tplfile_vec, exi.inpfile_vec, exi.insfile_vec, exi.outfile_vec,
-				file_manager.build_filename("rns"), pathname,
+				rns_file, pathname,
 				pest_scenario.get_pestpp_options().get_max_run_fail());
 		}
 
@@ -301,14 +312,8 @@ int main(int argc, char* argv[])
 		//Allocates Space for Run Manager.  This initializes the model parameter names and observations names.
 		//Neither of these will change over the course of the simulation
 
-		if (restart_ctl.get_restart_option() == RestartController::RestartOption::RESUME_JACOBIAN_RUNS)
-		{
-			run_manager_ptr->initialize_restart(file_manager.build_filename("rnj"));
-		}
-		else
-		{
-			run_manager_ptr->initialize(base_trans_seq.ctl2model_cp(cur_ctl_parameters), pest_scenario.get_ctl_observations());
-		}
+
+		run_manager_ptr->initialize(base_trans_seq.ctl2model_cp(cur_ctl_parameters), pest_scenario.get_ctl_observations());
 
 		IterEnsembleSmoother ies(pest_scenario, file_manager, output_file_writer, &performance_log, run_manager_ptr);
 
@@ -317,7 +322,7 @@ int main(int argc, char* argv[])
 		ies.iterate_2_solution();
 		ies.finalize();
 
-		
+
 
 		// clean up
 		fout_rec.close();

@@ -3,7 +3,7 @@
 
 thread_flag::thread_flag(bool _flag)
 {
-	flag = _flag;	
+	flag = _flag;
 }
 
 bool thread_flag::set(bool f)

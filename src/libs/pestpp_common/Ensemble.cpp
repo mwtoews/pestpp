@@ -38,7 +38,7 @@ void Ensemble::check_for_dups()
 			dups.push_back(n);
 		names.insert(n);
 	}
-	 
+
 	if (dups.size() > 0)
 	{
 		throw_ensemble_error("duplicate var/real names in ensemble: ", dups);
@@ -130,7 +130,7 @@ void Ensemble::draw(int num_reals, Covariance cov, Transformable &tran, const ve
 	if (cov.isdiagonal())
 	{
 		plog->log_event("scaling by std");
-		
+
 		for (int j = 0; j < draw_names.size(); j++)
 		{
 			//cout << var_names[j] << " , " << std(j) << endl;
@@ -147,7 +147,7 @@ void Ensemble::draw(int num_reals, Covariance cov, Transformable &tran, const ve
 			Covariance gcov;
 			stringstream ss;
 			RedSVD::RedSymEigen<Eigen::SparseMatrix<double>> eig;
-			
+
 			Eigen::MatrixXd proj;
 			map<string, int> idx_map;
 			vector<int> idx;
@@ -176,16 +176,16 @@ void Ensemble::draw(int num_reals, Covariance cov, Transformable &tran, const ve
 				{
 					gcov.to_ascii(gi.first + "_cov.dat");
 				}
-				
+
 				idx.clear();
 				for (auto n : gi.second)
 					idx.push_back(idx_map[n]);
 				if (idx.size() != idx[idx.size() - 1] - idx[0] + 1)
 					throw_ensemble_error("Ensemble:: draw() error in full cov group draw: idx out of order");
-				
+
 				//cout << var_names[idx[0]] << "," << var_names[idx.size() - idx[0]] << endl;
 				//cout << idx[0] << ',' << idx[idx.size()-1] << ',' <<  idx.size() << " , " << idx[idx.size()-1] - idx[0] <<  endl;
-				
+
 				double fac = gcov.e_ptr()->diagonal().minCoeff();
 				ss.str("");
 				ss << "min variance for group " << gi.first << ": " << fac;
@@ -200,10 +200,10 @@ void Ensemble::draw(int num_reals, Covariance cov, Transformable &tran, const ve
 				//cout << svd.singularValues() << endl;
 				//Eigen::JacobiSVD<Eigen::MatrixXd> svd(gcov.e_ptr()->toDense(), Eigen::ComputeFullU);
 				//svd.computeU();
-				
+
 				proj = (eig.eigenvectors() * (fac *eig.eigenvalues()).cwiseSqrt().asDiagonal());
 				//proj = (svd.matrixU() * svd.singularValues().asDiagonal());
-				
+
 				if (level > 2)
 				{
 					ofstream f(gi.first + "_evec.dat");
@@ -222,7 +222,7 @@ void Ensemble::draw(int num_reals, Covariance cov, Transformable &tran, const ve
 				//cout << " proj " << proj.rows() << " , " << proj.cols() << endl;
 				plog->log_event("projecting group block");
 				draws.block(0, idx[0], num_reals, idx.size()) = (proj * block.transpose()).transpose();
-				
+
 			}
 		}
 		else
@@ -260,7 +260,7 @@ void Ensemble::draw(int num_reals, Covariance cov, Transformable &tran, const ve
 			draws.transposeInPlace();
 		}
 	}
-	
+
 	//check for invalid values
 	plog->log_event("checking realization for invalid values");
 	bool found_invalid = false;
@@ -270,14 +270,14 @@ void Ensemble::draw(int num_reals, Covariance cov, Transformable &tran, const ve
 		iv = 0;
 		for (int i = 0; i < num_reals; i++)
 		{
-			
-		
+
+
 			if (OperSys::double_is_invalid(draws(i, j)))
 			{
 				found_invalid = true;
 				iv++;
 			}
-			
+
 		}
 		if ((level>2) && (iv > 0))
 		{
@@ -285,7 +285,7 @@ void Ensemble::draw(int num_reals, Covariance cov, Transformable &tran, const ve
 		}
 	}
 
-	
+
 
 	//form some realization names
 	real_names.clear();
@@ -296,7 +296,7 @@ void Ensemble::draw(int num_reals, Covariance cov, Transformable &tran, const ve
 		ss << i;
 		real_names.push_back(ss.str());
 	}
-	
+
 	//add the mean values - using the Transformable instance (initial par value or observed value)
 	plog->log_event("resizing reals matrix");
 	reals.resize(num_reals, var_names.size());
@@ -335,7 +335,7 @@ Covariance Ensemble::get_diagonal_cov_matrix()
 {
 	//build an empirical diagonal covariance matrix from the realizations
 
-	
+
 	Eigen::MatrixXd meandiff = get_eigen_mean_diff();
 	double var;
 	vector<Eigen::Triplet<double>> triplets;
@@ -350,7 +350,7 @@ Covariance Ensemble::get_diagonal_cov_matrix()
 			stringstream ss;
 			ss << "invalid variance for ensemble variable: " << var_names[j] << ": " << var;
 			throw_ensemble_error(ss.str());
-			
+
 		}
 		triplets.push_back(Eigen::Triplet<double>(j, j, var));
 	}
@@ -359,7 +359,7 @@ Covariance Ensemble::get_diagonal_cov_matrix()
 	Eigen::SparseMatrix<double> mat;
 	mat.conservativeResize(triplets.size(), triplets.size());
 	mat.setFromTriplets(triplets.begin(), triplets.end());
-	
+
 	return Covariance(var_names, mat, Covariance::MatType::DIAGONAL);
 }
 
@@ -371,14 +371,14 @@ Eigen::MatrixXd Ensemble::get_eigen_mean_diff()
 Eigen::MatrixXd Ensemble::get_eigen_mean_diff(const vector<string> &_real_names, const vector<string> &_var_names)
 {
 	//get a matrix this is the differences of var_names  realized values from the mean realized value
-	
+
 	//the new Eigen matrix
 	Eigen::MatrixXd _reals;
 	if ((_real_names.size() == 0) && (_var_names.size() == 0))
 		_reals = reals;
 	else
 		_reals = get_eigen(_real_names, _var_names);
-	
+
 	//process each var name
 	double mean;
 	int s = _reals.rows();
@@ -399,7 +399,7 @@ vector<double> Ensemble::get_mean_stl_vector()
 	mean_vec.reserve(var_names.size());
 	for (int j = 0; j < reals.cols(); j++)
 	{
-		mean_vec.push_back(reals.col(j).mean());	
+		mean_vec.push_back(reals.col(j).mean());
 	}
 	return mean_vec;
 
@@ -454,7 +454,7 @@ void Ensemble::drop_rows(const vector<int> &row_idxs)
 			keep_names.push_back(real_names[ireal]);
 	if (keep_names.size() == 0)
 		reals = Eigen::MatrixXd();
-	else	
+	else
 		reals = get_eigen(keep_names, vector<string>());
 	real_names = keep_names;
 }
@@ -548,8 +548,8 @@ Eigen::MatrixXd Ensemble::get_eigen(vector<string> row_names, vector<string> col
 	Eigen::MatrixXd mat;
 
 	// only mess with columns, keep rows the same
-	if (row_names.size() == 0) 
-	{		
+	if (row_names.size() == 0)
+	{
 		if (missing_cols.size() > 0)
 			throw_ensemble_error("Ensemble.get_eigen() the following col_names not found:", missing_cols);
 		mat.resize(real_names.size(), col_names.size());
@@ -563,7 +563,7 @@ Eigen::MatrixXd Ensemble::get_eigen(vector<string> row_names, vector<string> col
 	}
 
 	// only mess with rows, keep cols the same
-	if (col_names.size() == 0) 
+	if (col_names.size() == 0)
 	{
 		if (missing_rows.size() > 0)
 			throw_ensemble_error("Ensemble.get_eigen() the following row_names not found:", missing_rows);
@@ -580,7 +580,7 @@ Eigen::MatrixXd Ensemble::get_eigen(vector<string> row_names, vector<string> col
 	//the slow one where we are rearranging rows and cols
 	if (missing_rows.size() > 0)
 		throw_ensemble_error("Ensemble.get_eigen() the following row_names not found:", missing_rows);
-	
+
 	if (missing_cols.size() > 0)
 		throw_ensemble_error("Ensemble.get_eigen() the following col_names not found:", missing_cols);
 	mat.resize(row_names.size(), col_names.size());
@@ -597,7 +597,7 @@ Eigen::MatrixXd Ensemble::get_eigen(vector<string> row_names, vector<string> col
 		i++;
 	}
 	return mat;
-	
+
 }
 
 void Ensemble::to_csv(string file_name)
@@ -637,7 +637,7 @@ const vector<string> Ensemble::get_real_names(vector<int> &indices)
 
 Eigen::VectorXd Ensemble::get_real_vector(int ireal)
 {
-	//get a row vector from reals by index 
+	//get a row vector from reals by index
 	if (ireal >= shape().first)
 	{
 		stringstream ss;
@@ -709,7 +709,7 @@ map<string,int> Ensemble::prepare_csv(const vector<string> &names, ifstream &csv
 	pest_utils::upper_ip(line);
 	pest_utils::tokenize(line, header_tokens, ",", false);
 	unordered_set<string> hset(header_tokens.begin(), header_tokens.end());
-	
+
 	// check for parameter names that in the pest control file but that are missing from the csv file
 	vector<string> missing_names;
 	unordered_set<string>::iterator end = hset.end();
@@ -799,7 +799,7 @@ void Ensemble::append_other_rows(Ensemble &other)
 	for (auto &rname : other.get_real_names())
 		new_real_names.push_back(rname);
 	reals.conservativeResize(new_real_names.size(), var_names.size());
-	
+
 	int iother = 0;
 	for (int i = real_names.size(); i < new_real_names.size(); i++)
 	{
@@ -833,7 +833,7 @@ void Ensemble::append(string real_name, const Transformable &trans)
 			ss << m << " , ";
 		throw_ensemble_error(ss.str());
 	}
-	
+
 	reals.conservativeResize(real_names.size() + 1, var_names.size());
 	reals.row(real_names.size()) = trans.get_data_eigen_vec(var_names);
 	real_names.push_back(real_name);
@@ -934,7 +934,7 @@ void Ensemble::from_binary(string file_name, vector<string> &names, bool transpo
 	//advance to col names section
 	in.seekg(n_nonzero*(sizeof(double) + sizeof(int)), ios_base::cur);
 
-	//read col names	
+	//read col names
 	vector<string>* col_names = &var_names;
 	vector<string>* row_names = &real_names;
 	if (transposed)
@@ -1012,7 +1012,7 @@ void Ensemble::read_csv(int num_reals,ifstream &csv, map<string,int> header_info
 		pest_utils::tokenize(line, tokens, ",", false);
 		if (tokens[tokens.size() - 1].size() == 0)
 			tokens.pop_back();
-		
+
 		try
 		{
 			pest_utils::convert_ip(tokens[0], real_id);
@@ -1109,13 +1109,13 @@ void ParameterEnsemble::draw(int num_reals, Covariance &cov, PerformanceLog *plo
 	Ensemble::draw(num_reals, cov, par, var_names, grouper, plog, level);
 	if (!same)
 	{
-		
+
 		reorder(vector<string>(), pest_scenario_ptr->get_ctl_ordered_adj_par_names());
 	}
 	if (pest_scenario_ptr->get_pestpp_options().get_ies_enforce_bounds())
 		enforce_bounds();
 
-	
+
 }
 
 void ParameterEnsemble::set_pest_scenario(Pest *_pest_scenario)
@@ -1127,12 +1127,12 @@ void ParameterEnsemble::set_pest_scenario(Pest *_pest_scenario)
 
 ParameterEnsemble ParameterEnsemble::zeros_like()
 {
-	
+
 	Eigen::MatrixXd new_reals = Eigen::MatrixXd::Zero(real_names.size(), var_names.size());
 	ParameterEnsemble new_en(pest_scenario_ptr);
 	new_en.from_eigen_mat(new_reals, real_names, var_names);
 	return new_en;
-	
+
 
 }
 
@@ -1208,10 +1208,10 @@ void ParameterEnsemble::from_csv(string file_name)
 {
 	ifstream csv(file_name);
 	if (!csv.good())
-		throw runtime_error("error opening parameter csv " + file_name + " for reading"); 
-	var_names = pest_scenario_ptr->get_ctl_ordered_adj_par_names();
-	//var_names = pest_scenario_ptr->get_ctl_ordered_par_names();
-	map<string,int>header_info = prepare_csv(var_names, csv, false);
+		throw runtime_error("error opening parameter csv " + file_name + " for reading");
+	//var_names = pest_scenario_ptr->get_ctl_ordered_adj_par_names();
+	var_names = pest_scenario_ptr->get_ctl_ordered_par_names();
+	map<string,int>header_info = prepare_csv(var_names, csv, true);
 	//blast through the file to get number of reals
 	string line;
 	int num_reals = 0;
@@ -1219,15 +1219,58 @@ void ParameterEnsemble::from_csv(string file_name)
 		num_reals++;
 	csv.close();
 
+	//make sure all adjustable parameters are present
+	vector<string> missing;
+	for (auto p : pest_scenario_ptr->get_ctl_ordered_adj_par_names())
+		if (header_info.find(p) == header_info.end())
+			missing.push_back(p);
+	if (missing.size() > 0)
+		throw_ensemble_error("ParameterEnsemble.from_csv() error: the following adjustable pars not in csv:",missing);
+
 	csv.open(file_name);
 	if (!csv.good())
 		throw runtime_error("error re-opening parameter csv " + file_name + " for reading");
 	getline(csv, line);
 	Ensemble::read_csv(num_reals, csv, header_info);
-
+	fill_fixed(header_info);
 	save_fixed();
-	
+
 	tstat = transStatus::CTL;
+
+}
+
+void ParameterEnsemble::fill_fixed(const map<string, int> &header_info)
+{
+	ParameterInfo pi = pest_scenario_ptr->get_ctl_parameter_info();
+	ParameterRec::TRAN_TYPE ft = ParameterRec::TRAN_TYPE::FIXED;
+	for (auto &name : var_names)
+	{
+		if (pi.get_parameter_rec_ptr(name)->tranform_type == ft)
+		{
+			fixed_names.push_back(name);
+		}
+	}
+	if (fixed_names.size() == 0)
+		return;
+	map<string, int> var_map;
+	for (int i = 0; i < var_names.size(); i++)
+		var_map[var_names[i]] = i;
+
+	Parameters pars = pest_scenario_ptr->get_ctl_parameters();
+	int c = 0;
+	for (auto &fname : fixed_names)
+	{
+		if (header_info.find(fname) == header_info.end())
+		{
+			Eigen::VectorXd vec(reals.rows());
+			vec.setOnes();
+			reals.col(var_map[fname]) = reals.col(var_map[fname]) + (pars[fname] * vec);
+			c++;
+		}
+	}
+	if (c > 0)
+		cout << "filled " << c << " fixed pars not listed in user-supplied par csv with `parval1` values from control file" << endl;
+
 
 }
 
@@ -1248,7 +1291,7 @@ void ParameterEnsemble::save_fixed()
 		cout << "these values will be used during forward model runs instead of 'parval1'" << endl;
 
 		Eigen::MatrixXd fixed_reals = get_eigen(vector<string>(), fixed_names);
-		
+
 		for (int i = 0; i < real_names.size(); i++)
 		{
 			for (int j = 0; j < fixed_names.size(); j++)
@@ -1464,7 +1507,7 @@ void ParameterEnsemble::transform_ip(transStatus to_tstat)
 	}
 	else
 		throw_ensemble_error("ParameterEnsemble::transform_ip() only CTL to NUM implemented");
-	
+
 }
 Covariance ParameterEnsemble::get_diagonal_cov_matrix()
 {
@@ -1503,7 +1546,7 @@ void ObservationEnsemble::update_from_obs(int row_idx, Observations &obs)
 	if (row_idx >= real_names.size())
 		throw_ensemble_error("ObservtionEnsemble.update_from_obs() obs_idx out of range");
 	//Eigen::VectorXd temp = obs.get_data_eigen_vec(var_names);
-	//cout << reals.row(row_idx) << endl << endl;	
+	//cout << reals.row(row_idx) << endl << endl;
 	//cout << temp << endl;
 	reals.row(row_idx) = obs.get_data_eigen_vec(var_names);
 	//cout << reals.row(row_idx) << endl;
@@ -1573,7 +1616,7 @@ void ObservationEnsemble::from_csv(string file_name)
 	csv.close();
 
 	csv.open(file_name);
-	if (!csv.good()) 
+	if (!csv.good())
 		throw runtime_error("error re-opening observation csv " + file_name + " for reading");
 	getline(csv, line);
 	Ensemble::read_csv(num_reals, csv,header_info);

@@ -1,8 +1,8 @@
-/*  
-	© Copyright 2012, David Welter
-	
+/*
+
+
 	This file is part of PEST++.
-   
+
 	PEST++ is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
@@ -33,13 +33,13 @@ RunManagerAbstract::RunManagerAbstract(const vector<string> _comline_vec,
 	const string &stor_filename, int _max_n_failure)
   : total_runs(0), max_n_failure(_max_n_failure), file_stor(stor_filename),
     comline_vec(_comline_vec), tplfile_vec(_tplfile_vec),
-    inpfile_vec(_inpfile_vec), insfile_vec(_insfile_vec), outfile_vec(_outfile_vec)	
+    inpfile_vec(_inpfile_vec), insfile_vec(_insfile_vec), outfile_vec(_outfile_vec)
 {
 	cout << endl;
 	cout << "             Generalized Run Manager Interface" << endl;
 	cout << "                       developed by:" << endl << endl;
-	cout << "                        Dave Welter" << endl;
-	cout << "          Computational Water Resource Engineering" << endl;
+	cout << "                        The PEST++ Development Team" << endl;
+
 	cout << endl << endl;
 	cur_group_id = -1;
 }
@@ -120,7 +120,7 @@ bool RunManagerAbstract::get_run(int run_id, Parameters &pars, Observations &obs
 {
 	bool success = false;
 	int status = file_stor.get_run(run_id, pars, obs, info_txt, info_value, clear_old);
-	if (status > 0) success = true; 
+	if (status > 0) success = true;
 	return success;
 }
 
@@ -136,7 +136,7 @@ bool RunManagerAbstract::get_run(int run_id, vector<double> &pars_vec, vector<do
 {
 	bool success = false;
 	int status = file_stor.get_run(run_id, pars_vec, obs_vec, info_txt, info_value);
-	if (status > 0) success = true; 
+	if (status > 0) success = true;
 	return success;
 }
 
@@ -152,7 +152,7 @@ bool  RunManagerAbstract::get_run(int run_id, double *pars, size_t npars, double
 {
 	bool success = false;
 	int status = file_stor.get_run(run_id, pars, npars, obs, nobs, info_txt, info_value);
-	if (status > 0) success = true; 
+	if (status > 0) success = true;
 	return success;
 }
 
@@ -227,8 +227,8 @@ int RunManagerAbstract::get_num_failed_runs(void)
 bool RunManagerAbstract::get_model_parameters(int run_id, Parameters &pars)
  {
 	bool success = false;
-	int status = file_stor.get_parameters(run_id, pars); 
-	if (status > 0) success = true; 
+	int status = file_stor.get_parameters(run_id, pars);
+	if (status > 0) success = true;
         return success;
  }
 
@@ -236,7 +236,7 @@ bool RunManagerAbstract::get_observations_vec(int run_id, vector<double> &data_v
 {
 	bool success = false;
 	int status = file_stor.get_observations_vec(run_id, data_vec);
-	if (status > 0) success = true; 
+	if (status > 0) success = true;
 	return success;
 }
 
@@ -255,7 +255,7 @@ bool RunManagerAbstract::get_observations_vec(int run_id, vector<double> &data_v
  {
 	 return cur_group_id;
  }
- 
+
  bool RunManagerAbstract::run_requried(int run_id)
  {
 	 bool ret_val;
@@ -264,7 +264,7 @@ bool RunManagerAbstract::get_observations_vec(int run_id, vector<double> &data_v
 	 {
 		 ret_val = true;
 	 }
-	 else 
+	 else
 	 {
 		 ret_val = false;
 	 }

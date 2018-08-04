@@ -1,5 +1,5 @@
 /*
-© Copyright 2012, David Welter
+
 
 This file is part of PEST++.
 
@@ -322,7 +322,11 @@ int main(int argc, char* argv[])
 		string filename = complete_path;
 		string pathname = ".";
 		file_manager.initialize_path(get_filename_without_ext(filename), pathname);
-
+		//jwhite - something weird is happening with the machine is busy and an existing
+		//rns file is really large. so let's remove it explicitly and wait a few seconds before continuing...
+		string rns_file = file_manager.build_filename("rns");
+		int flag = remove(rns_file.c_str());
+		w_sleep(2000);
 		//by default use the serial run manager.  This will be changed later if another
 		//run manger is specified on the command line.
 		RunManagerType run_manager_type = RunManagerType::SERIAL;
@@ -499,7 +503,7 @@ int main(int argc, char* argv[])
 		}
 		else
 			par_csv_file = pest_scenario.get_pestpp_options().get_sweep_parameter_csv_file();
-		
+
 		ifstream par_stream(par_csv_file);
 		if (!par_stream.good())
 		{
@@ -535,7 +539,7 @@ int main(int argc, char* argv[])
 				file_manager.build_filename("rns"), pathname,
 				pest_scenario.get_pestpp_options().get_max_run_fail());
 		}
-		
+
 
 		const ParamTransformSeq &base_trans_seq = pest_scenario.get_base_par_tran_seq();
 		ObjectiveFunc obj_func(&(pest_scenario.get_ctl_observations()), &(pest_scenario.get_ctl_observation_info()), &(pest_scenario.get_prior_info()));
@@ -557,7 +561,7 @@ int main(int argc, char* argv[])
 
 		string par_ext = par_csv_file.substr(par_csv_file.size() - 3, par_csv_file.size());
 		pest_utils::lower_ip(par_ext);
-		
+
 		Eigen::MatrixXd jco_mat;
 		bool use_jco = false;
 		vector<string> jco_col_names;
@@ -566,8 +570,8 @@ int main(int argc, char* argv[])
 			cout << "  ---  binary jco-type file detected for par_csv" << endl;
 			use_jco = true;
 			Jacobian jco(file_manager);
-			jco.read(par_csv_file);	
-			cout << jco.get_matrix_ptr()->rows() << " runs found in binary jco-type file" << endl;		
+			jco.read(par_csv_file);
+			cout << jco.get_matrix_ptr()->rows() << " runs found in binary jco-type file" << endl;
 			//check that the jco is compatible with the control file
 			vector<string> names = jco.get_base_numeric_par_names();
 			jco_col_names = jco.get_sim_obs_names();
@@ -588,7 +592,7 @@ int main(int argc, char* argv[])
 			cout << "  --- converting sparse JCO matrix to dense" << endl;
 			jco_mat = jco.get_matrix(jco.get_sim_obs_names(), pest_scenario.get_ctl_ordered_par_names()).toDense();
 		}
-		
+
 		else
 		{
 			header_info = prepare_parameter_csv(pest_scenario.get_ctl_parameters(),
@@ -601,7 +605,7 @@ int main(int argc, char* argv[])
 		int chunk = pest_scenario.get_pestpp_options().get_sweep_chunk();
 		vector<int> run_ids;
 		pair<vector<string>,vector<Parameters>> sweep_par_info;
-		
+
 		//if desired, add the base run to the list of runs
 		if (pest_scenario.get_pestpp_options().get_sweep_base_run())
 		{
@@ -669,11 +673,11 @@ int main(int argc, char* argv[])
 			{
 				//Parameters temp = base_trans_seq.active_ctl2model_cp(par);
 		        run_ids.push_back(run_manager_ptr->add_run(base_trans_seq.active_ctl2model_cp(par)));
-		
+
 			}
 
 			//make some runs
-			
+
 			run_manager_ptr->run();
 
 			//process the runs

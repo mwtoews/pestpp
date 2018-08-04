@@ -241,7 +241,7 @@ int NODE::sendtype()
 */
 
 {
-  
+
   MESSAGE message;
 
   try
@@ -282,7 +282,7 @@ int NODE::sendspeed()
 */
 
 {
-  
+
   MESSAGE message;
 
   try
@@ -322,7 +322,7 @@ int NODE::sendnslave(int nslave)
 */
 
 {
-  
+
   MESSAGE message;
 
   try
@@ -362,7 +362,7 @@ int NODE::sendname()
 */
 
 {
-  
+
   MESSAGE message;
 
   try
@@ -403,7 +403,7 @@ int NODE::sendname()
 //*/
 //
 //{
-//  
+//
 //  try
 //  {
 ////    if(!run->sendme(sock)) throw -1;
@@ -428,7 +428,7 @@ double NODE::median_runtime()
       to send/execute/return a model run
 */
 {
-  
+
   //double t;
   unsigned int i;
 
@@ -440,7 +440,7 @@ double NODE::median_runtime()
   // if no runs are complete then return 1 over the rating
   if(run_end->size()==0)
     return 1./rating*CLOCKS_PER_SEC;
-  
+
   // calculate time to complete runs
   is=run_start->begin();
   for(ie=run_end->begin();ie!=run_end->end();++ie)
@@ -452,7 +452,7 @@ double NODE::median_runtime()
   // if only one run completed it is the median
   if(duration.size()==1)
     return *duration.begin();
-  
+
   // set is already sorted so just return median value
   dur=duration.begin();
   for(i=0;i<run_end->size()/2-1;i++)
@@ -477,13 +477,13 @@ double NODE::expected_timeleft()
       slave to complete its current run
 */
 {
-  
+
   double current_time,median_time;
 
   // if no runs are complete then return 1 over the rating
   if(run_end->size()==0)
     return 1./rating*CLOCKS_PER_SEC;
-  
+
   // get the current time and the median time to complete a run
   median_time=median_runtime();
   if(median_time*rating/CLOCKS_PER_SEC==rating)

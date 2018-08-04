@@ -272,7 +272,7 @@ int MODEL_RUN::read_output()
       return 0;
       break;
     }
-  
+
   }
 
 }
@@ -287,7 +287,7 @@ int MODEL_RUN::delete_output()
 */
 
 {
-  
+
   size_t n;
   string fnam;
 
@@ -378,8 +378,8 @@ void MODEL_RUN::alloc(size_t &_npar,size_t &_nobs,
     exec[n].args='\0';
     exec[n].path='\0';
   }
-  
-  parnams=new string[*npar];  
+
+  parnams=new string[*npar];
   parvals=new double[*npar];
 
   obsnams=new string[*nobs];
@@ -509,7 +509,7 @@ int MODEL_RUN::send(SOCKET &_socket)
 */
 
 {
-  
+
   size_t n;
   size_t datasize=0,copied=0;
   size_t itmp;
@@ -828,7 +828,7 @@ int MODEL_RUN::save(fstream &_file)
 */
 
 {
-  
+
   size_t n;
   size_t itmp;
   size_t one=1,zero=0;
@@ -961,7 +961,7 @@ int MODEL_RUN::set_frm_msg(MESSAGE *message)
   size_t copied=0;
   size_t nsiz;
   string mr_chartostring(char *from);
-  
+
   try
   {
 

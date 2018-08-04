@@ -106,7 +106,7 @@ const char *forcing_constraint_action::name() const
   bounds on the row activity (often referred to as lhs bounds, from the common
   form ax <= b). This routine will remember useless constraints as it finds
   them and invoke useless_constraint_action to deal with them.
-  
+
   The transform applied here simply tightens the bounds on the variables.
   Other transforms will remove the fixed variables, leaving an empty row which
   is ultimately dropped.
@@ -116,7 +116,7 @@ const char *forcing_constraint_action::name() const
   we'll be dealing with a column-major representation and we may need to scan
   the row (see postsolve comments). So it's useful to record all variables in
   the constraint.
-  
+
   On the other hand, it's definitely harmful to ask remove_fixed_action
   to process a variable more than once (causes problems in
   remove_fixed_action::postsolve).
@@ -385,7 +385,7 @@ const CoinPresolveAction*
   Trim the actions array to size and create a postsolve object.
 */
     if (nactions) {
-      next = new forcing_constraint_action(nactions, 
+      next = new forcing_constraint_action(nactions,
 				 CoinCopyOfArray(actions,nactions),next) ;
     }
 /*
@@ -454,7 +454,7 @@ const CoinPresolveAction*
   that constraint r exists and is fully populated with fixed variables, all
   of which are nonbasic. Even though the constraint is tight, the logical
   s(r) is basic and the dual y(r) is zero.
-  
+
   We may need to change that if a bound is relaxed to infinity on some
   variable x(t), making x(t)'s current nonbasic status untenable. We'll need
   to make s(r) nonbasic so that y(r) can be nonzero. Then we can make x(t)
@@ -714,8 +714,8 @@ void forcing_constraint_action::postsolve(CoinPostsolveMatrix *prob) const
 }
 
 
-forcing_constraint_action::~forcing_constraint_action() 
-{ 
+forcing_constraint_action::~forcing_constraint_action()
+{
   int i ;
   for (i=0;i<nactions_;i++) {
     //delete [] actions_[i].rowcols; MS Visual C++ V6 can not compile

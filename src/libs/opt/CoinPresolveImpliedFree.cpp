@@ -21,9 +21,9 @@
 #if PRESOLVE_DEBUG > 0 || PRESOLVE_CONSISTENCY > 0
 #include "CoinPresolvePsdebug.hpp"
 #endif
-static int numberBadElements=0; 
-int check_row (CoinBigIndex *mrstrt, 
-	   double *rowels, int *hcol, int *hinrow, 
+static int numberBadElements=0;
+int check_row (CoinBigIndex *mrstrt,
+	   double *rowels, int *hcol, int *hinrow,
 	   double coeff_factor, double kill_ratio,  int irowx, int irowy)
 {
   const double tolerance = kill_ratio*coeff_factor;
@@ -44,7 +44,7 @@ int check_row (CoinBigIndex *mrstrt,
       newcoeff = rowels[krowy]*coeff_factor ;
       nFill++;
     }
-    // kill small 
+    // kill small
     if (fabs(newcoeff) <tolerance) {
       if (newcoeff>0.1*tolerance)
 	numberBadElements++;
@@ -165,7 +165,7 @@ const CoinPresolveAction *implied_free_action::presolve (
 /*
   Documented as `inhibit x+y+z = 1 mods'.  From the code below, it's clear
   that this is intended to avoid removing SOS equalities with length >= 5
-  (hardcoded). 
+  (hardcoded).
 */
   const bool stopSomeStuff = ((prob->presolveOptions()&0x04) != 0) ;
 /*
@@ -177,7 +177,7 @@ const CoinPresolveAction *implied_free_action::presolve (
 */
   const double feasTol = prob->feasibilityTolerance_ ;
 
-# if 0  
+# if 0
 /*
   Tentatively moved to be a front-end function for useless_constraint_action,
   much as make_fixed is a front-end for make_fixed_action. This bit of code
@@ -207,7 +207,7 @@ const CoinPresolveAction *implied_free_action::presolve (
   implied_free and subst take a fair bit of effort to scan for candidates.
   This is a hook to allow a presolve driver to avoid that work.
 */
-  if (prob->pass_ > 15 && (prob->presolveOptions_&0x10000) != 0) { 
+  if (prob->pass_ > 15 && (prob->presolveOptions_&0x10000) != 0) {
     fill_level = 2 ;
     return (next) ;
   }
@@ -292,7 +292,7 @@ const CoinPresolveAction *implied_free_action::presolve (
       numberLook = n ;
     } else {
       numberLook = 0 ;
-      for (iLook = 0 ; iLook < n ; iLook++) 
+      for (iLook = 0 ; iLook < n ; iLook++)
 	if (!prob->colProhibited(iLook))
 	  look[numberLook++] = iLook ;
     }
@@ -336,7 +336,7 @@ const CoinPresolveAction *implied_free_action::presolve (
       singletonRow = (rowLengths[i] == 1) ;
       possibleRow = (fabs(colCoeffs[kcs]) > ZTOLDP2) ;
     } else {
-      
+
 /*
   If the column is not a singleton, we'll need a numerically stable
   substitution formula. Check that this is possible.  One of the entangled
@@ -421,20 +421,20 @@ const CoinPresolveAction *implied_free_action::presolve (
 	  const double lk = clo[k] ;
 	  const double uk = cup[k] ;
 	  if (aik > 0.0) {
-	    if (uk < large) 
+	    if (uk < large)
 	      maxUi += uk*aik ;
 	    else
 	      ++infUi ;
-	    if (lk > -large) 
+	    if (lk > -large)
 	      maxLi += lk*aik ;
 	    else
 	      ++infLi ;
 	  } else if (aik < 0.0) {
-	    if (uk < large) 
+	    if (uk < large)
 	      maxLi += uk*aik ;
 	    else
 	      ++infLi ;
-	    if (lk > -large) 
+	    if (lk > -large)
 	      maxUi += lk*aik ;
 	    else
 	      ++infUi ;
@@ -670,14 +670,14 @@ const CoinPresolveAction *implied_free_action::presolve (
   int unprocessed = 0 ;
   for (iLook = 0 ; iLook < numberFree ; iLook++) {
     const int tgtcol = whichFree[iLook] ;
-    
+
     if (colLengths[tgtcol] != 1) {
       whichFree[unprocessed] = whichFree[iLook] ;
       implied_free[unprocessed] = implied_free[iLook] ;
       unprocessed++ ;
       continue ;
     }
-    
+
     const int tgtrow = implied_free[iLook] ;
     const int tgtrow_len = rowLengths[tgtrow] ;
 
@@ -805,7 +805,7 @@ const CoinPresolveAction *implied_free_action::presolve (
     action *actions1 = new action[nactions] ;
     CoinMemcpyN(actions, nactions, actions1) ;
     next = new implied_free_action(nactions,actions1,next) ;
-  } 
+  }
   delete [] actions ;
 # if PRESOLVE_DEBUG > 0
   std::cout
@@ -833,27 +833,27 @@ const CoinPresolveAction *implied_free_action::presolve (
       int *rowLengths = prob->hinrow_ ;
       double *rowCoeffs = prob->rowels_ ;
       int *colIndices = prob->hcol_ ;
-      
+
       CoinBigIndex *colStarts = prob->mcstrt_ ;
       int *colLengths = prob->hincol_ ;
       double *colCoeffs = prob->colels_ ;
       int *rowIndices = prob->hrow_ ;
-      
+
       /*
 	This array is used to hold the indices of columns involved in substitutions,
 	where we have the potential for cancellation. At the end they'll be
 	checked to eliminate any actual zeros that may result.
-	
+
 	NOTE that usefulColumnInt_ is already in use for parameters implied_free and
 	whichFree when this routine is called from implied_free.
       */
-      
+
       int *rowsUsed = &prob->usefulRowInt_[0] ;
       int nRowsUsed = 0 ;
       /*
 	Open a loop to process the (equality r, implied free variable t) pairs
 	in whichFree and implied_free.
-	
+
 	It can happen that removal of (row, natural singleton) pairs back in
 	implied_free will reduce the length of column t. It can also happen
 	that previous processing here has resulted in fillin or cancellation. So
@@ -863,7 +863,7 @@ const CoinPresolveAction *implied_free_action::presolve (
       for (int iLook = 0 ; iLook < numberFree ; iLook++) {
 	const int tgtcol = whichFree[iLook] ;
 	const int tgtrow = implied_free[iLook] ;
-	
+
 	if (colLengths[tgtcol] < 2 || colLengths[tgtcol] > maxLook) {
 #     if PRESOLVE_DEBUG > 3
 	  std::cout
@@ -872,7 +872,7 @@ const CoinPresolveAction *implied_free_action::presolve (
 #     endif
 	  continue ;
 	}
-	
+
 	CoinBigIndex tgtcs = colStarts[tgtcol] ;
 	CoinBigIndex tgtce = tgtcs+colLengths[tgtcol] ;
 	/*
@@ -883,7 +883,7 @@ const CoinPresolveAction *implied_free_action::presolve (
 	  * Don't use this pair if any involved row has been modified as part of
 	  the processing for a previous candidate pair on this call.
 	  * Don't use this pair if a(i,tgtcol) has become zero.
-	  
+
 	  The checks on a(i,tgtcol) seem superfluous but it's possible that
 	  implied_free identified two candidate pairs to eliminate the same column. If
 	  we've already processed one of them, we could be in trouble.
@@ -903,7 +903,7 @@ const CoinPresolveAction *implied_free_action::presolve (
 	  }
 	  if (i == tgtrow) tgtcoeff = aij ;
 	}
-	
+
 	if (dealBreaker == true) {
 #     if PRESOLVE_DEBUG > 3
 	  std::cout
@@ -942,16 +942,16 @@ const CoinPresolveAction *implied_free_action::presolve (
 	  prob->setRowUsed(i) ;
 	  rowsUsed[nRowsUsed++] = i ;
 	}
-	
+
 	CoinBigIndex tgtrs = rowStarts[tgtrow] ;
 	CoinBigIndex tgtre = tgtrs+rowLengths[tgtrow] ;
-	
+
 	// kill small if wanted
 	int relax= (prob->presolveOptions()&0x60000)>>17;
 	double tolerance = 1.0e-12;
 	for (int i=0;i<relax;i++)
 	  tolerance *= 10.0;
-	
+
 	/*
 	  Sort the target row for efficiency
 	*/
@@ -963,10 +963,10 @@ const CoinPresolveAction *implied_free_action::presolve (
 	for (int colndx = start ; colndx < end ; ++colndx) {
 	  int i = rowIndices[colndx] ;
 	  if (i == tgtrow) continue ;
-	  
+
 	  double ait = colCoeffs[colndx] ;
 	  double coeff_factor = -ait/tgtcoeff ;
-	  
+
 	  CoinBigIndex krs = rowStarts[i] ;
 	  CoinBigIndex kre = krs+rowLengths[i] ;
 	  /*
@@ -975,7 +975,7 @@ const CoinPresolveAction *implied_free_action::presolve (
 	    compaction of the row-major bulk store, so update bulk store indices.
 	  */
 	  CoinSort_2(colIndices+krs,colIndices+kre,rowCoeffs+krs) ;
-	  
+
 	  numberFill += check_row(rowStarts,rowCoeffs,colIndices,
 				  rowLengths,coeff_factor,tolerance,i,tgtrow);
 	}
@@ -993,14 +993,14 @@ const CoinPresolveAction *implied_free_action::presolve (
       }
       /*
 	That's it, we've processed all the candidate pairs.
-	
+
 	Clear the row used flags.
       */
       for (int i = 0 ; i < nRowsUsed ; i++) prob->unsetRowUsed(rowsUsed[i]) ;
 #if CLP_USEFUL_PRINTOUT
       printf("%d allowed through out of %d - %d on coefficient\n",
 	     unprocessed,numberFree,nBad);
-#endif      
+#endif
     }
     next = subst_constraint_action::presolve(prob,implied_free,whichFree,
     					     unprocessed,next,maxLook) ;
@@ -1064,7 +1064,7 @@ const char *implied_free_action::name() const
   No corrections to duals or reduced costs are required because we built
   that correction into the problem when we modified the objective. Work the
   linear algebra; it's very neat.
-  
+
   It will frequently happen that the implied bounds on x(t) are simply equal
   to the existing column bounds and the value we calculate here will be at
   one of the original column bounds. This leaves x(t) degenerate basic. The
@@ -1081,7 +1081,7 @@ const char *implied_free_action::name() const
   degenerate basic logical. This version of the code always makes x(t) basic.
 */
 
-  
+
 
 void implied_free_action::postsolve(CoinPostsolveMatrix *prob) const
 {
@@ -1353,8 +1353,8 @@ void implied_free_action::postsolve(CoinPostsolveMatrix *prob) const
 
 
 
-implied_free_action::~implied_free_action() 
-{ 
+implied_free_action::~implied_free_action()
+{
   int i ;
   for (i=0;i<nactions_;i++) {
     deleteAction(actions_[i].rowels,double *) ;

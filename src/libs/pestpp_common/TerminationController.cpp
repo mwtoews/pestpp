@@ -1,8 +1,8 @@
-/*  
-	© Copyright 2012, David Welter
-	
+/*
+
+
 	This file is part of PEST++.
-   
+
 	PEST++ is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
@@ -27,9 +27,9 @@ using namespace pest_utils;
 using namespace std;
 
 TerminationController::TerminationController(int _noptmax, double _phiredstp,
-	int _nphistp, int _nphinored, double _relparstp, int _nrelpar, 
+	int _nphistp, int _nphinored, double _relparstp, int _nrelpar,
 	bool _use_dynaimc_regul, double _phim_accept, double _reg_frac)
-	: 
+	:
 	phiredstp(_phiredstp), relparstp(_relparstp), phim_accept(_phim_accept),
 	current_phi(99e99), nphistp(_nphistp), noptmax(_noptmax), nphinored(_nphinored),
 	nopt_count(0), nphinored_count(0), nrelpar(_nrelpar), nrelpar_count(0),
@@ -125,7 +125,7 @@ bool TerminationController::check_last_iteration()
 		return terminate_code;
 	}
 
-	double min_phi_diff = lowest_phi.back() - lowest_phi.front();	
+	double min_phi_diff = lowest_phi.back() - lowest_phi.front();
 	if (current_phi <= std::numeric_limits<double>::denorm_min())
 	{
 		terminate_code = true;
@@ -136,7 +136,7 @@ bool TerminationController::check_last_iteration()
 	{
 		terminate_code = true;
 		termimate_reason = "NPHINORED criterion met";
-	}	
+	}
 	else if (lowest_phi.size() >= nphistp && min_phi_diff <= phiredstp*current_phi)
 	{
 		terminate_code = true;
@@ -147,7 +147,7 @@ bool TerminationController::check_last_iteration()
 	{
 		terminate_code = true;
 		termimate_reason = "RELPARSTP / NRELPAR criterion met";
-	}	
+	}
 	else
 	{
 		terminate_code = false;
@@ -200,7 +200,7 @@ const TerminationController& TerminationController::operator=(const TerminationC
 void TerminationController::save_state(std::ostream &fout)
 {
 
-	fout << "termination_info_1 " << noptmax << " " << nopt_count << " " << nphinored << " " 
+	fout << "termination_info_1 " << noptmax << " " << nopt_count << " " << nphinored << " "
 		<< nphinored_count << " " << nrelpar << endl;
 	fout << "termination_info_2 " << nrelpar_count << " " << nphistp << " " << phiredstp << " " << relparstp << endl;
 	fout << "termination_info_3 ";

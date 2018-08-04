@@ -1,8 +1,8 @@
-/*  
-	© Copyright 2012, David Welter
-	
+/*
+
+
 	This file is part of PEST++.
-   
+
 	PEST++ is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
@@ -232,7 +232,7 @@ void OutputFileWriter::scenario_report(std::ostream &os)
 	switch (pest_scenario.get_control_info().pestmode)
 	{
 	case ControlInfo::PestMode::ESTIMATION: mode = "estimation";
-		
+
 	case ControlInfo::PestMode::REGUL: mode = "regularization";
 	case ControlInfo::PestMode::PARETO: mode = "pareto";
 	case ControlInfo::PestMode::UNKNOWN: mode = "unknown";
@@ -256,6 +256,19 @@ void OutputFileWriter::scenario_report(std::ostream &os)
 	scenario_pi_report(os);
 
 	os << endl << pest_scenario.get_svd_info() << endl;
+	os << endl;
+
+	if (pest_scenario.get_control_info().pestmode == ControlInfo::PestMode::REGUL)
+	{
+		os << "Regularization information:" << endl;
+		os << setw(0) << "    phimlim = " << pest_scenario.get_regul_scheme_ptr()->get_phimlim() << endl;
+		os << setw(0) << "    fracphim = " << pest_scenario.get_regul_scheme_ptr()->get_fracphim() << endl;
+		os << setw(0) << "    phimaccept = " << pest_scenario.get_regul_scheme_ptr()->get_phimaccept() << endl;
+		os << setw(0) << "    wfinit = " << pest_scenario.get_regul_scheme_ptr()->get_wfinit() << endl;
+
+	}
+	os << endl;
+	os << endl;
 	os << endl;
 
 }
@@ -297,7 +310,7 @@ void OutputFileWriter::scenario_io_report(std::ostream &os)
 void OutputFileWriter::scenario_pargroup_report(std::ostream &os)
 {
 	const ParameterGroupRec *grp_rec;
-	
+
 	os << "Parameter group information" << endl;
 	os << left << setw(15) << "NAME" << right << setw(15) << "INCREMENT TYPE" << setw(25) << "DERIVATIVE INCREMENT";
 	os << setw(25) << "INCREMENT LOWER BOUND" << setw(15) << "FORCE CENTRAL" << setw(25) << "INCREMENT MULTIPLIER" << endl;
@@ -385,7 +398,7 @@ void OutputFileWriter::par_report(std::ostream &os, Parameters const &new_ctl_pa
 	os << "    ------------  ------------" << endl;
 	for (auto &p_name : pest_scenario.get_ctl_ordered_par_names())
 	{
-		val = new_ctl_pars.get_rec(p_name);		
+		val = new_ctl_pars.get_rec(p_name);
 		os << left;
 		os << "    " << setw(12) << lower_cp(p_name);
 		os << right;
@@ -397,15 +410,15 @@ void OutputFileWriter::par_report(std::ostream &os, Parameters const &new_ctl_pa
 
 void OutputFileWriter::par_report(std::ostream &os, int const iter, Parameters const &new_pars, Parameters const &old_pars,
 	string par_type)
-{	
+{
 	double p_old, p_new;
 	double fac_change = -9999, rel_change = -9999;
 	bool have_fac = false, have_rel = false;
 	double max_fac_change = 0;
-	double max_rel_change = 0;	
+	double max_rel_change = 0;
 	string max_fac_par = "N/A";
 	string max_rel_par = "N/A";
-	
+
 	os << "    Iteration "<<iter<<" Parameter Upgrades (" << par_type << " Parameters) " << endl;
 	os << "      Parameter     Current       Previous       Factor       Relative" << endl;
 	os << "        Name         Value         Value         Change        Change" << endl;
@@ -418,13 +431,13 @@ void OutputFileWriter::par_report(std::ostream &os, int const iter, Parameters c
 		par_names = new_pars.get_keys();
 		sort(par_names.begin(), par_names.end());
 	}
-	//for (const auto &ipar : new_ctl_pars)	
+	//for (const auto &ipar : new_ctl_pars)
 	for (auto &p_name : par_names)
 	{
 		Parameters::const_iterator pi = new_pars.find(p_name);
 		if (pi == new_pars.end()) continue;
 		p_new = new_pars.get_rec(p_name);
-		p_old = old_pars.get_rec(p_name);		
+		p_old = old_pars.get_rec(p_name);
 		param_change_stats(p_old, p_new, have_fac, fac_change, have_rel, rel_change);
 		if (have_fac && fac_change >= max_fac_change)
 		{
@@ -453,8 +466,8 @@ void OutputFileWriter::par_report(std::ostream &os, int const iter, Parameters c
 	}
 	os << "       Maximum changes in \"" << par_type << "\" parameters:" << endl;
 	os << "         Maximum relative change = " << max_rel_change << "   [" << lower_cp(max_rel_par) << "]" << endl;
-	os << "         Maximum factor change = " << max_fac_change << "   [" << lower_cp(max_fac_par) << "]" << endl;	
-	os << endl;	
+	os << "         Maximum factor change = " << max_fac_change << "   [" << lower_cp(max_fac_par) << "]" << endl;
+	os << endl;
 	if ((lower_cp(par_type) == "control file") && (pest_scenario.get_pestpp_options().get_iter_summary_flag()))
 	{
 		write_par_iter(iter, new_pars);
@@ -462,7 +475,7 @@ void OutputFileWriter::par_report(std::ostream &os, int const iter, Parameters c
 }
 
 
-void OutputFileWriter::param_change_stats(double p_old, double p_new, bool &have_fac, 
+void OutputFileWriter::param_change_stats(double p_old, double p_new, bool &have_fac,
 	double &fac_change, bool &have_rel, double &rel_change)
 {
 	have_rel = have_fac = true;
@@ -502,7 +515,7 @@ void OutputFileWriter::phi_report(std::ostream &os, int const iter, int const nr
 		else
 		{
 			os << endl << "  " << tag << " phi for this iteration                     Total : " << phi_comps.total() << endl << endl << endl;
-		}		
+		}
 	}
 	else
 	{
@@ -521,7 +534,7 @@ void OutputFileWriter::phi_report(std::ostream &os, int const iter, int const nr
 			os << "  " << tag << " regularization phi for this iteration      Total : " << phi_comps.regul << endl;
 		}
 	}
-	
+
 	for (auto &gname : pest_scenario.get_ctl_ordered_obs_group_names())
 	{
 		os << "  Contribution to phi from observation group ";
@@ -537,13 +550,13 @@ void OutputFileWriter::phi_report(std::ostream &os, int const iter, int const nr
 
 void OutputFileWriter::obs_report(ostream &os, const Observations &obs, const Observations &sim)
 {
-	
+
 	os << setw(21) << " Name" << setw(13) << " Group" << setw(21) << " Measured" << setw(21) << " Modelled" << setw(21) << " Residual" << setw(21) << " Weight" << endl;
 	//vector<string> obs_name_vec = obs.get_keys();
 	vector<string> obs_name_vec = pest_scenario.get_ctl_ordered_obs_names();
 	double obs_val, sim_val;
 	ObservationInfo oi = pest_scenario.get_ctl_observation_info();
-	//for(vector<string>::const_iterator b = obs_name_vec.begin(), 
+	//for(vector<string>::const_iterator b = obs_name_vec.begin(),
 	//	e = obs_name_vec.end(); b!=e; ++b)
 	for (auto &b : obs_name_vec)
 	{
@@ -573,7 +586,7 @@ void OutputFileWriter::write_opt_constraint_rei(std::ofstream &fout, int iter_no
 	const PriorInformation *prior_info_ptr = pest_scenario.get_prior_info_ptr();
 	const PriorInformationRec *pi_rec_ptr;
 	PriorInformation::const_iterator ipi;
-	//for(PriorInformation::const_iterator b = prior_info_ptr->begin(), 
+	//for(PriorInformation::const_iterator b = prior_info_ptr->begin(),
 	//	e = prior_info_ptr->end(); b!=e; ++b)
 	vector<string> obs_name_vec = pest_scenario.get_ctl_ordered_pi_names();
 	double obs_val, residual, sim_val;
@@ -594,7 +607,7 @@ void OutputFileWriter::write_opt_constraint_rei(std::ofstream &fout, int iter_no
 }
 
 
-void OutputFileWriter::write_rei(ofstream &fout, int iter_no, const Observations &obs, const Observations &sim, 
+void OutputFileWriter::write_rei(ofstream &fout, int iter_no, const Observations &obs, const Observations &sim,
 	const ObjectiveFunc &obj_func, const Parameters &pars)
 {
 	fout << setiosflags(ios::left);
@@ -607,7 +620,7 @@ void OutputFileWriter::write_rei(ofstream &fout, int iter_no, const Observations
 	const PriorInformation *prior_info_ptr = pest_scenario.get_prior_info_ptr();
 	const PriorInformationRec *pi_rec_ptr;
 	PriorInformation::const_iterator ipi;
-	//for(PriorInformation::const_iterator b = prior_info_ptr->begin(), 
+	//for(PriorInformation::const_iterator b = prior_info_ptr->begin(),
 	//	e = prior_info_ptr->end(); b!=e; ++b)
 	vector<string> obs_name_vec = pest_scenario.get_ctl_ordered_pi_names();
 	double obs_val, residual, sim_val;
@@ -623,7 +636,7 @@ void OutputFileWriter::write_rei(ofstream &fout, int iter_no, const Observations
 		<< " " << showpoint <<   setw(20) << obs_val
 		<< " " << showpoint <<  setw(20) << sim_val
 		<<  " " << showpoint <<  setw(20) << residual
-		<< " " << showpoint << setw(20)  << sqrt(pi_rec_ptr->get_weight()) << endl;	
+		<< " " << showpoint << setw(20)  << sqrt(pi_rec_ptr->get_weight()) << endl;
 	}
 }
 
@@ -642,7 +655,7 @@ void OutputFileWriter::write_par(ofstream &fout, const Parameters &pars, const T
 	vector<string> par_name_vec = pest_scenario.get_ctl_ordered_par_names();
 	for (auto &b : par_name_vec)
 	{
-		//name_ptr = &(*b).first;		
+		//name_ptr = &(*b).first;
 		val_pair = offset_tran.get_value(b);
 		if (val_pair.first == true)
 			offset = val_pair.second;
@@ -719,7 +732,7 @@ void OutputFileWriter::append_sen(std::ostream &fout, int iter_no, const Jacobia
 		int n_par = par_list.size();
 		//int n_nonzero_weights_reg = q_sqrt_reg.nonZeros();
 		//int n_nonzero_weights_no_reg = q_sqrt_no_reg.nonZeros();
-		
+
 		int n_nonzero_weights_no_reg = obj_func.get_obs_info_ptr()->get_nnz_obs();
 		int n_nonzero_weights_reg = n_nonzero_weights_no_reg + obj_func.get_prior_info_ptr()->get_nnz_pi();
 		vector<string> par_names;
@@ -825,10 +838,10 @@ void OutputFileWriter::write_jco(bool isBaseIter, string ext, const Jacobian &jc
 {
 
 	ofstream &jout = file_manager.open_ofile_ext(ext, ios::out | ios::binary);
-	
+
 	vector<string> obs_names;
 	vector<string> par_names;
-	
+
 	if (isBaseIter)
 	{
 		obs_names = pest_scenario.get_ctl_ordered_obs_names();

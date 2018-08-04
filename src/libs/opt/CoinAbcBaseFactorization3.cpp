@@ -20,7 +20,7 @@ extern int cilk_conflict;
 //:class CoinAbcTypeFactorization.  Deals with Factorization and Updates
 
 /* Updates one column for dual steepest edge weights (FTRAN) */
-void 
+void
 CoinAbcTypeFactorization::updateWeights ( CoinIndexedVector & regionSparse) const
 {
   toLongArray(&regionSparse,1);
@@ -39,9 +39,9 @@ CoinAbcTypeFactorization::updateWeights ( CoinIndexedVector & regionSparse) cons
 #endif
 		  );
   //row bits here
-  updateColumnR ( &regionSparse 
+  updateColumnR ( &regionSparse
 #if ABC_SMALL<2
-		  ,reinterpret_cast<CoinAbcStatistics &>(ftranCountInput_) 
+		  ,reinterpret_cast<CoinAbcStatistics &>(ftranCountInput_)
 #endif
 #if ABC_PARALLEL
 		  ,0
@@ -76,9 +76,9 @@ CoinSimplexInt CoinAbcTypeFactorization::updateColumn ( CoinIndexedVector & regi
 #endif
 		  );
   //row bits here
-  updateColumnR ( &regionSparse 
+  updateColumnR ( &regionSparse
 #if ABC_SMALL<2
-		  ,reinterpret_cast<CoinAbcStatistics &>(ftranCountInput_) 
+		  ,reinterpret_cast<CoinAbcStatistics &>(ftranCountInput_)
 #endif
 		  );
   //update counts
@@ -94,7 +94,7 @@ CoinSimplexInt CoinAbcTypeFactorization::updateColumn ( CoinIndexedVector & regi
   return regionSparse.getNumElements();
 }
 /* Updates one full column (FTRAN) */
-void 
+void
 CoinAbcTypeFactorization::updateFullColumn ( CoinIndexedVector & regionSparse) const
 {
 #ifndef ABC_ORDERED_FACTORIZATION
@@ -115,9 +115,9 @@ CoinAbcTypeFactorization::updateFullColumn ( CoinIndexedVector & regionSparse) c
 #endif
 		    );
     //row bits here
-    updateColumnR ( &regionSparse 
+    updateColumnR ( &regionSparse
 #if ABC_SMALL<2
-	      ,reinterpret_cast<CoinAbcStatistics &>(ftranFullCountInput_) 
+	      ,reinterpret_cast<CoinAbcStatistics &>(ftranFullCountInput_)
 #endif
 #if ABC_PARALLEL
 		    ,1
@@ -153,7 +153,7 @@ inline void multiplyIndexed(CoinSimplexInt number,
   }
 }
 /* Updates one full column (BTRAN) */
-void 
+void
 CoinAbcTypeFactorization::updateFullColumnTranspose ( CoinIndexedVector & regionSparse) const
 {
   int numberNonZero=0;
@@ -197,7 +197,7 @@ CoinAbcTypeFactorization::updateFullColumnTranspose ( CoinIndexedVector & region
   // Guess at number at end
   if (gotUCopy()) {
     assert (btranFullAverageAfterU_);
-    CoinSimplexInt newNumber = 
+    CoinSimplexInt newNumber =
       static_cast<CoinSimplexInt> (numberNonZero*btranFullAverageAfterU_*twiddleBtranFullFactor1());
     if (newNumber< sparseThreshold_)
       goSparse = true;
@@ -223,13 +223,13 @@ CoinAbcTypeFactorization::updateFullColumnTranspose ( CoinIndexedVector & region
 #endif
 			   );
   //row bits here
-  updateColumnTransposeR ( &regionSparse 
+  updateColumnTransposeR ( &regionSparse
 #if ABC_SMALL<2
 	      ,reinterpret_cast<CoinAbcStatistics &>(btranFullCountInput_)
 #endif
 							 );
   //  ******* L
-  updateColumnTransposeL ( &regionSparse 
+  updateColumnTransposeL ( &regionSparse
 #if ABC_SMALL<2
 		  ,reinterpret_cast<CoinAbcStatistics &>(btranFullCountInput_)
 #endif
@@ -334,20 +334,20 @@ CoinAbcTypeFactorization::updateColumnL ( CoinIndexedVector * regionSparse
     CoinSimplexInt lastSparse = numberRows_-numberDense_;
     CoinFactorizationDouble * COIN_RESTRICT region = denseVector (regionSparse);
     CoinFactorizationDouble *  COIN_RESTRICT denseArea = denseAreaAddress_;
-    CoinFactorizationDouble * COIN_RESTRICT denseRegion = 
+    CoinFactorizationDouble * COIN_RESTRICT denseRegion =
       denseArea+leadingDimension_*numberDense_;
     CoinSimplexInt *  COIN_RESTRICT densePermute=
       reinterpret_cast<CoinSimplexInt *>(denseRegion+FACTOR_CPU*numberDense_);
     //for (int i=0;i<numberDense_;i++) {
       //printf("perm %d %d\n",i,densePermute[i]);
       //assert (densePermute[i]>=0&&densePermute[i]<numberRows_);
-    //} 
+    //}
 #if ABC_PARALLEL
     if (whichSparse)
       denseRegion+=whichSparse*numberDense_;
     //printf("PP %d %d %s region %x\n",whichSparse,__LINE__,__FILE__,denseRegion);
 #endif
-    CoinFactorizationDouble * COIN_RESTRICT densePut = 
+    CoinFactorizationDouble * COIN_RESTRICT densePut =
       denseRegion-lastSparse;
     CoinZeroN(denseRegion,numberDense_);
     bool doDense=false;
@@ -435,7 +435,7 @@ CoinAbcTypeFactorization::updateColumnL ( CoinIndexedVector * regionSparse
 #endif
 #endif
 #if ABC_SMALL<2
-  if (factorizationStatistics()) 
+  if (factorizationStatistics())
     statistics.countAfterL_ += regionSparse->getNumElements();
 #endif
 #if CILK_CONFLICT>0
@@ -649,7 +649,7 @@ inline CoinFactorizationDouble gatherUpdate(CoinSimplexInt number,
   return pivotValue;
 }
 // Updates part of column (FTRANL) when densish
-void 
+void
 CoinAbcTypeFactorization::updateColumnLDensish ( CoinIndexedVector * regionSparse) const
 {
   CoinSimplexInt * COIN_RESTRICT regionIndex=regionSparse->getIndices();
@@ -658,7 +658,7 @@ CoinAbcTypeFactorization::updateColumnLDensish ( CoinIndexedVector * regionSpars
 #if ABC_SMALL<3
   CoinSimplexInt numberNonZero = 0;
 #endif
-  
+
   const CoinBigIndex * COIN_RESTRICT startColumn = startColumnLAddress_;
   const CoinSimplexInt * COIN_RESTRICT indexRow = indexRowLAddress_;
   const CoinFactorizationDouble * COIN_RESTRICT element = elementLAddress_;
@@ -687,7 +687,7 @@ CoinAbcTypeFactorization::updateColumnLDensish ( CoinIndexedVector * regionSpars
 #else
     if (jPivot>=baseL_)
       smallestIndex = CoinMin(jPivot,smallestIndex);
-#endif      
+#endif
   }
   instrument_start("CoinAbcFactorizationUpdateLDensish",number+(last-smallestIndex));
   // now others
@@ -718,7 +718,7 @@ CoinAbcTypeFactorization::updateColumnLDensish ( CoinIndexedVector * regionSpars
 	    CoinFactorizationDouble result = region[iRow];
 	    CoinFactorizationDouble value = element[j];
 	    region[iRow] = result - value * pivotValue;
-	  }     
+	  }
 #else
 	  CoinAbcScatterUpdate(end-start,pivotValue,element+start,indexRow+start,region);
 #endif
@@ -728,9 +728,9 @@ CoinAbcTypeFactorization::updateColumnLDensish ( CoinIndexedVector * regionSpars
       } else {
 	region[i] = 0.0;
 #endif
-      }       
+      }
     }
-  }     
+  }
   // and dense
 #if ABC_SMALL<3
   for (CoinSimplexInt k = last; k < numberRows_; k++ ) {
@@ -745,15 +745,15 @@ CoinAbcTypeFactorization::updateColumnLDensish ( CoinIndexedVector * regionSpars
 	regionIndex[numberNonZero++] = i;
       } else {
 	region[i] = 0.0;
-      }       
+      }
     }
-  }     
+  }
   regionSparse->setNumElements ( numberNonZero );
 #endif
   instrument_end();
 }
 // Updates part of column (FTRANL) when dense
-void 
+void
 CoinAbcTypeFactorization::updateColumnLDense ( CoinIndexedVector * regionSparse) const
 {
   CoinSimplexInt * COIN_RESTRICT regionIndex=regionSparse->getIndices();
@@ -762,7 +762,7 @@ CoinAbcTypeFactorization::updateColumnLDense ( CoinIndexedVector * regionSparse)
 #if ABC_SMALL<3
   CoinSimplexInt numberNonZero = 0;
 #endif
-  
+
   const CoinBigIndex * COIN_RESTRICT startColumn = startColumnLAddress_;
   const CoinSimplexInt * COIN_RESTRICT indexRow = indexRowLAddress_;
   const CoinFactorizationDouble * COIN_RESTRICT element = elementLAddress_;
@@ -791,7 +791,7 @@ CoinAbcTypeFactorization::updateColumnLDense ( CoinIndexedVector * regionSparse)
 #else
     if (jPivot>=baseL_)
       smallestIndex = CoinMin(jPivot,smallestIndex);
-#endif      
+#endif
   }
   instrument_start("CoinAbcFactorizationUpdateLDensish",number+(last-smallestIndex));
   // now others
@@ -815,7 +815,7 @@ CoinAbcTypeFactorization::updateColumnLDense ( CoinIndexedVector * regionSparse)
 	    CoinFactorizationDouble result = region[iRow];
 	    CoinFactorizationDouble value = element[j];
 	    region[iRow] = result - value * pivotValue;
-	  }     
+	  }
 #else
 	  CoinAbcScatterUpdate(end-start,pivotValue,element+start,indexRow+start,region);
 #endif
@@ -825,9 +825,9 @@ CoinAbcTypeFactorization::updateColumnLDense ( CoinIndexedVector * regionSparse)
       } else {
 	region[i] = 0.0;
 #endif
-      }       
+      }
     }
-  }     
+  }
   // and dense
 #if ABC_SMALL<3
   for (CoinSimplexInt k = last; k < numberRows_; k++ ) {
@@ -842,16 +842,16 @@ CoinAbcTypeFactorization::updateColumnLDense ( CoinIndexedVector * regionSparse)
 	regionIndex[numberNonZero++] = i;
       } else {
 	region[i] = 0.0;
-      }       
+      }
     }
-  }     
+  }
   regionSparse->setNumElements ( numberNonZero );
 #endif
   instrument_end();
 }
 #if ABC_SMALL<2
 // Updates part of column (FTRANL) when sparse
-void 
+void
 CoinAbcTypeFactorization::updateColumnLSparse ( CoinIndexedVector * regionSparse
 #if ABC_PARALLEL
 						,int whichSparse
@@ -862,9 +862,9 @@ CoinAbcTypeFactorization::updateColumnLSparse ( CoinIndexedVector * regionSparse
   CoinFactorizationDouble * COIN_RESTRICT region = denseVector(regionSparse);
   CoinSimplexInt number = regionSparse->getNumElements (  );
   CoinSimplexInt numberNonZero;
-  
+
   numberNonZero = 0;
-  
+
   const CoinBigIndex * COIN_RESTRICT startColumn = startColumnLAddress_;
   const CoinSimplexInt * COIN_RESTRICT indexRow = indexRowLAddress_;
   const CoinFactorizationDouble * COIN_RESTRICT element = elementLAddress_;
@@ -880,7 +880,7 @@ CoinAbcTypeFactorization::updateColumnLSparse ( CoinIndexedVector * regionSparse
   CoinCheckZero * COIN_RESTRICT mark = markRowAddress_;
 #else
   //BIT
-  CoinSimplexUnsignedInt * COIN_RESTRICT mark = reinterpret_cast<CoinSimplexUnsignedInt *> 
+  CoinSimplexUnsignedInt * COIN_RESTRICT mark = reinterpret_cast<CoinSimplexUnsignedInt *>
     (markRowAddress_);
 #endif
 #if ABC_PARALLEL
@@ -1051,7 +1051,7 @@ CoinAbcTypeFactorization::updateColumnLSparse ( CoinIndexedVector * regionSparse
     for (CoinSimplexInt k = 0; k < numberRows_; k++ ) {
       CoinSimplexInt i=pivotLOrder[k];
       CoinFactorizationDouble pivotValue = temp[i];
-    
+
       if ( !TEST_LESS_THAN_TOLERANCE(pivotValue) ) {
 	CoinBigIndex start = startColumn[k];
 	CoinBigIndex end = startColumn[k + 1];
@@ -1059,13 +1059,13 @@ CoinAbcTypeFactorization::updateColumnLSparse ( CoinIndexedVector * regionSparse
 	  CoinSimplexInt iRow = indexRow[j];
 	  CoinFactorizationDouble result = temp[iRow];
 	  CoinFactorizationDouble value = element[j];
-	  
+
 	  temp[iRow] = result - value * pivotValue;
-	}     
+	}
       } else {
 	temp[i] = 0.0;
-      }       
-    }     
+      }
+    }
   }
 #endif
   instrument_start("CoinAbcFactorizationUpdateLSparse",number+nList);
@@ -1139,7 +1139,7 @@ CoinAbcTypeFactorization::updateColumnLSparse ( CoinIndexedVector * regionSparse
 #if FACTORIZATION_STATISTICS
 extern double twoThresholdX;
 #endif
-CoinSimplexInt 
+CoinSimplexInt
 CoinAbcTypeFactorization::updateTwoColumnsFT ( CoinIndexedVector & regionFTX,
 				       CoinIndexedVector & regionOtherX)
 {
@@ -1170,12 +1170,12 @@ CoinAbcTypeFactorization::updateTwoColumnsFT ( CoinIndexedVector & regionFTX,
 #endif
 		  );
   //row bits here
-  updateColumnR ( regionFT 
+  updateColumnR ( regionFT
 #if ABC_SMALL<2
 		  ,reinterpret_cast<CoinAbcStatistics &>(ftranFTCountInput_)
 #endif
 		  );
-  updateColumnR ( regionOther 
+  updateColumnR ( regionOther
 #if ABC_SMALL<2
 		  ,reinterpret_cast<CoinAbcStatistics &>(ftranCountInput_)
 #endif
@@ -1189,7 +1189,7 @@ CoinAbcTypeFactorization::updateTwoColumnsFT ( CoinIndexedVector & regionFTX,
   if (gotSparse()) {
     CoinSimplexInt numberNonZero = (regionOther->getNumElements (  )+
 			 regionFT->getNumElements())>>1;
-    double average = 0.25*(ftranAverageAfterL_*twiddleFtranFactor1() 
+    double average = 0.25*(ftranAverageAfterL_*twiddleFtranFactor1()
 			   + ftranFTAverageAfterL_*twiddleFtranFTFactor1());
     assert (average);
     CoinSimplexInt newNumber = static_cast<CoinSimplexInt> (numberNonZero*average);
@@ -1215,7 +1215,7 @@ CoinAbcTypeFactorization::updateTwoColumnsFT ( CoinIndexedVector & regionFTX,
     regionFT->setNumElements ( numberNonZeroFT );
     regionOther->setNumElements ( numberNonZero );
   } else {
-    // sparse 
+    // sparse
     updateColumnU ( regionFT
 #if ABC_SMALL<2
 		    , reinterpret_cast<CoinAbcStatistics &>(ftranFTCountInput_)
@@ -1235,19 +1235,19 @@ CoinAbcTypeFactorization::updateTwoColumnsFT ( CoinIndexedVector & regionFTX,
   regionFT->checkClean();
   regionOther->checkClean();
 #endif
-  if ( doFT ) 
+  if ( doFT )
     return numberNonZeroFT;
-  else 
+  else
     return -numberNonZeroFT;
 }
 // Updates part of 2 columns (FTRANU) real work
 void
 CoinAbcTypeFactorization::updateTwoColumnsUDensish (
 					     CoinSimplexInt & numberNonZero1,
-					     CoinFactorizationDouble * COIN_RESTRICT region1, 
+					     CoinFactorizationDouble * COIN_RESTRICT region1,
 					     CoinSimplexInt * COIN_RESTRICT index1,
 					     CoinSimplexInt & numberNonZero2,
-					     CoinFactorizationDouble * COIN_RESTRICT region2, 
+					     CoinFactorizationDouble * COIN_RESTRICT region2,
 					     CoinSimplexInt * COIN_RESTRICT index2) const
 {
 #ifdef ABC_USE_FUNCTION_POINTERS
@@ -1311,7 +1311,7 @@ CoinAbcTypeFactorization::updateTwoColumnsUDensish (
 	}
       }
       instrument_add(numberIn);
-      if (numberIn) { 
+      if (numberIn) {
 	if (do2) {
 	  if (!do1) {
 	    // just region 2
@@ -1401,7 +1401,7 @@ CoinAbcTypeFactorization::updateColumnU ( CoinIndexedVector * regionSparse
   CoinSimplexInt numberNonZero = regionSparse->getNumElements (  );
   int goSparse;
   // Guess at number at end
-  if (gotSparse()) { 
+  if (gotSparse()) {
     double average = statistics.averageAfterU_*twiddleFactor1S();
     assert (average);
     CoinSimplexInt newNumber = static_cast<CoinSimplexInt> (numberNonZero*average);
@@ -1471,7 +1471,7 @@ CoinAbcTypeFactorization::updateColumnUDensish (  CoinIndexedVector * regionSpar
   const CoinSimplexInt * COIN_RESTRICT indexRow = indexRowUAddress_;
   const CoinFactorizationDouble * COIN_RESTRICT element = elementUAddress_;
 #endif
-  
+
   const CoinSimplexInt *  COIN_RESTRICT pivotLinked = pivotLinkedBackwardsAddress_;
   CoinSimplexInt jRow=pivotLinked[numberRows_];
 #define ETAS_1 2
@@ -1615,7 +1615,7 @@ CoinAbcTypeFactorization::updateColumnUDense (  CoinIndexedVector * regionSparse
   const CoinSimplexInt * COIN_RESTRICT numberInColumn = numberInColumnAddress_;
   CoinSimplexInt numberNonZero = 0;
   const CoinFactorizationDouble * COIN_RESTRICT pivotRegion = pivotRegionAddress_;
-  
+
 #ifdef ABC_USE_FUNCTION_POINTERS
   scatterStruct * COIN_RESTRICT scatterPointer = scatterUColumn();
   CoinFactorizationDouble *  COIN_RESTRICT elementUColumnPlus = elementUColumnPlusAddress_;
@@ -1812,7 +1812,7 @@ CoinAbcTypeFactorization::updateColumnUSparse ( CoinIndexedVector * regionSparse
   CoinCheckZero * COIN_RESTRICT mark = markRowAddress_;
 #else
   //BIT
-  CoinSimplexUnsignedInt * COIN_RESTRICT mark = reinterpret_cast<CoinSimplexUnsignedInt *> 
+  CoinSimplexUnsignedInt * COIN_RESTRICT mark = reinterpret_cast<CoinSimplexUnsignedInt *>
     (markRowAddress_);
 #endif
 #if ABC_PARALLEL
@@ -1889,7 +1889,7 @@ CoinAbcTypeFactorization::updateColumnUSparse ( CoinIndexedVector * regionSparse
 	  bit0 = (jPivot & COINFACTORIZATION_MASK_PER_INT2)<<1;
 	  CoinSimplexUnsignedInt mark_j=(mark[word0]>>bit0)&3;
 #endif
-	  if (!mark_j) 
+	  if (!mark_j)
 	    break;
 	}
 	if (j>=start) {
@@ -2089,10 +2089,10 @@ CoinAbcTypeFactorization::updateColumnUSparse ( CoinIndexedVector * regionSparse
 }
 #endif
 // Store update after doing L and R - retuns false if no room
-bool 
+bool
 CoinAbcTypeFactorization::storeFT(
 #if ABC_SMALL<3
-			      const 
+			      const
 #endif
 			      CoinIndexedVector * updateFT)
 {
@@ -2117,7 +2117,7 @@ CoinAbcTypeFactorization::storeFT(
 #ifndef ABC_USE_FUNCTION_POINTERS
     CoinBigIndex * COIN_RESTRICT startColumnU = startColumnUAddress_;
     //we are going to save at end of U
-    startColumnU[numberRows_] = lastEntryByColumnU_; 
+    startColumnU[numberRows_] = lastEntryByColumnU_;
     CoinSimplexInt * COIN_RESTRICT putIndex = indexRowUAddress_ + lastEntryByColumnU_;
     CoinFactorizationDouble * COIN_RESTRICT putElement = elementUAddress_ + lastEntryByColumnU_;
 #else
@@ -2177,7 +2177,7 @@ CoinSimplexInt CoinAbcTypeFactorization::updateColumnFT ( CoinIndexedVector & re
   //printf("b\n");
   //regionSparse->checkClean();
   //row bits here
-  updateColumnR ( regionSparse 
+  updateColumnR ( regionSparse
 #if ABC_SMALL<2
 	      ,reinterpret_cast<CoinAbcStatistics &>(ftranFTCountInput_)
 #endif
@@ -2201,7 +2201,7 @@ CoinSimplexInt CoinAbcTypeFactorization::updateColumnFT ( CoinIndexedVector & re
 #endif
   numberNonZero=regionSparse->getNumElements();
   // will be negative if no room
-  if ( doFT ) 
+  if ( doFT )
     return numberNonZero;
   else
     return -numberNonZero;
@@ -2231,7 +2231,7 @@ void CoinAbcTypeFactorization::updateColumnFT ( CoinIndexedVector & regionSparse
   //printf("b\n");
   //regionSparse->checkClean();
   //row bits here
-  updateColumnR ( regionSparse 
+  updateColumnR ( regionSparse
 #if ABC_SMALL<2
 	      ,reinterpret_cast<CoinAbcStatistics &>(ftranFTCountInput_)
 #endif
@@ -2264,8 +2264,8 @@ void CoinAbcTypeFactorization::updateColumnFT ( CoinIndexedVector & regionSparse
   regionSparse->checkClean();
 #endif
 }
- int 
-  CoinAbcTypeFactorization::updateColumnFTPart1 ( CoinIndexedVector & regionSparse) 
+ int
+  CoinAbcTypeFactorization::updateColumnFTPart1 ( CoinIndexedVector & regionSparse)
 {
   toLongArray(&regionSparse,0);
 #ifdef ABC_ORDERED_FACTORIZATION
@@ -2285,7 +2285,7 @@ void CoinAbcTypeFactorization::updateColumnFT ( CoinIndexedVector & regionSparse
 		  );
   //regionSparse.checkClean();
   //row bits here
-  updateColumnR ( &regionSparse 
+  updateColumnR ( &regionSparse
 #if ABC_SMALL<2
 	      ,reinterpret_cast<CoinAbcStatistics &>(ftranFTCountInput_)
 #endif
@@ -2297,13 +2297,13 @@ void CoinAbcTypeFactorization::updateColumnFT ( CoinIndexedVector & regionSparse
   //regionSparse.checkClean();
   bool doFT=storeFT(&regionSparse);
   // will be negative if no room
-  if ( doFT ) 
+  if ( doFT )
     return 1;
   else
     return -1;
 }
  void
-CoinAbcTypeFactorization::updateColumnFTPart2 ( CoinIndexedVector & regionSparse) 
+CoinAbcTypeFactorization::updateColumnFTPart2 ( CoinIndexedVector & regionSparse)
 {
   toLongArray(&regionSparse,0);
   //CoinSimplexInt numberNonZero=regionSparse.getNumElements();
@@ -2321,7 +2321,7 @@ CoinAbcTypeFactorization::updateColumnFTPart2 ( CoinIndexedVector & regionSparse
 #endif
 }
 /* Updates one column (FTRAN) */
-void 
+void
 CoinAbcTypeFactorization::updateColumnCpu ( CoinIndexedVector & regionSparse,int whichCpu) const
 {
   toLongArray(&regionSparse,whichCpu);
@@ -2339,9 +2339,9 @@ CoinAbcTypeFactorization::updateColumnCpu ( CoinIndexedVector & regionSparse,int
 #endif
 		  );
   //row bits here
-  updateColumnR ( &regionSparse 
+  updateColumnR ( &regionSparse
 #if ABC_SMALL<2
-		  ,reinterpret_cast<CoinAbcStatistics &>(ftranCountInput_) 
+		  ,reinterpret_cast<CoinAbcStatistics &>(ftranCountInput_)
 #endif
 #if ABC_PARALLEL
 		  ,whichCpu
@@ -2363,11 +2363,11 @@ CoinAbcTypeFactorization::updateColumnCpu ( CoinIndexedVector & regionSparse,int
 #endif
 }
 /* Updates one column (BTRAN) */
- void 
+ void
 CoinAbcTypeFactorization::updateColumnTransposeCpu ( CoinIndexedVector & regionSparse,int whichCpu) const
  {
   toLongArray(&regionSparse,whichCpu);
-     
+
   CoinSimplexDouble * COIN_RESTRICT region = regionSparse.denseVector();
   CoinSimplexInt * COIN_RESTRICT regionIndex = regionSparse.getIndices();
   CoinSimplexInt numberNonZero = regionSparse.getNumElements();
@@ -2408,7 +2408,7 @@ CoinAbcTypeFactorization::updateColumnTransposeCpu ( CoinIndexedVector & regionS
   // Guess at number at end
   if (gotUCopy()) {
     assert (btranAverageAfterU_);
-    CoinSimplexInt newNumber = 
+    CoinSimplexInt newNumber =
       static_cast<CoinSimplexInt> (numberNonZero*btranAverageAfterU_*twiddleBtranFactor1());
     if (newNumber< sparseThreshold_)
       goSparse = true;
@@ -2425,7 +2425,7 @@ CoinAbcTypeFactorization::updateColumnTransposeCpu ( CoinIndexedVector & regionS
       }
     }
   }
-  updateColumnTransposeU ( &regionSparse,smallestIndex 
+  updateColumnTransposeU ( &regionSparse,smallestIndex
 #if ABC_SMALL<2
 		  ,reinterpret_cast<CoinAbcStatistics &>(btranCountInput_)
 #endif
@@ -2434,13 +2434,13 @@ CoinAbcTypeFactorization::updateColumnTransposeCpu ( CoinIndexedVector & regionS
 #endif
 			   );
   //row bits here
-  updateColumnTransposeR ( &regionSparse 
+  updateColumnTransposeR ( &regionSparse
 #if ABC_SMALL<2
 		  ,reinterpret_cast<CoinAbcStatistics &>(btranCountInput_)
 #endif
 			   );
   //  ******* L
-  updateColumnTransposeL ( &regionSparse 
+  updateColumnTransposeL ( &regionSparse
 #if ABC_SMALL<2
 		  ,reinterpret_cast<CoinAbcStatistics &>(btranCountInput_)
 #endif
@@ -2502,7 +2502,7 @@ CoinAbcTypeFactorization::getRowSpaceIterate ( CoinSimplexInt iRow,
       //move
       CoinBigIndex get = startRow[iRow];
       CoinBigIndex getEnd = startRow[iRow] + numberInRow[iRow];
-      
+
       startRow[iRow] = put;
       CoinBigIndex i;
       for ( i = get; i < getEnd; i++ ) {
@@ -2515,7 +2515,7 @@ CoinAbcTypeFactorization::getRowSpaceIterate ( CoinSimplexInt iRow,
 #endif
 	elementRowU[put] = elementRowU[i];
 	put++;
-      }       
+      }
       iRow = nextRow[iRow];
     }       /* endwhile */
     numberCompressions_++;
@@ -2526,12 +2526,12 @@ CoinAbcTypeFactorization::getRowSpaceIterate ( CoinSimplexInt iRow,
       //if we can allocate bigger then do so and copy
       //if not then return so code can start again
       status_ = -99;
-      return false;    }       
-  }       
+      return false;    }
+  }
   CoinBigIndex put = lastEntryByRowU_;
   CoinSimplexInt next = nextRow[iRow];
   CoinSimplexInt last = lastRow[iRow];
-  
+
   //out
   nextRow[last] = next;
   lastRow[next] = last;
@@ -2562,7 +2562,7 @@ CoinAbcTypeFactorization::getRowSpaceIterate ( CoinSimplexInt iRow,
   return true;
 }
 #endif
-void 
+void
 CoinAbcTypeFactorization::printRegion(const CoinIndexedVector & vector,const char * where) const
 {
   //return;
@@ -2581,11 +2581,11 @@ CoinAbcTypeFactorization::printRegion(const CoinIndexedVector & vector,const cha
   }
   printf("====            %s ====\n",where);
 }
-void 
+void
 CoinAbcTypeFactorization::unpack ( CoinIndexedVector * regionFrom,
 			   CoinIndexedVector * regionTo) const
 {
-  // move 
+  // move
   CoinSimplexInt * COIN_RESTRICT regionIndex = regionTo->getIndices (  );
   CoinSimplexInt numberNonZero = regionFrom->getNumElements();
   CoinSimplexInt * COIN_RESTRICT index = regionFrom->getIndices();
@@ -2600,11 +2600,11 @@ CoinAbcTypeFactorization::unpack ( CoinIndexedVector * regionFrom,
   }
   regionTo->setNumElements(numberNonZero);
 }
-void 
+void
 CoinAbcTypeFactorization::pack ( CoinIndexedVector * regionFrom,
 			 CoinIndexedVector * regionTo) const
 {
-  // move 
+  // move
   CoinSimplexInt * COIN_RESTRICT regionIndex = regionFrom->getIndices (  );
   CoinSimplexInt numberNonZero = regionFrom->getNumElements();
   CoinSimplexInt * COIN_RESTRICT index = regionTo->getIndices();
@@ -2620,7 +2620,7 @@ CoinAbcTypeFactorization::pack ( CoinIndexedVector * regionFrom,
   regionTo->setNumElements(numberNonZero);
 }
 // Set up addresses from arrays
-void 
+void
 CoinAbcTypeFactorization::doAddresses()
 {
   pivotColumnAddress_ = pivotColumn_.array();

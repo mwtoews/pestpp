@@ -1,8 +1,8 @@
-/*  
-	© Copyright 2012, David Welter
-	
+/*
+
+
 	This file is part of PEST++.
-   
+
 	PEST++ is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
@@ -104,9 +104,11 @@ public:
 	void cancel_run(int run_id);
 	virtual void run();
 	virtual RunManagerAbstract::RUN_UNTIL_COND run_until(RUN_UNTIL_COND condition, int n_nops = 0, double sec = 0.0);
-	~RunManagerPanther(void); 
+	~RunManagerPanther(void);
 	int get_n_waiting_runs() { return waiting_runs.size(); }
 	void close_slaves();
+
+
 
 private:
 	std::string port;
@@ -115,12 +117,12 @@ private:
 	static const int N_PINGS_UNRESPONSIVE;
 	static const int PING_INTERVAL_SECS;
 	static const int MAX_CONCURRENT_RUNS_LOWER_LIMIT;
-	
+
 	double overdue_reched_fac;
 	double overdue_giveup_fac;
 	double overdue_giveup_minutes;
 	int max_concurrent_runs;
-	int n_no_ops;  //number of consecutive times tcp/ip has looked for slave communciations and not found any 
+	int n_no_ops;  //number of consecutive times tcp/ip has looked for slave communciations and not found any
 	int listener;
 	int fdmax;
 	int model_runs_done;
@@ -140,7 +142,7 @@ private:
 	void kill_all_active_runs();
 	void close_slave(int i_sock);
 	void close_slave(list<SlaveInfoRec>::iterator slave_info_iter);
-	
+
 	std::ofstream &f_rmr;
 	bool listen();
 	bool process_model_run(int sock_id, NetPackage &net_pack);
@@ -151,7 +153,7 @@ private:
 	void erase_slave(int sock_id);
 	bool ping(int i_sock);
 	bool ping();
-	void report(std::string message,bool to_cout);	
+	void report(std::string message,bool to_cout);
 	string get_time_string();
 	string get_time_string_short();
 	void echo();
@@ -174,7 +176,7 @@ public:
 	RunManagerYAMRCondor(const std::string &stor_filename, const std::string &port, std::ofstream &_f_rmr, int _max_n_failure,
 		double overdue_reched_fac, double overdue_giveup_fac, double overdue_giveup_minutes, string _condor_submit_file);
 	virtual void run();
-	
+
 private:
 	int max_condor_queue;
 	vector<string> submit_lines;

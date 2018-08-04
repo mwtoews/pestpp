@@ -38,7 +38,7 @@ Mat::Mat(string filename)
 
 }
 
-Mat::Mat(vector<string> _row_names, vector<string> _col_names, 
+Mat::Mat(vector<string> _row_names, vector<string> _col_names,
 	Eigen::SparseMatrix<double> _matrix)
 {
 	row_names = _row_names;
@@ -320,13 +320,13 @@ void Mat::inv_ip(Logger *log)
 	//cout << "full inv_ip()" << endl;
 	/*matrix.setZero();
 	matrix = solver.solve(I);*/
-	
+
 }
 
 
 void Mat::SVD()
 {
-	Eigen::JacobiSVD<Eigen::MatrixXd> svd_fac(matrix, Eigen::DecompositionOptions::ComputeFullU | 
+	Eigen::JacobiSVD<Eigen::MatrixXd> svd_fac(matrix, Eigen::DecompositionOptions::ComputeFullU |
 		Eigen::DecompositionOptions::ComputeFullV);
 	s = svd_fac.singularValues();
 	U = svd_fac.matrixU().sparseView();
@@ -377,7 +377,7 @@ void Mat::to_ascii(const string &filename)
 		out<< "* row and column names" << endl;
 		for (auto &name : row_names)
 			out << name << endl;
-		
+
 	}
 	else
 	{
@@ -485,19 +485,19 @@ void Mat::from_csv(const string &filename)
 			if (val != 0.0)
 				triplet_list.push_back(Eigen::Triplet<double>(irow, j, val));
 		}
-	
+
 	lcount++;
 	irow++;
 	}
 	matrix.resize(row_names.size(), col_names.size());
 	matrix.setFromTriplets(triplet_list.begin(), triplet_list.end());
-	
+
 }
 
 void Mat::from_ascii(const string &filename)
 {
 	ifstream in(filename);
-	if (!in.good()) 
+	if (!in.good())
 		throw runtime_error("Mat::from_ascii() error: cannot open " + filename + " \
 												to read ASCII matrix");
 	int nrow = -999, ncol = -999;
@@ -514,7 +514,7 @@ void Mat::from_ascii(const string &filename)
 		if (in >> val)
 		{
 			if (val != 0.0)
-				triplet_list.push_back(Eigen::Triplet<double>(irow,jcol,val));	
+				triplet_list.push_back(Eigen::Triplet<double>(irow,jcol,val));
 			jcol++;
 			if (jcol >= ncol)
 			{
@@ -529,7 +529,7 @@ void Mat::from_ascii(const string &filename)
 								 ASCII matrix file: "+filename);
 		}
 	}
-	
+
 	string header;
 	//read the newline char
 	getline(in, header);
@@ -727,7 +727,7 @@ void Mat::from_binary(const string &filename)
 	//advance to parameter names section
 	in.seekg(n_nonzero*(sizeof(double)+sizeof(int)), ios_base::cur);
 
-	//read parameter names	
+	//read parameter names
 	for (int i_rec = 0; i_rec<n_par; ++i_rec)
 	{
 		in.read(col_name, 12);
@@ -790,7 +790,7 @@ Mat Mat::rightCols(const int idx)
 	vector<string> cnames;
 	vector<string> base_cnames = *cn_ptr();
 	for (int i = ncol() - idx; i < ncol(); i++)
-		cnames.push_back(base_cnames[i]);	
+		cnames.push_back(base_cnames[i]);
 	return Mat(row_names,cnames,matrix.rightCols(idx));
 }
 
@@ -800,7 +800,7 @@ Mat Mat::get(const vector<string> &new_row_names, const vector<string> &new_col_
 	if (new_row_names.size() == 0) throw runtime_error("Mat::get() error: new_row_names is empty");
 	if (new_col_names.size() == 0) throw runtime_error("Mat::get() error: new_col_names is empty");
 	vector<string> row_not_found;
-	
+
 	set<string> row_set(row_names.begin(), row_names.end());
 	set<string>::iterator end = row_set.end();
 	for (auto &n : new_row_names)
@@ -856,7 +856,7 @@ Mat Mat::get(const vector<string> &new_row_names, const vector<string> &new_col_
 		b != e; ++b, ++irow_new) {
 		row_name2new_index_map[(*b)] = irow_new;
 	}
-	
+
 	unordered_map<string, int>::const_iterator found_col;
 	unordered_map<string, int>::const_iterator found_row;
 	unordered_map<string, int>::const_iterator not_found_col_map = col_name2new_index_map.end();
@@ -870,7 +870,7 @@ Mat Mat::get(const vector<string> &new_row_names, const vector<string> &new_col_
 	for (int icol = 0; icol<matrix.outerSize(); ++icol)
 	{
 		for (Eigen::SparseMatrix<double>::InnerIterator it(matrix, icol); it; ++it)
-		{			
+		{
 			col_name = &col_names[it.col()];
 			row_name = &row_names[it.row()];
 			found_col = col_name2new_index_map.find(*col_name);
@@ -895,7 +895,7 @@ Mat Mat::extract(const vector<string> &extract_row_names, const vector<string> &
 {
 	Mat new_mat;
 	if ((extract_row_names.size() == 0) && (extract_col_names.size() == 0))
-		throw runtime_error("Mat::extract() error: extract_rows and extract_cols both empty");	
+		throw runtime_error("Mat::extract() error: extract_rows and extract_cols both empty");
 	else if (extract_row_names.size() == 0)
 	{
 		new_mat = get(row_names, extract_col_names);
@@ -951,7 +951,7 @@ void Mat::drop_cols(const vector<string> &drop_col_names)
 		throw runtime_error("Mat::drop_cols() error: atleast one drop col name not found");
 	}
 	vector<string> new_col_names;
-	if (drop_col_names.size() == 0) 
+	if (drop_col_names.size() == 0)
 		new_col_names = col_names;
 	else
 	{
@@ -967,12 +967,12 @@ void Mat::drop_cols(const vector<string> &drop_col_names)
 
 void Mat::drop_rows(const vector<string> &drop_row_names)
 {
-	
-	vector<string> missing_row_names;	
+
+	vector<string> missing_row_names;
 	for (auto &name : drop_row_names)
 		if (find(row_names.begin(), row_names.end(), name) == row_names.end())
 			missing_row_names.push_back(name);
-		
+
 	if (missing_row_names.size() != 0)
 	{
 		cout << "Mat::drop_rows() error: the following drop_row_names were not found:" << endl;
@@ -981,9 +981,9 @@ void Mat::drop_rows(const vector<string> &drop_row_names)
 		cout << endl;
 		throw runtime_error("Mat::drop_rows() error: atleast one drop row name not found");
 	}
-	 
+
 	vector<string> new_row_names;
-	if (drop_row_names.size() == 0) 
+	if (drop_row_names.size() == 0)
 		new_row_names = row_names;
 	else
 	{
@@ -1000,7 +1000,7 @@ void Mat::drop_rows(const vector<string> &drop_row_names)
 		mattype = new_mat.get_mattype();
 	}
 	row_names = new_row_names;
-	
+
 }
 
 
@@ -1038,7 +1038,7 @@ Covariance::Covariance()
 }
 
 Covariance::Covariance(vector<string> _names, Eigen::SparseMatrix<double> _matrix, Mat::MatType _mattype)
-{	
+{
 	if ((_names.size() != _matrix.rows()) || (_names.size() != _matrix.cols()))
 		throw runtime_error("Covariance::Covariance() error: names.size() does not match matrix dimensions");
 	Eigen::SparseMatrix<double> test = _matrix;
@@ -1066,7 +1066,7 @@ void Covariance::from_diagonal(Covariance &other)
 	row_names = other.get_row_names();
 	col_names = other.get_col_names();
 	if (other.get_mattype() == Mat::MatType::DIAGONAL)
-	{		
+	{
 		matrix = other.get_matrix();
 	}
 	else
@@ -1129,7 +1129,7 @@ string Covariance::try_from(Pest &pest_scenario, FileManager &file_manager, bool
 		}
 	}
 	else
-	{	
+	{
 		if (is_parcov)
 		{
 			from_parameter_bounds(pest_scenario);
@@ -1181,7 +1181,7 @@ string Covariance::try_from(Pest &pest_scenario, FileManager &file_manager, bool
 			{
 				missing.push_back(oname);
 			}
-			
+
 		}
 		if (missing.size() > 0)
 		{
@@ -1191,7 +1191,7 @@ string Covariance::try_from(Pest &pest_scenario, FileManager &file_manager, bool
 			throw PestError("parcov missing parameters: " + ss.str());
 		}
 	}
-	
+
 	return how.str();
 }
 
@@ -1228,7 +1228,7 @@ void Covariance::from_uncertainty_file(const string &filename)
 	double val;
 	vector<string> tokens;
 	int irow=0, jcol=0;
-	
+
 	while (getline(in, line))
 	{
 		if (line.substr(0, 1).find("#") != string::npos)
@@ -1250,7 +1250,7 @@ void Covariance::from_uncertainty_file(const string &filename)
 					if (line.find("END") != string::npos) break;
 					tokens.clear();
 					pest_utils::tokenize(line, tokens);
-					pest_utils::convert_ip(tokens[1], val);					
+					pest_utils::convert_ip(tokens[1], val);
 					if (find(names.begin(), names.end(), name) != names.end())
 						throw runtime_error(name + " listed more than once in uncertainty file:" + filename);
 					names.push_back(tokens[0]);
@@ -1272,7 +1272,7 @@ void Covariance::from_uncertainty_file(const string &filename)
 					if (line.find("END") != string::npos) break;
 
 					tokens.clear();
-					pest_utils::tokenize(line, tokens);					
+					pest_utils::tokenize(line, tokens);
 					if (tokens[0].find("FILE") != string::npos)
 						cov_filename = tokens[1];
 					else if (tokens[0].find("VARIANCE") != string::npos)
@@ -1452,7 +1452,7 @@ void Covariance::from_observation_weights(Pest &pest_scenario)
 {
 	from_observation_weights(pest_scenario.get_ctl_ordered_obs_names(), pest_scenario.get_ctl_observation_info(),
 		pest_scenario.get_ctl_ordered_pi_names(), pest_scenario.get_prior_info_ptr());
-	
+
 }
 
 void Covariance::to_uncertainty_file(const string &filename)
@@ -1488,7 +1488,7 @@ void Covariance::to_uncertainty_file(const string &filename)
 }
 
 void Covariance::cholesky()
-{	
+{
 	Eigen::SimplicialLLT<Eigen::SparseMatrix<double>> llt;
 	lower_cholesky = llt.matrixL();
 }

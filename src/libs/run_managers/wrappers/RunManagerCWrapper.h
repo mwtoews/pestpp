@@ -42,7 +42,7 @@ RunManager* rmic_create_genie(char **comline, int comline_array_len,
 #ifdef OS_WIN
 extern __declspec(dllexport)
 #endif
-int rmic_initialize(RunManager *run_manager_ptr, 
+int rmic_initialize(RunManager *run_manager_ptr,
 	char **pname, int pname_array_len,
 	char **oname, int oname_array_len);
 
@@ -81,7 +81,7 @@ int rmic_get_num_failed_runs(RunManager *run_manager_ptr, int *nfail);
 
 //*************************************************************************************
 //******************************** IMPORTANT ******************************************
-//The calling program is resposible for freeing the memory associated with run_id_array 
+//The calling program is resposible for freeing the memory associated with run_id_array
 //after calling this function by involking delete[] run_id_array
 //*************************************************************************************
 #ifdef OS_WIN
@@ -109,6 +109,6 @@ extern __declspec(dllexport)
 #endif
 int rmic_delete(RunManager *run_manager_ptr);
 
-					 
+
 }
 #endif //RUNMANAGER_C_WRAP_H_

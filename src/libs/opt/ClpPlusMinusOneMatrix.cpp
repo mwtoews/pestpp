@@ -29,7 +29,7 @@ static void oneit(int i)
     for (int j=0;j<12;j++)
       printf(" %d",oneitcount[j]);
     printf("\n");
-  }    
+  }
 }
 #endif
 //#############################################################################

@@ -76,7 +76,7 @@ void DifferentialEvolution::solve(RunManagerAbstract &run_manager,
 		os << endl;
 		best_run_idx = recombination(run_manager);
 		os << endl;
-	
+
 		run_target_ok = gen_1.get_run(best_run_idx, tmp_pars, tmp_obs);
 		par_transform.model2ctl_ip(tmp_pars);
 		// write parameter file for this iteration
@@ -144,10 +144,10 @@ void DifferentialEvolution::initialize_population(RunManagerAbstract &run_manage
 void DifferentialEvolution::initialize_vector(Parameters &numeric_pars)
 {
 	std::uniform_real_distribution<double> distribution(0.0, 1.0);
-	
+
 	for (const auto &i : par_list)
 	{
-		double p_val; 
+		double p_val;
 		const string &p_name = i;
 		double p_min = min_numeric_pars[p_name];
 		double p_max = max_numeric_pars[p_name];
@@ -231,7 +231,7 @@ void DifferentialEvolution::mutation(RunManagerAbstract &run_manager, double f, 
 			}
 			// do cross over
 			//the trial vector was initialized with the target vector
-			// so the parameters from the parent don't need to be set 
+			// so the parameters from the parent don't need to be set
 			double rand_cr = cr_prob(rand_engine);
 			if (rand_cr > cr || idx == par_id_chg)
 			{
@@ -381,7 +381,7 @@ int DifferentialEvolution::recombination(RunManagerAbstract &run_manager)
 		n_good_runs_can, phi_avg_can, phi_min_can, phi_max_can,
 		n_good_runs_new, phi_avg_new, phi_min_new, phi_max_new);
 	os << endl;
-	
+
 	return best_run_idx;
 }
 
@@ -398,7 +398,7 @@ void DifferentialEvolution::write_run_summary(std::ostream &os,
 		os << setw(11) << nrun_par;
 		os << setw(15) << avg_par;
 		os << setw(15) << min_par;
-		os << setw(15) << max_par; 
+		os << setw(15) << max_par;
 		os << endl;
 		os << left << setw(17) << "    canidate";
 		os << setw(11) << nrun_can;
@@ -416,7 +416,7 @@ void DifferentialEvolution::write_run_summary(std::ostream &os,
 		//cout << "    parents  : runs=" << n_good_runs_targ << ";  phi(avg=" << phi_avg_targ << "; min=" << phi_min_targ << "; max=" << phi_max_targ << endl;
 		//cout << "    canidates: runs=" << n_good_runs_can << ";  phi(avg=" << phi_avg_can << "; min=" << phi_min_can << "; max=" << phi_max_can << endl;
 		//cout << "    children : runs=" << n_good_runs_new << ";  phi(avg=" << phi_avg_new << "; min=" << phi_min_new << "; max=" << phi_max_new << endl;
-		
+
 }
 DifferentialEvolution::~DifferentialEvolution()
 {

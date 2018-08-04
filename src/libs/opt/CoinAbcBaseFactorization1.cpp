@@ -25,7 +25,7 @@ CoinAbcTypeFactorization::CoinAbcTypeFactorization (  )
   gutsOfInitialize(7);
 }
 
-/// Copy constructor 
+/// Copy constructor
 CoinAbcTypeFactorization::CoinAbcTypeFactorization ( const CoinAbcTypeFactorization &other)
   : CoinAbcAnyFactorization(other)
 {
@@ -33,12 +33,12 @@ CoinAbcTypeFactorization::CoinAbcTypeFactorization ( const CoinAbcTypeFactorizat
   gutsOfCopy(other);
 }
 /// Clone
-CoinAbcAnyFactorization * 
-CoinAbcTypeFactorization::clone() const 
+CoinAbcAnyFactorization *
+CoinAbcTypeFactorization::clone() const
 {
   return new CoinAbcTypeFactorization(*this);
 }
-/// Copy constructor 
+/// Copy constructor
 CoinAbcTypeFactorization::CoinAbcTypeFactorization ( const CoinFactorization & /*other*/)
   : CoinAbcAnyFactorization()
 {
@@ -75,7 +75,7 @@ void CoinAbcTypeFactorization::gutsOfDestructor(CoinSimplexInt )
   lengthAreaR_ = 0;
 #if ABC_SMALL<4
   numberDense_=0;
-#endif  
+#endif
 }
 #if FACTORIZATION_STATISTICS
 extern double denseThresholdX;
@@ -129,7 +129,7 @@ void CoinAbcTypeFactorization::gutsOfInitialize(CoinSimplexInt type)
     numberDense_=0;
 #endif
   }
-  // after 2 
+  // after 2
   if ((type&1)!=0) {
     areaFactor_ = 0.0;
     pivotTolerance_ = 1.0e-1;
@@ -210,7 +210,7 @@ void CoinAbcTypeFactorization::gutsOfInitialize(CoinSimplexInt type)
     indexColumnL_.switchOn();
     elementByRowL_.switchOn();
     sparse_.switchOn();
-    
+
     // Below are all to collect
     ftranCountInput_=0.0;
     ftranCountAfterL_=0.0;
@@ -243,15 +243,15 @@ void CoinAbcTypeFactorization::gutsOfInitialize(CoinSimplexInt type)
     btranTwiddleFactor2_=1.0;
     ftranFullTwiddleFactor2_=1.0;
     btranFullTwiddleFactor2_=1.0;
-#endif    
+#endif
     // We can roll over factorizations
     numberFtranCounts_=0;
     numberFtranFTCounts_=0;
     numberBtranCounts_=0;
     numberFtranFullCounts_=0;
     numberFtranFullCounts_=0;
-    
-    // While these are averages collected over last 
+
+    // While these are averages collected over last
     ftranAverageAfterL_=INITIAL_AVERAGE;
     ftranAverageAfterR_=INITIAL_AVERAGE;
     ftranAverageAfterU_=INITIAL_AVERAGE;
@@ -260,7 +260,7 @@ void CoinAbcTypeFactorization::gutsOfInitialize(CoinSimplexInt type)
     ftranFTAverageAfterU_=INITIAL_AVERAGE;
     btranAverageAfterU_=INITIAL_AVERAGE;
     btranAverageAfterR_=INITIAL_AVERAGE;
-    btranAverageAfterL_=INITIAL_AVERAGE; 
+    btranAverageAfterL_=INITIAL_AVERAGE;
     ftranFullAverageAfterL_=INITIAL_AVERAGE;
     ftranFullAverageAfterR_=INITIAL_AVERAGE;
     ftranFullAverageAfterU_=INITIAL_AVERAGE;
@@ -278,7 +278,7 @@ CoinAbcTypeFactorization::~CoinAbcTypeFactorization (  )
 }
 //  =
 CoinAbcTypeFactorization & CoinAbcTypeFactorization::operator = ( const CoinAbcTypeFactorization & other ) {
-  if (this != &other) {    
+  if (this != &other) {
     gutsOfDestructor();
     CoinAbcAnyFactorization::operator=(other);
     gutsOfInitialize(3);
@@ -421,7 +421,7 @@ void CoinAbcTypeFactorization::gutsOfCopy(const CoinAbcTypeFactorization &other)
   ftranFTAverageAfterU_=other.ftranFTAverageAfterU_;
   btranAverageAfterU_=other.btranAverageAfterU_;
   btranAverageAfterR_=other.btranAverageAfterR_;
-  btranAverageAfterL_=other.btranAverageAfterL_; 
+  btranAverageAfterL_=other.btranAverageAfterL_;
   ftranFullAverageAfterL_=other.ftranFullAverageAfterL_;
   ftranFullAverageAfterR_=other.ftranFullAverageAfterR_;
   ftranFullAverageAfterU_=other.ftranFullAverageAfterU_;
@@ -439,7 +439,7 @@ void CoinAbcTypeFactorization::gutsOfCopy(const CoinAbcTypeFactorization &other)
   btranTwiddleFactor2_=other.btranTwiddleFactor2_;
   ftranFullTwiddleFactor2_=other.ftranFullTwiddleFactor2_;
   btranFullTwiddleFactor2_=other.btranFullTwiddleFactor2_;
-#endif    
+#endif
   sparseThreshold_=other.sparseThreshold_;
 #endif
   state_=other.state_;
@@ -482,7 +482,7 @@ void CoinAbcTypeFactorization::gutsOfCopy(const CoinAbcTypeFactorization &other)
     CoinAbcMemcpy( nextColumn_.array() , other.nextColumn_.array(), numberRowsExtra_ + 1);
     CoinAbcMemcpy( lastColumn_.array() , other.lastColumn_.array(), numberRowsExtra_ + 1);
     CoinAbcMemcpy (startColumnR() , other.startColumnR() , numberRowsExtra_ - numberRows_ + 1);
-			  
+
     //extra one at end
     //startColumnU_.array()[maximumRowsExtra_] =
     //other.startColumnU_.array()[maximumRowsExtra_];
@@ -529,7 +529,7 @@ void CoinAbcTypeFactorization::gutsOfCopy(const CoinAbcTypeFactorization &other)
       //row
       CoinBigIndex start = startRowU[iRow];
       CoinSimplexInt numberIn = numberInRow[iRow];
-      
+
       CoinAbcMemcpy( indexColumnU + start , indexColumnUOther + start, numberIn);
 #if CONVERTROW
       CoinAbcMemcpy(   convertU + start ,convertUOther + start , numberIn);
@@ -574,7 +574,7 @@ CoinAbcTypeFactorization::getAreas ( CoinSimplexInt numberOfRows,
 			 CoinBigIndex maximumU )
 {
   gutsOfInitialize(2);
-  
+
   numberRows_ = numberOfRows;
   numberRowsSmall_ = numberOfRows;
   maximumRows_ = CoinMax(maximumRows_,numberRows_);
@@ -586,7 +586,7 @@ CoinAbcTypeFactorization::getAreas ( CoinSimplexInt numberOfRows,
     areaFactor_ = 1.0;
   }
   if ( areaFactor_ != 1.0 ) {
-    if ((messageLevel_&16)!=0) 
+    if ((messageLevel_&16)!=0)
       printf("Increasing factorization areas by %g\n",areaFactor_);
     lengthAreaU_ =  static_cast<CoinBigIndex> (areaFactor_*lengthAreaU_);
     lengthAreaL_ =  static_cast<CoinBigIndex> (areaFactor_*lengthAreaL_);
@@ -616,7 +616,7 @@ CoinAbcTypeFactorization::getAreas ( CoinSimplexInt numberOfRows,
   startColumnL_.array()[0] = 0;
   startRowU_.conditionalNew( maximumRowsExtra_ + 1);
   // make sure this is valid (Needed for row links????)
-  startRowU_.array()[maximumRowsExtra_]=0; 
+  startRowU_.array()[maximumRowsExtra_]=0;
   lastEntryByRowU_ = 0;
   numberInRow_.conditionalNew( maximumRowsExtra_ + 1 );
   markRow_.conditionalNew( numberRows_ );
@@ -693,21 +693,21 @@ CoinAbcTypeFactorization::factor (AbcSimplex * model)
   switch ( status_ ) {
   case 0:			//finished
     totalElements_ = 0;
-    if ( numberGoodU_ < numberRows_ ) 
-      status_ = -1; 
-    break; 
+    if ( numberGoodU_ < numberRows_ )
+      status_ = -1;
+    break;
 #if ABC_DENSE_CODE
 #if ABC_SMALL<4
     // dense
-  case 2: 
+  case 2:
     status_=factorDense();
-    if(!status_) 
+    if(!status_)
       break;
 #endif
 #endif
   default:
     //singular ? or some error
-    if ((messageLevel_&4)!=0) 
+    if ((messageLevel_&4)!=0)
       std::cout << "Error " << status_ << std::endl;
     if (status_==-99) {
       if (numberRows_-numberGoodU_<1000) {
@@ -766,13 +766,13 @@ CoinAbcTypeFactorization::factor (AbcSimplex * model)
   return status_;
 }
 #define ALWAYS_GIVE_UP 0 //1
-#ifdef ABC_USE_FUNCTION_POINTERS 
+#ifdef ABC_USE_FUNCTION_POINTERS
 #define DENSE_TRY
 #ifdef DENSE_TRY
 static void pivotStartup(int first, int last, int numberInPivotColumn, int lengthArea,int giveUp,
 			 CoinFactorizationDouble * COIN_RESTRICT eArea,const int * COIN_RESTRICT saveColumn,
 			 const int * COIN_RESTRICT startColumnU,int * COIN_RESTRICT tempColumnCount,
-			 const CoinFactorizationDouble * COIN_RESTRICT elementU, 
+			 const CoinFactorizationDouble * COIN_RESTRICT elementU,
 			 const int * COIN_RESTRICT numberInColumn,
 			 const int * COIN_RESTRICT indexRowU)
 {
@@ -933,13 +933,13 @@ static void pivotSomeAfter(int first, int last, int numberInPivotColumn,int leng
     }
 #endif
     int put = startColumn;
-    if (positionLargest>=0) 
+    if (positionLargest>=0)
       positionLargest+=put+numberNow;
     put+=numberNow;
     int iA=0;
     for (int jj=0;jj<numberInPivotColumn;jj+=32) {
       unsigned int aThis=*aBitsThis;
-      aBitsThis++; 
+      aBitsThis++;
       for (int i=jj;i<CoinMin(jj+32,numberInPivotColumn);i++) {
 	if ((aThis&1)!=0) {
 	  indexRowU[put]=indexL[i];
@@ -1058,13 +1058,13 @@ static void pivotSome(int first, int last, int numberInPivotColumn,int lengthAre
       }
 #endif
       int put = startColumn;
-      if (positionLargest>=0) 
+      if (positionLargest>=0)
 	positionLargest+=put+numberNow;
       put+=numberNow;
       int iA=0;
       for (int jj=0;jj<numberInPivotColumn;jj+=32) {
 	unsigned int aThis=*aBitsThis;
-	aBitsThis++; 
+	aBitsThis++;
 	for (int i=jj;i<CoinMin(jj+32,numberInPivotColumn);i++) {
 	  if ((aThis&1)!=0) {
 	    indexRowU[put]=indexL[i];
@@ -1163,7 +1163,7 @@ CoinAbcTypeFactorization::pivot ( CoinSimplexInt & pivotRow,
 
   if ( l + numberInPivotColumn > lengthAreaL_ ) {
     //need more memory
-    if ((messageLevel_&4)!=0) 
+    if ((messageLevel_&4)!=0)
       printf("more memory needed in middle of invert\n");
     return -99;
   }
@@ -1176,7 +1176,7 @@ CoinAbcTypeFactorization::pivot ( CoinSimplexInt & pivotRow,
   if ( pivotRowPosition < 0 ) {
     for ( pivotRowPosition = startColumn; pivotRowPosition < endColumn; pivotRowPosition++ ) {
       CoinSimplexInt iRow = indexRowU[pivotRowPosition];
-      if ( iRow == pivotRow ) 
+      if ( iRow == pivotRow )
 	break;
     }
   }
@@ -1206,7 +1206,7 @@ CoinAbcTypeFactorization::pivot ( CoinSimplexInt & pivotRow,
 #ifdef INT_IS_8
   abort();
 #endif
-  if (spaceNeeded>=lengthAreaUPlus_-lastEntryByColumnUPlus_) 
+  if (spaceNeeded>=lengthAreaUPlus_-lastEntryByColumnUPlus_)
     return -99;
   // see if need to zero out
   CoinFactorizationDouble * COIN_RESTRICT eArea = elementUColumnPlusAddress_+lengthAreaUPlus_-spaceZeroed;
@@ -1238,7 +1238,7 @@ CoinAbcTypeFactorization::pivot ( CoinSimplexInt & pivotRow,
   //use end of L for temporary space BUT AVX
   CoinSimplexInt * COIN_RESTRICT indexL = &indexRowL[lSave];
   //CoinFactorizationDouble * COIN_RESTRICT multipliersL = &elementL[lSave];
-  for (int i=0;i<numberInPivotColumn;i++) 
+  for (int i=0;i<numberInPivotColumn;i++)
     multipliersL[i] *= pivotMultiplier;
   // could make multiple of 4 for AVX (then adjust previous computation)
   int lengthArea=((numberInPivotColumn+4)>>2)<<2;
@@ -1383,7 +1383,7 @@ CoinAbcTypeFactorization::pivot ( CoinSimplexInt & pivotRow,
     // move earlier but set numberInRow to final
     for (CoinBigIndex i = startRow ; i < endRow; i++ ) {
       int iColumn = indexColumnU[i];
-      if (!mark[iColumn]) 
+      if (!mark[iColumn])
 	indexColumnU[put++]=iColumn;
     }
     numberInRow[iRow]=put-startRow;
@@ -1444,7 +1444,7 @@ CoinAbcTypeFactorization::pivot ( CoinSimplexInt & pivotRow,
   if (numberZeroOther>4) {
     //printf("Cando INrow %d incolumn %d nother %d\n",
     //	   numberInPivotRow,numberInPivotColumn,numberZeroOther);
-    int numberRowsTest=(numberRowsLeft_-numberZeroOther+0)&~7; 
+    int numberRowsTest=(numberRowsLeft_-numberZeroOther+0)&~7;
     if (numberRowsLeft_-numberZeroOther<=numberRowsTest) {
       //see if would go dense
       int numberSubtracted=0;
@@ -1540,7 +1540,7 @@ CoinAbcTypeFactorization::pivot ( CoinSimplexInt & pivotRow,
 	CoinBigIndex l = lengthL_;
 	if ( l + numberInPivotColumn > lengthAreaL_ ) {
 	  //need more memory
-	  if ((messageLevel_&4)!=0) 
+	  if ((messageLevel_&4)!=0)
 	    printf("more memory needed in middle of invert\n");
 	  return -99;
 	}
@@ -1666,7 +1666,7 @@ CoinAbcTypeFactorization::pivot ( CoinSimplexInt & pivotRow,
     // last bit
     inAreaAlready=true;
   }
-#endif 
+#endif
 #if 0
   for (int i=0;i<numberRowsSmall_;i++)
     assert (numberInColumn[i]>=0);
@@ -1754,7 +1754,7 @@ CoinAbcTypeFactorization::pivot ( CoinSimplexInt & pivotRow,
   for (int i=0;i<numberRowsSmall_;i++)
     assert (!mark[i]);
 #endif
-  //double ratio=((double)addedX)/((double)(numberInPivotRow*numberInPivotColumn)); 
+  //double ratio=((double)addedX)/((double)(numberInPivotRow*numberInPivotColumn));
 #if 0 //def DENSE_TRY
   if (numberZeroOther>10000)
     printf("INrow %d incolumn %d nzero %d\n",
@@ -1879,7 +1879,7 @@ CoinAbcTypeFactorization::pivot ( CoinSimplexInt pivotRow,
 
   if ( l + numberInPivotColumn > lengthAreaL_ ) {
     //need more memory
-    if ((messageLevel_&4)!=0) 
+    if ((messageLevel_&4)!=0)
       printf("more memory needed in middle of invert\n");
     return -99;
   }
@@ -1959,7 +1959,7 @@ CoinAbcTypeFactorization::pivot ( CoinSimplexInt pivotRow,
   pivotRowPosition++;
   for ( ; pivotRowPosition < endColumn; pivotRowPosition++ ) {
     CoinSimplexInt iRow = indexRowU[pivotRowPosition];
-    
+
     markRow[iRow] = l - lSave;
     indexRowL[l] = iRow;
     elementL[l] = elementU[pivotRowPosition];
@@ -2125,7 +2125,7 @@ CoinAbcTypeFactorization::pivot ( CoinSimplexInt pivotRow,
 
       if ( absValue > tolerance ) {
 	work[j] = 0.0;
-	assert (put<lengthAreaU_); 
+	assert (put<lengthAreaU_);
 	elementU[put] = value;
 	indexRowU[put] = indexL[j];
 #if BOTH_WAYS
@@ -2409,7 +2409,7 @@ int CoinAbcTypeFactorization::wantToGoDense()
 {
   int status=0;
   if (denseThreshold_) {
-    // see whether to go dense 
+    // see whether to go dense
     // only if exact multiple
     if ((numberRowsLeft_&7)==0) {
       CoinSimplexDouble full = numberRowsLeft_;
@@ -2436,7 +2436,7 @@ int CoinAbcTypeFactorization::wantToGoDense()
 	//return to do dense
 	CoinSimplexInt check=0;
 	for (CoinSimplexInt iColumn=0;iColumn<numberRowsSmall_;iColumn++) {
-	  if (numberInColumnAddress_[iColumn]) 
+	  if (numberInColumnAddress_[iColumn])
 	    check++;
 	}
 	if (check!=numberRowsLeft_) {
@@ -2444,7 +2444,7 @@ int CoinAbcTypeFactorization::wantToGoDense()
 	  //denseThreshold_=0;
 	} else {
 	  status=2;
-	  if ((messageLevel_&4)!=0) 
+	  if ((messageLevel_&4)!=0)
 	    std::cout<<"      Went dense at "<<numberRowsLeft_<<" rows "<<
 	      totalElements_<<" "<<full<<" "<<leftElements<<std::endl;
 	}
@@ -2490,7 +2490,7 @@ CoinAbcTypeFactorization::pivotRowSingleton ( CoinSimplexInt pivotRow,
 
   if ( l + numberDoColumn > lengthAreaL_ ) {
     //need more memory
-    if ((messageLevel_&4)!=0) 
+    if ((messageLevel_&4)!=0)
       std::cout << "more memory needed in middle of invert" << std::endl;
     return false;
   }
@@ -2799,7 +2799,7 @@ CoinAbcTypeFactorization::getColumnSpace ( CoinSimplexInt iColumn,
     CoinSimplexInt *indexRow = indexRowU;
     CoinFactorizationDouble *element = elementU;
     CoinSimplexInt i = 0;
-    
+
     if ( ( number & 1 ) != 0 ) {
       element[put] = element[get];
       indexRow[put] = indexRow[get];
@@ -2812,7 +2812,7 @@ CoinAbcTypeFactorization::getColumnSpace ( CoinSimplexInt iColumn,
       CoinFactorizationDouble value1 = element[get + i + 1];
       CoinSimplexInt index0 = indexRow[get + i];
       CoinSimplexInt index1 = indexRow[get + i + 1];
-      
+
       element[put + i] = value0;
       element[put + i + 1] = value1;
       indexRow[put + i] = index0;
@@ -2969,12 +2969,12 @@ CoinAbcTypeFactorization::cleanup (  )
       const CoinBigIndex * COIN_RESTRICT indices = reinterpret_cast<const CoinBigIndex *>(area+number);
 #if PRINT_LEVEL>1
       for (int j1 = 0; j1 < number; j1+=5 ) {
-	for (int j = j1; j < CoinMin(number,j1+5); j++ ) 
+	for (int j = j1; j < CoinMin(number,j1+5); j++ )
 	  printf("(%d,%g) ",indices[j],area[j]);
 	printf("\n");
       }
 #else
-      for (int j = 0; j < number; j++ ) 
+      for (int j = 0; j < number; j++ )
 	if (fabs(area[j])>largestU) {
 	  iU=i;
 	  largestU=fabs(area[j]);
@@ -2992,7 +2992,7 @@ CoinAbcTypeFactorization::cleanup (  )
 	int * indices = indexRowL+startColumnL[i];
 	printf("%d has %d elements\n",i,number);
 	for (int j1 = 0; j1 < number; j1+=5 ) {
-	  for (int j = j1; j < CoinMin(number,j1+5); j++ ) 
+	  for (int j = j1; j < CoinMin(number,j1+5); j++ )
 	    printf("(%d,%g) ",indices[j],elementL[j+startColumnL[i]]);
 	  printf("\n");
 	}
@@ -3068,7 +3068,7 @@ CoinAbcTypeFactorization::cleanup (  )
     CoinBigIndex *  COIN_RESTRICT startColumnL = startColumnLAddress_;
     for (int i=0;i<numberRows_;i++) {
       int number=startColumnL[i+1]-startColumnL[i];
-      if (number) 
+      if (number)
 	sizeL+=number;
     }
     printf("Unordered says %d L %d U\n",sizeL,sizeU);
@@ -3117,8 +3117,8 @@ CoinAbcTypeFactorization::cleanup (  )
     const CoinSimplexInt * COIN_RESTRICT numberInColumn = numberInColumnPlusAddress_;
     CoinFactorizationDouble * elementU = elementUAddress_;
     CoinFactorizationDouble * elementU2 = elementRowUAddress_;
-    CoinSimplexInt * COIN_RESTRICT indexRowU = indexRowUAddress_;  
-    CoinSimplexInt * COIN_RESTRICT indexRowU2 = indexColumnUAddress_;  
+    CoinSimplexInt * COIN_RESTRICT indexRowU = indexRowUAddress_;
+    CoinSimplexInt * COIN_RESTRICT indexRowU2 = indexColumnUAddress_;
     // so that just slacks will have start of 0
     CoinBigIndex size=1;
     for (int i=0;i<numberSlacks_;i++) {
@@ -3235,7 +3235,7 @@ CoinAbcTypeFactorization::cleanup (  )
   if (numberDense_) {
     assert (numberDense_<30000);
     CoinFactorizationDouble *  COIN_RESTRICT denseArea = denseAreaAddress_;
-    CoinFactorizationDouble * COIN_RESTRICT denseRegion = 
+    CoinFactorizationDouble * COIN_RESTRICT denseRegion =
       denseArea+leadingDimension_*numberDense_;
     CoinSimplexInt *  COIN_RESTRICT densePermute=
       reinterpret_cast<CoinSimplexInt *>(denseRegion+FACTOR_CPU*numberDense_);
@@ -3273,7 +3273,7 @@ CoinAbcTypeFactorization::cleanup (  )
 	forFtran2[i]=kRow;
       }
     }
-#endif 
+#endif
   }
 #endif
   CoinAbcMemset0(numberInRow,numberRows_+1);
@@ -3367,7 +3367,7 @@ CoinAbcTypeFactorization::cleanup (  )
   numberR_ = 0;
 }
 // Returns areaFactor but adjusted for dense
-double 
+double
 CoinAbcTypeFactorization::adjustedAreaFactor() const
 {
   double factor = areaFactor_;
@@ -3454,7 +3454,7 @@ CoinAbcTypeFactorization::checkConsistency (  )
   }
 }
   //  pivotOneOtherRow.  When just one other row so faster
-bool 
+bool
 CoinAbcTypeFactorization::pivotOneOtherRow ( CoinSimplexInt pivotRow,
 					   CoinSimplexInt pivotColumn )
 {
@@ -3496,7 +3496,7 @@ CoinAbcTypeFactorization::pivotOneOtherRow ( CoinSimplexInt pivotRow,
 
   if ( l + 1 > lengthAreaL_ ) {
     //need more memory
-    if ((messageLevel_&4)!=0) 
+    if ((messageLevel_&4)!=0)
       std::cout << "more memory needed in middle of invert" << std::endl;
     return false;
   }
@@ -3784,13 +3784,13 @@ CoinAbcTypeFactorization::pivotOneOtherRow ( CoinSimplexInt pivotRow,
   return true;
 }
 // Delete all stuff
-void 
+void
 CoinAbcTypeFactorization::almostDestructor()
 {
   gutsOfDestructor(1);
 }
 // PreProcesses column ordered copy of basis
-void 
+void
 CoinAbcTypeFactorization::preProcess ( )
 {
   CoinBigIndex numberElements = startColumnUAddress_[numberRows_-1]
@@ -3798,7 +3798,7 @@ CoinAbcTypeFactorization::preProcess ( )
   setNumberElementsU(numberElements);
 }
 // Return largest
-double 
+double
 CoinAbcTypeFactorization::preProcess3 ( )
 {
   CoinSimplexInt * COIN_RESTRICT numberInRow = numberInRowAddress_;
@@ -3812,14 +3812,14 @@ CoinAbcTypeFactorization::preProcess3 ( )
   CoinZeroN ( numberInColumn+numberRows_, maximumRowsExtra_ + 1 - numberRows_);
   CoinSimplexInt * COIN_RESTRICT lastRow = lastRowAddress_;
   CoinSimplexInt * COIN_RESTRICT nextRow = nextRowAddress_;
-  
+
   CoinFillN ( pivotColumnAddress_, numberRows_, -1 );
   CoinZeroN ( numberInColumnPlus, maximumRowsExtra_ + 1 );
   CoinZeroN ( lastRow, numberRows_ );
   startColumn[maximumRowsExtra_] = lengthU_;
   lastEntryByColumnU_=lengthU_;
   lastEntryByRowU_=lengthU_;
-  
+
   //do slacks first
   //CoinBigIndex * startColumnU = startColumnUAddress_;
   CoinBigIndex *  COIN_RESTRICT startColumnL = startColumnLAddress_;
@@ -3856,7 +3856,7 @@ CoinAbcTypeFactorization::preProcess3 ( )
     CoinSimplexInt iRow = indexRow[iSlack];
     lastRow[iRow] =-2;
     //nextRow[iRow] = numberGoodU_;	//use for permute
-    permute[iRow]=iSlack; 
+    permute[iRow]=iSlack;
     numberInRow[iRow]=0;
     pivotColumn[iSlack] = iSlack;
 #ifdef ABC_USE_FUNCTION_POINTERS
@@ -4059,7 +4059,7 @@ CoinAbcTypeFactorization::preProcess3 ( )
   }
 #endif
 #endif
-  for (CoinSimplexInt iRow=numberRowsSmall_-1;iRow>0;iRow--) 
+  for (CoinSimplexInt iRow=numberRowsSmall_-1;iRow>0;iRow--)
     startRow[iRow]=startRow[iRow-1];
   startRow[0]=0;
   // Do links (do backwards to get rows first?)
@@ -4116,7 +4116,7 @@ CoinAbcTypeFactorization::preProcess3 ( )
   return overallLargest;
 }
 // Does post processing on valid factorization - putting variables on correct rows
-void 
+void
 CoinAbcTypeFactorization::postProcess(const CoinSimplexInt * sequence, CoinSimplexInt * pivotVariable)
 {
   const CoinSimplexInt *  COIN_RESTRICT back = firstCountAddress_+numberRows_;
@@ -4259,14 +4259,14 @@ CoinAbcTypeFactorization::postProcess(const CoinSimplexInt * sequence, CoinSimpl
 #endif
     CoinFactorizationDouble * COIN_RESTRICT elementRow = elementRowUAddress_;
     CoinBigIndex j = 0;
-    
+
     CoinSimplexInt iRow;
     for ( iRow = 0; iRow < numberRows_; iRow++ ) {
       startRow[iRow] = j;
       j += numberInRow[iRow];
     }
     lastEntryByRowU_ = j;
-    
+
 #if CONVERTROW
     CoinBigIndex * COIN_RESTRICT convertRowToColumn = convertRowToColumnUAddress_;
 #if CONVERTROW>2
@@ -4387,12 +4387,12 @@ CoinAbcTypeFactorization::postProcess(const CoinSimplexInt * sequence, CoinSimpl
 #endif
 }
 // Makes a non-singular basis by replacing variables
-void 
+void
 CoinAbcTypeFactorization::makeNonSingular(CoinSimplexInt *  COIN_RESTRICT sequence)
 {
   // Replace bad ones by correct slack
   CoinSimplexInt *  COIN_RESTRICT workArea = indexRowUAddress_;
-  for (CoinSimplexInt i=0;i<numberRows_;i++) 
+  for (CoinSimplexInt i=0;i<numberRows_;i++)
     workArea[i]=-1;
   const CoinSimplexInt *  COIN_RESTRICT pivotColumn = pivotColumnAddress_;
   const CoinSimplexInt *  COIN_RESTRICT permute = permuteAddress_;
@@ -4547,7 +4547,7 @@ CoinAbcTypeFactorization::checkLinks(int type)
 	list1[iRow]=1;
 	iRow=nextRow[iRow];
       }
-      for (int i=0;i<numberRowsSmall_;i++) { 
+      for (int i=0;i<numberRowsSmall_;i++) {
 	assert (list1[i]||!numberInRow[i]);
 	assert (!list1[i]||numberInRow[i]);
       }
@@ -4738,7 +4738,7 @@ CoinAbcTypeFactorization::checkLinks(int type)
     }
 #if VERBOSE
     if (count)
-      printf("%d items have count %d\n",count,iCount); 
+      printf("%d items have count %d\n",count,iCount);
 #endif
   }
   delete [] mark;

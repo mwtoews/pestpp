@@ -1472,7 +1472,7 @@ static double weightIncU=1.0;
 static double weightR=2.0;
 static double weightRest=1.0;
 static double weightFactL=30.0;
-static double weightFactDense=0.1; 
+static double weightFactDense=0.1;
 static double weightNrows=10.0;
 static double increaseNeeded=1.1;
 static double constWeightIterate = 1.0;
@@ -1482,14 +1482,14 @@ static double weightNrowsIterate = 3.0;
 #define weightR 2.0
 #define weightRest 1.0
 #define weightFactL 30.0
-#define weightFactDense 0.1 
+#define weightFactDense 0.1
 #define weightNrows 10.0
 #define increaseNeeded 1.1
 #define constWeightIterate   1.0
 #define weightNrowsIterate   3.0
 #endif
-bool 
-ClpFactorization::timeToRefactorize() const 
+bool
+ClpFactorization::timeToRefactorize() const
 {
   if (coinFactorizationA_) {
     bool reFactor = (coinFactorizationA_->pivots() * 3 > coinFactorizationA_->maximumPivots() * 2 &&
@@ -1591,7 +1591,7 @@ ClpFactorization::timeToRefactorize() const
   }
 }
 #if CLP_FACTORIZATION_NEW_TIMING>1
-void 
+void
 ClpFactorization::statsRefactor(char when) const
 {
   int numberPivots=coinFactorizationA_->pivots();
@@ -1617,8 +1617,8 @@ ClpFactorization::statsRefactor(char when) const
 }
 #endif
 #else
-bool 
-ClpFactorization::timeToRefactorize() const 
+bool
+ClpFactorization::timeToRefactorize() const
 {
     if (coinFactorizationA_) {
     return (coinFactorizationA_->pivots() * 3 > coinFactorizationA_->maximumPivots() * 2 &&
@@ -2254,7 +2254,7 @@ if (model->clpMatrix()->type() == 11)
                          coinFactorizationA_->preProcess ( 3 ); // no row copy
                     coinFactorizationA_->factor (  );
 #ifdef CLP_FACTORIZATION_NEW_TIMING
-		    endLengthU_ = coinFactorizationA_->numberElements() - 
+		    endLengthU_ = coinFactorizationA_->numberElements() -
 		      coinFactorizationA_->numberDense()*coinFactorizationA_->numberDense()
 		      -coinFactorizationA_->numberElementsL();
 #endif
@@ -2602,7 +2602,7 @@ ClpFactorization::replaceColumn ( const ClpSimplex * model,
           if (!coinFactorizationA_ || coinFactorizationA_->forrestTomlin()) {
                if (coinFactorizationA_) {
 #if ABC_USE_COIN_FACTORIZATION<2
-		 returnCode = 
+		 returnCode =
 		   coinFactorizationA_->replaceColumn(regionSparse,
 						      pivotRow,
 						      pivotCheck,
@@ -2611,10 +2611,10 @@ ClpFactorization::replaceColumn ( const ClpSimplex * model,
 #else
 		 // fake btran alpha until I understand
 		 double btranAlpha=model->alpha();
-		 double ftAlpha = 
+		 double ftAlpha =
 		   coinFactorizationA_->checkReplacePart1(regionSparse,
 							  pivotRow);
-		 returnCode = 
+		 returnCode =
 		   coinFactorizationA_->checkReplacePart2(pivotRow,
 							  btranAlpha,
 							  model->alpha(),
@@ -2924,7 +2924,7 @@ ClpFactorization::updateTwoColumnsFT ( CoinIndexedVector * regionSparse1,
 		    tempInfo[1] = model_->sequenceIn();
 		    coinFactorizationB_->setUsefulInformation(tempInfo, 3);
 #endif
-		    returnCode = 
+		    returnCode =
 		      coinFactorizationB_->updateTwoColumnsFT(
 							      regionSparse1,
 							      regionSparse2,

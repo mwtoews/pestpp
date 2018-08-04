@@ -1,8 +1,8 @@
-/*  
-	© Copyright 2012, David Welter
-	
+/*
+
+
 	This file is part of PEST++.
-   
+
 	PEST++ is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
@@ -43,7 +43,7 @@ RunManagerSerial::RunManagerSerial(const vector<string> _comline_vec,
 	_insfile_vec, _outfile_vec, stor_filename, _max_run_fail),
 	run_dir(_run_dir), mi(_tplfile_vec,_inpfile_vec,_insfile_vec,_outfile_vec, _comline_vec)
 {
-	
+
 	cout << "              starting serial run manager ..." << endl << endl;
 }
 
@@ -53,16 +53,16 @@ void RunManagerSerial::run()
 	int prev_sucess_runs = 0;
 	const vector<string> &par_name_vec = file_stor.get_par_name_vec();
 	const vector<string> &obs_name_vec = file_stor.get_obs_name_vec();
-	
-	stringstream message;		
+
+	stringstream message;
 	std::vector<double> obs_vec;
 	vector<int> run_id_vec;
 	int nruns = get_outstanding_run_ids().size();
 	while (!(run_id_vec = get_outstanding_run_ids()).empty())
 	{
 		for (int i_run : run_id_vec)
-		{						
-			try 
+		{
+			try
 			{
 				Observations obs;
 				vector<double> par_values;
@@ -71,7 +71,7 @@ void RunManagerSerial::run()
 				obs_vec.resize(obs_name_vec.size(), RunStorage::no_data);
 				obs.clear();
 				obs.insert(obs_name_vec, obs_vec);
-				mi.run(&pars, &obs);			
+				mi.run(&pars, &obs);
 				std::cout << string(message.str().size(), '\b');
 				message.str("");
 				message << "(" << success_runs << "/" << nruns << " runs complete)";

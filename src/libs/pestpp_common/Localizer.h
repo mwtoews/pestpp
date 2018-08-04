@@ -31,4 +31,4 @@ private:
 	vector<pair<vector<string>, vector<string>>> localizer_map;
 };
 
-#endif 
+#endif

@@ -34,8 +34,8 @@ void Logger::write(const std::string &message)
 		*fout << time_to_string(time_now) << " : " << message << endl;
 		fout->flush();
 	}
-		
-	if (echo) 
+
+	if (echo)
 		cout << time_to_string(time_now) << " : " << message << endl;
 }
 
@@ -52,7 +52,7 @@ void Logger::warning(const std::string &message)
 
 
 void Logger::log(const string &message)
-{	
+{
 	system_clock::time_point time_now = system_clock::now();
 	map<string, chrono::system_clock::time_point>::iterator message_iter = tagged_events.find(message);
 	//if this is a new message
@@ -82,7 +82,7 @@ void Logger::log(const string &message)
 			for (int i = 0; i != tagged_events.size(); i++)
 				*fout << "->";
 			*fout << " finished " << message << ", elapsed time = " <<
-				elapsed_time_to_string(time_now, time_start) << endl; 
+				elapsed_time_to_string(time_now, time_start) << endl;
 			fout->flush();
 		}
 		if (echo)

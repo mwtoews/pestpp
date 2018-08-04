@@ -17,9 +17,9 @@
 //#############################################################################
 
 //-------------------------------------------------------------------
-// Default Constructor 
+// Default Constructor
 //-------------------------------------------------------------------
-CoinStructuredModel::CoinStructuredModel () 
+CoinStructuredModel::CoinStructuredModel ()
   :  CoinBaseModel(),
      numberRowBlocks_(0),
      numberColumnBlocks_(0),
@@ -32,7 +32,7 @@ CoinStructuredModel::CoinStructuredModel ()
 }
 /* Read a problem in MPS or GAMS format from the given filename.
  */
-CoinStructuredModel::CoinStructuredModel(const char *fileName, 
+CoinStructuredModel::CoinStructuredModel(const char *fileName,
 					 int decomposeType,
 					 int maxBlocks)
   :  CoinBaseModel(),
@@ -53,7 +53,7 @@ CoinStructuredModel::CoinStructuredModel(const char *fileName,
       addBlock("row_master","column_master",coinModel);
     } else {
       const CoinPackedMatrix * matrix = coinModel.packedMatrix();
-      if (!matrix) 
+      if (!matrix)
 	coinModel.convertMatrix();
       decompose(coinModel,decomposeType,maxBlocks);
       //addBlock("row_master","column_master",coinModel);
@@ -62,9 +62,9 @@ CoinStructuredModel::CoinStructuredModel(const char *fileName,
 }
 
 //-------------------------------------------------------------------
-// Copy constructor 
+// Copy constructor
 //-------------------------------------------------------------------
-CoinStructuredModel::CoinStructuredModel (const CoinStructuredModel & rhs) 
+CoinStructuredModel::CoinStructuredModel (const CoinStructuredModel & rhs)
   : CoinBaseModel(rhs),
     numberRowBlocks_(rhs.numberRowBlocks_),
     numberColumnBlocks_(rhs.numberColumnBlocks_),
@@ -94,7 +94,7 @@ CoinStructuredModel::CoinStructuredModel (const CoinStructuredModel & rhs)
 }
 
 //-------------------------------------------------------------------
-// Destructor 
+// Destructor
 //-------------------------------------------------------------------
 CoinStructuredModel::~CoinStructuredModel ()
 {
@@ -117,7 +117,7 @@ CoinStructuredModel::clone() const
 }
 
 //----------------------------------------------------------------
-// Assignment operator 
+// Assignment operator
 //-------------------------------------------------------------------
 CoinStructuredModel &
 CoinStructuredModel::operator=(const CoinStructuredModel& rhs)
@@ -217,7 +217,7 @@ static bool sameValues(const CoinModel * a, const CoinModel *b, bool doRows)
 }
 // Add a row block name and number of rows
 int
-CoinStructuredModel::addRowBlock(int numberRows,const std::string &name) 
+CoinStructuredModel::addRowBlock(int numberRows,const std::string &name)
 {
   int iRowBlock;
   for (iRowBlock=0;iRowBlock<numberRowBlocks_;iRowBlock++) {
@@ -232,7 +232,7 @@ CoinStructuredModel::addRowBlock(int numberRows,const std::string &name)
   return iRowBlock;
 }
 // Return a row block index given a row block name
-int 
+int
 CoinStructuredModel::rowBlock(const std::string &name) const
 {
   int iRowBlock;
@@ -240,13 +240,13 @@ CoinStructuredModel::rowBlock(const std::string &name) const
     if (name==rowBlockNames_[iRowBlock])
       break;
   }
-  if (iRowBlock==numberRowBlocks_) 
+  if (iRowBlock==numberRowBlocks_)
     iRowBlock=-1;
   return iRowBlock;
 }
 // Add a column block name and number of columns
 int
-CoinStructuredModel::addColumnBlock(int numberColumns,const std::string &name) 
+CoinStructuredModel::addColumnBlock(int numberColumns,const std::string &name)
 {
   int iColumnBlock;
   for (iColumnBlock=0;iColumnBlock<numberColumnBlocks_;iColumnBlock++) {
@@ -261,7 +261,7 @@ CoinStructuredModel::addColumnBlock(int numberColumns,const std::string &name)
   return iColumnBlock;
 }
 // Return a column block index given a column block name
-int 
+int
 CoinStructuredModel::columnBlock(const std::string &name) const
 {
   int iColumnBlock;
@@ -269,12 +269,12 @@ CoinStructuredModel::columnBlock(const std::string &name) const
     if (name==columnBlockNames_[iColumnBlock])
       break;
   }
-  if (iColumnBlock==numberColumnBlocks_) 
+  if (iColumnBlock==numberColumnBlocks_)
     iColumnBlock=-1;
   return iColumnBlock;
 }
 // Return number of elements
-CoinBigIndex 
+CoinBigIndex
 CoinStructuredModel::numberElements() const
 {
   CoinBigIndex numberElements=0;
@@ -284,11 +284,11 @@ CoinStructuredModel::numberElements() const
   return numberElements;
 }
 // Return i'th block as CoinModel (or NULL)
-CoinModel * 
+CoinModel *
 CoinStructuredModel::coinBlock(int i) const
-{ 
+{
   CoinModel * block = dynamic_cast<CoinModel *>(blocks_[i]);
-  if (block) 
+  if (block)
     return block;
   else if (coinModelBlocks_)
     return coinModelBlocks_[i];
@@ -299,7 +299,7 @@ CoinStructuredModel::coinBlock(int i) const
 /* Return block as a CoinModel block
    and fill in info structure and update counts
 */
-CoinModel *  
+CoinModel *
 CoinStructuredModel::coinModelBlock(CoinModelBlockInfo & info)
 {
   // CoinStructuredModel
@@ -368,22 +368,22 @@ CoinStructuredModel::coinModelBlock(CoinModelBlockInfo & info)
   // Bases for blocks
   int * rowBase = new int[numberRowBlocks];
   CoinFillN(rowBase,numberRowBlocks,-1);
-  CoinModelBlockInfo * rowBlockInfo = 
+  CoinModelBlockInfo * rowBlockInfo =
     new CoinModelBlockInfo [numberRowBlocks];
   int * columnBase = new int[numberColumnBlocks];
   CoinFillN(columnBase,numberColumnBlocks,-1);
-  CoinModelBlockInfo * columnBlockInfo = 
+  CoinModelBlockInfo * columnBlockInfo =
     new CoinModelBlockInfo [numberColumnBlocks];
   for (int iBlock=0;iBlock<numberElementBlocks;iBlock++) {
     int iRowBlock = rowBlock(blocks[iBlock]->getRowBlock());
     assert (iRowBlock>=0&&iRowBlock<numberRowBlocks);
-    if (rowBase[iRowBlock]==-1) 
+    if (rowBase[iRowBlock]==-1)
       rowBase[iRowBlock]=blocks[iBlock]->numberRows();
     else
       assert (rowBase[iRowBlock]==blocks[iBlock]->numberRows());
     int iColumnBlock = columnBlock(blocks[iBlock]->getColumnBlock());
     assert (iColumnBlock>=0&&iColumnBlock<numberColumnBlocks);
-    if (columnBase[iColumnBlock]==-1) 
+    if (columnBase[iColumnBlock]==-1)
       columnBase[iColumnBlock]=blocks[iBlock]->numberColumns();
     else
       assert (columnBase[iColumnBlock]==blocks[iBlock]->numberColumns());
@@ -411,7 +411,7 @@ CoinStructuredModel::coinModelBlock(CoinModelBlockInfo & info)
     int iRowBase = rowBase[iRowBlock];
     int nRows = thisBlock->numberRows();
     // could check if identical before error
-    if (thisInfo.rhs) { 
+    if (thisInfo.rhs) {
       assert (!rowBlockInfo[iRowBlock].rhs);
       rowBlockInfo[iRowBlock].rhs=1;
       memcpy(rowLower+iRowBase,thisBlock->rowLowerArray(),
@@ -443,7 +443,7 @@ CoinStructuredModel::coinModelBlock(CoinModelBlockInfo & info)
     const int * row2 = elementBlock->getIndices();
     const CoinBigIndex * columnStart = elementBlock->getVectorStarts();
     const double * elementByColumn = elementBlock->getElements();
-    const int * columnLength = elementBlock->getVectorLengths(); 
+    const int * columnLength = elementBlock->getVectorLengths();
     int n = elementBlock->getNumCols();
     assert (elementBlock->isColOrdered());
     for (int iColumn=0;iColumn<n;iColumn++) {
@@ -467,7 +467,7 @@ CoinStructuredModel::coinModelBlock(CoinModelBlockInfo & info)
   delete [] element;
   CoinModel * block = new CoinModel(numberRows, numberColumns,
 			&matrix,
-			rowLower, rowUpper, 
+			rowLower, rowUpper,
 			columnLower, columnUpper, objective);
   delete [] rowLower;
   delete [] rowUpper;
@@ -525,7 +525,7 @@ CoinStructuredModel::coinModelBlock(CoinModelBlockInfo & info)
   return block;
 }
 // Sets given block into coinModelBlocks_
-void 
+void
 CoinStructuredModel::setCoinModel(CoinModel * block, int iBlock)
 {
  if (!coinModelBlocks_) {
@@ -536,7 +536,7 @@ CoinStructuredModel::setCoinModel(CoinModel * block, int iBlock)
   coinModelBlocks_[iBlock]=block;
  }
 // Refresh info in blockType_
-void 
+void
 CoinStructuredModel::refresh(int iBlock)
 {
   fillInfo(blockType_[iBlock],coinBlock(iBlock));
@@ -544,9 +544,9 @@ CoinStructuredModel::refresh(int iBlock)
 /* Fill in info structure and update counts
    Returns number of inconsistencies on border
 */
-int 
+int
 CoinStructuredModel::fillInfo(CoinModelBlockInfo & info,
-			      const CoinModel * block) 
+			      const CoinModel * block)
 {
   int whatsSet = block->whatIsSet();
   info.matrix = static_cast<char>(((whatsSet&1)!=0) ? 1 : 0);
@@ -650,7 +650,7 @@ CoinStructuredModel::fillInfo(CoinModelBlockInfo & info,
 */
 void
 CoinStructuredModel::fillInfo(CoinModelBlockInfo & info,
-			      const CoinStructuredModel * block) 
+			      const CoinStructuredModel * block)
 {
   int numberRows = block->numberRows();
   int numberColumns = block->numberColumns();
@@ -661,7 +661,7 @@ CoinStructuredModel::fillInfo(CoinModelBlockInfo & info,
   info.columnBlock=iColumnBlock;
 }
 /* add a block from a CoinModel without names*/
-int 
+int
 CoinStructuredModel::addBlock(const std::string & rowBlock,
 			      const std::string & columnBlock,
 			      const CoinBaseModel & block)
@@ -669,9 +669,9 @@ CoinStructuredModel::addBlock(const std::string & rowBlock,
   CoinBaseModel * block2 = block.clone();
   return addBlock(rowBlock,columnBlock,block2);
 }
-/* add a block using names 
+/* add a block using names
  */
-int 
+int
 CoinStructuredModel::addBlock(const std::string & rowBlock,
 			      const std::string & columnBlock,
 			      const CoinPackedMatrix & matrix,
@@ -685,7 +685,7 @@ CoinStructuredModel::addBlock(const std::string & rowBlock,
   return addBlock(rowBlock,columnBlock,block);
 }
 /* add a block from a CoinModel without names*/
-int 
+int
 CoinStructuredModel::addBlock(const std::string & rowBlock,
 			      const std::string & columnBlock,
 			      CoinBaseModel * block)
@@ -721,7 +721,7 @@ CoinStructuredModel::addBlock(const std::string & rowBlock,
   } else {
     CoinStructuredModel * subModel = dynamic_cast<CoinStructuredModel *>(block);
     assert (subModel);
-    CoinModel * blockX = 
+    CoinModel * blockX =
       subModel->coinModelBlock(blockType_[numberElementBlocks_-1]);
     fillInfo(blockType_[numberElementBlocks_-1],subModel);
     setCoinModel(blockX,numberElementBlocks_-1);
@@ -733,7 +733,7 @@ CoinStructuredModel::addBlock(const std::string & rowBlock,
 int
 CoinStructuredModel::addBlock(const CoinBaseModel & block)
 {
-  
+
   //inline const std::string & getRowBlock() const
   //abort();
   return addBlock(block.getRowBlock(),block.getColumnBlock(),
@@ -745,7 +745,7 @@ CoinStructuredModel::addBlock(const CoinBaseModel & block)
    3 - try Staircase
    Returns number of blocks or zero if no structure
 */
-int 
+int
 CoinStructuredModel::decompose(const CoinPackedMatrix & matrix,
 			       const double * rowLower, const double * rowUpper,
 			       const double * columnLower, const double * columnUpper,
@@ -837,7 +837,7 @@ CoinStructuredModel::decompose(const CoinPackedMatrix & matrix,
 	double best = 0.0; //COIN_DBL_MAX;
 #endif
 	int numberGoodBlocks=0;
-	
+
 	for (int kRow=0;kRow<numberRows;kRow++) {
 	  iRow = stack[kRow];
 	  CoinBigIndex start = rowStart[iRow];
@@ -936,7 +936,7 @@ CoinStructuredModel::decompose(const CoinPackedMatrix & matrix,
 	  }
 #endif
 	  rowsDone++;
-	  if (iBlock>=0) 
+	  if (iBlock>=0)
 	    maximumInBlock = CoinMax(maximumInBlock,rowBlock[iBlock]);
 	  if (rowsDone>=checkAfterRows) {
 	    assert (numberGoodBlocks>0);
@@ -948,7 +948,7 @@ CoinStructuredModel::decompose(const CoinPackedMatrix & matrix,
 	    if (maximumInBlock<3*averageSize&&numberGoodBlocks>2) {
 	      if(best*(numberRows-rowsDone) < notionalBlocks) {
 		best = notionalBlocks/
-		  static_cast<double> (numberRows-rowsDone); 
+		  static_cast<double> (numberRows-rowsDone);
 		bestRow = kRow;
 	      }
 	    }
@@ -956,13 +956,13 @@ CoinStructuredModel::decompose(const CoinPackedMatrix & matrix,
 	    if (maximumInBlock*10<numberColumns*11&&numberGoodBlocks>1) {
 	      double test = maximumInBlock + 0.0*averageSize;
 	      if(best*static_cast<double>(rowsDone) > test) {
-		best = test/static_cast<double> (rowsDone); 
+		best = test/static_cast<double> (rowsDone);
 		bestRow = kRow;
 		bestRowsDone=rowsDone;
 	      }
 	    }
 #endif
-	  }	      
+	  }
 	}
 #ifndef OSL_WAY
 	best2[iWay]=best;
@@ -1230,11 +1230,11 @@ CoinStructuredModel::decompose(const CoinPackedMatrix & matrix,
       delete [] columnBlock;
       delete [] whichRow;
       delete [] whichColumn;
-      delete [] obj ; 
-      delete [] columnLo ; 
-      delete [] columnUp ; 
-      delete [] rowLo ; 
-      delete [] rowUp ; 
+      delete [] obj ;
+      delete [] columnLo ;
+      delete [] columnUp ;
+      delete [] rowLo ;
+      delete [] rowUp ;
       CoinModel model(numberRows,numberColumns,&matrix, rowLower, rowUpper,
 		      columnLower,columnUpper,objective);
       model.setObjectiveOffset(objectiveOffset);
@@ -1333,11 +1333,11 @@ CoinStructuredModel::decompose(const CoinPackedMatrix & matrix,
     addBlock("row_master","column_master",block); // takes ownership
     delete [] whichRow;
     delete [] whichColumn;
-    delete [] obj ; 
-    delete [] columnLo ; 
-    delete [] columnUp ; 
-    delete [] rowLo ; 
-    delete [] rowUp ; 
+    delete [] obj ;
+    delete [] columnLo ;
+    delete [] columnUp ;
+    delete [] rowLo ;
+    delete [] rowUp ;
   } else if (type==2) {
     // Try master at beginning and end
     bool goodBenders=true;
@@ -1422,7 +1422,7 @@ CoinStructuredModel::decompose(const CoinPackedMatrix & matrix,
 	double best = 0.0; //COIN_DBL_MAX;
 #endif
 	int numberGoodBlocks=0;
-	
+
 	for (int kColumn=0;kColumn<numberColumns;kColumn++) {
 	  iColumn = stack[kColumn];
 	  CoinBigIndex start = columnStart[iColumn];
@@ -1492,7 +1492,7 @@ CoinStructuredModel::decompose(const CoinPackedMatrix & matrix,
 	    whichColumn[iBlock]=jRow;
 	  }
 	  columnsDone++;
-	  if (iBlock>=0) 
+	  if (iBlock>=0)
 	    maximumInBlock = CoinMax(maximumInBlock,columnBlock[iBlock]);
 	  if (columnsDone>=checkAfterColumns) {
 	    assert (numberGoodBlocks>0);
@@ -1504,7 +1504,7 @@ CoinStructuredModel::decompose(const CoinPackedMatrix & matrix,
 	    if (maximumInBlock<3*averageSize&&numberGoodBlocks>2) {
 	      if(best*(numberColumns-columnsDone) < notionalBlocks) {
 		best = notionalBlocks/
-		  static_cast<double> (numberColumns-columnsDone); 
+		  static_cast<double> (numberColumns-columnsDone);
 		bestColumn = kColumn;
 	      }
 	    }
@@ -1512,13 +1512,13 @@ CoinStructuredModel::decompose(const CoinPackedMatrix & matrix,
 	    if (maximumInBlock*10<numberRows*11&&numberGoodBlocks>1) {
 	      double test = maximumInBlock + 0.0*averageSize;
 	      if(best*static_cast<double>(columnsDone) > test) {
-		best = test/static_cast<double> (columnsDone); 
+		best = test/static_cast<double> (columnsDone);
 		bestColumn = kColumn;
 		bestColumnsDone=columnsDone;
 	      }
 	    }
 #endif
-	  }	      
+	  }
 	}
 #ifndef OSL_WAY
 	best2[iWay]=best;
@@ -1768,11 +1768,11 @@ CoinStructuredModel::decompose(const CoinPackedMatrix & matrix,
       delete [] columnBlock;
       delete [] whichRow;
       delete [] whichColumn;
-      delete [] obj ; 
-      delete [] columnLo ; 
-      delete [] columnUp ; 
-      delete [] rowLo ; 
-      delete [] rowUp ; 
+      delete [] obj ;
+      delete [] columnLo ;
+      delete [] columnUp ;
+      delete [] rowLo ;
+      delete [] rowUp ;
 #if 0
       CoinModel model(numberRows,numberColumns,&matrix, rowLower, rowUpper,
 		      columnLower,columnUpper,objective);
@@ -1873,11 +1873,11 @@ CoinStructuredModel::decompose(const CoinPackedMatrix & matrix,
     addBlock("row_master","column_master",block); // takes ownership
     delete [] whichRow;
     delete [] whichColumn;
-    delete [] obj ; 
-    delete [] columnLo ; 
-    delete [] columnUp ; 
-    delete [] rowLo ; 
-    delete [] rowUp ; 
+    delete [] obj ;
+    delete [] columnLo ;
+    delete [] columnUp ;
+    delete [] rowLo ;
+    delete [] rowUp ;
   } else {
     abort();
   }
@@ -1889,7 +1889,7 @@ CoinStructuredModel::decompose(const CoinPackedMatrix & matrix,
    3 - try Staircase
    Returns number of blocks or zero if no structure
 */
-int 
+int
 CoinStructuredModel::decompose(const CoinModel & coinModel, int type,
 			       int maxBlocks, const char ** starts)
 {
@@ -2021,7 +2021,7 @@ CoinStructuredModel::decompose(const CoinModel & coinModel, int type,
   return nBlocks;
 }
 // Read SMPS model
-int 
+int
 CoinStructuredModel::readSmps(const char *filename,
 			      bool keepNames, bool ignoreErrors)
 {
@@ -2029,7 +2029,7 @@ CoinStructuredModel::readSmps(const char *filename,
   return 0;
 }
 // Return block corresponding to row and column
-const CoinBaseModel *  
+const CoinBaseModel *
 CoinStructuredModel::block(int row,int column) const
 {
   const CoinBaseModel * block = NULL;
@@ -2045,7 +2045,7 @@ CoinStructuredModel::block(int row,int column) const
   return block;
 }
 // Return block corresponding to row and column as CoinModel
-const CoinBaseModel *  
+const CoinBaseModel *
 CoinStructuredModel::coinBlock(int row,int column) const
 {
   const CoinModel * block = NULL;
@@ -2063,7 +2063,7 @@ CoinStructuredModel::coinBlock(int row,int column) const
 }
 /* Fill pointers corresponding to row and column.
    False if any missing */
-CoinModelBlockInfo 
+CoinModelBlockInfo
 CoinStructuredModel::block(int row,int column,
 			   const double * & rowLower, const double * & rowUpper,
 			   const double * & columnLower, const double * & columnUpper,
@@ -2099,7 +2099,7 @@ CoinStructuredModel::block(int row,int column,
   return info;
 }
 // Return block number corresponding to row and column
-int  
+int
 CoinStructuredModel::blockIndex(int row,int column) const
 {
   int block=-1;

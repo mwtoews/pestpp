@@ -1,8 +1,19 @@
 # PEST++
 Object Oriented Inverse Modeling Software
 <br><br><br>
+[![Travis Status](https://travis-ci.org/jtwhite79/pestpp.svg?branch=develop)](https://travis-ci.org/jtwhite79/pestpp)
+[![Build status](https://ci.appveyor.com/api/projects/status/jlyivnw4jhstp8l8?svg=true)](https://ci.appveyor.com/project/jtwhite79/pestpp)
+
+## links to latest binaries
+
+* [windows (users with current visual studio installed)](https://github.com/jtwhite79/pestpp/tree/develop/exe/windows/x64/Release).  Direct zip download [here](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/jtwhite79/pestpp/tree/develop/exe/windows/x64/Release)
+* [windows compiled with intel C++ (the 'i' prefix)](https://github.com/jtwhite79/pestpp/tree/intel_c_windows/exe/windows/x64/Release).  Direct zip download [here](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/jtwhite79/pestpp/tree/intel_c_windows/exe/windows/x64/Release)
+* [mac OS](https://github.com/jtwhite79/pestpp/tree/develop/exe/mac).  Direct zip download [here](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/jtwhite79/pestpp/tree/develop/exe/mac)
+* [linux static compiled with intel C++](https://github.com/jtwhite79/pestpp/tree/develop/exe/linux). Direct zip download [here](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/jtwhite79/pestpp/tree/develop/exe/linux). (makefiles for GCC provides in src/ directory)
+
 ## Overview
 The PEST++ software suite includes several stand-alone tools for model-independent (non-intrusive) computer model parameter estimation and uncertainty analysis.  Codes include:
+<<<<<<< HEAD
 
 * ``pestpp``: deterministic GLM parameter estimation using "on-the-fly" subspace reparameterization, effectively reproducing the SVD-Assist methodology of PEST without any user intervention
 
@@ -12,12 +23,29 @@ The PEST++ software suite includes several stand-alone tools for model-independe
 
 * ``pestpp-opt``: chance-constrainted linear programming
 
+=======
+
+* ``pestpp``: deterministic GLM parameter estimation using "on-the-fly" subspace reparameterization, effectively reproducing the SVD-Assist methodology of PEST without any user intervention
+
+* ``pestpp-gsa``: Global senitivity analysis using either Morris or Sobol
+
+* ``pestpp-swp``: a generic parallel run utility driven by a CSV file of parameter values
+
+* ``pestpp-opt``: chance-constrainted linear programming
+
+>>>>>>> origin/develop
 * ``pestpp-ies``: iterative ensemble smoother implementation of GLM.
 
 All members of the software suite can be compiled for PC, MAC, or Linux and have several run managers to support parallelization.  precompiled binaries are available in the "exe" folder.  Windows users should use the ``intel_c_windows`` branch binaries to avoid the dreaded MSVC missing runtime DLL issue
 
 ## Recent Updates
 <b> update 4 July 2018 </b>: PESTPP++ version 4.0.0 has been released to support the newly-developed ``pestpp-ies``. A manuscript documenting ``pestpp-ies`` is available here: [https://www.sciencedirect.com/science/article/pii/S1364815218302676](https://www.sciencedirect.com/science/article/pii/S1364815218302676).  Stay tuned for an actual manual to accompany version 4!
+
+<b> update 5 August 2018 </b>: Welcome to the active fork of ``pestpp-ies``, ``pestpp-opt``, and ``pestpp-swp``. I strive to actively support users, so please raise issues related to these codes as needed.  I will also try to support ``pestpp`` users are best I can although this code is a lower priority for me.
+
+<b> update 30 July 2018 </b>: The PEST++ now supports parameter and observation names up to 200 characters in length. This allows for more descriptive naming and better support for problems with very large numbers of pars and obs.  Note that if a parameter name exceeds 12 chars or an observation name exceeds 20 chars, the resulting jacobian binary file will include truncated names (at 12 and 20 chars, respectively) and names exceeding these lengths are not backward compatible with PEST. 
+
+<b> update 4 July 2018 </b>: PEST++ version 4.0.0 has been released to support the newly-developed ``pestpp-ies``. A manuscript documenting ``pestpp-ies`` is available here: [https://www.sciencedirect.com/science/article/pii/S1364815218302676](https://www.sciencedirect.com/science/article/pii/S1364815218302676).  Stay tuned for an actual manual to accompany version 4!
 
 <b> update 2 May 2018 </b>: some refactoring is underway.  ``sweep`` has been renamed ``pestpp-swp`` and ``gsa`` has been renamed ``pestpp-gsa``.  Also, the initial version of the new iterative ensemble smoother is avaiable as ``pestpp-ies``.  The basic ``++`` options needed for fine-grained control of ``pestpp-ies`` are listed below.   
 
@@ -64,15 +92,27 @@ Welter, D.E., Doherty, J.E., Hunt, R.J., Muffels, C.T., Tonkin, M.J., and Schre√
 The master branch includes a Visual Studio 2015 project, as well as makefiles for linux and mac.
 
 ## Testing
-The benchmarks/ folder contain several test problems of varying problem size which are used to evaluate the performance of various aspects of the PEST++ algorithm and implementation.  
+The benchmarks/ folder contain many full-worked test problems of varying problem size which are used to evaluate the performance of various aspects of the PEST++ suite.  
 
 ## Dependencies
 Much work has been done to avoid additional external dependencies in PEST++.  As currently designed, the project is fully self-contained and statically linked.  
 
-## pestpp arguments
-Here is a (more or less) complete list of ``++`` arguments that can be added to the control file
-* ``++overdue_resched_fac(1.2)``:YAMR only, if a run is more than <``overdue_resched_fac``> X average run time, reschedule it on available resources
-* ``++overdue_giveup_fac(2.0)``:YAMR only, if a run is more than <``overdue_giveup_fac``> X average run time, mark it as failed
+## parallel run manager arguments
+These are the optional ``++`` args that can be used to control the parallel run manager
+* ``++overdue_resched_fac(1.15)``:YAMR only, if a run is more than <``overdue_resched_fac``> X average run time, reschedule it on available resources (depending on value of <``max_run_fail``>.
+
+* ``++overdue_giveup_fac(100.0)``:YAMR only, if a run is more than <``overdue_giveup_fac``> X average run time, mark it as failed. Default of ``pestpp-ies`` is 2.0.
+
+* ``++overdue_giveup_minutes(1.0e+30)``:YAMR only, if a run has been going for more than <``overdue_giveup_minutes``>, mark it as failed.
+
+* ``++max_run_fail(4)``:maximum number of runs that can fail before the run manager emits an error and also the maximum number of concurrent runs allowed (for runs that are "overdue" according to <``overdue_resched_fac``>).  Default for ``pestpp-ies`` is 1.
+
+* ``++condor_submit_file(pest.sub)``: a HTCondor submit file.  Setting this arg results in use of a specialized version of the YAMR run manager where the ``condor_submit()`` command is issued before the run manager starts, and, once a set of runs are complete, the workers are released and the ``condor_rm()`` command is issued.  This specialized run manager is useful for those sharing an HTCondor pool so that during the upgrade calculation process, all workers are released and during upgrade testing, only the required number workers are queued.  As with all things PEST and PEST++, it is up to the user to make sure the relative paths between the location of the submit file, the control file and the instance of PEST++ are in sync.
+
+
+## pestpp ``++`` arguments
+Here is a (more or less) complete list of ``++`` arguments that can be added to the control file for ``pestpp``
+
 * ``++max_n_super(20)``: maximum number of super parameters to use
 
 * ``++super_eigthres(1.0e-8)`` ratio of max to min singular values used to truncate the singular components when forming the super parameter problem
@@ -81,7 +121,7 @@ Here is a (more or less) complete list of ``++`` arguments that can be added to 
 
 * ``++n_iter_super(4)``: number of super (reduced dimension) parameter iterations to complete as part of the on-the-fly combined base-parameter/super-parameter iteration process
 
-* ``++svd_pack(propack)``: which SVD solver to use.  valid arguments are ``eigen``(jacobi solution), ``propack``(iterative Lanczos solution) and ``redsvd`` (randomized solution).
+* ``++svd_pack(redsvd)``: which SVD solver to use.  valid arguments are ``eigen``(jacobi solution), ``propack``(iterative Lanczos solution) and ``redsvd`` (randomized solution).
 
 * ``++lambdas(0.1,1,10,100,1000)``: the values of lambda to test in the upgrade part of the solution process. Note that this base list is augmented with values bracketing the previous iterations best lambda.  However, if a single value is specified, only one lambda will be used.
 
@@ -106,15 +146,11 @@ Here is a (more or less) complete list of ``++`` arguments that can be added to 
 
 * ``++hotstart_resfile(mycase.res)``: use an exising residual file to restart with an existing jacobian to forego the initial, base run and jump straight to upgrade calculations (++base_jacobian arg required).
 
-* ``++max_run_fail(4)``:maximum number of runs that can fail before the run manager emits an error.
-
 * ``++mat_inv(jtqj)``: the form of the normal matrix to use in the solution process. Valid values are "jtqj" and "q1/2j".
 
 * ``++der_forgive(true)``: a flag to tolerate run failures during the derivative calculation process
 
 * ``++parcov_scale_fac(0.01)``: scaling factor to scale the prior parameter covariance matrix by when scaling the normal matrix by the inverse of the prior parameter covariance matrix.  If not specified, no scaling is undertaken; if specified, ``++mat_inv`` must be "jtqj".
-
-* ``++condor_submit_file(pest.sub)``: a HTCondor submit file.  Setting this arg results in use of a specialized version of the YAMR run manager where the ``condor_submit()`` command is issued before the run manager starts, and, once a set of runs are complete, the workers are released and the ``condor_rm()`` command is issued.  This specialized run manager is useful for those sharing an HTCondor pool so that during the upgrade calculation process, all workers are released and during upgrade testing, only the required number workers are queued.  As with all things PEST and PEST++, it is up to the user to make sure the relative paths between the location of the submit file, the control file and the instance of PEST++ are in sync.
 
 ### pestpp-swp ``++`` arguments
 ``sweep`` is a utility to run a parametric sweep for a series of parameter values.  Useful for things like monte carlo, design of experiment, etc. Designed to be used with ``pyemu`` and the python pandas library.
@@ -192,7 +228,7 @@ Here is a (more or less) complete list of ``++`` arguments that can be added to 
 
 * ``lambda_scale_fac(<lambda_scale_fac>)``: line search lambda scaling factors.  Each lambda parameter upgrade ensemble is scaled by each ``lambda_scale_fac``.  Default is [0.5,0.75,0.9,1.0,1.1].  
 
-* ``ies_subset_how(<subset_how>)``: choice for how the subset is selected.  Choices are "first" (use the first ``subset_size`` realizations),"last" (use the last ``subset_size`` realizations),"random" (randomly select ``subset_size`` realizations each iteration),"phi_based" (chose ``subset_size`` realizations spread across the composite phi from the last iteration). Default is "first".  
+* ``ies_subset_how(<subset_how>)``: choice for how the subset is selected.  Choices are "first" (use the first ``subset_size`` realizations),"last" (use the last ``subset_size`` realizations),"random" (randomly select ``subset_size`` realizations each iteration),"phi_based" (chose ``subset_size`` realizations spread across the composite phi from the last iteration). Default is "phi_based". If present, the ``base`` parameter realization will always be included in the subset.  
 
 * ``ies_localizer(<localizer>)``: an optional localizer to use to localize spurious cross-correlations between observations and parameters.  The file format is determined by the extension: "mat","cov","csv","jco"/"jcb".  The row names of the matrix are observation names and/or observation group names and columns are parameter names and/or parameter group names (each obs/par can only be include once even through groups).  Currently only zero vs nonzero entires are used to localize.  
 

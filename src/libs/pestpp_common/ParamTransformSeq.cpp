@@ -1,8 +1,8 @@
-/*  
-	© Copyright 2012, David Welter
-	
+/*
+
+
 	This file is part of PEST++.
-   
+
 	PEST++ is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
@@ -151,7 +151,7 @@ void ParamTransformSeq::copy(const ParamTransformSeq &rhs, const set<Transformat
 {
 	clear();
 	name = "copy of " + rhs.name;
-	
+
 	Transformation *t_ptr;
 	for(vector<Transformation*>::const_iterator i = rhs.tranSeq_ctl2model.begin(),
 		e=rhs.tranSeq_ctl2model.end(); i != e; ++i)
@@ -195,10 +195,10 @@ void ParamTransformSeq::copy(const ParamTransformSeq &rhs, const set<Transformat
 			default_deep_copy_tran_set.insert(t_ptr);
 		}
 	}
-	for (auto &itran_seq : rhs.custom_tran_seq ) 
+	for (auto &itran_seq : rhs.custom_tran_seq )
 	{
 	  for (auto &itran : itran_seq.second )
-	  { 
+	  {
 		if (deep_copy_tran_set.find(itran) ==  deep_copy_tran_set.end()) {
 			t_ptr = itran;
 		}
@@ -229,7 +229,7 @@ void ParamTransformSeq::append(const ParamTransformSeq &rhs, const set<Transform
 	Transformation *t_ptr;
 
 	for (vector<Transformation*>::const_iterator i=rhs.tranSeq_ctl2model.begin(), e=rhs.tranSeq_ctl2model.end();
-		i!=e; ++i) 
+		i!=e; ++i)
 	{
 		if (deep_copy_tran_set.find(*i) ==  deep_copy_tran_set.end()) {
 			t_ptr = *i;
@@ -243,7 +243,7 @@ void ParamTransformSeq::append(const ParamTransformSeq &rhs, const set<Transform
 		}
 	}
 	for (vector<Transformation*>::const_iterator i=rhs.tranSeq_ctl2active_ctl.begin(), e=rhs.tranSeq_ctl2active_ctl.end();
-		i!=e; ++i) 
+		i!=e; ++i)
 	{
 		if (deep_copy_tran_set.find(*i) ==  deep_copy_tran_set.end()) {
 			t_ptr = *i;
@@ -257,7 +257,7 @@ void ParamTransformSeq::append(const ParamTransformSeq &rhs, const set<Transform
 		}
 	}
 	for (vector<Transformation*>::const_iterator i=rhs.tranSeq_active_ctl2numeric.begin(), e=rhs.tranSeq_active_ctl2numeric.end();
-		i!=e; ++i) 
+		i!=e; ++i)
 	{
 		if (deep_copy_tran_set.find(*i) ==  deep_copy_tran_set.end()) {
 			t_ptr = *i;
@@ -270,10 +270,10 @@ void ParamTransformSeq::append(const ParamTransformSeq &rhs, const set<Transform
 			default_deep_copy_tran_set.insert(t_ptr);
 		}
 	}
-	for (auto &itran_seq : rhs.custom_tran_seq ) 
+	for (auto &itran_seq : rhs.custom_tran_seq )
 	{
 	  for (auto &itran : itran_seq.second )
-	  { 
+	  {
 		if (deep_copy_tran_set.find(itran) ==  deep_copy_tran_set.end()) {
 			t_ptr = itran;
 		}
@@ -351,7 +351,7 @@ void ParamTransformSeq::ctl2active_ctl_ip(Parameters &data) const
 		iter != e; ++iter)
 	{
 		(*iter)->forward(data);
-		
+
 	}
 }
 
@@ -583,7 +583,7 @@ Transformation* ParamTransformSeq::get_transformation(const string &name)
 
 void ParamTransformSeq::print(ostream &os) const
 {
-	os << "ParamTransformSeq name = " << name << endl; 
+	os << "ParamTransformSeq name = " << name << endl;
 	os << "Control file to model transformations" << endl;
 	for (vector<Transformation*>::const_iterator b=tranSeq_ctl2model.begin(), e=tranSeq_ctl2model.end();
 		b!=e; ++b) {
@@ -618,7 +618,7 @@ void ParamTransformSeq::custom_tran_seq_forward_ip(const std::string &name, Para
 	auto iter= custom_tran_seq.find(name);
 	assert(iter != custom_tran_seq.end());
 	const vector<Transformation*> &tran_vec = iter->second;
-	
+
 	for(const auto &itran : tran_vec)
 	{
 		itran->forward(data);
@@ -634,7 +634,7 @@ vector<Transformation*>::iterator ParamTransformSeq::find_in_ctl2model(const str
 	return iter;
 }
 
-vector<Transformation*>::const_iterator ParamTransformSeq::find_in_ctl2model(const string &name) const 
+vector<Transformation*>::const_iterator ParamTransformSeq::find_in_ctl2model(const string &name) const
 {
 	vector<Transformation*>::const_iterator iter = find_if(tranSeq_ctl2model.cbegin(), tranSeq_ctl2model.cend(),
 		[&name](Transformation *tr_ptr)->bool{return tr_ptr->get_name() == name;});
@@ -648,7 +648,7 @@ vector<Transformation*>::iterator ParamTransformSeq::find_in_ctl2active_ctl(cons
 	return iter;
 }
 
-vector<Transformation*>::const_iterator ParamTransformSeq::find_in_ctl2active_ctl(const string &name) const 
+vector<Transformation*>::const_iterator ParamTransformSeq::find_in_ctl2active_ctl(const string &name) const
 {
 	vector<Transformation*>::const_iterator iter = find_if(tranSeq_ctl2active_ctl.cbegin(), tranSeq_ctl2active_ctl.cend(),
 		[&name](Transformation *tr_ptr)->bool{return tr_ptr->get_name() == name;});
@@ -663,7 +663,7 @@ vector<Transformation*>::iterator ParamTransformSeq::find_in_active_ctl2numeric(
 	return iter;
 }
 
-vector<Transformation*>::const_iterator ParamTransformSeq::find_in_active_ctl2numeric(const string &name) const 
+vector<Transformation*>::const_iterator ParamTransformSeq::find_in_active_ctl2numeric(const string &name) const
 {
 	vector<Transformation*>::const_iterator iter = find_if(tranSeq_active_ctl2numeric.cbegin(), tranSeq_active_ctl2numeric.cend(),
 		[&name](Transformation *tr_ptr)->bool{return tr_ptr->get_name() == name;});

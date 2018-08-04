@@ -1,8 +1,8 @@
-/*  
-	© Copyright 2012, David Welter
-	
+/*
+
+
 	This file is part of PEST++.
-   
+
 	PEST++ is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
@@ -81,7 +81,7 @@ Parameters SVDASolver::limit_parameters_freeze_all_ip(const Parameters &init_act
 			ipar.second = val_init + delta;
 		}
 	}
-			
+
 	//convert parameters to their ctl form and check any any that have exceeded their bounds
 	par_transform.numeric2active_ctl_ip(upgrade_active_ctl_pars);
 	Parameters freeze_active_ctl_par;
@@ -121,7 +121,7 @@ void SVDASolver::calc_upgrade_vec(double i_lambda, Parameters &prev_frozen_activ
 	int num_upgrade_out_grad_in;
 	Parameters new_frozen_ctl_pars;
 
-	// define a function type for upgrade methods 
+	// define a function type for upgrade methods
 	typedef void(SVDSolver::*UPGRADE_FUNCTION) (const Jacobian &jacobian, const QSqrtMatrix &Q_sqrt, const DynamicRegularization &regul,
 		const Eigen::VectorXd &Residuals, const vector<string> &obs_name_vec,
 		const Parameters &base_ctl_pars, const Parameters &prev_frozen_ctl_pars,
@@ -212,7 +212,7 @@ ModelRun SVDASolver::iteration_reuse_jac(RunManagerAbstract &run_manager, Termin
 	ostream &os = file_manager.rec_ofstream();
 	vector<string> numeric_par_names_vec;
 
-	
+
 
 	string jac_filename = filename;
 	if (filename.empty()) jac_filename = file_manager.build_filename("jcs");
@@ -489,6 +489,7 @@ ModelRun SVDASolver::iteration_upgrd(RunManagerAbstract &run_manager, Terminatio
 	Parameters new_frozen_pars;
 
 	int n_runs = run_manager.get_nruns();
+	bool one_success = false;
 	for (int i = 1; i < n_runs; ++i) {
 		ModelRun upgrade_run(base_run);
 		Parameters tmp_pars;
@@ -498,6 +499,7 @@ ModelRun SVDASolver::iteration_upgrd(RunManagerAbstract &run_manager, Terminatio
 		bool success = run_manager.get_run(i, tmp_pars, tmp_obs, lambda_type, i_lambda);
 		if (success)
 		{
+			one_success = true;
 			par_transform.model2ctl_ip(tmp_pars);
 			upgrade_run.update_ctl(tmp_pars, tmp_obs);
 			par_transform.ctl2active_ctl_ip(tmp_pars);
@@ -575,6 +577,10 @@ ModelRun SVDASolver::iteration_upgrd(RunManagerAbstract &run_manager, Terminatio
 	// clean up run_manager memory
 	run_manager.free_memory();
 
+	if (!one_success)
+	{
+		throw runtime_error("all upgrade runs failed");
+	}
 	return best_upgrade_run;
 }
 

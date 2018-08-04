@@ -19,7 +19,7 @@ int RMIF_CREATE_PANTHER(char *f_comline, int  *comline_str_len, int *comline_arr
 	char *f_ins, int  *ins_str_len, int *ins_array_len,
 	char *f_out, int  *out_str_len, int *out_array_len,
 	char *f_storfile, int *storfile_len,
-	char *f_port, int *f_port_len, 
+	char *f_port, int *f_port_len,
 	char *f_info_filename, int *info_filename_len, int *n_max_fail);
 
 
@@ -64,6 +64,6 @@ int RMIF_GET_NUM_TOTAL_RUNS(int *nruns);
 
 int RMFI_DELETE();
 
-					 
+
 }
 #endif //RUNMANAGER_FORTRAN_WRAP_H_

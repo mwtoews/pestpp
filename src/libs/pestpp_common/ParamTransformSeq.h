@@ -1,8 +1,8 @@
-/*  
-	© Copyright 2012, David Welter
-	
+/*
+
+
 	This file is part of PEST++.
-   
+
 	PEST++ is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
@@ -20,9 +20,9 @@
 #define ParamTransformSeq_H_
 
 /** @file
- @brief ParamTransformSeq class 
- 
- This file defines the ParamTransformSeq.  This class is used to define the sequence of 
+ @brief ParamTransformSeq class
+
+ This file defines the ParamTransformSeq.  This class is used to define the sequence of
  transformations used to switch between model, control and numeric parameter representations
 */
 
@@ -36,8 +36,8 @@ class JacobianAnalytic;
 using namespace std;
 
 /**
- @brief ParamTransformSeq class 
- 
+ @brief ParamTransformSeq class
+
  This class is used to define the sequence of transformations used to switch
  between model, control and numeric parameter representations
 */

@@ -1,8 +1,8 @@
-/*  
-    © Copyright 2012, David Welter
-    
+/*
+
+
     This file is part of PEST++.
-   
+
     PEST++ is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
@@ -164,13 +164,13 @@ pair<string,string> PriorInformation::AddRecord(const string &pi_line)
 	string prior_info_name = tokens[0];
 	// process prior information equation
 	plus_sign = true;
-	for (int i=1; i< n_tokens-4; i+=4) 
+	for (int i=1; i< n_tokens-4; i+=4)
 	{
 		convert_ip(tokens[i], pifac);
 		// token i+1 = "*"
 		par_name = tokens[i+2];
 		if (par_name.find("LOG") == 0) // parameter name
-		{ 
+		{
 			log_trans = true;
 			par_name = par_name.substr(4, par_name.size() - 5); // remove "log(" from front and ")" from rear of tokens[i+1]
 		}
@@ -200,7 +200,7 @@ vector<string> PriorInformation::get_keys() const
 	vector<string> ret_val;
 
 	for(std::map<std::string, PriorInformationRec>::const_iterator b=prior_info_map.begin(), e=prior_info_map.end();
-		b!=e; ++b) 
+		b!=e; ++b)
 	{
 	ret_val.push_back((*b).first);
 	}

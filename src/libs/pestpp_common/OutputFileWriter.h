@@ -1,8 +1,8 @@
-/*  
-	© Copyright 2012, David Welter
-	
+/*
+
+
 	This file is part of PEST++.
-   
+
 	PEST++ is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
@@ -44,11 +44,11 @@ public:
 	OutputFileWriter(FileManager &_file_manager, Pest &_pest_scenario, bool restart_flag = false, bool _save_rei = true, int _eigenwrite = 0);
 	void write_rei(std::ofstream &fout, int iter_no, const Observations &obs,
 		const Observations &sim, const ObjectiveFunc &obj_func, const Parameters &pars);
-	void write_par(std::ofstream &fout, const Parameters &pars, const TranOffset &offset_tran, const TranScale &scale_tran);	
+	void write_par(std::ofstream &fout, const Parameters &pars, const TranOffset &offset_tran, const TranScale &scale_tran);
 	void write_restart_header(std::ostream &fout);
 	void write_sen_header(std::ostream &fout, const std::string &case_name);
 	void set_svd_output_opt(int _eigenwrite);
-	void append_sen(std::ostream &fout, int iter_no, const Jacobian &jac, const ObjectiveFunc &obj_func, 
+	void append_sen(std::ostream &fout, int iter_no, const Jacobian &jac, const ObjectiveFunc &obj_func,
 		const ParameterGroupInfo &par_grp_info, const DynamicRegularization &regul,bool is_super,
 		const ParamTransformSeq &par_transform);
 	void write_svd(Eigen::VectorXd &Sigma, Eigen::SparseMatrix<double> &Vt, double lambda, const Parameters &freeze_numeric_pars, Eigen::VectorXd &Sigma_trunc);
@@ -69,7 +69,7 @@ public:
 	void iteration_report(std::ostream &os, int iter, int nruns, string iteration_type, string svd_type=string(""), string mat_inv=string(""));
 	void scenario_report(std::ostream &os);
 	void obs_report(std::ostream &os, const Observations &obs, const Observations &sim);
-	
+
 	void param_change_stats(double p_old, double p_new, bool &have_fac, double &fac_change, bool &have_rel, double &rel_change);
 	void write_par_iter(int iter, Parameters const &ctl_pars);
 	void write_obj_iter(int iter, int nruns, PhiData const &pph_data);
@@ -86,7 +86,7 @@ private:
 	std::string case_name;
 	int eigenwrite;
 	bool save_rei;
-	
+
 	void prepare_iteration_summary_files(bool restart_flag);
 	void prepare_upgrade_summary_files();
 	//void prepare_jco_run_id_file();

@@ -1,8 +1,8 @@
-/*  
-	© Copyright 2012, David Welter
-	
+/*
+
+
 	This file is part of PEST++.
-   
+
 	PEST++ is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
@@ -31,7 +31,7 @@ class TerminationController
 	friend RestartController;
 public:
 	TerminationController(int _noptmax=0, double _phiredstp=0.0, int _nphistp=0,
-		int _nphinored=0, double _relparstp = 0.0, int _nrelpar = 0, 
+		int _nphinored=0, double _relparstp = 0.0, int _nrelpar = 0,
 		bool _use_dynaimc_regul = false, double _phim_accept=0.0, double reg_frac = 0);
 	TerminationController(const TerminationController &rhs) {*this = rhs;}
 	bool process_iteration(const PhiComponets &phi, double relpar);

@@ -1,8 +1,8 @@
-/*  
-	© Copyright 2012, David Welter
-	
+/*
+
+
 	This file is part of PEST++.
-   
+
 	PEST++ is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
@@ -18,12 +18,12 @@
 */
 
 
-#include <sstream> 
+#include <sstream>
 #include <cstdio>
 #include <cassert>
 #include <iostream>
 #include <fstream>
-#include <algorithm> 
+#include <algorithm>
 #include "RunStorage.h"
 #include "Serialization.h"
 #include "Transformable.h"
@@ -43,8 +43,8 @@ void RunStorage::reset(const vector<string> &_par_names, const vector<string> &_
 {
 	par_names = _par_names;
 	obs_names = _obs_names;
-	// a file needs to exist before it can be opened it with read and write 
-	// permission.   So open it with write permission to crteate it, close 
+	// a file needs to exist before it can be opened it with read and write
+	// permission.   So open it with write permission to crteate it, close
 	// and then reopen it with read and write permisssion.
 	if (_filename.size() > 0)
 	{
@@ -116,7 +116,7 @@ void RunStorage::init_restart(const std::string &_filename)
 
 	std::int64_t n_runs_64;
 	buf_stream.read((char*) &n_runs_64, sizeof(n_runs_64));
-	
+
 	std::int64_t  run_size_64;
 	buf_stream.read((char*) &run_size_64, sizeof(run_size_64));
 	run_byte_size = run_size_64;
@@ -288,8 +288,8 @@ void RunStorage::copy(const RunStorage &rhs_rs)
 		buf_stream.close();
 	}
 	// std::ofstream::trunc will delete the file if it already exist
-	// a file needs to exist before it can be opened it with read and write 
-	// permission.   So open it with write permission to create it, close 
+	// a file needs to exist before it can be opened it with read and write
+	// permission.   So open it with write permission to create it, close
 	// and then reopen it with read and write permisssion.
 	buf_stream.open(filename.c_str(), ios_base::out | ios_base::binary | std::ofstream::trunc);
 	buf_stream.close();
@@ -546,12 +546,12 @@ int RunStorage::get_run(int run_id, vector<double> &pars_vec, vector<double> &ob
 
 	size_t n_par = par_names.size();
 	size_t n_obs = obs_names.size();
-      
+
 	pars_vec.resize(n_par);
 	obs_vec.resize(n_obs);
 
 	check_rec_id(run_id);
-	
+
 	buf_stream.seekg(get_stream_pos(run_id), ios_base::beg);
 	buf_stream.read(reinterpret_cast<char*>(&r_status), sizeof(r_status));
 	buf_stream.read(reinterpret_cast<char*>(&info_txt_buf[0]), sizeof(char)*info_txt_length);
@@ -687,7 +687,7 @@ void RunStorage::free_memory()
 void RunStorage::check_rec_size(const vector<char> &serial_data) const
 {
 	if (serial_data.size() != run_data_byte_size)
-	{ 
+	{
 		throw PestError("Error in RunStorage routine.  Size of serial data is different from what is expected");
 	}
 }
@@ -734,7 +734,7 @@ void RunStorage::export_diff_to_text_file(const std::string &in1_filename, const
 	vector<string> par_name_vec_2 = rs2.get_par_name_vec();
 	vector<string> obs_name_vec_1 = rs1.get_obs_name_vec();
 	vector<string> obs_name_vec_2 = rs2.get_obs_name_vec();
-	
+
 	auto npar = par_name_vec_1.size();
 	auto nobs = obs_name_vec_1.size();
 	fout << in1_filename << endl;
@@ -744,7 +744,7 @@ void RunStorage::export_diff_to_text_file(const std::string &in1_filename, const
 	//check parameter names are the same
 	if (par_name_vec_1.size() != par_name_vec_2.size())
 		fout << "Parameter name arrays sizes differ: " << par_name_vec_1.size() << ", " << par_name_vec_2.size() << endl;
-	
+
 	for (size_t ipar = 0; ipar < npar; ++ipar)
 	{
 		if (par_name_vec_1[ipar] != par_name_vec_2[ipar])

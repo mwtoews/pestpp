@@ -17,7 +17,7 @@ class sequentialLP
 {
 	enum ConstraintSense {less_than,greater_than,equal_to,undefined};
 public:
-	sequentialLP(Pest &_pest_scenario, RunManagerAbstract* _run_mgr_ptr, 
+	sequentialLP(Pest &_pest_scenario, RunManagerAbstract* _run_mgr_ptr,
 		         Covariance &_parcov, FileManager* _file_mgr_ptr, OutputFileWriter of_wr);
 	void initialize_and_check();
 	void solve();
@@ -34,7 +34,7 @@ private:
 	bool std_weights;
 	string obj_obs;
 	int slp_iter;
-	
+
 	double* dec_var_lb;
 	double* dec_var_ub;
 	double* constraint_lb;
@@ -79,7 +79,7 @@ private:
 	map<ClpSimplex::Status, string> status_name_map = { {ClpSimplex::Status::atLowerBound,"at lower bound"},
 	{ ClpSimplex::Status::atUpperBound,"at upper bound"},{ClpSimplex::Status::basic,"basic"},
 	{ ClpSimplex::Status::isFree,"free"},{ ClpSimplex::Status::isFixed,"fixed"}};
-		
+
 	map<string, double> obj_func_coef_map;
 	map<string, ConstraintSense> constraint_sense_map;
 	map <string, string> constraint_sense_name;
@@ -118,7 +118,7 @@ private:
 	Covariance obscov;
 	FileManager* file_mgr_ptr;
 	//OutputFileWriter* out_wtr_ptr;
-		
+
 	int num_dec_vars() { return ctl_ord_dec_var_names.size(); }
 	int num_obs_constraints() { return ctl_ord_obs_constraint_names.size(); }
 	int num_pi_constraints() { return ctl_ord_pi_constraint_names.size(); }
@@ -128,7 +128,7 @@ private:
 
 	void build_dec_var_bounds();
 
-	//get the interpolated probit value 
+	//get the interpolated probit value
 	double get_probit();
 
 	//report the infeasible info
@@ -142,7 +142,7 @@ private:
 
 	//solve the current LP problem
 	void iter_solve();
-	
+
 	//report initial conditions to rec file
 	void initial_report();
 
@@ -154,19 +154,19 @@ private:
 
 	//report dec var info the newly solved LP solution.  returns the current and new obj func
 	pair<double,double> postsolve_decision_var_report(Parameters &upgrade_pars);
-	
+
 	//report the current and newly solved LP constraint info
 	void postsolve_constraint_report(Observations &upgrade_obs, Parameters &upgrade_pars);
-	
+
 	//check that all constraints and dec vars are satified
 	pair < map < string, double > , map<string,double >> postsolve_check(Observations &upgrade_obs, Parameters &upgrade_pars);
 
 	//prepare for LP solution, including filling response matrix
 	void iter_presolve();
-	
+
 	//run the model with dec var values from the newly solved LP problem
 	bool make_upgrade_run(Parameters &upgrade_pars, Observations &upgrade_obs);
-	
+
 	//process the LP solve, including check for convergence
 	void iter_postsolve();
 
@@ -181,12 +181,12 @@ private:
 	void throw_sequentialLP_error(string message,const vector<string> &messages);
 	void throw_sequentialLP_error(string message, const set<string> &messages);
 
-	//get the current constraint residual vector 
+	//get the current constraint residual vector
 	vector<double> get_constraint_residual_vec();
-	
+
 	//get a residual vector comparing constraints_obs and sim_vals
 	vector<double> get_constraint_residual_vec(Observations &sim_vals);
-	
+
 	//set the double* obj_func array
 	void build_obj_func_coef_array();
 

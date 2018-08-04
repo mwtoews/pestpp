@@ -1,8 +1,8 @@
-/*  
-    © Copyright 2012, David Welter
-    
+/*
+
+
     This file is part of PEST++.
-   
+
     PEST++ is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
@@ -31,7 +31,7 @@
 class LaTridiagMatDouble;
 
 class ControlInfo {
-	
+
 public:
 	enum PestMode { ESTIMATION, REGUL, PARETO, UNKNOWN };
 	double relparmax;
@@ -76,11 +76,11 @@ public:
 	string dermthd;
 	double splitthresh;
 	double splitreldiff;
-	ParameterGroupRec(const string &_name="", const string &_inctyp="", double _derinc=0.0, double _derinclb=0.0, 
-		const string &_forcen="", double _derincmul=0.0, 
+	ParameterGroupRec(const string &_name="", const string &_inctyp="", double _derinc=0.0, double _derinclb=0.0,
+		const string &_forcen="", double _derincmul=0.0,
 		const string &_dermthd = "", double _splitthresh = 0.0, double _splitreldiff=.50)
 		: name(_name), inctyp(_inctyp), derinc(_derinc), derinclb(_derinclb), forcen(_forcen),
-		derincmul(_derincmul), dermthd(_dermthd), splitthresh(_splitthresh), 
+		derincmul(_derincmul), dermthd(_dermthd), splitthresh(_splitthresh),
 		splitreldiff(_splitreldiff){}
 	ParameterGroupRec(const ParameterGroupRec &rhs) {*this=rhs;}
 	ParameterGroupRec& operator=(const ParameterGroupRec &rhs);
@@ -97,7 +97,7 @@ public:
 	void insert_group(const string &group_name, ParameterGroupRec &rec);
 
 	/** @brief Creates a link from a parameter to its parameters group.
-	
+
 	This method add a record to a hash table to link the specified parameter
 	to the specified group
 	*/
@@ -114,7 +114,7 @@ public:
 private:
 	unordered_map<string, ParameterGroupRec*> groups;
 	unordered_map<string, ParameterGroupRec*> parameter2group;
-	
+
 };
 
 
@@ -145,7 +145,7 @@ public:
 	const ParameterRec* get_parameter_rec_ptr(const string &name) const;
 	void insert(const string &name, const ParameterRec &rec) {parameter_info[name] = rec;}
 	ParameterInfo() {}
-	~ParameterInfo() {}	
+	~ParameterInfo() {}
 private:
 	unordered_map<string, ParameterRec> parameter_info;
 };
@@ -183,7 +183,7 @@ public:
 	string get_group(const string &obs_name) const;
 	const ObservationRec* get_observation_rec_ptr(const string &name) const;
 	const ObservationGroupRec* get_group_rec_ptr(const string &name) const;
-	Observations get_regulatization_obs(const Observations &obs_in);	
+	Observations get_regulatization_obs(const Observations &obs_in);
 	int get_nnz_obs() const;
 	int get_nnz_obs_and_reg() const;
 	vector<string> get_groups();
@@ -393,7 +393,7 @@ public:
 
 
 	set<string> get_passed_args() const { return passed_args; }
-	
+
 
 
 private:
@@ -408,7 +408,7 @@ private:
 	int max_run_fail;
 	int max_super_frz_iter;
 	int max_reg_iter;
-	vector<double> base_lambda_vec;	
+	vector<double> base_lambda_vec;
 	vector<double> lambda_scale_vec;
 	bool iter_summary_flag;
 	bool der_forgive;

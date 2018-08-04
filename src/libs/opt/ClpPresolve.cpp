@@ -160,7 +160,7 @@ ClpPresolve::originalModel() const
      return originalModel_;
 }
 // Return presolve status (0,1,2)
-int 
+int
 ClpPresolve::presolveStatus() const
 {
   if (nelems_>=0) {
@@ -281,7 +281,7 @@ ClpPresolve::postsolve(bool updateStatus)
           prob.colstat_ = 0 ;
 #ifndef CLP_NO_STD
      }
-#endif 
+#endif
      // put back duals
      CoinMemcpyN(prob.rowduals_,	nrows_, originalModel_->dualRowSolution());
      double maxmin = originalModel_->getObjSense();
@@ -301,7 +301,7 @@ ClpPresolve::postsolve(bool updateStatus)
                                     originalModel_->dualRowSolution(),
                                     originalModel_->dualColumnSolution());
      memset(originalModel_->primalRowSolution(), 0, nrows_ * sizeof(double));
-     originalModel_->clpMatrix()->times(1.0, 
+     originalModel_->clpMatrix()->times(1.0,
 					originalModel_->primalColumnSolution(),
 					originalModel_->primalRowSolution());
      originalModel_->checkSolutionInternal();
@@ -694,7 +694,7 @@ static int tightenDoubletons2(CoinPresolveMatrix * prob)
 		   icol,upperX,highestHighest);
 #endif
 	    upperX=highestHighest;
-	    
+
 	  }
 #endif
 	  // see if we can move costs
@@ -871,7 +871,7 @@ static bool break2(CoinPresolveMatrix *prob)
   return (counter<=0);
 }
 #define possibleBreak if (break2(prob)) break
-#define possibleSkip  if (!break2(prob)) 
+#define possibleSkip  if (!break2(prob))
 #else
 #define possibleBreak
 #define possibleSkip
@@ -1048,7 +1048,7 @@ const CoinPresolveAction *ClpPresolve::presolve(CoinPresolveMatrix *prob)
 	  int numberColumnsLeft=numberColumnsStart;
 	  bool lastPassWasGood=true;
 #if ABC_NORMAL_DEBUG
-	  printf("Original rows,columns %d,%d starting first pass with %d,%d\n", 
+	  printf("Original rows,columns %d,%d starting first pass with %d,%d\n",
 		 nrows_,ncols_,numberRowsLeft,numberColumnsLeft);
 #endif
 #endif
@@ -1181,7 +1181,7 @@ const CoinPresolveAction *ClpPresolve::presolve(CoinPresolveMatrix *prob)
 		      for (int i = 0; i < nNext; i++) {
 			int index = nextToDo[i];
 			prob->unsetRowChanged(index);
-			if (count[index]) 
+			if (count[index])
 			  toDo[n++] = index;
 		      }
 		      prob->numberRowsToDo_ = n;
@@ -1194,7 +1194,7 @@ const CoinPresolveAction *ClpPresolve::presolve(CoinPresolveMatrix *prob)
 		      for (int i = 0; i < nNext; i++) {
 			int index = nextToDo[i];
 			prob->unsetColChanged(index);
-			if (count[index]) 
+			if (count[index])
 			  toDo[n++] = index;
 		      }
 		      prob->numberColsToDo_ = n;
@@ -1211,7 +1211,7 @@ const CoinPresolveAction *ClpPresolve::presolve(CoinPresolveMatrix *prob)
 		 int n = 0;
 		 for (int i = 0; i < nrows_; i++) {
 		   prob->unsetRowChanged(i);
-		   if (count[i]) 
+		   if (count[i])
 		     toDo[n++] = i;
 		 }
 		 prob->numberRowsToDo_ = n;
@@ -1221,7 +1221,7 @@ const CoinPresolveAction *ClpPresolve::presolve(CoinPresolveMatrix *prob)
 		 n = 0;
 		 for (int i = 0; i < ncols_; i++) {
 		   prob->unsetColChanged(i);
-		   if (count[i]) 
+		   if (count[i])
 		     toDo[n++] = i;
 		 }
 		 prob->numberColsToDo_ = n;
@@ -1358,7 +1358,7 @@ const CoinPresolveAction *ClpPresolve::presolve(CoinPresolveMatrix *prob)
 	       int numberRowsNow=nrows_-prob->countEmptyRows();
 	       int numberColumnsNow=ncols_-prob->countEmptyCols();
 #if ABC_NORMAL_DEBUG
-	       printf("Original rows,columns %d,%d - last %d,%d end of pass %d has %d,%d\n", 
+	       printf("Original rows,columns %d,%d - last %d,%d end of pass %d has %d,%d\n",
 		      nrows_,ncols_,numberRowsLeft,numberColumnsLeft,iLoop+1,numberRowsNow,
 		      numberColumnsNow);
 #endif
@@ -1655,7 +1655,7 @@ CoinPrePostsolveMatrix::CoinPrePostsolveMatrix(const ClpSimplex * si,
        messages_()
 
 {
-     bulk0_ = static_cast<CoinBigIndex> (bulkRatio_ * 
+     bulk0_ = static_cast<CoinBigIndex> (bulkRatio_ *
 					 CoinMax(nelems_in,nelems_));
      // allow for temporary overflow
      hrow_  = new int   [bulk0_+ncols_in];
@@ -2338,7 +2338,7 @@ ClpPresolve::gutsOfPresolvedModel(ClpSimplex * originalModel,
 		 //memset(prob.acts_,0,prob.nrows_*sizeof(double));
 		 presolvedModel_->matrix()->times(prob.sol_,rsol);
 		 int i;
-		 
+
 		 for (i = 0; i < n; i++) {
 		   double gap=up[i]-lo[i];
 		   if (rsol[i]<lo[i]-feasibilityTolerance&&fabs(rsol[i]-lo[i])<1.0e-3) {

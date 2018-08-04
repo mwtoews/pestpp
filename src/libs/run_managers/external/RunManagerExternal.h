@@ -1,5 +1,5 @@
 /*
-© Copyright 2012, David Welter
+
 
 This file is part of PEST++.
 
