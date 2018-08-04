@@ -421,7 +421,7 @@ void Mat::from_file(const string &filename)
 	}
 	else
 	{
-		ss << "Mat::from_file() erroro: unrecognnized localizer '" << ext << "', should be JCB, JCO, MAT or CSV";
+		ss << "Mat::from_file() error: unrecognized extension'" << ext << "', should be JCB, JCO, MAT or CSV";
 		throw runtime_error(ss.str());
 	}
 
@@ -1113,6 +1113,7 @@ string Covariance::try_from(Pest &pest_scenario, FileManager &file_manager, bool
 	if (!cov_fname.empty())
 	{
 		string ext = cov_fname.substr(cov_fname.size() - 3, 3);
+		pest_utils::upper_ip(ext);
 		if (ext == "UNC")
 		{
 			try
