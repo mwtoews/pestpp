@@ -29,14 +29,14 @@ public:
 	linear_analysis(Mat* _jacobian, Pest* pest_scenario, Logger* _log = new Logger());
 	linear_analysis(Mat* _jacobian, Pest* pest_scenario, Mat* _obscov, Logger* _log = new Logger());
 
-	
+
 	//directly from Mat objects
 	linear_analysis(Mat _jacobian, Mat _parcov, Mat _obscov, map<string, Mat> _predictions,Logger* _log = new Logger());
 
 	void set_predictions(vector<string> preds);
 	void set_predictions(vector<Mat> preds);
 	void set_predictions(Mat* preds);
-	
+
 	void  set_parcov(Mat* _parcov);
 
 	//get a new linear analysis object consisting of a subset of par and obs names
@@ -56,7 +56,7 @@ public:
 	//the full matrix
 	Mat posterior_parameter_matrix();
 	Mat* posterior_parameter_ptr();
-	
+
 	//prior predictive variance from parcov
 	double prior_prediction_variance(string &pred_name);
 	//map <pred_name,variance> from parcov
@@ -76,8 +76,8 @@ public:
 	//<pred_name,prior and posterior variance_reduction> from perfect knowledge of some pars
 	map<string, pair<double, double>> contribution(vector<string> &par_names);
 
-	
-	
+
+
 	//exposed error variance functionality
 
 	//<err_var_component("null","solution","omitted"),error_variance> for a set of singular values and a parameter
@@ -135,7 +135,7 @@ public:
 
 	map<string,Mat> get_predictions(){ return predictions; }
 	map<string,Mat> get_omitted_predictions(){ return omitted_predictions; }
-	
+
 	//aligns the different linear components
 	void align();
 
@@ -144,11 +144,11 @@ public:
 	~linear_analysis();
 
 	//some convience methods for PEST++ integration
-	void write_par_credible_range(ofstream &fout, string sum_filename, ParameterInfo parinfo, 
+	void write_par_credible_range(ofstream &fout, string sum_filename, ParameterInfo parinfo,
 		Parameters init_pars, Parameters opt_pars,vector<string> ordered_names);
-	void write_pred_credible_range(ofstream &fout, string sum_filename, map<string,pair<double,double>> init_final_pred_values);	
+	void write_pred_credible_range(ofstream &fout, string sum_filename, map<string,pair<double,double>> init_final_pred_values);
 	void drop_prior_information(const Pest &pest_scenario);
-	
+
 private:
 
 	Logger* log;

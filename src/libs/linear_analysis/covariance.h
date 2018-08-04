@@ -19,9 +19,9 @@ public:
 	Mat(){ autoalign = true; };
 	Mat(string filename);
 
-	Mat(vector<string> _row_names, vector<string> _col_names, 
+	Mat(vector<string> _row_names, vector<string> _col_names,
 		Eigen::SparseMatrix<double> _matrix);
-	
+
 	Mat(vector<string> _row_names, vector<string> _col_names,
 		Eigen::SparseMatrix<double>* _matrix);
 
@@ -33,7 +33,7 @@ public:
 	const vector<string>* rn_ptr();
 	const vector<string>* cn_ptr();
 	Eigen::SparseMatrix<double> get_matrix(){ return matrix; }
-	
+
 	const Eigen::SparseMatrix<double>* e_ptr();
 	const Eigen::SparseMatrix<double>* U_ptr();
 	const Eigen::SparseMatrix<double>* V_ptr();
@@ -68,7 +68,7 @@ public:
 
 	Mat identity();
 	Mat zero();
-	
+
 
 	Mat get(const vector<string> &other_row_names, const vector<string> &other_col_names,bool update=true);
 	Mat leftCols(const int idx);
@@ -80,7 +80,7 @@ public:
 	void drop_cols(const vector<string> &drop_col_names);
 
 	int nrow(){ return row_names.size(); }
-	int ncol(){ return col_names.size(); }	
+	int ncol(){ return col_names.size(); }
 
 	bool isdiagonal();
 
@@ -138,7 +138,7 @@ public:
 	vector<double> standard_normal(default_random_engine gen);
 	void cholesky();
 
-	
+
 private:
 	Eigen::SparseMatrix<double> lower_cholesky;
 };

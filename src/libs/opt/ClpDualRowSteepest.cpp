@@ -725,7 +725,7 @@ updatePrimalBit(update_primals & info)
 	value *= CLP_DUAL_FIXED_COLUMN_MULTIPLIER; // bias towards taking out fixed variables
 #endif
       // store square in list
-      if (!infeas[iRow]) 
+      if (!infeas[iRow])
 	which[numberAdded++]=iRow;
       infeas[iRow] = value;
     } else if (value > upper + tolerance) {
@@ -740,7 +740,7 @@ updatePrimalBit(update_primals & info)
 	value *= CLP_DUAL_FIXED_COLUMN_MULTIPLIER; // bias towards taking out fixed variables
 #endif
       // store square in list
-      if (!infeas[iRow]) 
+      if (!infeas[iRow])
 	which[numberAdded++]=iRow;
       infeas[iRow] = value;
     } else {
@@ -779,7 +779,7 @@ ClpDualRowSteepest::updatePrimalSolution(
      int numberColumns = model_->numberColumns();
 #endif
      if (primalUpdate->packedMode()) {
-#if ABOCA_LITE == 0 
+#if ABOCA_LITE == 0
           for (i = 0; i < number; i++) {
                int iRow = which[i];
                int iPivot = pivotVariable[iRow];
@@ -861,7 +861,7 @@ ClpDualRowSteepest::updatePrimalSolution(
 	       for (i=0;i<ABOCA_LITE;i++) {
 		 int numberAdded=info[i].numberAdded;
 		 int * which=info[i].which;
-		 for (int j=0;j<numberAdded;j++) 
+		 for (int j=0;j<numberAdded;j++)
 		   index[n++]=which[j];
 		 changeObj += info[i].changeObj;
 	       }
@@ -1178,19 +1178,19 @@ ClpDualRowSteepest::saveWeights(ClpSimplex * model, int mode)
 	 // fast of some sort - could be clever???
 	 // for now initialize
 	 if ((options&524288)!=0&&false) {
-	   // fathom 
-	   for (int i = 0; i < numberRows; i++) 
+	   // fathom
+	   for (int i = 0; i < numberRows; i++)
 	     weights_[i] = 1.0;
 	 } else if (true) {
 	   // strong
-	   for (int i = 0; i < numberRows; i++) 
+	   for (int i = 0; i < numberRows; i++)
 	     weights_[i] = 1.0;
 	 }
        }
      }
 }
 // Pass in saved weights
-void 
+void
 ClpDualRowSteepest::passInSavedWeights(const CoinIndexedVector * saved)
 {
   delete savedWeights_;

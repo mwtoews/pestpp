@@ -24,7 +24,7 @@ public:
 	//	OutputFileWriter &_output_file_writer, PerformanceLog *_performance_log, unsigned int seed = 1);
 	Ensemble(Pest* _pest_scenario);
 	Ensemble() { ; }
-	
+
 	//Ensemble get(vector<string> &_real_names, vector<string> &_var_names);
 
 	void to_csv(string file_name);
@@ -54,12 +54,12 @@ public:
 
 	Eigen::MatrixXd get_eigen_mean_diff();
 	Eigen::MatrixXd get_eigen_mean_diff(const vector<string> &_real_names, const vector<string> &_var_names);
-	
+
 	vector<double> get_mean_stl_vector();
-	
+
 	void append_other_rows(Ensemble &other);
 	void append(string real_name, const Transformable &trans);
-	
+
 	Covariance get_diagonal_cov_matrix();
 
 	void reorder(const vector<string> &_real_names, const vector<string> &_var_names);
@@ -95,7 +95,7 @@ protected:
 
 class ParameterEnsemble : public Ensemble
 {
-	
+
 public:
 	enum transStatus { CTL, NUM, MODEL };
 	/*ParameterEnsemble(const ParamTransformSeq &_par_transform, Pest &_pest_scenario,
@@ -141,7 +141,7 @@ private:
 
 class ObservationEnsemble : public Ensemble
 {
-public: 
+public:
 	/*ObservationEnsemble(ObjectiveFunc *_obj_func, Pest &_pest_scenario, FileManager &_file_manager,
     OutputFileWriter &_output_file_writer, PerformanceLog *_performance_log, unsigned int seed = 1);
 	*/
@@ -162,4 +162,4 @@ public:
 };
 
 
-#endif 
+#endif

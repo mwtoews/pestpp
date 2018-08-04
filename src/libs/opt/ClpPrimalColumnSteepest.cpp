@@ -584,7 +584,7 @@ ClpPrimalColumnSteepest::pivotColumn(CoinIndexedVector * updates,
 
 #ifndef NDEBUG
      if (bestSequence >= 0) {
-          if (model_->getStatus(bestSequence) == ClpSimplex::atLowerBound) 
+          if (model_->getStatus(bestSequence) == ClpSimplex::atLowerBound)
                assert(model_->reducedCost(bestSequence) < 0.0);
           if (model_->getStatus(bestSequence) == ClpSimplex::atUpperBound) {
                assert(model_->reducedCost(bestSequence) > 0.0);
@@ -630,7 +630,7 @@ ClpPrimalColumnSteepest::justDjs(CoinIndexedVector * updates,
 
           reducedCost = model_->djRegion(iSection);
           int addSequence;
-#ifdef CLP_PRIMAL_SLACK_MULTIPLIER 
+#ifdef CLP_PRIMAL_SLACK_MULTIPLIER
 	  double slack_multiplier;
 #endif
 
@@ -639,7 +639,7 @@ ClpPrimalColumnSteepest::justDjs(CoinIndexedVector * updates,
                index = updates->getIndices();
                updateBy = updates->denseVector();
                addSequence = model_->numberColumns();
-#ifdef CLP_PRIMAL_SLACK_MULTIPLIER 
+#ifdef CLP_PRIMAL_SLACK_MULTIPLIER
 	       slack_multiplier = CLP_PRIMAL_SLACK_MULTIPLIER;
 #endif
           } else {
@@ -647,7 +647,7 @@ ClpPrimalColumnSteepest::justDjs(CoinIndexedVector * updates,
                index = spareColumn1->getIndices();
                updateBy = spareColumn1->denseVector();
                addSequence = 0;
-#ifdef CLP_PRIMAL_SLACK_MULTIPLIER 
+#ifdef CLP_PRIMAL_SLACK_MULTIPLIER
 	       slack_multiplier = 1.0;
 #endif
           }
@@ -1164,7 +1164,7 @@ ClpPrimalColumnSteepest::djsAndSteepest(CoinIndexedVector * updates,
                     else
                          infeasible_->quickAdd(iSequence, value);
                } else {
-                    infeasible_->zero(iSequence); 
+                    infeasible_->zero(iSequence);
                }
           }
      }
@@ -1288,7 +1288,7 @@ ClpPrimalColumnSteepest::djsAndDevex2(CoinIndexedVector * updates,
 
           reducedCost = model_->djRegion(iSection);
           int addSequence;
-#ifdef CLP_PRIMAL_SLACK_MULTIPLIER 
+#ifdef CLP_PRIMAL_SLACK_MULTIPLIER
 	  double slack_multiplier;
 #endif
 
@@ -1297,7 +1297,7 @@ ClpPrimalColumnSteepest::djsAndDevex2(CoinIndexedVector * updates,
                index = updates->getIndices();
                updateBy = updates->denseVector();
                addSequence = model_->numberColumns();
-#ifdef CLP_PRIMAL_SLACK_MULTIPLIER 
+#ifdef CLP_PRIMAL_SLACK_MULTIPLIER
 	       slack_multiplier = CLP_PRIMAL_SLACK_MULTIPLIER;
 #endif
           } else {
@@ -1305,7 +1305,7 @@ ClpPrimalColumnSteepest::djsAndDevex2(CoinIndexedVector * updates,
                index = spareColumn1->getIndices();
                updateBy = spareColumn1->denseVector();
                addSequence = 0;
-#ifdef CLP_PRIMAL_SLACK_MULTIPLIER 
+#ifdef CLP_PRIMAL_SLACK_MULTIPLIER
 	       slack_multiplier = 1.0;
 #endif
           }
@@ -1500,7 +1500,7 @@ ClpPrimalColumnSteepest::djsAndSteepest2(CoinIndexedVector * updates,
 
           reducedCost = model_->djRegion(iSection);
           int addSequence;
-#ifdef CLP_PRIMAL_SLACK_MULTIPLIER 
+#ifdef CLP_PRIMAL_SLACK_MULTIPLIER
 	  double slack_multiplier;
 #endif
 
@@ -1509,7 +1509,7 @@ ClpPrimalColumnSteepest::djsAndSteepest2(CoinIndexedVector * updates,
                index = updates->getIndices();
                updateBy = updates->denseVector();
                addSequence = model_->numberColumns();
-#ifdef CLP_PRIMAL_SLACK_MULTIPLIER 
+#ifdef CLP_PRIMAL_SLACK_MULTIPLIER
 	       slack_multiplier = CLP_PRIMAL_SLACK_MULTIPLIER;
 #endif
           } else {
@@ -1517,7 +1517,7 @@ ClpPrimalColumnSteepest::djsAndSteepest2(CoinIndexedVector * updates,
                index = spareColumn1->getIndices();
                updateBy = spareColumn1->denseVector();
                addSequence = 0;
-#ifdef CLP_PRIMAL_SLACK_MULTIPLIER 
+#ifdef CLP_PRIMAL_SLACK_MULTIPLIER
 	       slack_multiplier = 1.0;
 #endif
           }
@@ -2966,8 +2966,8 @@ ClpPrimalColumnSteepest::saveWeights(ClpSimplex * model, int mode)
                }
                savedPivotSequence_ = -2;
                savedSequenceOut_ = -2;
-	       if (pivotSequence_ < 0 || pivotSequence_ >= 
-		   numberRows+numberColumns) 
+	       if (pivotSequence_ < 0 || pivotSequence_ >=
+		   numberRows+numberColumns)
 		 pivotSequence_ = -1;
 
           } else {
@@ -3058,7 +3058,7 @@ ClpPrimalColumnSteepest::saveWeights(ClpSimplex * model, int mode)
 	  double primalTolerance = model_->currentPrimalTolerance();
 
           if (!model_->nonLinearCost()->lookBothWays()) {
-#ifndef CLP_PRIMAL_SLACK_MULTIPLIER 
+#ifndef CLP_PRIMAL_SLACK_MULTIPLIER
                for (iSequence = 0; iSequence < number; iSequence++) {
                     double value = reducedCost[iSequence];
                     ClpSimplex::Status status = model_->getStatus(iSequence);

@@ -36,7 +36,7 @@
   For efficiency, rows are marked as processed when L(i) and U(i) are first
   calculated and these values are not recalculated unless a column bound
   changes.
-  
+
 */
 const CoinPresolveAction *testRedundant (CoinPresolveMatrix *prob,
 					 const CoinPresolveAction *next)
@@ -76,7 +76,7 @@ const CoinPresolveAction *testRedundant (CoinPresolveMatrix *prob,
   const int *colLengths = prob->hincol_ ;
 /*
   Rim vectors.
-  
+
   We need copies of the column bounds to modify as we do bound propagation.
 */
   const double *rlo = prob->rlo_ ;
@@ -198,20 +198,20 @@ const CoinPresolveAction *testRedundant (CoinPresolveMatrix *prob,
 	const double value = rowCoeffs[kcol] ;
 	const int j = colIndices[kcol] ;
 	if (value > 0.0) {
-	  if (columnUpper[j] < large) 
+	  if (columnUpper[j] < large)
 	    finUpi += columnUpper[j]*value ;
 	  else
 	    ++infUpi ;
-	  if (columnLower[j] > -large) 
+	  if (columnLower[j] > -large)
 	    finDowni += columnLower[j]*value ;
 	  else
 	    ++infLoi ;
 	} else if (value<0.0) {
-	  if (columnUpper[j] < large) 
+	  if (columnUpper[j] < large)
 	    finDowni += columnUpper[j]*value ;
 	  else
 	    ++infLoi ;
-	  if (columnLower[j] > -large) 
+	  if (columnLower[j] > -large)
 	    finUpi += columnLower[j]*value ;
 	  else
 	    ++infUpi ;
@@ -474,7 +474,7 @@ const CoinPresolveAction *testRedundant (CoinPresolveMatrix *prob,
   Open a loop to scan the rows again looking for useless constraints.
 */
     for (int i = 0 ; i < m ; i++) {
-      
+
       if (markRow[i] == markIgnore) continue ;
 /*
   Recalculate L(i) and U(i).
@@ -492,20 +492,20 @@ const CoinPresolveAction *testRedundant (CoinPresolveMatrix *prob,
 	const double value = rowCoeffs[krow] ;
 	const int j = colIndices[krow] ;
 	if (value > 0.0) {
-	  if (columnUpper[j] < large) 
+	  if (columnUpper[j] < large)
 	    finUpi += columnUpper[j] * value ;
 	  else
 	    ++infUpi ;
-	  if (columnLower[j] > -large) 
+	  if (columnLower[j] > -large)
 	    finDowni += columnLower[j] * value ;
 	  else
 	    ++infLoi ;
 	} else if (value<0.0) {
-	  if (columnUpper[j] < large) 
+	  if (columnUpper[j] < large)
 	    finDowni += columnUpper[j] * value ;
 	  else
 	    ++infLoi ;
-	  if (columnLower[j] > -large) 
+	  if (columnLower[j] > -large)
 	    finUpi += columnLower[j] * value ;
 	  else
 	    ++infUpi ;
@@ -560,13 +560,13 @@ const CoinPresolveAction *testRedundant (CoinPresolveMatrix *prob,
 	if (upper-lower < 1.0e-8) {
 	  if (upper-lower < -feasTol)
 	    numberInfeasible++ ;
-	  if (CoinMin(fabs(upper),fabs(lower)) <= 1.0e-7) 
+	  if (CoinMin(fabs(upper),fabs(lower)) <= 1.0e-7)
 	    upper = 0.0 ;
 	  fixed[nFixed++] = j ;
 	  prob->addCol(j) ;
 	  cup[j] = upper ;
 	  clo[j] = upper ;
-	  if (csol != 0) 
+	  if (csol != 0)
 	    csol[j] = upper ;
 	} else {
 	  if (integerType[j]) {
@@ -588,7 +588,7 @@ const CoinPresolveAction *testRedundant (CoinPresolveMatrix *prob,
 	printf("%d fixed in impliedfree, %d changed\n",nFixed,nChanged) ;
 #     endif
       if (nFixed)
-	next = remove_fixed_action::presolve(prob,fixed,nFixed,next) ; 
+	next = remove_fixed_action::presolve(prob,fixed,nFixed,next) ;
     }
   }
 
@@ -717,12 +717,12 @@ const CoinPresolveAction *useless_constraint_action::presolve(CoinPresolveMatrix
 // Put constructors here
 useless_constraint_action::useless_constraint_action(int nactions,
                                                      const action *actions,
-                                                     const CoinPresolveAction *next) 
+                                                     const CoinPresolveAction *next)
   :   CoinPresolveAction(next),
       nactions_(nactions),
       actions_(actions)
 {}
-useless_constraint_action::~useless_constraint_action() 
+useless_constraint_action::~useless_constraint_action()
 {
   for (int i=0;i<nactions_;i++) {
     deleteAction(actions_[i].rowcols, int *);
@@ -756,7 +756,7 @@ void useless_constraint_action::postsolve(CoinPostsolveMatrix *prob) const
   CoinBigIndex *mcstrt		= prob->mcstrt_;
   int *link		= prob->link_;
   int *hincol		= prob->hincol_;
-  
+
   //  double *rowduals	= prob->rowduals_;
   double *rowacts	= prob->acts_;
   const double *sol	= prob->sol_;
@@ -792,14 +792,14 @@ void useless_constraint_action::postsolve(CoinPostsolveMatrix *prob) const
 	link[kk] = mcstrt[jcol];
 	mcstrt[jcol] = kk;
       }
-      
+
       rowact += rowels[k] * sol[jcol];
       hincol[jcol]++;
     }
 #   if PRESOLVE_CONSISTENCY
     presolve_check_free_list(prob) ;
 #   endif
-    
+
     // I don't know if this is always true
     PRESOLVEASSERT(prob->getRowStatus(irow)==CoinPrePostsolveMatrix::basic);
     // rcosts are unaffected since rowdual is 0

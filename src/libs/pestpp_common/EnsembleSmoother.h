@@ -13,7 +13,7 @@
 #include "covariance.h"
 #include "RunManagerAbstract.h"
 #include "ObjectiveFunc.h"
-#include "Localizer.h" 
+#include "Localizer.h"
 
 
 class PhiHandler
@@ -22,7 +22,7 @@ public:
 
 	enum phiType { MEAS, COMPOSITE, REGUL, ACTUAL };
 	PhiHandler() { ; }
-	PhiHandler(Pest *_pest_scenario, FileManager *_file_manager, 
+	PhiHandler(Pest *_pest_scenario, FileManager *_file_manager,
 		       ObservationEnsemble *_oe_base, ParameterEnsemble *_pe_base,
 		       Covariance *_parcov, double *_reg_factor, ObservationEnsemble *_weights);
 	void update(ObservationEnsemble &oe, ParameterEnsemble &pe);
@@ -62,7 +62,7 @@ private:
 	//map<string, double>* get_phi_map(PhiHandler::phiType &pt);
 	void write_csv(int iter_num, int total_runs,ofstream &csv, phiType pt,
 		           vector<string> &names);
-	void write_group_csv(int iter_num, int total_runs, ofstream &csv, 
+	void write_group_csv(int iter_num, int total_runs, ofstream &csv,
 		vector<double> extra = vector<double>());
 
 	double *reg_factor;
@@ -87,10 +87,10 @@ private:
 	map<string, vector<int>> obs_group_idx_map;
 	map<string, vector<int>> par_group_idx_map;
 	map<string, map<string, double>> obs_group_phi_map, par_group_phi_map;
-	
+
 	map<string, double> get_obs_group_contrib(Eigen::VectorXd &phi_vec);
-	map<string, double> get_par_group_contrib(Eigen::VectorXd &phi_vec);	
-	
+	map<string, double> get_par_group_contrib(Eigen::VectorXd &phi_vec);
+
 };
 
 
@@ -117,7 +117,7 @@ private:
 	PhiHandler ph;
 	Covariance parcov, obscov;
 	double reg_factor;
-	
+
 	bool use_localizer;
 	Localizer localizer;
 
@@ -173,7 +173,7 @@ private:
 	template<typename T, typename A>
 	void message(int level, string _message, vector<T, A> _extras);
 	void message(int level, string _message);
-	
+
 	template<typename T, typename A>
 	void message(int level, char* _message, vector<T, A> _extras);// { message(level, string(_message), _extras); }
 	void message(int level, char* _message);// { message(level, string(_message)); }
@@ -195,4 +195,4 @@ private:
 
 };
 
-#endif 
+#endif

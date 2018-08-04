@@ -1,8 +1,8 @@
-/*  
-	© Copyright 2012, David Welter
-	
+/*
+
+
 	This file is part of PEST++.
-   
+
 	PEST++ is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
@@ -67,8 +67,7 @@ int main(int argc, char* argv[])
 		string version = PESTPP_VERSION;
 		cout << endl << endl;
 		cout << "             pestpp: a tool for GLM parameter estimation,  version " << version << endl << endl;
-		cout << "                 by Dave Welter" << endl;
-		cout << "     Computational Water Resource Engineering" << endl << endl << endl;
+		cout << "                 by The PEST++ Development Team" << endl;
 		// build commandline
 		string commandline = "";
 		for (int i = 0; i < argc; ++i)
@@ -250,8 +249,8 @@ int main(int argc, char* argv[])
 		if (!restart_flag || save_restart_rec_header)
 		{
 			fout_rec << "             PEST++ Version " << version << endl << endl;
-			fout_rec << "                 by Dave Welter" << endl;
-			fout_rec << "     Computational Water Resource Engineering" << endl << endl << endl;
+			fout_rec << "                 by The PEST++ Development Team" << endl;
+
 			fout_rec << endl;
 			fout_rec << "using control file: \"" << complete_path << "\"" << endl << endl;
 		}
@@ -284,7 +283,7 @@ int main(int argc, char* argv[])
 		}
 
 		//Initialize OutputFileWriter to hadle IO of suplementary files (.par, .par, .svd)
-		//bool save_eign = pest_scenario.get_svd_info().eigwrite > 0;	
+		//bool save_eign = pest_scenario.get_svd_info().eigwrite > 0;
 		OutputFileWriter output_file_writer(file_manager, pest_scenario, restart_flag);
 		output_file_writer.set_svd_output_opt(pest_scenario.get_svd_info().eigwrite);
 		if (!restart_flag)
@@ -342,7 +341,7 @@ int main(int argc, char* argv[])
 			run_manager_ptr = new RunManagerExternal(exi.comline_vec,
 				exi.tplfile_vec, exi.inpfile_vec, exi.insfile_vec, exi.outfile_vec,
 				file_manager.build_filename("rns"), file_manager.build_filename("ext"),
-				file_manager.build_filename("exi"), 
+				file_manager.build_filename("exi"),
 				pest_scenario.get_pestpp_options().get_max_run_fail());
 		}
 		else
@@ -387,7 +386,7 @@ int main(int argc, char* argv[])
 		if (pest_scenario.get_pestpp_options().get_mat_inv() == PestppOptions::Q12J) mat_inv = SVDSolver::MAT_INV::Q12J;
 		SVDSolver base_svd(pest_scenario, file_manager, &obj_func, base_trans_seq,
 			*base_jacobian_ptr, output_file_writer, mat_inv, &performance_log, "base parameter solution",parcov);
-		
+
 		base_svd.set_svd_package(pest_scenario.get_pestpp_options().get_svd_pack());
 		//Build Super-Parameter problem
 		Jacobian *super_jacobian_ptr = new Jacobian(file_manager);
@@ -509,7 +508,7 @@ int main(int argc, char* argv[])
 
 		//Define model Run for Base Parameters (uses base parameter tranformations)
 		ModelRun cur_run(&obj_func, pest_scenario.get_ctl_observations());
-		
+
 		cur_run.set_ctl_parameters(cur_ctl_parameters);
 		//If this is a restart we need to get the latest ctl parameters
 		if (restart_ctl.get_restart_option() != RestartController::RestartOption::NONE)
@@ -560,7 +559,7 @@ int main(int argc, char* argv[])
 					bool restart_runs = (restart_ctl.get_restart_option() == RestartController::RestartOption::RESUME_JACOBIAN_RUNS);
 					cur_run = base_svd.compute_jacobian(*run_manager_ptr, termination_ctl, cur_run, restart_runs);
 					if (restart_runs) restart_ctl.get_restart_option() = RestartController::RestartOption::NONE;
-					optimum_run = cur_run;					
+					optimum_run = cur_run;
 					output_file_writer.write_rei(file_manager.open_ofile_ext("rei"), -1, pest_scenario.get_ctl_observations(),
 						cur_run.get_obs(), *cur_run.get_obj_func_ptr(), pest_scenario.get_ctl_parameters());
 					termination_ctl.set_terminate(true);
@@ -631,7 +630,7 @@ int main(int argc, char* argv[])
 				//use base jacobian to compute first super jacobian if there was not a super upgrade
 				bool calc_first_jacobian = true;
 				if (n_base_iter == -1)
-				{ 
+				{
 					//transform base jacobian to super jacobian
 					super_svd.get_jacobian() = base_svd.get_jacobian();
 					super_svd.get_jacobian().transform(base_trans_seq, &ParamTransformSeq::jac_numeric2active_ctl_ip);
@@ -681,9 +680,9 @@ int main(int argc, char* argv[])
 		output_file_writer.phi_report(cout, termination_ctl.get_iteration_number() + 1, run_manager_ptr->get_total_runs(), phi_data, 0.0, true);
 		fout_rec << endl << endl;
 		fout_rec << "Number of forward model runs performed during optimiztion: " << run_manager_ptr->get_total_runs() << endl;
-			
+
 		//linear analysis stuff
-		if ((pest_scenario.get_control_info().noptmax != 0) && 
+		if ((pest_scenario.get_control_info().noptmax != 0) &&
 			(pest_scenario.get_pestpp_options().get_uncert_flag()))
 
 		{
@@ -722,7 +721,7 @@ int main(int argc, char* argv[])
 			fout_rec << "      See PEST++ V3 documentation for implementation details." << endl;
 			fout_rec << "-----------------------------------------------------------------------" << endl;
 			fout_rec << endl;
-			
+
 			fout_rec << "Note: Any observations or prior information equations with a group name" << endl;
 			fout_rec << "      starting with 'regul' are dropped from the jacobian and observation" << endl;
 			fout_rec << "      covariance matrices before uncertainty calculations.  Please" << endl;
@@ -732,17 +731,17 @@ int main(int argc, char* argv[])
 			fout_rec << "      where <matrix_file_name> can be an ASCII PEST-compatible matrix file (.mat) or" << endl;
 			fout_rec << "      a PEST-compatible uncertainty file (.unc)." << endl << endl;
 
-			
+
 			ofstream &pfm = file_manager.get_ofstream("pfm");
 			pfm << endl << endl << "-----------------------------------" << endl;
 			pfm << "starting linear uncertainty analyses" << endl;
 			pfm << "-----------------------------------" << endl << endl;
 			Logger unc_log(pfm);
-			
+
 			//instance of a Mat for the jco
 			Mat j(base_jacobian_ptr->get_sim_obs_names(), base_jacobian_ptr->get_base_numeric_par_names(),
 				base_jacobian_ptr->get_matrix_ptr());
-			
+
 			//get a new obs info instance that accounts for residual phi (and expected objection value if passed)
 			// and report new weights to the rec file
 			fout_rec << endl;
@@ -754,8 +753,8 @@ int main(int argc, char* argv[])
 			fout_rec << "      the level of measurement noise implied by the original weights so" << endl;
 			fout_rec << "      the total objective function is equal to the number of  " << endl;
 			fout_rec << "      non-zero weighted observations." << endl;
-				
-							
+
+
 			fout_rec << endl;
 			fout_rec << "Scaled observation weights used to form observation noise covariance matrix:" << endl;
 			fout_rec << endl << setw(20) << "observation" << setw(20) << "group" << setw(20) << "scaled_weight" << endl;
@@ -765,12 +764,12 @@ int main(int argc, char* argv[])
 			fout_rec << endl << endl;
 			//covariance instance for observation noise
 			Covariance obscov;
-			obscov.from_observation_weights(pest_scenario.get_ctl_ordered_obs_names(), reweight, 
+			obscov.from_observation_weights(pest_scenario.get_ctl_ordered_obs_names(), reweight,
 				pest_scenario.get_ctl_ordered_pi_names(), pest_scenario.get_prior_info_ptr());
-			
+
 			//instance of linear analysis
 			linear_analysis la(&j, &pest_scenario, &obscov, &unc_log);
-			
+
 			//if needed, set the predictive sensitivity vectors
 			const vector<string> pred_names = pest_scenario.get_pestpp_options().get_prediction_names();
 			//make sure prediction weights are zero
@@ -784,22 +783,22 @@ int main(int argc, char* argv[])
 			}
 			if (pred_names.size() > 0)
 				la.set_predictions(pred_names);
-			
+
 			//drop all 'regul' obs and equations
 			la.drop_prior_information(pest_scenario);
-			
+
 			//write the posterior covariance matrix
 			string postcov_filename = file_manager.get_base_filename() + ".post.cov";
 			la.posterior_parameter_ptr()->to_ascii(postcov_filename);
-			fout_rec << "Note : posterior parameter covariance matrix written to file '" + postcov_filename + 
+			fout_rec << "Note : posterior parameter covariance matrix written to file '" + postcov_filename +
 				"'" << endl << endl;
-				 
+
 			//write a parameter prior and posterior summary to the rec file
 			const ParamTransformSeq trans = pest_scenario.get_base_par_tran_seq();
 			Parameters pars = pest_scenario.get_ctl_parameters();
 			string parsum_filename = file_manager.get_base_filename() + ".par.usum.csv";
-			la.write_par_credible_range(fout_rec, parsum_filename, pest_scenario.get_ctl_parameter_info(), 
-				trans.active_ctl2numeric_cp(pest_scenario.get_ctl_parameters()), 
+			la.write_par_credible_range(fout_rec, parsum_filename, pest_scenario.get_ctl_parameter_info(),
+				trans.active_ctl2numeric_cp(pest_scenario.get_ctl_parameters()),
 				trans.active_ctl2numeric_cp(optimum_run.get_ctl_pars()),
 				pest_scenario.get_ctl_ordered_par_names());
 			fout_rec << "Note : the above parameter uncertainty summary was written to file '" + parsum_filename +
@@ -811,7 +810,7 @@ int main(int argc, char* argv[])
 				double ival, fval;
 				for (auto &pred_name : pred_names)
 				{
-					int idx = distance(run_manager_ptr->get_obs_name_vec().begin(),find(run_manager_ptr->get_obs_name_vec().begin(), 
+					int idx = distance(run_manager_ptr->get_obs_name_vec().begin(),find(run_manager_ptr->get_obs_name_vec().begin(),
 						run_manager_ptr->get_obs_name_vec().end(), pred_name));
 					ival = run_manager_ptr->get_init_sim()[idx];
 					//ival = pest_scenario.get_ctl_observations().get_rec(pred_name);

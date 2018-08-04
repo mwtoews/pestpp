@@ -99,7 +99,7 @@
 #ifdef CLP_USER_DRIVEN1
 /* Returns true if variable sequenceOut can leave basis when
    model->sequenceIn() enters.
-   This function may be entered several times for each sequenceOut.  
+   This function may be entered several times for each sequenceOut.
    The first time realAlpha will be positive if going to lower bound
    and negative if going to upper bound (scaled bounds in lower,upper) - then will be zero.
    currentValue is distance to bound.
@@ -479,7 +479,7 @@ int ClpSimplexPrimal::primal (int ifValuesPass , int startFinishOptions)
                // exit if victory declared
 	       if (problemStatus_ >= 0) {
 #ifdef CLP_USER_DRIVEN
-		 int status = 
+		 int status =
 		   eventHandler_->event(ClpEventHandler::endInPrimal);
 		 if (status>=0&&status<10) {
 		   // carry on
@@ -498,7 +498,7 @@ int ClpSimplexPrimal::primal (int ifValuesPass , int startFinishOptions)
 	       }
 
                // test for maximum iterations
-               if (hitMaximumIterations() || 
+               if (hitMaximumIterations() ||
 		   (ifValuesPass == 2 && firstFree_ < 0)) {
                     problemStatus_ = 3;
                     break;
@@ -780,7 +780,7 @@ ClpSimplexPrimal::whileIterating(int valuesOption)
 		 if (status>=0&&status<10) {
 		   // carry on
 		   problemStatus_=-1;
-		   if (status==0) 
+		   if (status==0)
 		     break;
 		 } else if (status>=10) {
 		     problemStatus_=status-10;
@@ -1383,7 +1383,7 @@ ClpSimplexPrimal::statusOfProblemInPrimal(int & lastCleaned, int type,
                               delete [] ray_;
                               ray_ = new double [numberRows_];
 			      // swap sign
-			      for (int i=0;i<numberRows_;i++) 
+			      for (int i=0;i<numberRows_;i++)
 				ray_[i] = -dual_[i];
 #ifdef PRINT_RAY_METHOD
 			      printf("Primal creating infeasibility ray\n");
@@ -2656,7 +2656,7 @@ ClpSimplexPrimal::perturb(int type)
 #endif
                     value *= randomNumberGenerator_.randomDouble();
                     if (savePerturbation != 50) {
-		      if (fabs(value) <= primalTolerance_) 
+		      if (fabs(value) <= primalTolerance_)
 			value = 0.0;
 		    }
                     if (value) {
@@ -3048,7 +3048,7 @@ ClpSimplexPrimal::pivotResult(int ifValuesPass)
                          // take on more relaxed criterion
 		         if ((saveDj * dualIn_ < test1 ||
                                    fabs(saveDj - dualIn_) > 2.0e-1 * (1.0 + fabs(dualIn_)) ||
-			      fabs(dualIn_) < test2) && 
+			      fabs(dualIn_) < test2) &&
 			     (fabs(saveDj)>fabs(dualIn_)
 						||saveDj*dualIn_<1.0e-4||factorization_->pivots())) {
                               // need to reject something

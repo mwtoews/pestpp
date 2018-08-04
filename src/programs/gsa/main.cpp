@@ -1,8 +1,8 @@
-/*  
-	© Copyright 2012, David Welter
-	
+/*
+
+
 	This file is part of PEST++.
-   
+
 	PEST++ is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
@@ -54,8 +54,7 @@ int main(int argc, char* argv[])
 	string version = PESTPP_VERSION;
 	cout << endl << endl;
 	cout << "             pestpp-gsa: a tool for global sensitivity analysis, version " << version << endl << endl;
-	cout << "                 by Dave Welter" << endl;
-	cout << "     Computational Water Resource Engineering"<< endl << endl << endl;
+	cout << "                 by The PEST++ Development Team" << endl;
 	// build commandline
 	string commandline = "";
 	for(int i=0; i<argc; ++i)
@@ -83,7 +82,7 @@ int main(int argc, char* argv[])
 		cerr << "    serial run manager:" << endl;
 		cerr << "        gsa pest_ctl_file.pst" << endl << endl;
 		cerr << "    PANTHER master:" << endl;
-		cerr << "        gsa control_file.pst /H :port" << endl; 
+		cerr << "        gsa control_file.pst /H :port" << endl;
 		cerr << "    PANTHER worker:" << endl;
 		cerr << "        gsa control_file.pst /H hostname:port " << endl << endl;
 		cerr << "    GENIE:" << endl;
@@ -184,8 +183,8 @@ int main(int argc, char* argv[])
 
 	ofstream &fout_rec = file_manager.open_ofile_ext("rec");
 	fout_rec << "             GSA++ Version " << version << endl << endl;
-	fout_rec << "                 by Dave Welter" << endl;
-	fout_rec << "     Computational Water Resource Engineering"<< endl << endl << endl;
+	fout_rec << "                 by The PEST++ Development Team" << endl;
+
 
 	// create pest run and process control file to initialize it
 	Pest pest_scenario;
@@ -205,7 +204,7 @@ int main(int argc, char* argv[])
 		//throw(e);
 		return 1;
 	}
-	
+
 
 	RunManagerAbstract *run_manager_ptr;
 	if (run_manager_type == RunManagerType::PANTHER)
@@ -304,7 +303,7 @@ int main(int argc, char* argv[])
 	{
 		int morris_r = 4;
 		int morris_p = 5;
-	
+
 		double morris_delta = .666;
 		double default_delta = true;
 		bool calc_pooled_obs = false;

@@ -32,7 +32,7 @@ CoinOneMessage::CoinOneMessage(const CoinOneMessage & rhs)
   detail_=rhs.detail_;
 }
 /* assignment operator. */
-CoinOneMessage& 
+CoinOneMessage&
 CoinOneMessage::operator=(const CoinOneMessage & rhs)
 {
   if (this != &rhs) {
@@ -60,7 +60,7 @@ CoinOneMessage::CoinOneMessage(int externalNumber, char detail,
   detail_=detail;
 }
 // Replaces messages (i.e. a different language)
-void 
+void
 CoinOneMessage::replaceMessage( const char * message)
 {
   strcpy(message_,message);
@@ -78,7 +78,7 @@ CoinMessages::CoinMessages(int numberMessages)
   if (numberMessages_) {
     message_ = new CoinOneMessage * [numberMessages_];
     int i;
-    for (i=0;i<numberMessages_;i++) 
+    for (i=0;i<numberMessages_;i++)
       message_[i]=NULL;
   } else {
     message_=NULL;
@@ -89,7 +89,7 @@ CoinMessages::~CoinMessages()
 {
   int i;
   if (lengthMessages_<0) {
-    for (i=0;i<numberMessages_;i++) 
+    for (i=0;i<numberMessages_;i++)
       delete message_[i];
   }
   delete [] message_;
@@ -106,7 +106,7 @@ CoinMessages::CoinMessages(const CoinMessages & rhs)
     if (numberMessages_) {
       message_ = new CoinOneMessage * [numberMessages_];
       int i;
-      for (i=0;i<numberMessages_;i++) 
+      for (i=0;i<numberMessages_;i++)
 	if (rhs.message_[i])
 	  message_[i]=new CoinOneMessage(*(rhs.message_[i]));
 	else
@@ -132,7 +132,7 @@ CoinMessages::CoinMessages(const CoinMessages & rhs)
   }
 }
 /* assignment operator. */
-CoinMessages& 
+CoinMessages&
 CoinMessages::operator=(const CoinMessages & rhs)
 {
   if (this != &rhs) {
@@ -151,7 +151,7 @@ CoinMessages::operator=(const CoinMessages & rhs)
       if (numberMessages_) {
 	message_ = new CoinOneMessage * [numberMessages_];
 	int i;
-	for (i=0;i<numberMessages_;i++) 
+	for (i=0;i<numberMessages_;i++)
 	  if (rhs.message_[i])
 	    message_[i]=new CoinOneMessage(*(rhs.message_[i]));
 	  else
@@ -179,16 +179,16 @@ CoinMessages::operator=(const CoinMessages & rhs)
   return *this;
 }
 // Puts message in correct place
-void 
+void
 CoinMessages::addMessage(int messageNumber, const CoinOneMessage & message)
 {
   if (messageNumber>=numberMessages_) {
     // should not happen but allow for it
     CoinOneMessage ** temp = new CoinOneMessage * [messageNumber+1];
     int i;
-    for (i=0;i<numberMessages_;i++) 
+    for (i=0;i<numberMessages_;i++)
       temp[i] = message_[i];
-    for (;i<=messageNumber;i++) 
+    for (;i<=messageNumber;i++)
       temp[i] = NULL;
     delete [] message_;
     message_ = temp;
@@ -199,8 +199,8 @@ CoinMessages::addMessage(int messageNumber, const CoinOneMessage & message)
   message_[messageNumber]=new CoinOneMessage(message);
 }
 // Replaces messages (i.e. a different language)
-void 
-CoinMessages::replaceMessage(int messageNumber, 
+void
+CoinMessages::replaceMessage(int messageNumber,
 			     const char * message)
 {
   if (lengthMessages_>=0)
@@ -209,7 +209,7 @@ CoinMessages::replaceMessage(int messageNumber,
   message_[messageNumber]->replaceMessage(message);
 }
 // Changes detail level for one message
-void 
+void
 CoinMessages::setDetailMessage(int newLevel, int messageNumber)
 {
   int i;
@@ -222,7 +222,7 @@ CoinMessages::setDetailMessage(int newLevel, int messageNumber)
   }
 }
 // Changes detail level for several messages
-void 
+void
 CoinMessages::setDetailMessages(int newLevel, int numberMessages,
 			       int * messageNumbers)
 {
@@ -242,9 +242,9 @@ CoinMessages::setDetailMessages(int newLevel, int numberMessages,
   } else if (numberMessages<10000&&messageNumbers) {
     // do backward mapping
     int backward[10000];
-    for (i=0;i<10000;i++) 
+    for (i=0;i<10000;i++)
       backward[i]=-1;
-    for (i=0;i<numberMessages_;i++) 
+    for (i=0;i<numberMessages_;i++)
       backward[message_[i]->externalNumber()]=i;
     for (i=0;i<numberMessages;i++) {
       int iback = backward[messageNumbers[i]];
@@ -260,7 +260,7 @@ CoinMessages::setDetailMessages(int newLevel, int numberMessages,
 }
 
 // Changes detail level for all messages >= low and < high
-void 
+void
 CoinMessages::setDetailMessages(int newLevel, int low, int high)
 {
   // do all (except for dummy end) if in range
@@ -277,7 +277,7 @@ CoinMessages::setDetailMessages(int newLevel, int low, int high)
   bulk store that holds compressed CoinOneMessage objects, where the
   message_ array is truncated to be just as large as necessary.
 */
-void 
+void
 CoinMessages::toCompact()
 {
   if (numberMessages_&&lengthMessages_<0) {
@@ -329,7 +329,7 @@ CoinMessages::toCompact()
   }
 }
 // Moves from compact format
-void 
+void
 CoinMessages::fromCompact()
 {
   if (numberMessages_&&lengthMessages_>=0) {
@@ -348,8 +348,8 @@ CoinMessages::fromCompact()
 }
 
 // Clean, print message and check severity, return 0 normally
-int 
-CoinMessageHandler::internalPrint() 
+int
+CoinMessageHandler::internalPrint()
 {
   int returnCode=0;
   if (messageOut_>messageBuffer_) {
@@ -362,7 +362,7 @@ CoinMessageHandler::internalPrint()
 	messageOut_--;
       } else {
 	break;
-      } 
+      }
     }
     // Now do print which can be overridden
     returnCode=print();
@@ -375,11 +375,11 @@ CoinMessageHandler::internalPrint()
 extern int coinFlushBufferFlag;
 #endif
 // Print message, return 0 normally
-int 
-CoinMessageHandler::print() 
+int
+CoinMessageHandler::print()
 {
   fprintf(fp_,"%s\n",messageBuffer_);
-#if FLUSH_PRINT_BUFFER 
+#if FLUSH_PRINT_BUFFER
 #if FLUSH_PRINT_BUFFER < 2
   fflush(fp_);
 #else
@@ -390,14 +390,14 @@ CoinMessageHandler::print()
   return 0;
 }
 // Check severity
-void 
-CoinMessageHandler::checkSeverity() 
+void
+CoinMessageHandler::checkSeverity()
 {
   if (currentMessage_.severity_=='S') {
     fprintf(fp_,"Stopping due to previous errors.\n");
     //Should do walkback
     abort();
-  } 
+  }
 }
 /* Amount of print out:
    0 - none
@@ -408,12 +408,12 @@ CoinMessageHandler::checkSeverity()
    above that 8,16,32 etc just for selective debug and are for
    printf messages in code
 */
-void 
+void
 CoinMessageHandler::setLogLevel (int value)
 {
   if (value >= -1) logLevel_ = value ;
 }
-void 
+void
 CoinMessageHandler::setLogLevel (int which, int value)
 {
   if (which >= 0 && which < COIN_NUM_LOG) {
@@ -421,11 +421,11 @@ CoinMessageHandler::setLogLevel (int which, int value)
       logLevels_[which] = value ;
   }
 }
-void 
+void
 CoinMessageHandler::setPrecision(unsigned int new_precision) {
 
   char new_string[8] = {'%','.','8','f','\0','\0','\0','\0'};
-  
+
   //we assume that the precision is smaller than one thousand
   new_precision = std::min<unsigned int>(999,new_precision);
   if (new_precision == 0)
@@ -449,7 +449,7 @@ CoinMessageHandler::setPrecision(unsigned int new_precision) {
   new_string[idx] = 'g';
   strcpy(g_format_,new_string);
 }
-void 
+void
 CoinMessageHandler::setPrefix(bool value)
 {
   if (value)
@@ -457,7 +457,7 @@ CoinMessageHandler::setPrefix(bool value)
   else
     prefix_ =0;
 }
-bool  
+bool
 CoinMessageHandler::prefix() const
 {
   return (prefix_!=0);
@@ -477,7 +477,7 @@ CoinMessageHandler::CoinMessageHandler() :
 
   strcpy(g_format_,g_default);
   g_precision_ = 8 ;
-  
+
   for (int i=0;i<COIN_NUM_LOG;i++)
     logLevels_[i]=-1000;
   messageBuffer_[0]='\0';
@@ -496,7 +496,7 @@ CoinMessageHandler::CoinMessageHandler(FILE * fp) :
   fp_(fp)
 {
   const char* g_default = "%.8g";
-  
+
   strcpy(g_format_,g_default);
   g_precision_ = 8 ;
 
@@ -553,7 +553,7 @@ CoinMessageHandler::CoinMessageHandler(const CoinMessageHandler& rhs)
   gutsOfCopy(rhs);
 }
 /* assignment operator. */
-CoinMessageHandler & 
+CoinMessageHandler &
 CoinMessageHandler::operator=(const CoinMessageHandler& rhs)
 {
   if (this != &rhs) {
@@ -562,7 +562,7 @@ CoinMessageHandler::operator=(const CoinMessageHandler& rhs)
   return *this;
 }
 // Clone
-CoinMessageHandler * 
+CoinMessageHandler *
 CoinMessageHandler::clone() const
 {
   return new CoinMessageHandler(*this);
@@ -600,7 +600,7 @@ void CoinMessageHandler::calcPrintStatus (int msglvl, int msgclass)
 /*
   Start a message using a standard CoinOneMessage.
 */
-CoinMessageHandler & 
+CoinMessageHandler &
 CoinMessageHandler::message (int messageNumber,
 			     const CoinMessages &normalMessages)
 {
@@ -639,7 +639,7 @@ CoinMessageHandler::message (int messageNumber,
   a prefix, a severity code, and an optional log level.
   Intended as an aid to help existing codes interface.
 */
-CoinMessageHandler & 
+CoinMessageHandler &
 CoinMessageHandler::message (int externalNumber, const char *source,
 			     const char *msg, char severity, int loglvl)
 {
@@ -679,7 +679,7 @@ CoinMessageHandler::message (int externalNumber, const char *source,
 /*
   Decides whether or not to print and returns a reference to the handler.
 */
-CoinMessageHandler & 
+CoinMessageHandler &
 CoinMessageHandler::message(int loglvl)
 {
   // Adjust print status?
@@ -691,7 +691,7 @@ CoinMessageHandler::message(int loglvl)
 /*
   Allows for skipping printing of part of message, but putting in data
 */
-CoinMessageHandler & 
+CoinMessageHandler &
 CoinMessageHandler::printing(bool onOff)
 {
   // has no effect if skipping or whole message in
@@ -712,7 +712,7 @@ CoinMessageHandler::printing(bool onOff)
   Unless printing is currently suppressed. We need to do the finishing actions
   in any event.
 */
-int 
+int
 CoinMessageHandler::finish()
 {
   // Deal with the collected message
@@ -738,7 +738,7 @@ CoinMessageHandler::finish()
    text from the current position up to and including a % code is is processed
    by the relevant operator<< method.
 */
-char * 
+char *
 CoinMessageHandler::nextPerCent(char * start , const bool initial)
 {
   if (start) {
@@ -750,41 +750,41 @@ CoinMessageHandler::nextPerCent(char * start , const bool initial)
 	  int numberToCopy=static_cast<int>(nextPerCent-start);
 	  strncpy(messageOut_,start,numberToCopy);
 	  messageOut_+=numberToCopy;
-	} 
+	}
 	// %? is skipped over as it is just a separator
 	if (nextPerCent[1]!='?') {
 	  start=nextPerCent;
 	  if (start[1]!='%') {
 	    foundNext=true;
-	    if (!initial) 
+	    if (!initial)
 	      *start='\0'; //zap
 	  } else {
 	    start+=2;
 	    if (initial) {
 	      *messageOut_='%';
 	      messageOut_++;
-	    } 
+	    }
 	  }
 	} else {
 	  foundNext=true;
 	  // skip to % and zap
 	  start=nextPerCent;
-	  *start='\0'; 
+	  *start='\0';
 	}
       } else {
         if (initial&&!printStatus_) {
           strcpy(messageOut_,start);
           messageOut_+=strlen(messageOut_);
-        } 
+        }
         start=0;
         foundNext=true;
-      } 
-    } 
-  } 
+      }
+    }
+  }
   return start;
 }
 // Adds into message
-CoinMessageHandler & 
+CoinMessageHandler &
 CoinMessageHandler::operator<< (int intvalue)
 {
   if (printStatus_==3)
@@ -804,11 +804,11 @@ CoinMessageHandler::operator<< (int intvalue)
     } else {
       sprintf(messageOut_," %d",intvalue);
       messageOut_+=strlen(messageOut_);
-    } 
+    }
   }
   return *this;
 }
-CoinMessageHandler & 
+CoinMessageHandler &
 CoinMessageHandler::operator<< (double doublevalue)
 {
   if (printStatus_==3)
@@ -842,12 +842,12 @@ CoinMessageHandler::operator<< (double doublevalue)
       messageOut_ += 1;
       sprintf(messageOut_,g_format_,doublevalue);
       messageOut_+=strlen(messageOut_);
-    } 
+    }
   }
   return *this;
 }
 #if COIN_BIG_INDEX==1
-CoinMessageHandler & 
+CoinMessageHandler &
 CoinMessageHandler::operator<< (long longvalue)
 {
   if (printStatus_==3)
@@ -867,13 +867,13 @@ CoinMessageHandler::operator<< (long longvalue)
     } else {
       sprintf(messageOut_," %ld",longvalue);
       messageOut_+=strlen(messageOut_);
-    } 
+    }
   }
   return *this;
 }
 #endif
 #if COIN_BIG_INDEX==2
-CoinMessageHandler & 
+CoinMessageHandler &
 CoinMessageHandler::operator<< (long long longvalue)
 {
   if (printStatus_==3)
@@ -893,12 +893,12 @@ CoinMessageHandler::operator<< (long long longvalue)
     } else {
       sprintf(messageOut_," %ld",longvalue);
       messageOut_+=strlen(messageOut_);
-    } 
+    }
   }
   return *this;
 }
 #endif
-CoinMessageHandler & 
+CoinMessageHandler &
 CoinMessageHandler::operator<< (const std::string& stringvalue)
 {
   if (printStatus_==3)
@@ -918,11 +918,11 @@ CoinMessageHandler::operator<< (const std::string& stringvalue)
     } else {
       sprintf(messageOut_," %s",stringvalue.c_str());
       messageOut_+=strlen(messageOut_);
-    } 
+    }
   }
   return *this;
 }
-CoinMessageHandler & 
+CoinMessageHandler &
 CoinMessageHandler::operator<< (char charvalue)
 {
   if (printStatus_==3)
@@ -942,11 +942,11 @@ CoinMessageHandler::operator<< (char charvalue)
     } else {
       sprintf(messageOut_," %c",charvalue);
       messageOut_+=strlen(messageOut_);
-    } 
+    }
   }
   return *this;
 }
-CoinMessageHandler & 
+CoinMessageHandler &
 CoinMessageHandler::operator<< (const char *stringvalue)
 {
   if (printStatus_==3)
@@ -966,7 +966,7 @@ CoinMessageHandler::operator<< (const char *stringvalue)
     } else {
       sprintf(messageOut_," %s",stringvalue);
       messageOut_+=strlen(messageOut_);
-    } 
+    }
   }
   return *this;
 }
@@ -975,7 +975,7 @@ CoinMessageHandler::operator<< (const char *stringvalue)
   Handle markers. Even when printing is suppressed (printStatus_ == 3) we need
   to execute finish() to reset for the next message.
 */
-CoinMessageHandler & 
+CoinMessageHandler &
 CoinMessageHandler::operator<< (CoinMessageMarker marker)
 {
   switch (marker) {

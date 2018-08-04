@@ -21,7 +21,7 @@ using namespace std;
 using namespace pest_utils;
 TornadoPlot::TornadoPlot(const vector<string> &_adj_par_name_vec, const Parameters &_fixed_pars, const Parameters &_init_pars,
 	const Parameters &_lower_bnd, const Parameters &_upper_bnd, const set<string> &_log_trans_pars,
-	ParamTransformSeq *_base_partran_seq_ptr, const std::vector<std::string> &_obs_name_vec, 
+	ParamTransformSeq *_base_partran_seq_ptr, const std::vector<std::string> &_obs_name_vec,
 	FileManager *file_manager_ptr, const ObservationInfo *_obs_info_ptr,
 	bool _calc_obs_sen)
 	//: GsaAbstractBase(_base_partran_seq_ptr, _adj_par_name_vec, _fixed_pars, _lower_bnd, _upper_bnd,

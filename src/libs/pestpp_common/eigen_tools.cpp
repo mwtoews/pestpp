@@ -1,8 +1,8 @@
-/*  
-	© Copyright 2012, David Welter
-	
+/*
+
+
 	This file is part of PEST++.
-   
+
 	PEST++ is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
@@ -25,7 +25,7 @@
 #include <iomanip>
 #include <string>
 #include <cstdio>
-#include <cstdint> 
+#include <cstdint>
 
 
 using namespace Eigen;
@@ -42,7 +42,7 @@ void get_MatrixXd_row_abs_max(const MatrixXd &m, int row, int *max_col, double *
 	*max_val = 0;
 	for (size_t icol=0; icol<ncols; ++icol)
 	{
-		if(abs(m(row,icol)) > abs(*max_val)) 
+		if(abs(m(row,icol)) > abs(*max_val))
 		{
 			*max_col = icol;
 			*max_val = m(row,icol);
@@ -157,7 +157,7 @@ void print(const MatrixXd &mat, ostream & fout)
 
 	for (size_t i=0; i<nrows; ++i)
 	{
-		for (size_t j=0; j<ncols; ++j) 
+		for (size_t j=0; j<ncols; ++j)
 		{
 			fout << mat(i,j);
 			if (j < ncols-1) {fout << ", ";}
@@ -174,7 +174,7 @@ void print(const MatrixXd &mat, ostream & fout, int n_per_line)
 
 	for (size_t i=0; i<nrows; ++i)
 	{
-		for (size_t j=0; j<ncols; ++j) 
+		for (size_t j=0; j<ncols; ++j)
 		{
 			fout << setw(15) << setiosflags(ios::right) << mat(i,j);
 			if ((j+1) % (n_per_line) == 0 || j+1==ncols)

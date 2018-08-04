@@ -1,8 +1,8 @@
-/*  
-	© Copyright 2012, David Welter
-	
+/*
+
+
 	This file is part of PEST++.
-   
+
 	PEST++ is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
@@ -34,11 +34,11 @@ using namespace pest_utils;
 const int RunManagerGenie::LEN_PARAMETER_NAME = 12+1;
 const int RunManagerGenie::LEN_OBSERVATION_NAME = 20+1;
 
-extern "C" { 
+extern "C" {
 	int GENIE_INTERFACE(int*, int*, char*,
 		int*, int*, char*, char*, double*, double*,
 		int*, int*, char*, char*, char*,
-		char*, char*, char*, int*); 
+		char*, char*, char*, int*);
 	int GENIE_KILL_GMAN(char*,char*);
 }
 
@@ -50,7 +50,7 @@ RunManagerGenie::RunManagerGenie(const vector<string> _comline_vec,
 	const string &stor_filename, const std::string &_host,
 	const std::string &_id)
 	: RunManagerAbstract(_comline_vec, _tplfile_vec, _inpfile_vec,
-		_insfile_vec, _outfile_vec, stor_filename), 
+		_insfile_vec, _outfile_vec, stor_filename),
 		host(_host), id(_id)
 {
 	cout << "                starting GENIE run manager ..." << endl;

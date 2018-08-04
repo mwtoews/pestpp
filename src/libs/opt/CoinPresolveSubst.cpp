@@ -38,7 +38,7 @@ void dbg_find_elem (const CoinPostsolveMatrix *postMtx, int i, int j)
     presolve_find_row3(i,kcs,lenj,postMtx->hrow_,postMtx->link_) ;
   if (krow >= 0) {
     std::cout
-      << "  row " << i << " present in column " << j 
+      << "  row " << i << " present in column " << j
       << ", a(" << i << "," << j
       << ") = " << postMtx->colels_[krow] << std::endl ;
   } else {
@@ -70,7 +70,7 @@ void dbg_find_elem (const CoinPostsolveMatrix *postMtx, int i, int j)
   Returns false if the addition completes without error, true if there's a
   problem.
 */
-static bool 
+static bool
 add_row (CoinBigIndex *mrstrt, double *rlo, double *acts, double *rup,
 	 double *rowels, int *hcol, int *hinrow, presolvehlink *rlink,
 	 int nrows, double coeff_factor, double kill_ratio,  int irowx, int irowy,
@@ -151,8 +151,8 @@ add_row (CoinBigIndex *mrstrt, double *rlo, double *acts, double *rup,
       std::cout << rowels[krowx] << " -> " << newcoeff << ";" ;
 #     endif
 
-      // kill small 
-      if (fabs(newcoeff) <tolerance) 
+      // kill small
+      if (fabs(newcoeff) <tolerance)
 	newcoeff=0.0;
       rowels[krowx] = newcoeff ;
       x_to_y[x_to_y_i++] = krowx-krsx ;
@@ -168,22 +168,22 @@ add_row (CoinBigIndex *mrstrt, double *rlo, double *acts, double *rup,
       bool outOfSpace = presolve_expand_row(mrstrt,rowels,hcol,
 					    hinrow,rlink,nrows,irowx) ;
       if (outOfSpace) return (true) ;
-      
+
       krowy = mrstrt[irowy]+(krowy-krsy) ;
       krsy = mrstrt[irowy] ;
       krey = krsy+hinrow[irowy] ;
-      
+
       krowx = mrstrt[irowx]+(krowx-krsx) ;
       krex0 = mrstrt[irowx]+(krex0-krsx) ;
       krsx = mrstrt[irowx] ;
       krex = krsx+hinrow[irowx] ;
-      
+
       hcol[krex] = j ;
       rowels[krex] = newValue;
       x_to_y[x_to_y_i++] = krex-krsx ;
       hinrow[irowx]++ ;
       krex++ ;
-      
+
 #     if PRESOLVE_DEBUG > 3
       std::cout << rowels[krex-1] << ";" ;
 #     endif
@@ -523,7 +523,7 @@ const CoinPresolveAction *subst_constraint_action::presolve (
 
       double ait = ap->coeffxs[colndx] ;
       double coeff_factor = -ait/tgtcoeff ;
-      
+
       CoinBigIndex krs = rowStarts[i] ;
       CoinBigIndex kre = krs+rowLengths[i] ;
 
@@ -545,7 +545,7 @@ const CoinPresolveAction *subst_constraint_action::presolve (
   compaction of the row-major bulk store, so update bulk store indices.
 */
       CoinSort_2(colIndices+krs,colIndices+kre,rowCoeffs+krs) ;
-      
+
       bool outOfSpace = add_row(rowStarts,rlo,acts,rup,rowCoeffs,colIndices,
 				rowLengths,rlink,nrows,coeff_factor,tolerance,i,tgtrow,
 				x_to_y) ;
@@ -593,7 +593,7 @@ const CoinPresolveAction *subst_constraint_action::presolve (
 	const double coeff = rowCoeffs[krs+x_to_y[rowndx]] ;
 
 	CoinBigIndex kcol = presolve_find_row1(i,kcs,kce,rowIndices) ;
-	
+
 	if (kcol < kce) {
 	  colCoeffs[kcol] = coeff ;
 	} else {
@@ -603,7 +603,7 @@ const CoinPresolveAction *subst_constraint_action::presolve (
 	    throwCoinError("out of memory","CoinImpliedFree::presolve") ;
 	  kcs = colStarts[j] ;
 	  kce = kcs+colLengths[j] ;
-	  
+
 	  rowIndices[kce] = i ;
 	  colCoeffs[kce] = coeff ;
 	  colLengths[j]++ ;
@@ -623,7 +623,7 @@ const CoinPresolveAction *subst_constraint_action::presolve (
       }
       std::cout << std::endl ;
 #     endif
-      
+
     }
 /*
   End of the substitution loop.

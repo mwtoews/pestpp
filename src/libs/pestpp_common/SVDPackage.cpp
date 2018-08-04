@@ -1,8 +1,8 @@
-/*  
-	© Copyright 2012, David Welter
-	
+/*
+
+
 	This file is part of PEST++.
-   
+
 	PEST++ is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
@@ -27,7 +27,7 @@
 
 using namespace Eigen;
 
-SVDPackage::SVDPackage(std::string _descritpion, int _n_max_sing, double _eign_thres) : description(_descritpion), n_max_sing(_n_max_sing), eign_thres(_eign_thres) 
+SVDPackage::SVDPackage(std::string _descritpion, int _n_max_sing, double _eign_thres) : description(_descritpion), n_max_sing(_n_max_sing), eign_thres(_eign_thres)
 {
 	performance_log = nullptr;
 }
@@ -112,7 +112,7 @@ void SVD_REDSVD::solve_ip(Eigen::MatrixXd& A, Eigen::MatrixXd &Sigma, Eigen::Mat
 		temp = U.leftCols(num_sing_used);
 		U = temp;
 		//std::cout << U.col(0);
-		
+
 
 	}
 	performance_log->log_event("done REDSVD");
@@ -163,7 +163,7 @@ void SVD_REDSVD::solve_ip(Eigen::SparseMatrix<double>& A, Eigen::VectorXd &Sigma
 	std::stringstream ss;
 	ss << "triming REDSVD components to " << num_sing_used << "elements";
 	performance_log->log_event(ss.str());
-	
+
 	Sigma = Sigma_full.head(num_sing_used);
 	Sigma_trunc = Sigma_full.tail(Sigma_full.size() - num_sing_used);
 
@@ -187,7 +187,7 @@ void SVD_EIGEN::solve_ip(Eigen::MatrixXd& A, Eigen::MatrixXd &Sigma, Eigen::Matr
 {
 
 	JacobiSVD<MatrixXd> svd_fac(A, ComputeFullU | ComputeFullV);
-	
+
 	performance_log->log_event("starting REDSVD");
 
 	//RedSVD::RedSVD<MatrixXd> red_svd(A);

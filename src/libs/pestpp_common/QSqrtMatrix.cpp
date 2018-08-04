@@ -1,8 +1,8 @@
-/*  
-	© Copyright 2012, David Welter
-	
+/*
+
+
 	This file is part of PEST++.
-   
+
 	PEST++ is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
@@ -64,7 +64,7 @@ Eigen::SparseMatrix<double> QSqrtMatrix::get_sparse_matrix(const vector<string> 
 			group = &((*found_obsinfo_iter).second.group);
 			weight = (*found_obsinfo_iter).second.weight;
 			bool is_reg_grp = ObservationGroupRec::is_regularization(*group);
-			if (use_regul && is_reg_grp) 
+			if (use_regul && is_reg_grp)
 			{
 				if (regul.get_adj_grp_weights() && is_reg_grp)
 				{
@@ -95,7 +95,7 @@ Eigen::SparseMatrix<double> QSqrtMatrix::get_sparse_matrix(const vector<string> 
 			triplet_list.push_back(Eigen::Triplet<double>(i, i, weight));
 		}
 		else {
-			assert(true);  //observation not in standard observations or prior information 
+			assert(true);  //observation not in standard observations or prior information
 		}
 	}
 	weights.resize(obs_names.size(), obs_names.size());

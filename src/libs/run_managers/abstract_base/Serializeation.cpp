@@ -1,8 +1,8 @@
-/*  
-    © Copyright 2012, David Welter
-    
+/*
+
+
     This file is part of PEST++.
-   
+
     PEST++ is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
@@ -140,7 +140,7 @@ vector<int8_t> Serialization::serialize(const Parameters &pars, const vector<str
 	w_memcpy_s(buf, par_buf_sz, &par_data[0], par_data.size() * sizeof(double));
 
 	vector<double> obs_data = obs.get_data_vec(obs_names_vec);
-	
+
 	w_memcpy_s(buf+par_buf_sz, obs_buf_sz, &obs_data[0], obs_data.size() * sizeof(double));
 	w_memcpy_s(buf + par_buf_sz + obs_buf_sz, run_time_sz, &run_time, sizeof(double));
 

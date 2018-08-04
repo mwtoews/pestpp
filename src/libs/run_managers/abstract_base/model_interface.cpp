@@ -161,17 +161,17 @@ void ModelInterface::finalize()
 ModelInterface::~ModelInterface()
 {
 	finalize();
-	
+
 }
 
 void ModelInterface::run(Parameters* pars, Observations* obs)
-{	
-	
+{
+
 	pest_utils::thread_flag terminate(false);
 	pest_utils::thread_flag finished(false);
 	pest_utils::thread_exceptions shared_exceptions;
-	
-	
+
+
 
 	run(&terminate, &finished, &shared_exceptions, pars, obs);
 	if (shared_exceptions.size() > 0)
@@ -179,15 +179,15 @@ void ModelInterface::run(Parameters* pars, Observations* obs)
 		finalize();
 		shared_exceptions.rethrow();
 	}
-	
+
 }
 
 
 void ModelInterface::run(pest_utils::thread_flag* terminate, pest_utils::thread_flag* finished, pest_utils::thread_exceptions *shared_execptions,
 						Parameters* pars, Observations* obs)
 {
-	
-	
+
+
 
 	if (!initialized)
 	{
@@ -197,10 +197,10 @@ void ModelInterface::run(pest_utils::thread_flag* terminate, pest_utils::thread_
 	}
 	//get par vals that are aligned with this::par_name_vec since the mio module was initialized with this::par_name_vec order
 	par_vals = pars->get_data_vec(par_name_vec);
-	
+
 	try
 	{
-		//first delete any existing input and output files	
+		//first delete any existing input and output files
 		// This outer loop is a work around for a bug in windows.  Window can fail to release a file
 		// handle quick enough when the external run executes very quickly
 		bool failed_file_op = true;
@@ -285,7 +285,7 @@ void ModelInterface::run(pest_utils::thread_flag* terminate, pest_utils::thread_
 			throw_mio_error("uncaught error writing model input files from template files:" + emess);
 		}
 		if (ifail != 0) throw_mio_error("error writing model input files from template files");
-		
+
 
 #ifdef OS_WIN
 		//a flag to track if the run was terminated
@@ -319,7 +319,7 @@ void ModelInterface::run(pest_utils::thread_flag* terminate, pest_utils::thread_
 			DWORD exitcode;
 			while (true)
 			{
-				//sleep		
+				//sleep
 				std::this_thread::sleep_for(std::chrono::milliseconds(OperSys::thread_sleep_milli_secs));
 				//check if process is still active
 				GetExitCodeProcess(pi.hProcess, &exitcode);
@@ -343,7 +343,7 @@ void ModelInterface::run(pest_utils::thread_flag* terminate, pest_utils::thread_
 						throw std::runtime_error("unable to terminate process for command: " + cmd_string);
 					}
 					term_break = true;
-					
+
 					break;
 				}
 			}
@@ -401,7 +401,7 @@ void ModelInterface::run(pest_utils::thread_flag* terminate, pest_utils::thread_
 
 		if (term_break) return;
 
-		// process instruction files		
+		// process instruction files
 		int nins = insfile_vec.size();
 		int nobs = obs_name_vec.size();
 		obs_vals.resize(nobs, -9999.00);
@@ -422,7 +422,7 @@ void ModelInterface::run(pest_utils::thread_flag* terminate, pest_utils::thread_
 			string err = string(err_instruct);
 			auto s_end = err.find_last_not_of(" \t",1000);
 			err = err.substr(0, s_end);
-			
+
 			throw_mio_error("error processing model output files:" + err);
 
 		}
@@ -462,7 +462,7 @@ void ModelInterface::run(pest_utils::thread_flag* terminate, pest_utils::thread_
 
 		//set the finished flag for the listener thread
 		finished->set(true);
-		
+
 	}
 	catch (...)
 	{

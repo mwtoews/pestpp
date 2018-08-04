@@ -56,7 +56,7 @@ bool Localizer::initialize(PerformanceLog *performance_log)
 
 	for (auto &pg : pest_scenario_ptr->get_ctl_ordered_par_group_names())
 	{
-		
+
 		names.clear();
 		for (auto &p : par_names)
 			if (pi->get_group_name(p) == pg)

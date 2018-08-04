@@ -39,14 +39,14 @@ void w_init()
 #endif
 }
 
-int w_close(int sockfd) 
+int w_close(int sockfd)
 {
   int n;
 	#ifdef OS_WIN
 	shutdown(sockfd, SD_BOTH);
 	if ((n = closesocket(sockfd)) != 0)
 	{
-		cerr << "error closing socket: "  << w_get_error_msg() << endl;  
+		cerr << "error closing socket: "  << w_get_error_msg() << endl;
 	}
 	return n;
 	#endif
@@ -83,7 +83,7 @@ vector<string> w_getnameinfo_vec(int sockfd, int flags)
 	struct sockaddr_storage addr;
 	socklen_t addr_len = sizeof addr;
 	err = getpeername(sockfd, (struct sockaddr*) &addr, &addr_len);
-	err = getnameinfo((struct sockaddr*) &addr, addr_len, host, sizeof host, port, sizeof port, flags); 
+	err = getnameinfo((struct sockaddr*) &addr, addr_len, host, sizeof host, port, sizeof port, flags);
 	name_info.push_back(host);
 	name_info.push_back(port);
 	return name_info;
@@ -121,7 +121,7 @@ int w_bind(int sockfd, struct sockaddr *my_addr, socklen_t addrlen)
 	int n=0;
 	if ((n=::bind(sockfd, my_addr, addrlen)) == -1 )
 	{
-		
+
 		cerr << "bind error: " << w_get_error_msg() << endl;
 	}
 	return n;
@@ -130,7 +130,7 @@ int w_bind(int sockfd, struct sockaddr *my_addr, socklen_t addrlen)
 int w_accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
 {
 	int n=0;
-	if ((n=accept(sockfd, addr, addrlen)) == -1) 
+	if ((n=accept(sockfd, addr, addrlen)) == -1)
 	{
 		cerr << "bind error: " << w_get_error_msg() << endl;
 	}
@@ -211,10 +211,10 @@ addrinfo* w_bind_first_avl(addrinfo *servinfo, int &sockfd)
 	// loop through all the results and bind to the first we can
 	struct addrinfo *p;
 	char yes = '1';
-	for(p = servinfo; p != nullptr; p = p->ai_next) 
+	for(p = servinfo; p != nullptr; p = p->ai_next)
 	{
 		if ((sockfd = w_socket(p->ai_family, p->ai_socktype,
-		p->ai_protocol)) == -1) 
+		p->ai_protocol)) == -1)
 		{
 			continue;
 		}
@@ -223,7 +223,7 @@ addrinfo* w_bind_first_avl(addrinfo *servinfo, int &sockfd)
 		{
 			return nullptr;
 		}
-		if (w_bind(sockfd, p->ai_addr, p->ai_addrlen) == -1) 
+		if (w_bind(sockfd, p->ai_addr, p->ai_addrlen) == -1)
 		{
 			w_close(sockfd);
 			continue;
@@ -240,14 +240,14 @@ addrinfo* w_connect_first_avl(addrinfo *servinfo, int &sockfd)
 {
 	// loop through all the results and connect to the first we can
 	struct addrinfo *p;
-	for(p = servinfo; p != nullptr; p = p->ai_next) 
+	for(p = servinfo; p != nullptr; p = p->ai_next)
 	{
 		if ((sockfd = w_socket(p->ai_family, p->ai_socktype,
-		p->ai_protocol)) == -1) 
+		p->ai_protocol)) == -1)
 		{
 			continue;
 		}
-		if (w_connect(sockfd, p->ai_addr, p->ai_addrlen) == -1) 
+		if (w_connect(sockfd, p->ai_addr, p->ai_addrlen) == -1)
 		{
 			w_close(sockfd);
 			continue;
@@ -266,7 +266,7 @@ void w_print_servinfo(addrinfo *res, ostream &fout)
 {
 	struct addrinfo *p;
 	fout << "IP addresses:" << endl;
-	for(p = res;p != NULL; p = p->ai_next) 
+	for(p = res;p != NULL; p = p->ai_next)
 	{
 		string socket_string = w_get_addrinfo_string(p);
 	   fout << "  " << socket_string << endl;

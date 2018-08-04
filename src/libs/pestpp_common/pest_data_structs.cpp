@@ -1,8 +1,8 @@
-/*  
-	© Copyright 2012, David Welter
-	
+/*
+
+
 	This file is part of PEST++.
-   
+
 	PEST++ is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
@@ -111,7 +111,7 @@ string ParameterGroupInfo::get_group_name(const string &par_name) const
 	return get_group_rec_ptr(par_name)->name;
 }
 
-void ParameterGroupInfo::insert_group(const string &group_name, ParameterGroupRec &rec) 
+void ParameterGroupInfo::insert_group(const string &group_name, ParameterGroupRec &rec)
 {
 	groups[group_name] = new ParameterGroupRec(rec);
 }
@@ -289,7 +289,7 @@ ostream& operator<< (ostream &os, const PestppOptions& val)
 	os << "    max super frz iter = " << left << setw(20) << val.get_max_super_frz_iter() << endl;
 	os << "    mat inv = " << left << setw(20) << val.get_mat_inv() << endl;
 	os << "    max run fail = " << left << setw(20) << val.get_max_run_fail() << endl;
-	os << "    max reg iter = " << left << setw(20) << val.get_max_reg_iter() << endl;	
+	os << "    max reg iter = " << left << setw(20) << val.get_max_reg_iter() << endl;
 	os << "    use jacobian scaling a la PEST? = ";
 	if (val.get_jac_scale())
 		os << " yes" << endl;
@@ -323,7 +323,7 @@ ostream& operator<< (ostream &os, const PestppOptions& val)
 			os << "    using FOSM-based uncertainty for forecasts" << endl;
 			os << "    forecast names = " << endl;
 		}
-		
+
 	}
 	for (auto &pname : val.get_prediction_names())
 		os << right << setw(15) << pname << endl;
@@ -349,7 +349,7 @@ PestppOptions::PestppOptions(int _n_iter_base, int _n_iter_super, int _max_n_sup
 	SVD_PACK _svd_pack, MAT_INV _mat_inv, double _auto_norm, double _super_relparmax, int _max_run_fail,
 	bool _iter_summary_flag, bool _der_forgive, double _overdue_reched_fac, double _overdue_giveup_fac, double _reg_frac,
 	GLOBAL_OPT _global_opt, double _de_f, double _de_cr, int _de_npopulation, int _de_max_gen, bool _de_dither_f)
-	: n_iter_base(_n_iter_base), n_iter_super(_n_iter_super), max_n_super(_max_n_super), super_eigthres(_super_eigthres), 
+	: n_iter_base(_n_iter_base), n_iter_super(_n_iter_super), max_n_super(_max_n_super), super_eigthres(_super_eigthres),
 	svd_pack(_svd_pack), mat_inv(_mat_inv), auto_norm(_auto_norm), super_relparmax(_super_relparmax),
 	max_run_fail(_max_run_fail), max_super_frz_iter(50), max_reg_iter(50), base_lambda_vec({ 0.1, 1.0, 10.0, 100.0, 1000.0 }),
 	lambda_scale_vec({1.0}),
@@ -388,17 +388,17 @@ void PestppOptions::parce_line(const string &line)
 		passed_args.insert(key);
 
 		if (key=="MAX_N_SUPER"){
-			convert_ip(value, max_n_super); 
-		
+			convert_ip(value, max_n_super);
+
 		}
 		else if (key=="SUPER_EIGTHRES"){
-			convert_ip(value, super_eigthres); 
+			convert_ip(value, super_eigthres);
 		}
 		else if (key=="N_ITER_BASE"){
-			convert_ip(value, n_iter_base); 
+			convert_ip(value, n_iter_base);
 		}
 		else if (key=="N_ITER_SUPER"){
-			convert_ip(value, n_iter_super); 
+			convert_ip(value, n_iter_super);
 		}
 		else if (key=="SVD_PACK"){
 
@@ -414,7 +414,7 @@ void PestppOptions::parce_line(const string &line)
 
 		}
 		else if (key=="AUTO_NORM"){
-			convert_ip(value, auto_norm); 
+			convert_ip(value, auto_norm);
 		}
 		else if (key == "SUPER_RELPARMAX"){
 			convert_ip(value, super_relparmax);
@@ -440,7 +440,7 @@ void PestppOptions::parce_line(const string &line)
 			{
 				base_lambda_vec.push_back(convert_cp<double>(ilambda));
 			}
-		}	
+		}
 		else if (key == "LAMBDA_SCALE_FAC")
 		{
 			lambda_scale_vec.clear();
@@ -479,7 +479,7 @@ void PestppOptions::parce_line(const string &line)
 				prediction_names.push_back(pname);
 			}
 		}
-		else if ((key == "PARCOV") || (key == "PARAMETER_COVARIANCE") 
+		else if ((key == "PARCOV") || (key == "PARAMETER_COVARIANCE")
 			|| (key == "PARCOV_FILENAME"))
 		{
 			//convert_ip(org_value, parcov_filename);
@@ -521,7 +521,7 @@ void PestppOptions::parce_line(const string &line)
 			condor_submit_file = org_value;
 		}
 		else if ((key == "SWEEP_PARAMETER_CSV_FILE") || (key == "SWEEP_PAR_CSV"))
-			//convert_ip(org_value, sweep_parameter_csv_file);	
+			//convert_ip(org_value, sweep_parameter_csv_file);
 			sweep_parameter_csv_file = org_value;
 		else if ((key == "SWEEP_OUTPUT_CSV_FILE") || (key == "SWEEP_OBS_CSV"))
 			//convert_ip(org_value, sweep_output_csv_file);
@@ -579,7 +579,7 @@ void PestppOptions::parce_line(const string &line)
 				convert_ip(value, upgrade_bounds);
 			else
 				throw runtime_error("unrecognozed 'upgrade_bounds' option: should 'robust' or 'cheap'");
-			
+
 		}
 
 		else if (key == "GLOBAL_OPT")
@@ -610,7 +610,7 @@ void PestppOptions::parce_line(const string &line)
 		}
 		else if ((key == "OPT_OBJ_FUNC") || (key == "OPT_OBJECTIVE_FUNCTION"))
 		{
-			convert_ip(value,opt_obj_func); 
+			convert_ip(value,opt_obj_func);
 		}
 		else if (key == "OPT_COIN_LOG")
 		{
@@ -664,7 +664,7 @@ void PestppOptions::parce_line(const string &line)
 				opt_constraint_groups.push_back(name);
 			}
 		}
-		
+
 		else if (key == "OPT_RISK")
 		{
 			convert_ip(value, opt_risk);
@@ -715,7 +715,7 @@ void PestppOptions::parce_line(const string &line)
 			//convert_ip(value, ies_obs_csv);
 			ies_obs_csv = org_value;
 		}
-		else if ((key == "IES_OBS_RESTART_CSV") || (key == "IES_OBSERVATION_RESTART_CSV") 
+		else if ((key == "IES_OBS_RESTART_CSV") || (key == "IES_OBSERVATION_RESTART_CSV")
 			|| (key == "IES_RESTART_OBS_CSV") || (key == "IES_OBSERVATION_RESTART_ENSEMBLE") ||
 			(key == "IES_RESTART_OBSERVATION_ENSEMBLE") || (key == "IES_RESTART_OBS_EN") ||
 			(key == "IES_OBS_RESTART_EN"))
@@ -744,7 +744,7 @@ void PestppOptions::parce_line(const string &line)
 		{
 			convert_ip(value, ies_init_lam);
 		}
-		else if (key == "IES_USE_APPROX") 
+		else if (key == "IES_USE_APPROX")
 		{
 			convert_ip(value, ies_obs_restart_csv);
 		}

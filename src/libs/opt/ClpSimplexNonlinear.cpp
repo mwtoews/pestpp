@@ -2650,7 +2650,7 @@ ClpSimplexNonlinear::pivotNonlinearResult()
      return returnCode;
 }
 // May use a cut approach for solving any LP
-int 
+int
 ClpSimplexNonlinear::primalDualCuts(char * rowsIn, int startUp,int algorithm)
 {
   if (!rowsIn) {
@@ -2749,7 +2749,7 @@ ClpSimplexNonlinear::primalDualCuts(char * rowsIn, int startUp,int algorithm)
     // And take out slack rows until this pass
     int takeOutPass = 30;
     int iPass;
-    
+
     const int * start = this->clpMatrix()->getVectorStarts();
     const int * length = this->clpMatrix()->getVectorLengths();
     const int * row = this->clpMatrix()->getIndices();
@@ -2792,7 +2792,7 @@ ClpSimplexNonlinear::primalDualCuts(char * rowsIn, int startUp,int algorithm)
 	ClpSolve::PresolveType presolveType = ClpSolve::presolveOn;
 	ClpSolve solveOptions;
 	solveOptions.setPresolveType(presolveType, 5);
-	if (sumPrimalInfeasibilities_>1.0e-1) 
+	if (sumPrimalInfeasibilities_>1.0e-1)
 	  method = ClpSolve::useDual;
 	else
 	  method = ClpSolve::usePrimalorSprint;

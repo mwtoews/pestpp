@@ -1,8 +1,8 @@
-/*  
-	© Copyright 2012, David Welter
-	
+/*
+
+
 	This file is part of PEST++.
-   
+
 	PEST++ is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
@@ -74,7 +74,7 @@ public:
 	ObservationInfo *get_observation_info_ptr() { return &observation_info; }
 	DynamicRegularization* get_regul_scheme_ptr() { return regul_scheme_ptr; }
 	const ParetoInfo &get_pareto_info() const { return pareto_info; }
-	vector<string> get_nonregul_obs() const;	
+	vector<string> get_nonregul_obs() const;
 	virtual ~Pest();
 private:
 	int n_adj_par = 0;

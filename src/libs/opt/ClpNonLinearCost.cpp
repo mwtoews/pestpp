@@ -226,7 +226,7 @@ ClpNonLinearCost::ClpNonLinearCost ( ClpSimplex * model, int method)
 }
 #if 0
 // Refresh - assuming regions OK
-void 
+void
 ClpNonLinearCost::refresh()
 {
      int numberTotal = numberRows_ + numberColumns_;
@@ -275,7 +275,7 @@ ClpNonLinearCost::refresh()
        }
      }
      //     checkInfeasibilities(model_->primalTolerance());
-     
+
 }
 #endif
 // Refreshes costs always makes row costs zero

@@ -20,11 +20,11 @@ public:
 private:
 	bool echo;
 	std::ofstream* fout;
-	std::chrono::system_clock::time_point prev_time;	
+	std::chrono::system_clock::time_point prev_time;
 	std::map<std::string, std::chrono::system_clock::time_point> tagged_events;
 	std::string time_to_string(const std::chrono::system_clock::time_point &tmp_time);
 	std::string elapsed_time_to_string(std::chrono::system_clock::time_point &current_time, std::chrono::system_clock::time_point &prev_time);
 	void writetime(std::stringstream &os, time_t tc);
 };
 
-#endif 
+#endif

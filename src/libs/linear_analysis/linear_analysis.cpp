@@ -137,7 +137,7 @@ ObservationInfo normalize_weights_by_residual(Pest &pest_scenario, PhiData obj_c
 		obs_rec = obs_info.get_observation_rec_ptr(ogrp.first);
 		if (obs_rec->weight > 0.0)
 		{
-			weight = obs_info.get_observation_rec_ptr(ogrp.first)->weight * 
+			weight = obs_info.get_observation_rec_ptr(ogrp.first)->weight *
 				sqrt(((double)grp_nnz[ogrp.second]) / obj_comps.group_phi[ogrp.second]);
 			if (weight <= numeric_limits<double>::min())
 				weight = 0.0;
@@ -439,7 +439,7 @@ linear_analysis::linear_analysis(Mat* _jacobian, Pest* pest_scenario, Logger* _l
 		throw_error("linear_analysis::linear_analysis() error setting obscov from observation weights:" + string(e.what()));
 	}
 	R_sv = -999, G_sv = -999, ImR_sv = -999, V1_sv = -999;
-	
+
 }
 
 void  linear_analysis::set_parcov(Mat* _parcov)
@@ -483,7 +483,7 @@ linear_analysis::linear_analysis(Mat* _jacobian, Pest* pest_scenario, Mat* _obsc
 		}
 	}
 	R_sv = -999, G_sv = -999, ImR_sv = -999, V1_sv = -999;
-	
+
 	}
 
 void linear_analysis::align()
@@ -608,7 +608,7 @@ map<string, double> linear_analysis::worth(vector<string> &obs_names)
 	{
 		throw_error("linear_analysis::worth() error calculating posterior variance for 'keep' problem : "+string(e.what()));
 	}
-	
+
 	map<string, double> results;
 	for (auto &pred : predictions)
 		results[pred.first] = keep_post[pred.first] - org_post[pred.first];
@@ -754,7 +754,7 @@ Covariance linear_analysis::condition_on(vector<string> &keep_par_names, vector<
 	if (parcov.get_mattype() == Mat::MatType::DIAGONAL)
 	{
 		return new_parcov;
-	}		
+	}
 	//the portion of parcov that is becoming "known": C22
 	Covariance cond_parcov;
 	try
@@ -788,7 +788,7 @@ Covariance linear_analysis::condition_on(vector<string> &keep_par_names, vector<
 	Covariance new_cond_parcov;
 	try
 	{
-		Eigen::SparseMatrix<double> mcond = *new_parcov.e_ptr() - (*upper_off_diag.e_ptr() * *cond_parcov.e_ptr() * 
+		Eigen::SparseMatrix<double> mcond = *new_parcov.e_ptr() - (*upper_off_diag.e_ptr() * *cond_parcov.e_ptr() *
 			*upper_off_diag.transpose().e_ptr());
 		new_cond_parcov = Covariance(keep_par_names, mcond);
 	}
@@ -885,7 +885,7 @@ double linear_analysis::prior_prediction_variance(string &pred_name)
 	map<string, Mat>::iterator p_iter = predictions.find(pred_name);
 	if (p_iter == predictions.end())
 		throw_error("linear_analysis::prior_pred_variance() error: pred:" + pred_name + " not found in predicitons");
-	
+
 	if (p_iter->second.e_ptr()->nonZeros() == 0)
 		return 0.0;
 	double val;
@@ -1015,7 +1015,7 @@ void linear_analysis::set_predictions(vector<string> preds)
 	for (auto pred : preds)
 	{
 		pest_utils::upper_ip(pred);
-	
+
 		if (find(obs_names->begin(), obs_names->end(), pred) != obs_names->end())
 		{
 			if (predictions.find(pred) != predictions.end())
@@ -1230,7 +1230,7 @@ void linear_analysis::build_R(int sv)
 }
 
 Mat* linear_analysis::get_V1_ptr(int sv)
-{	
+{
 	if (sv != V1_sv)
 		build_V1(sv);
 	Mat* ptr = &V1;
@@ -1314,7 +1314,7 @@ void linear_analysis::build_G(int sv)
 	G_sv = sv;
 	log->log("build_G");
 }
- 
+
 Mat* linear_analysis::get_ImR_ptr(int sv)
 {
 	if (ImR_sv != sv)
@@ -1360,7 +1360,7 @@ void linear_analysis::build_ImR(int sv)
 			throw_error("linear_analysis::build_ImR() error calculating ImR :" + string(e.what()));
 		}
 		log->log("build_ImR - MM");
-	} 
+	}
 	ImR_sv = sv;
 	log->log("build_ImR");
 }
@@ -1404,7 +1404,7 @@ Covariance linear_analysis::first_parameter(int sv)
 	stringstream ss;
 	ss << sv;
 	string sv_str = ss.str();
-	
+
 	if (sv >= jacobian.ncol())
 		return parcov.zero();
 	else
@@ -1418,19 +1418,19 @@ Covariance linear_analysis::first_parameter(int sv)
 			return f;
 		}
 		catch (exception &e)
-		{			
+		{
 			throw_error("linear_analysis::first_parameter() error @" +sv_str + " : " + string(e.what()));
 		}
 	}
-	
+
 }
 
 Covariance linear_analysis::second_parameter(int sv)
-{	
+{
 	stringstream ss;
 	ss << sv;
 	string sv_str = ss.str();
-	
+
 	if (sv == 0)
 		return parcov.zero();
 	else if (sv >= jacobian.ncol())
@@ -1451,7 +1451,7 @@ Covariance linear_analysis::second_parameter(int sv)
 		}
 
 	}
-	
+
 }
 
 Covariance linear_analysis::third_parameter(int sv)
@@ -1510,7 +1510,7 @@ map<string, double> linear_analysis::first_prediction(int sv)
 		}
 
 		for (auto &p : predictions)
-		{			
+		{
 			try
 			{
 				result[p.first] = (p.second.e_ptr()->transpose() * *first.e_ptr() * *p.second.e_ptr()).eval().valuePtr()[0];
@@ -1595,7 +1595,7 @@ map<string, double> linear_analysis::third_prediction(int sv)
 		log->log("third_prediction with 'p' @" + sv_str);
 		for (auto &pred : predictions)
 		{
-		
+
 			Eigen::SparseMatrix<double, Eigen::RowMajor> p;
 			try
 			{
@@ -1646,7 +1646,7 @@ void linear_analysis::extract_omitted(vector<string> &omitted_par_names)
 	{
 		pest_utils::upper_ip(o);
 		if (find(jpar_names->begin(), jpar_names->end(), o) == jpar_names->end())
-			missing.push_back(o); 
+			missing.push_back(o);
 	}
 
 	if (missing.size() > 0)
@@ -1669,7 +1669,7 @@ void linear_analysis::extract_omitted(vector<string> &omitted_par_names)
 		log->warning("omitted Jacobian has no non-zero entries.");
 		cerr << endl << "WARNING: omitted parameter Jacobian has no non-zero entries in jacobian. " << endl;
 		cerr << "         This mean that the observations are not sensitive to the " << endl;
-		cerr << "         omitted parameters." << endl;	
+		cerr << "         omitted parameters." << endl;
 	}
 	try
 	{
@@ -1697,7 +1697,7 @@ void linear_analysis::extract_omitted(vector<string> &omitted_par_names)
 		{
 			throw_error("linear_analysis::extract_omitted() error extracting omitted prediction from prediction "+p.first+ " : " + string(e.what()));
 		}
-		
+
 	}
 	log->log("extract_omitted");
 }
@@ -1706,7 +1706,7 @@ void linear_analysis::extract_omitted(string &omitted_par_name)
 {
   vector<string> tmp_vec;
   tmp_vec.push_back(omitted_par_name);
-  extract_omitted(tmp_vec); 
+  extract_omitted(tmp_vec);
 }
 
 
@@ -1719,9 +1719,9 @@ map<string, double> linear_analysis::like_preds(double val)
 }
 
 
-void linear_analysis::write_par_credible_range(ofstream &fout, string sum_filename, ParameterInfo parinfo, 
+void linear_analysis::write_par_credible_range(ofstream &fout, string sum_filename, ParameterInfo parinfo,
 	Parameters init_pars, Parameters opt_pars, vector<string> ordered_names)
-{	
+{
 	fout << endl << "---------------------------------------" << endl;
 	fout << "---- parameter uncertainty summary ----" << endl;
 	fout << "---------------------------------------" << endl << endl << endl;
@@ -1729,7 +1729,7 @@ void linear_analysis::write_par_credible_range(ofstream &fout, string sum_filena
 	fout << setw(20) << "prior_lower_bound" << setw(20) << "prior_upper_bound";
 	fout << setw(20) << "post_mean" << setw(20) << "post_stdev";
 	fout << setw(20) << "post_lower_bound" << setw(20) << "post_upper_bound" << endl;
-	
+
 	ofstream sout(sum_filename);
 	sout << "name,prior_mean,prior_stdev,prior_lower_bound,prior_upper_bound,";
 	sout << "post_mean,post_stdev,post_lower_bound,post_upper_bound" << endl;
@@ -1761,7 +1761,7 @@ void linear_analysis::write_par_credible_range(ofstream &fout, string sum_filena
 			value = opt_pars.get_rec(pname);
 			stdev = sqrt(post_vars[pname]);
 			//range = get_range(value, post_vars[pname], parinfo.get_parameter_rec_ptr(pname)->tranform_type);
-			
+
 			fout << setw(20) << value << setw(20) << stdev << setw(20) <<
 				value - (2.0*stdev) << setw(20) << value + (2.0*stdev) << endl;
 			sout << "," << value << "," << stdev << "," <<
@@ -1797,7 +1797,7 @@ void linear_analysis::write_par_credible_range(ofstream &fout, string sum_filena
 }
 
 pair<double, double> linear_analysis::get_range(double value, double variance, const ParameterRec::TRAN_TYPE &tt)
-{	
+{
 	double stdev = 0.0, lower = 0.0 , upper = 0.0 ,lvalue = 0.0 ;
 	if (variance > numeric_limits<double>::min())
 		stdev = sqrt(variance);

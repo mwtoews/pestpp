@@ -7,7 +7,7 @@
 // Turn off compiler warning about long names
 #  pragma warning(disable:4786)
 #endif
-  
+
 #include <cassert>
 #include <cstdio>
 
@@ -85,10 +85,10 @@ CoinIndexedVector::operator=(const CoinIndexedVector & rhs)
     clear();
     packedMode_=rhs.packedMode_;
     if (!packedMode_)
-      gutsOfSetVector(rhs.capacity_,rhs.nElements_, 
+      gutsOfSetVector(rhs.capacity_,rhs.nElements_,
 		      rhs.indices_, rhs.elements_);
     else
-      gutsOfSetPackedVector(rhs.capacity_,rhs.nElements_, 
+      gutsOfSetPackedVector(rhs.capacity_,rhs.nElements_,
 		      rhs.indices_, rhs.elements_);
   }
   return *this;
@@ -96,7 +96,7 @@ CoinIndexedVector::operator=(const CoinIndexedVector & rhs)
 /* Copy the contents of one vector into another.  If multiplier is 1
    It is the equivalent of = but if vectors are same size does
    not re-allocate memory just clears and copies */
-void 
+void
 CoinIndexedVector::copy(const CoinIndexedVector & rhs, double multiplier)
 {
   if (capacity_==rhs.capacity_) {
@@ -108,7 +108,7 @@ CoinIndexedVector::copy(const CoinIndexedVector & rhs, double multiplier)
       for (int i=0;i<rhs.nElements_;i++) {
         int index = rhs.indices_[i];
         double value = rhs.elements_[index]*multiplier;
-        if (fabs(value)<COIN_INDEXED_TINY_ELEMENT) 
+        if (fabs(value)<COIN_INDEXED_TINY_ELEMENT)
           value = COIN_INDEXED_REALLY_TINY_ELEMENT;
         elements_[index]=value;
         indices_[nElements_++]=index;
@@ -117,7 +117,7 @@ CoinIndexedVector::copy(const CoinIndexedVector & rhs, double multiplier)
       for (int i=0;i<rhs.nElements_;i++) {
         int index = rhs.indices_[i];
         double value = rhs.elements_[i]*multiplier;
-        if (fabs(value)<COIN_INDEXED_TINY_ELEMENT) 
+        if (fabs(value)<COIN_INDEXED_TINY_ELEMENT)
           value = COIN_INDEXED_REALLY_TINY_ELEMENT;
         elements_[nElements_]=value;
         indices_[nElements_++]=index;
@@ -137,7 +137,7 @@ CoinIndexedVector::operator=(const CoinPackedVectorBase & rhs)
 {
   clear();
   packedMode_=false;
-  gutsOfSetVector(rhs.getNumElements(), 
+  gutsOfSetVector(rhs.getNumElements(),
 			    rhs.getIndices(), rhs.getElements());
   return *this;
 }
@@ -150,9 +150,9 @@ CoinIndexedVector::borrowVector(int size, int numberIndices, int* inds, double* 
   empty();
   capacity_=size;
   nElements_ = numberIndices;
-  indices_ = inds;  
+  indices_ = inds;
   elements_ = elems;
-  
+
   // whole point about borrowvector is that it is lightweight so no testing is done
 }
 
@@ -179,7 +179,7 @@ CoinIndexedVector::setVector(int size, const int * inds, const double * elems)
 //#############################################################################
 
 
-void 
+void
 CoinIndexedVector::setVector(int size, int numberIndices, const int * inds, const double * elems)
 {
   clear();
@@ -201,7 +201,7 @@ CoinIndexedVector::setFull(int size, const double * elems)
 {
   // Clear out any values presently stored
   clear();
-  
+
 #ifndef COIN_FAST_CODE
   if (size<0)
     throw CoinError("negative number of indices", "setFull", "CoinIndexedVector");
@@ -226,14 +226,14 @@ CoinIndexedVector::operator[](int index) const
 {
   assert (!packedMode_);
 #ifndef COIN_FAST_CODE
-  if ( index >= capacity_ ) 
+  if ( index >= capacity_ )
     throw CoinError("index >= capacity()", "[]", "CoinIndexedVector");
-  if ( index < 0 ) 
+  if ( index < 0 )
     throw CoinError("index < 0" , "[]", "CoinIndexedVector");
 #endif
   double * where = elements_ + index;
   return *where;
-  
+
 }
 //#############################################################################
 
@@ -241,9 +241,9 @@ void
 CoinIndexedVector::setElement(int index, double element)
 {
 #ifndef COIN_FAST_CODE
-  if ( index >= nElements_ ) 
+  if ( index >= nElements_ )
     throw CoinError("index >= size()", "setElement", "CoinIndexedVector");
-  if ( index < 0 ) 
+  if ( index < 0 )
     throw CoinError("index < 0" , "setElement", "CoinIndexedVector");
 #endif
   elements_[indices_[index]] = element;
@@ -255,7 +255,7 @@ void
 CoinIndexedVector::insert( int index, double element )
 {
 #ifndef COIN_FAST_CODE
-  if ( index < 0 ) 
+  if ( index < 0 )
     throw CoinError("index < 0" , "setElement", "CoinIndexedVector");
 #endif
   if (index >= capacity_)
@@ -274,7 +274,7 @@ void
 CoinIndexedVector::add( int index, double element )
 {
 #ifndef COIN_FAST_CODE
-  if ( index < 0 ) 
+  if ( index < 0 )
     throw CoinError("index < 0" , "setElement", "CoinIndexedVector");
 #endif
   if (index >= capacity_)
@@ -361,9 +361,9 @@ void CoinIndexedVector::checkClean()
   //printf("checkClean %p\n",this);
   int i;
   if (packedMode_) {
-    for (i=0;i<nElements_;i++) 
+    for (i=0;i<nElements_;i++)
       assert(elements_[i]);
-    for (;i<capacity_;i++) 
+    for (;i<capacity_;i++)
       assert(!elements_[i]);
   } else {
     double * copy = new double[capacity_];
@@ -373,7 +373,7 @@ void CoinIndexedVector::checkClean()
       assert (copy[indexValue]);
       copy[indexValue]=0.0;
     }
-    for (i=0;i<capacity_;i++) 
+    for (i=0;i<capacity_;i++)
       assert(!copy[i]);
     delete [] copy;
   }
@@ -389,10 +389,10 @@ void CoinIndexedVector::checkClean()
 //#############################################################################
 #ifndef CLP_NO_VECTOR
 void
-CoinIndexedVector::append(const CoinPackedVectorBase & caboose) 
+CoinIndexedVector::append(const CoinPackedVectorBase & caboose)
 {
   const int cs = caboose.getNumElements();
-  
+
   const int * cind = caboose.getIndices();
   const double * celem = caboose.getElements();
   int maxIndex=-1;
@@ -412,7 +412,7 @@ CoinIndexedVector::append(const CoinPackedVectorBase & caboose)
     if (elements_[indexValue]) {
       numberDuplicates++;
       elements_[indexValue] += celem[i] ;
-      if (fabs(elements_[indexValue])<COIN_INDEXED_TINY_ELEMENT) 
+      if (fabs(elements_[indexValue])<COIN_INDEXED_TINY_ELEMENT)
 	needClean=true; // need to go through again
     } else {
       if (fabs(celem[i])>=COIN_INDEXED_TINY_ELEMENT) {
@@ -442,20 +442,20 @@ CoinIndexedVector::append(const CoinPackedVectorBase & caboose)
 //#############################################################################
 
 void
-CoinIndexedVector::swap(int i, int j) 
+CoinIndexedVector::swap(int i, int j)
 {
-  if ( i >= nElements_ ) 
+  if ( i >= nElements_ )
     throw CoinError("index i >= size()","swap","CoinIndexedVector");
-  if ( i < 0 ) 
+  if ( i < 0 )
     throw CoinError("index i < 0" ,"swap","CoinIndexedVector");
-  if ( j >= nElements_ ) 
+  if ( j >= nElements_ )
     throw CoinError("index j >= size()","swap","CoinIndexedVector");
-  if ( j < 0 ) 
+  if ( j < 0 )
     throw CoinError("index j < 0" ,"swap","CoinIndexedVector");
-  
+
   // Swap positions i and j of the
   // indices array
-  
+
   int isave = indices_[i];
   indices_[i] = indices_[j];
   indices_[j] = isave;
@@ -464,7 +464,7 @@ CoinIndexedVector::swap(int i, int j)
 //#############################################################################
 
 void
-CoinIndexedVector::truncate( int n ) 
+CoinIndexedVector::truncate( int n )
 {
   reserve(n);
 }
@@ -472,7 +472,7 @@ CoinIndexedVector::truncate( int n )
 //#############################################################################
 
 void
-CoinIndexedVector::operator+=(double value) 
+CoinIndexedVector::operator+=(double value)
 {
   assert (!packedMode_);
   int i,indexValue;
@@ -489,7 +489,7 @@ CoinIndexedVector::operator+=(double value)
 //-----------------------------------------------------------------------------
 
 void
-CoinIndexedVector::operator-=(double value) 
+CoinIndexedVector::operator-=(double value)
 {
   assert (!packedMode_);
   int i,indexValue;
@@ -506,7 +506,7 @@ CoinIndexedVector::operator-=(double value)
 //-----------------------------------------------------------------------------
 
 void
-CoinIndexedVector::operator*=(double value) 
+CoinIndexedVector::operator*=(double value)
 {
   assert (!packedMode_);
   int i,indexValue;
@@ -523,7 +523,7 @@ CoinIndexedVector::operator*=(double value)
 //-----------------------------------------------------------------------------
 
 void
-CoinIndexedVector::operator/=(double value) 
+CoinIndexedVector::operator/=(double value)
 {
   assert (!packedMode_);
   int i,indexValue;
@@ -539,13 +539,13 @@ CoinIndexedVector::operator/=(double value)
 //#############################################################################
 
 void
-CoinIndexedVector::reserve(int n) 
+CoinIndexedVector::reserve(int n)
 {
   int i;
   // don't make allocated space smaller but do take off values
   if ( n < capacity_ ) {
 #ifndef COIN_FAST_CODE
-    if (n<0) 
+    if (n<0)
       throw CoinError("negative capacity", "reserve", "CoinIndexedVector");
 #endif
     int nNew=0;
@@ -559,12 +559,12 @@ CoinIndexedVector::reserve(int n)
     }
     nElements_=nNew;
   } else if (n>capacity_) {
-    
+
     // save pointers to existing data
     int * tempIndices = indices_;
     double * tempElements = elements_;
     double * delTemp = elements_-offset_;
-    
+
     // allocate new space
     int nPlus;
     if (sizeof(int)==4*sizeof(char))
@@ -581,7 +581,7 @@ CoinIndexedVector::reserve(int n)
     //if (iBottom)
       offset_ = (64-iBottom)>>3;
     elements_ = temp + offset_;;
-    
+
     // copy data to new space
     // and zero out part of array
     if (nElements_ > 0) {
@@ -592,7 +592,7 @@ CoinIndexedVector::reserve(int n)
       CoinZeroN(elements_,n);
     }
     capacity_ = n;
-    
+
     // free old data
     if (tempElements)
       delete [] delTemp;
@@ -675,8 +675,8 @@ nElements_(0),
 capacity_(0),
 offset_(0),
 packedMode_(false)
-{  
-  gutsOfSetVector(rhs.getNumElements(), 
+{
+  gutsOfSetVector(rhs.getNumElements(),
 			    rhs.getIndices(), rhs.getElements());
 }
 #endif
@@ -705,7 +705,7 @@ nElements_(0),
 capacity_(0),
 offset_(0),
 packedMode_(false)
-{  
+{
   if (!rhs->packedMode_)
     gutsOfSetVector(rhs->capacity_,rhs->nElements_, rhs->indices_, rhs->elements_);
   else
@@ -724,7 +724,7 @@ CoinIndexedVector::~CoinIndexedVector ()
 //#############################################################################
 
 /// Return the sum of two indexed vectors
-CoinIndexedVector 
+CoinIndexedVector
 CoinIndexedVector::operator+(
                             const CoinIndexedVector& op2)
 {
@@ -771,7 +771,7 @@ CoinIndexedVector::operator+(
 }
 
 /// Return the difference of two indexed vectors
-CoinIndexedVector 
+CoinIndexedVector
 CoinIndexedVector::operator-(
                             const CoinIndexedVector& op2)
 {
@@ -818,7 +818,7 @@ CoinIndexedVector::operator-(
 }
 
 /// Return the element-wise product of two indexed vectors
-CoinIndexedVector 
+CoinIndexedVector
 CoinIndexedVector::operator*(
                             const CoinIndexedVector& op2)
 {
@@ -862,8 +862,8 @@ CoinIndexedVector::operator*(
 }
 
 /// Return the element-wise ratio of two indexed vectors
-CoinIndexedVector 
-CoinIndexedVector::operator/ (const CoinIndexedVector& op2) 
+CoinIndexedVector
+CoinIndexedVector::operator/ (const CoinIndexedVector& op2)
 {
   assert (!packedMode_);
   // I am treating 0.0/0.0 as 0.0
@@ -907,7 +907,7 @@ CoinIndexedVector::operator/ (const CoinIndexedVector& op2)
   return newOne;
 }
 // The sum of two indexed vectors
-void 
+void
 CoinIndexedVector::operator+=(const CoinIndexedVector& op2)
 {
   // do slowly at first
@@ -915,7 +915,7 @@ CoinIndexedVector::operator+=(const CoinIndexedVector& op2)
 }
 
 // The difference of two indexed vectors
-void 
+void
 CoinIndexedVector::operator-=( const CoinIndexedVector& op2)
 {
   // do slowly at first
@@ -923,7 +923,7 @@ CoinIndexedVector::operator-=( const CoinIndexedVector& op2)
 }
 
 // The element-wise product of two indexed vectors
-void 
+void
 CoinIndexedVector::operator*=(const CoinIndexedVector& op2)
 {
   // do slowly at first
@@ -931,16 +931,16 @@ CoinIndexedVector::operator*=(const CoinIndexedVector& op2)
 }
 
 // The element-wise ratio of two indexed vectors (0.0/0.0 => 0.0) (0 vanishes)
-void 
+void
 CoinIndexedVector::operator/=(const CoinIndexedVector& op2)
 {
   // do slowly at first
   *this = *this / op2;
 }
 //#############################################################################
-void 
+void
 CoinIndexedVector::sortDecrIndex()
-{ 
+{
   // Should replace with std sort
   double * elements = new double [nElements_];
   CoinZeroN (elements,nElements_);
@@ -949,31 +949,31 @@ CoinIndexedVector::sortDecrIndex()
   delete [] elements;
 }
 
-void 
+void
 CoinIndexedVector::sortPacked()
-{ 
-  assert(packedMode_);  
+{
+  assert(packedMode_);
   CoinSort_2(indices_, indices_ + nElements_, elements_);
 }
 
-void 
+void
 CoinIndexedVector::sortIncrElement()
-{ 
+{
   double * elements = new double [nElements_];
   int i;
-  for (i=0;i<nElements_;i++) 
+  for (i=0;i<nElements_;i++)
     elements[i] = elements_[indices_[i]];
   CoinSort_2(elements, elements + nElements_, indices_,
     CoinFirstLess_2<double, int>());
   delete [] elements;
 }
 
-void 
+void
 CoinIndexedVector::sortDecrElement()
-{ 
+{
   double * elements = new double [nElements_];
   int i;
-  for (i=0;i<nElements_;i++) 
+  for (i=0;i<nElements_;i++)
     elements[i] = elements_[indices_[i]];
   CoinSort_2(elements, elements + nElements_, indices_,
     CoinFirstGreater_2<double, int>());
@@ -988,8 +988,8 @@ CoinIndexedVector::gutsOfSetVector(int size,
 #ifndef COIN_FAST_CODE
   if (size<0)
     throw CoinError("negative number of indices", "setVector", "CoinIndexedVector");
-#endif    
-  assert(!packedMode_);  
+#endif
+  assert(!packedMode_);
   // find largest
   int i;
   int maxIndex=-1;
@@ -998,7 +998,7 @@ CoinIndexedVector::gutsOfSetVector(int size,
 #ifndef COIN_FAST_CODE
     if (indexValue<0)
       throw CoinError("negative index", "setVector", "CoinIndexedVector");
-#endif    
+#endif
     if (maxIndex<indexValue)
       maxIndex = indexValue;
   }
@@ -1020,7 +1020,7 @@ CoinIndexedVector::gutsOfSetVector(int size,
     {
       numberDuplicates++;
       elements_[indexValue] += elems[i] ;
-      if (fabs(elements_[indexValue])<COIN_INDEXED_TINY_ELEMENT) 
+      if (fabs(elements_[indexValue])<COIN_INDEXED_TINY_ELEMENT)
 	needClean=true; // need to go through again
     }
   }
@@ -1045,17 +1045,17 @@ CoinIndexedVector::gutsOfSetVector(int size,
 //#############################################################################
 
 void
-CoinIndexedVector::gutsOfSetVector(int size, int numberIndices, 
+CoinIndexedVector::gutsOfSetVector(int size, int numberIndices,
 				   const int * inds, const double * elems)
 {
-  assert(!packedMode_);  
-  
+  assert(!packedMode_);
+
   int i;
   reserve(size);
 #ifndef COIN_FAST_CODE
   if (numberIndices<0)
     throw CoinError("negative number of indices", "setVector", "CoinIndexedVector");
-#endif    
+#endif
   nElements_ = 0;
   // elements_ array is all zero
   bool needClean=false;
@@ -1063,15 +1063,15 @@ CoinIndexedVector::gutsOfSetVector(int size, int numberIndices,
   for (i=0;i<numberIndices;i++) {
     int indexValue=inds[i];
 #ifndef COIN_FAST_CODE
-    if (indexValue<0) 
+    if (indexValue<0)
       throw CoinError("negative index", "setVector", "CoinIndexedVector");
-    else if (indexValue>=size) 
+    else if (indexValue>=size)
       throw CoinError("too large an index", "setVector", "CoinIndexedVector");
-#endif    
+#endif
     if (elements_[indexValue]) {
       numberDuplicates++;
       elements_[indexValue] += elems[indexValue] ;
-      if (fabs(elements_[indexValue])<COIN_INDEXED_TINY_ELEMENT) 
+      if (fabs(elements_[indexValue])<COIN_INDEXED_TINY_ELEMENT)
 	needClean=true; // need to go through again
     } else {
 #ifndef COIN_FAC_NEW
@@ -1105,28 +1105,28 @@ CoinIndexedVector::gutsOfSetVector(int size, int numberIndices,
 //-----------------------------------------------------------------------------
 
 void
-CoinIndexedVector::gutsOfSetPackedVector(int size, int numberIndices, 
+CoinIndexedVector::gutsOfSetPackedVector(int size, int numberIndices,
 				   const int * inds, const double * elems)
 {
-  packedMode_=true;  
-  
+  packedMode_=true;
+
   int i;
   reserve(size);
 #ifndef COIN_FAST_CODE
   if (numberIndices<0)
     throw CoinError("negative number of indices", "setVector", "CoinIndexedVector");
-#endif    
+#endif
   nElements_ = 0;
   // elements_ array is all zero
   // Does not check for duplicates
   for (i=0;i<numberIndices;i++) {
     int indexValue=inds[i];
 #ifndef COIN_FAST_CODE
-    if (indexValue<0) 
+    if (indexValue<0)
       throw CoinError("negative index", "setVector", "CoinIndexedVector");
-    //else if (indexValue>=size) 
+    //else if (indexValue>=size)
     //throw CoinError("too large an index", "setVector", "CoinIndexedVector");
-#endif    
+#endif
     if (fabs(elems[i])>=COIN_INDEXED_TINY_ELEMENT) {
       elements_[nElements_]=elems[i];
       indices_[nElements_++]=indexValue;
@@ -1141,11 +1141,11 @@ CoinIndexedVector::gutsOfSetConstant(int size,
 				     const int * inds, double value)
 {
 
-  assert(!packedMode_);  
+  assert(!packedMode_);
 #ifndef COIN_FAST_CODE
   if (size<0)
     throw CoinError("negative number of indices", "setConstant", "CoinIndexedVector");
-#endif    
+#endif
   // find largest
   int i;
   int maxIndex=-1;
@@ -1154,11 +1154,11 @@ CoinIndexedVector::gutsOfSetConstant(int size,
 #ifndef COIN_FAST_CODE
     if (indexValue<0)
       throw CoinError("negative index", "setConstant", "CoinIndexedVector");
-#endif    
+#endif
     if (maxIndex<indexValue)
       maxIndex = indexValue;
   }
-  
+
   reserve(maxIndex+1);
   nElements_ = 0;
   int numberDuplicates=0;
@@ -1177,7 +1177,7 @@ CoinIndexedVector::gutsOfSetConstant(int size,
     {
       numberDuplicates++;
       elements_[indexValue] += value ;
-      if (fabs(elements_[indexValue])<COIN_INDEXED_TINY_ELEMENT) 
+      if (fabs(elements_[indexValue])<COIN_INDEXED_TINY_ELEMENT)
 	needClean=true; // need to go through again
     }
   }
@@ -1201,11 +1201,11 @@ CoinIndexedVector::gutsOfSetConstant(int size,
 
 //#############################################################################
 // Append a CoinIndexedVector to the end
-void 
+void
 CoinIndexedVector::append(const CoinIndexedVector & caboose)
 {
   const int cs = caboose.getNumElements();
-  
+
   const int * cind = caboose.getIndices();
   const double * celem = caboose.denseVector();
   int maxIndex=-1;
@@ -1215,7 +1215,7 @@ CoinIndexedVector::append(const CoinIndexedVector & caboose)
 #ifndef COIN_FAST_CODE
     if (indexValue<0)
       throw CoinError("negative index", "append", "CoinIndexedVector");
-#endif    
+#endif
     if (maxIndex<indexValue)
       maxIndex = indexValue;
   }
@@ -1227,7 +1227,7 @@ CoinIndexedVector::append(const CoinIndexedVector & caboose)
     if (elements_[indexValue]) {
       numberDuplicates++;
       elements_[indexValue] += celem[indexValue] ;
-      if (fabs(elements_[indexValue])<COIN_INDEXED_TINY_ELEMENT) 
+      if (fabs(elements_[indexValue])<COIN_INDEXED_TINY_ELEMENT)
 	needClean=true; // need to go through again
     } else {
       if (fabs(celem[indexValue])>=COIN_INDEXED_TINY_ELEMENT) {
@@ -1254,7 +1254,7 @@ CoinIndexedVector::append(const CoinIndexedVector & caboose)
     throw CoinError("duplicate index", "append", "CoinIndexedVector");
 }
 // Append a CoinIndexedVector to the end and modify indices
-void 
+void
 CoinIndexedVector::append(CoinIndexedVector & other,int adjustIndex, bool zapElements/*,double multiplier*/)
 {
   const int cs = other.nElements_;
@@ -1333,11 +1333,11 @@ CoinIndexedVector::append(CoinIndexedVector & other,int adjustIndex, bool zapEle
 #ifndef CLP_NO_VECTOR
 /* Equal. Returns true if vectors have same length and corresponding
    element of each vector is equal. */
-bool 
+bool
 CoinIndexedVector::operator==(const CoinPackedVectorBase & rhs) const
 {
   const int cs = rhs.getNumElements();
-  
+
   const int * cind = rhs.getIndices();
   const double * celem = rhs.getElements();
   if (nElements_!=cs)
@@ -1354,11 +1354,11 @@ CoinIndexedVector::operator==(const CoinPackedVectorBase & rhs) const
   return okay;
 }
 // Not equal
-bool 
+bool
 CoinIndexedVector::operator!=(const CoinPackedVectorBase & rhs) const
 {
   const int cs = rhs.getNumElements();
-  
+
   const int * cind = rhs.getIndices();
   const double * celem = rhs.getElements();
   if (nElements_!=cs)
@@ -1375,7 +1375,7 @@ CoinIndexedVector::operator!=(const CoinPackedVectorBase & rhs) const
   return okay;
 }
 #endif
-// Equal with a tolerance (returns -1 or position of inequality). 
+// Equal with a tolerance (returns -1 or position of inequality).
 int
 CoinIndexedVector::isApproximatelyEqual(const CoinIndexedVector & rhs, double tolerance) const
 {
@@ -1463,11 +1463,11 @@ CoinIndexedVector::isApproximatelyEqual(const CoinIndexedVector & rhs, double to
 }
 /* Equal. Returns true if vectors have same length and corresponding
    element of each vector is equal. */
-bool 
+bool
 CoinIndexedVector::operator==(const CoinIndexedVector & rhs) const
 {
   const int cs = rhs.nElements_;
-  
+
   const int * cind = rhs.indices_;
   const double * celem = rhs.elements_;
   if (nElements_!=cs)
@@ -1513,11 +1513,11 @@ CoinIndexedVector::operator==(const CoinIndexedVector & rhs) const
   return okay;
 }
 /// Not equal
-bool 
+bool
 CoinIndexedVector::operator!=(const CoinIndexedVector & rhs) const
 {
   const int cs = rhs.nElements_;
-  
+
   const int * cind = rhs.indices_;
   const double * celem = rhs.elements_;
   if (nElements_!=cs)
@@ -1534,7 +1534,7 @@ CoinIndexedVector::operator!=(const CoinIndexedVector & rhs) const
   return okay;
 }
 // Get value of maximum index
-int 
+int
 CoinIndexedVector::getMaxIndex() const
 {
   int maxIndex = -COIN_INT_MAX;
@@ -1544,7 +1544,7 @@ CoinIndexedVector::getMaxIndex() const
   return maxIndex;
 }
 // Get value of minimum index
-int 
+int
 CoinIndexedVector::getMinIndex() const
 {
   int minIndex = COIN_INT_MAX;
@@ -1570,7 +1570,7 @@ CoinIndexedVector::scan(int start, int end)
   int i;
   int number = 0;
   int * indices = indices_+nElements_;
-  for (i=start;i<end;i++) 
+  for (i=start;i<end;i++)
     if (elements_[i])
       indices[number++] = i;
   nElements_ += number;
@@ -1596,7 +1596,7 @@ CoinIndexedVector::scan(int start, int end, double tolerance)
   for (i=start;i<end;i++) {
     double value = elements_[i];
     if (value) {
-      if (fabs(value)>=tolerance) 
+      if (fabs(value)>=tolerance)
 	indices[number++] = i;
       else
 	elements_[i]=0.0;
@@ -1730,13 +1730,13 @@ CoinIndexedVector::scanAndPack(int start, int end, double tolerance)
   return number;
 }
 // This is mainly for testing - goes from packed to indexed
-void 
+void
 CoinIndexedVector::expand()
 {
   if (nElements_&&packedMode_) {
     double * temp = new double[capacity_];
     int i;
-    for (i=0;i<nElements_;i++) 
+    for (i=0;i<nElements_;i++)
       temp[indices_[i]]=elements_[i];
     CoinZeroN(elements_,nElements_);
     for (i=0;i<nElements_;i++) {
@@ -1748,8 +1748,8 @@ CoinIndexedVector::expand()
   packedMode_=false;
 }
 // Create packed array
-void 
-CoinIndexedVector::createPacked(int number, const int * indices, 
+void
+CoinIndexedVector::createPacked(int number, const int * indices,
 		    const double * elements)
 {
   nElements_=number;
@@ -1758,8 +1758,8 @@ CoinIndexedVector::createPacked(int number, const int * indices,
   CoinMemcpyN(elements,number,elements_);
 }
 // Create packed array
-void 
-CoinIndexedVector::createUnpacked(int number, const int * indices, 
+void
+CoinIndexedVector::createUnpacked(int number, const int * indices,
 		    const double * elements)
 {
   nElements_=number;
@@ -1771,7 +1771,7 @@ CoinIndexedVector::createUnpacked(int number, const int * indices,
   }
 }
 // Create unpacked singleton
-void 
+void
 CoinIndexedVector::createOneUnpackedElement(int index, double element)
 {
   nElements_=1;
@@ -1780,7 +1780,7 @@ CoinIndexedVector::createOneUnpackedElement(int index, double element)
   elements_[index]=element;
 }
 //  Print out
-void 
+void
 CoinIndexedVector::print() const
 {
   printf("Vector has %d elements (%spacked mode)\n",nElements_,packedMode_ ? "" : "un");
@@ -1795,14 +1795,14 @@ CoinIndexedVector::print() const
 }
 
 // Zero out array
-void 
+void
 CoinArrayWithLength::clear()
 {
   assert ((size_>0&&array_)||!array_);
   memset (array_,0,size_);
 }
 // Get array with alignment
-void 
+void
 CoinArrayWithLength::getArray(int size)
 {
   if (size>0) {
@@ -1832,7 +1832,7 @@ CoinArrayWithLength::getArray(int size)
   }
 }
 // Get rid of array with alignment
-void 
+void
 CoinArrayWithLength::conditionalDelete()
 {
   if (size_==-1) {
@@ -1845,7 +1845,7 @@ CoinArrayWithLength::conditionalDelete()
   }
 }
 // Really get rid of array with alignment
-void 
+void
 CoinArrayWithLength::reallyFreeArray()
 {
   char * charArray = reinterpret_cast<char *> (array_);
@@ -1855,7 +1855,7 @@ CoinArrayWithLength::reallyFreeArray()
   size_=-1;
 }
 // Get enough space
-void 
+void
 CoinArrayWithLength::getCapacity(int numberBytes,int numberNeeded)
 {
   int k=capacity();
@@ -1868,7 +1868,7 @@ CoinArrayWithLength::getCapacity(int numberBytes,int numberNeeded)
     size_=-size_-2;
   }
 }
-/* Alternate Constructor - length in bytes 
+/* Alternate Constructor - length in bytes
    mode -  0 size_ set to size
    >0 size_ set to size and zeroed
    if size<=0 just does alignment
@@ -1878,17 +1878,17 @@ CoinArrayWithLength::CoinArrayWithLength(int size, int mode)
 {
   alignment_=abs(mode);
   getArray(size);
-  if (mode>0&&array_) 
+  if (mode>0&&array_)
     memset(array_,0,size);
   size_=size;
 }
 CoinArrayWithLength::~CoinArrayWithLength ()
-{ 
+{
   if (array_)
-    delete [] (array_-offset_); 
+    delete [] (array_-offset_);
 }
 // Conditionally gets new array
-char * 
+char *
 CoinArrayWithLength::conditionalNew(long sizeWanted)
 {
   if (size_==-1) {
@@ -1920,7 +1920,7 @@ CoinArrayWithLength::CoinArrayWithLength(const CoinArrayWithLength * rhs)
     CoinMemcpyN(rhs->array_,size_,array_);
 }
 /* Assignment operator. */
-CoinArrayWithLength & 
+CoinArrayWithLength &
 CoinArrayWithLength::operator=(const CoinArrayWithLength & rhs)
 {
   if (this != &rhs) {
@@ -1936,7 +1936,7 @@ CoinArrayWithLength::operator=(const CoinArrayWithLength & rhs)
   return *this;
 }
 /* Assignment with length (if -1 use internal length) */
-void 
+void
 CoinArrayWithLength::copy(const CoinArrayWithLength & rhs, int numberBytes)
 {
   if (numberBytes==-1||numberBytes<=rhs.capacity()) {
@@ -1949,7 +1949,7 @@ CoinArrayWithLength::copy(const CoinArrayWithLength & rhs, int numberBytes)
   }
 }
 /* Assignment with length - does not copy */
-void 
+void
 CoinArrayWithLength::allocate(const CoinArrayWithLength & rhs, int numberBytes)
 {
   if (numberBytes==-1||numberBytes<=rhs.capacity()) {
@@ -1966,8 +1966,8 @@ CoinArrayWithLength::allocate(const CoinArrayWithLength & rhs, int numberBytes)
       array_=NULL;
     } else {
       size_=-1;
-    } 
-    if (rhs.size_>=0) 
+    }
+    if (rhs.size_>=0)
       size_ = numberBytes;
     assert (numberBytes>=0);
     assert (!array_);
@@ -1976,7 +1976,7 @@ CoinArrayWithLength::allocate(const CoinArrayWithLength & rhs, int numberBytes)
   }
 }
 // Does what is needed to set persistence
-void 
+void
 CoinArrayWithLength::setPersistence(int flag,int currentLength)
 {
   if (flag) {
@@ -1994,7 +1994,7 @@ CoinArrayWithLength::setPersistence(int flag,int currentLength)
   }
 }
 // Swaps memory between two members
-void 
+void
 CoinArrayWithLength::swap(CoinArrayWithLength & other)
 {
 #ifdef COIN_DEVELOP
@@ -2013,7 +2013,7 @@ CoinArrayWithLength::swap(CoinArrayWithLength & other)
   offset_=swapOffset;
 }
 // Extend a persistent array keeping data (size in bytes)
-void 
+void
 CoinArrayWithLength::extend(int newSize)
 {
   //assert (newSize>=capacity()&&capacity()>=0);
@@ -2061,7 +2061,7 @@ CoinPartitionedVector::~CoinPartitionedVector ()
 {
 }
 // Add up number of elements in partitions
-void 
+void
 CoinPartitionedVector::computeNumberElements()
 {
   if (numberPartitions_) {
@@ -2073,7 +2073,7 @@ CoinPartitionedVector::computeNumberElements()
   }
 }
 // Add up number of elements in partitions and pack and get rid of partitions
-void 
+void
 CoinPartitionedVector::compact()
 {
   if (numberPartitions_) {
@@ -2106,7 +2106,7 @@ CoinPartitionedVector::compact()
 }
 /* Reserve space.
  */
-void 
+void
 CoinPartitionedVector::reserve(int n)
 {
   CoinIndexedVector::reserve(n);
@@ -2114,7 +2114,7 @@ CoinPartitionedVector::reserve(int n)
   startPartition_[1]=capacity_; // for safety
 }
 // Setup partitions (needs end as well)
-void 
+void
 CoinPartitionedVector::setPartitions(int number,const int * starts)
 {
   if (number) {
@@ -2138,7 +2138,7 @@ CoinPartitionedVector::setPartitions(int number,const int * starts)
   }
 }
 // Reset the vector (as if were just created an empty vector). Gets rid of partitions
-void 
+void
 CoinPartitionedVector::clearAndReset()
 {
   if (numberPartitions_) {
@@ -2157,7 +2157,7 @@ CoinPartitionedVector::clearAndReset()
   packedMode_=false;
 }
 // Reset the vector (as if were just created an empty vector). Keeps partitions
-void 
+void
 CoinPartitionedVector::clearAndKeep()
 {
   assert (packedMode_);
@@ -2169,7 +2169,7 @@ CoinPartitionedVector::clearAndKeep()
   nElements_=0;
 }
 // Clear a partition.
-void 
+void
 CoinPartitionedVector::clearPartition(int partition)
 {
   assert (packedMode_);
@@ -2180,7 +2180,7 @@ CoinPartitionedVector::clearPartition(int partition)
 }
 #ifndef NDEBUG
 // For debug check vector is clear i.e. no elements
-void 
+void
 CoinPartitionedVector::checkClear()
 {
 #ifndef NDEBUG
@@ -2213,7 +2213,7 @@ CoinPartitionedVector::checkClear()
 #endif
 }
 // For debug check vector is clean i.e. elements match indices
-void 
+void
 CoinPartitionedVector::checkClean()
 {
   //printf("checkClean %p\n",this);
@@ -2222,9 +2222,9 @@ CoinPartitionedVector::checkClean()
   } else {
     assert (packedMode_);
     int i;
-    for (i=0;i<nElements_;i++) 
+    for (i=0;i<nElements_;i++)
       assert(elements_[i]);
-    for (;i<capacity_;i++) 
+    for (;i<capacity_;i++)
       assert(!elements_[i]);
 #ifndef NDEBUG
     // check mark array zeroed
@@ -2237,7 +2237,7 @@ CoinPartitionedVector::checkClean()
 }
 #endif
 // Scan dense region and set up indices (returns number found)
-int 
+int
 CoinPartitionedVector::scan(int partition, double tolerance)
 {
   assert (packedMode_);
@@ -2272,7 +2272,7 @@ CoinPartitionedVector::scan(int partition, double tolerance)
   return n;
 }
 //  Print out
-void 
+void
 CoinPartitionedVector::print() const
 {
   printf("Vector has %d elements (%d partitions)\n",nElements_,numberPartitions_);
@@ -2299,7 +2299,7 @@ CoinPartitionedVector::print() const
   }
 }
 /* Sort the indexed storage vector (increasing indices). */
-void 
+void
 CoinPartitionedVector::sort()
 {
   assert (packedMode_);

@@ -44,14 +44,14 @@ void PANTHERSlave::init_network(const string &host, const string &port)
 	addrinfo* connect_addr = nullptr;
 	while  (connect_addr == nullptr)
 	{
-		
+
 		connect_addr = w_connect_first_avl(servinfo, sockfd);
 		if (connect_addr == nullptr) {
 			cerr << endl;
 			cerr << "failed to connect to master" << endl;
 			w_sleep(poll_interval_seconds * 1000);
 		}
-		
+
 	}
 	cout << "connection to master succeeded on socket: " << w_get_addrinfo_string(connect_addr) << endl << endl;
 	freeaddrinfo(servinfo);
@@ -184,7 +184,7 @@ void PANTHERSlave::process_ctl_file(const string &ctl_filename)
 			string value = upper_cp(org_value);
 			if (key == "YAMR_POLL_INTERVAL") {
 				convert_ip(value, poll_interval_seconds);
-				
+
 			}
 		}
 	}
@@ -285,7 +285,7 @@ void PANTHERSlave::process_panther_ctl_file(const string &ctl_filename)
 		e.raise();
 	}
 	fin.close();
-	
+
 
 
 }
@@ -395,7 +395,7 @@ NetPackage::PackType PANTHERSlave::run_model(Parameters &pars, Observations &obs
 	NetPackage::PackType final_run_status = NetPackage::PackType::RUN_FAILED;
 	bool done = false;
 	int err = 0;
-	
+
 	if (!mi.get_initialized())
 	{
 		//initialize the model interface
@@ -406,7 +406,7 @@ NetPackage::PackType PANTHERSlave::run_model(Parameters &pars, Observations &obs
 	thread_flag f_terminate(false);
 	thread_flag f_finished(false);
 	thread_exceptions shared_execptions;
-	try 
+	try
 	{
 		vector<string> par_name_vec;
 		vector<double> par_values;
@@ -415,12 +415,12 @@ NetPackage::PackType PANTHERSlave::run_model(Parameters &pars, Observations &obs
 			par_name_vec.push_back(i.first);
 			par_values.push_back(i.second);
 		}
-		
-		vector<double> obs_vec;		
+
+		vector<double> obs_vec;
 		thread run_thread(&PANTHERSlave::run_async, this, &f_terminate, &f_finished, &shared_execptions,
 		   &pars, &obs);
 		pest_utils::thread_RAII raii(run_thread);
-		
+
 		while (true)
 		{
 
@@ -553,7 +553,7 @@ void PANTHERSlave::start(const string &host, const string &port)
 	int err;
 
 	//class attribute - can be modified in run_model()
-	terminate = false;	
+	terminate = false;
 	init_network(host, port);
 	while (!terminate)
 	{
@@ -704,7 +704,7 @@ void PANTHERSlave::start(const string &host, const string &port)
 			}
 			cout << "ping response sent" << endl;
 		}
-		else 
+		else
 		{
 			cout << "received unsupported messaged type: " << int(net_pack.get_type()) << endl;
 		}

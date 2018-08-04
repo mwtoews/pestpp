@@ -1,8 +1,8 @@
-/*  
-    © Copyright 2012, David Welter
-    
+/*
+
+
     This file is part of PEST++.
-   
+
     PEST++ is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
@@ -41,7 +41,7 @@ class PriorInformationRec
 public:
 	friend std::ostream& operator<< (std::ostream& out, const PriorInformationRec &rhs);
 	PriorInformationRec(const PriorInformationRec &rhs);
-	PriorInformationRec(double _pival=0.0, double _weight=0.0, const std::string &_group="", 
+	PriorInformationRec(double _pival=0.0, double _weight=0.0, const std::string &_group="",
 		const std::vector<PIAtom> _pi_atoms = std::vector<PIAtom>());
 	const PriorInformationRec& operator=(const PriorInformationRec &rhs);
 	double calc_residual(const Parameters &pars) const;
@@ -67,7 +67,7 @@ class PriorInformation
 public:
 	typedef std::map<std::string, PriorInformationRec>::iterator iterator;
 	typedef std::map<std::string, PriorInformationRec>::const_iterator const_iterator;
-	PriorInformation() {}	
+	PriorInformation() {}
 	~PriorInformation() {}
 	std::pair<std::string, std::string> AddRecord(const std::string &pi_line);
 	void AddRecord(const std::string &name, const PriorInformationRec* pi_rec_ptr);

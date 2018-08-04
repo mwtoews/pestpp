@@ -1,8 +1,8 @@
-/*  
-	© Copyright 2012, David Welter
-	
+/*
+
+
 	This file is part of PEST++.
-   
+
 	PEST++ is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
@@ -67,9 +67,9 @@ public:
 	virtual const vector<string>& obs_and_reg_list() const;
 	virtual const Parameters &get_base_numeric_parameters() const{return base_numeric_parameters;};
 	Eigen::SparseMatrix<double> get_matrix(const vector<string> &obs_names, const vector<string> & par_name_vec) const;
-	
+
 	virtual bool build_runs(ModelRun &model_run, vector<string> numeric_par_names, ParamTransformSeq &par_transform,
-		const ParameterGroupInfo &group_info, const ParameterInfo &ctl_par_info, 
+		const ParameterGroupInfo &group_info, const ParameterInfo &ctl_par_info,
 		RunManagerAbstract &run_manager, set<string> &out_of_bound_par, bool phiredswh_flag=false, bool calc_init_obs=true);
 	bool build_runs(Parameters &ctl_pars, Observations &ctl_obs, vector<string> numeric_par_names, ParamTransformSeq &par_transform,
 		const ParameterGroupInfo &group_info, const ParameterInfo &ctl_par_info,
@@ -77,7 +77,7 @@ public:
 
 	virtual void make_runs(RunManagerAbstract &run_manager);
 	virtual bool process_runs(ParamTransformSeq &par_transform,
-		const ParameterGroupInfo &group_info, 
+		const ParameterGroupInfo &group_info,
 		RunManagerAbstract &run_manager, const PriorInformation &prior_info, bool splitswh_flag);
 
 	virtual void save(const std::string &ext="jco") const;
@@ -118,15 +118,15 @@ protected:
 
 	virtual std::vector<Eigen::Triplet<double> > calc_derivative(const string &numeric_par_name, double base_numeric_par_value, int jcol, list<JacobianRun> &run_list, const ParameterGroupInfo &group_info,
 		const PriorInformation &prior_info, bool splitswh_flag);
-	virtual bool forward_diff(const string &par_name, const Parameters &pest_parameters, 
+	virtual bool forward_diff(const string &par_name, const Parameters &pest_parameters,
 		const ParameterGroupInfo &group_info, const ParameterInfo &ctl_par_info, const ParamTransformSeq &par_trans,
 		double &new_par, set<string> &out_of_bound_par);
-	virtual bool central_diff(const string &par_name, const Parameters &pest_parameters, 
-		const ParameterGroupInfo &group_info, const ParameterInfo &ctl_par_info, const ParamTransformSeq &par_trans, vector<double> &new_par, 
+	virtual bool central_diff(const string &par_name, const Parameters &pest_parameters,
+		const ParameterGroupInfo &group_info, const ParameterInfo &ctl_par_info, const ParamTransformSeq &par_trans, vector<double> &new_par,
 		vector<Parameters> &model_par_vec, set<string> &out_of_bound_par);
 	virtual bool out_of_bounds(const Parameters &model_parameters, const ParameterInfo &ctl_par_info, set<string> &out_of_bound_par) const;
 	virtual double derivative_inc(const string &name, const ParameterGroupInfo &group_info,   double cur_par_value,  bool central = false);
-	virtual bool get_derivative_parameters(const string &par_name, Parameters &numeric_pars, ParamTransformSeq &par_transform, const ParameterGroupInfo &group_info, const ParameterInfo &ctl_par_info, 
+	virtual bool get_derivative_parameters(const string &par_name, Parameters &numeric_pars, ParamTransformSeq &par_transform, const ParameterGroupInfo &group_info, const ParameterInfo &ctl_par_info,
 		vector<double> &delta_numeric_par_vec, bool phiredswh_flag, set<string> &out_of_bound_par);
 	virtual unordered_map<string, int> get_par2col_map() const;
 	virtual unordered_map<string, int> get_obs2row_map() const;

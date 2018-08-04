@@ -1,8 +1,8 @@
-/*  
-	© Copyright 2012, David Welter
-	
+/*
+
+
 	This file is part of PEST++.
-   
+
 	PEST++ is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
@@ -41,7 +41,7 @@
 using namespace std;
 using namespace pest_utils;
 
-Jacobian_1to1::Jacobian_1to1(FileManager &_file_manager, OutputFileWriter &_output_file_writer) : Jacobian(_file_manager) 
+Jacobian_1to1::Jacobian_1to1(FileManager &_file_manager, OutputFileWriter &_output_file_writer) : Jacobian(_file_manager)
 {
 	output_file_writer_ptr = &_output_file_writer;
 }
@@ -122,10 +122,10 @@ bool Jacobian_1to1::build_runs(Parameters &ctl_pars, Observations &ctl_obs, vect
 		return false;
 	return true;
 }
-	
+
 
 bool Jacobian_1to1::build_runs(ModelRun &init_model_run, vector<string> numeric_par_names, ParamTransformSeq &par_transform,
-		const ParameterGroupInfo &group_info, const ParameterInfo &ctl_par_info, 
+		const ParameterGroupInfo &group_info, const ParameterInfo &ctl_par_info,
 		RunManagerAbstract &run_manager, set<string> &out_of_bound_par, bool phiredswh_flag, bool calc_init_obs)
 {
 	//Parameters pars = init_model_run.get_ctl_pars();
@@ -173,7 +173,7 @@ bool Jacobian_1to1::build_runs(ModelRun &init_model_run, vector<string> numeric_
 					model_parameters[ipar.first] = ipar.second;
 				}
 				int id = run_manager.add_run(model_parameters, i_name, par);
-				
+
 				if (par_run_map.count(i_name) == 0)
 					par_run_map[i_name] = vector<int>{ id };
 				else
@@ -198,7 +198,7 @@ bool Jacobian_1to1::build_runs(ModelRun &init_model_run, vector<string> numeric_
 	ofstream &fout_restart = file_manager.get_ofstream("rst");
 	debug_print(failed_parameter_names);
 	debug_msg("Jacobian_1to1::build_runs end");
-	
+
 	output_file_writer_ptr->write_jco_run_id(run_manager.get_cur_groupid(), par_run_map);
 	if (failed_parameter_names.size() > 0)
 		return false;
@@ -213,7 +213,7 @@ void Jacobian_1to1::make_runs(RunManagerAbstract &run_manager)
 }
 
 bool Jacobian_1to1::process_runs(ParamTransformSeq &par_transform,
-		const ParameterGroupInfo &group_info, 
+		const ParameterGroupInfo &group_info,
 		RunManagerAbstract &run_manager, const PriorInformation &prior_info, bool splitswh_flag)
 {
 	debug_msg("Jacobian_1to1::process_runs begin");
@@ -250,7 +250,7 @@ bool Jacobian_1to1::process_runs(ParamTransformSeq &par_transform,
 	int run_status_next;
 	double par_value_next;
 	double cur_numeric_par_value;
-	
+
 	list<JacobianRun> run_list;
 	for(; i_run<nruns; ++i_run)
 	{
@@ -312,7 +312,7 @@ bool Jacobian_1to1::process_runs(ParamTransformSeq &par_transform,
 	return true;
 }
 
-bool Jacobian_1to1::get_derivative_parameters(const string &par_name, double par_value, const ParamTransformSeq &par_trans, const ParameterGroupInfo &group_info, const ParameterInfo &ctl_par_info, 
+bool Jacobian_1to1::get_derivative_parameters(const string &par_name, double par_value, const ParamTransformSeq &par_trans, const ParameterGroupInfo &group_info, const ParameterInfo &ctl_par_info,
 		vector<double> &delta_numeric_par_vec, bool phiredswh_flag)
 {
 	bool success = false;
@@ -342,7 +342,7 @@ bool Jacobian_1to1::get_derivative_parameters(const string &par_name, double par
 	return success;
 }
 
-bool Jacobian_1to1::forward_diff(const string &par_name, double base_derivative_val, 
+bool Jacobian_1to1::forward_diff(const string &par_name, double base_derivative_val,
 		const ParameterGroupInfo &group_info, const ParameterInfo &ctl_par_info, const ParamTransformSeq &par_trans, double &new_par_val)
 {
 	const ParameterRec *par_info_ptr = ctl_par_info.get_parameter_rec_ptr(par_name);
@@ -367,14 +367,14 @@ bool Jacobian_1to1::forward_diff(const string &par_name, double base_derivative_
 	new_par_val = new_par[par_name] = base_derivative_val - incr;
 	out_of_bound_backward = out_of_bounds(new_par, par_info_ptr);
 	if (!out_of_bound_backward)
-	{	
+	{
 		return true;
 	}
 	return false;
 }
 
-bool Jacobian_1to1::central_diff(const string &par_name, double base_derivative_val, 
-		const ParameterGroupInfo &group_info, const ParameterInfo &ctl_par_info, const ParamTransformSeq &par_trans, vector<double> &new_par_vec, 
+bool Jacobian_1to1::central_diff(const string &par_name, double base_derivative_val,
+		const ParameterGroupInfo &group_info, const ParameterInfo &ctl_par_info, const ParamTransformSeq &par_trans, vector<double> &new_par_vec,
 		vector<Parameters>  &perturb_derivative_par_vec)
 {
 	double new_par;

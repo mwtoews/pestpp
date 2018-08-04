@@ -1,8 +1,8 @@
-/*  
-	© Copyright 2012, David Welter
-	
+/*
+
+
 	This file is part of PEST++.
-   
+
 	PEST++ is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
@@ -67,7 +67,7 @@ Transformable::Transformable(const vector<string> &names, const Eigen::VectorXd 
 	assert(names.size() == values.size());
 	if(names.size() != values.size())
 	{
-		throw PestIndexError("Transformable::Transformable(const vector<string> &names, Eigen::VectorXd &values)", 
+		throw PestIndexError("Transformable::Transformable(const vector<string> &names, Eigen::VectorXd &values)",
 			"size of names vector does not match the size of the values vector");
 	}
 	size_t len = min(size_t(names.size()), size_t(values.size()));
@@ -132,7 +132,7 @@ Transformable Transformable::operator-(const Transformable &rhs) const
 {
 	Transformable ret_val(*this);
 	ret_val -= rhs;
-	return ret_val;	
+	return ret_val;
 }
 
 Transformable Transformable::operator+(const Transformable &rhs) const
@@ -224,7 +224,7 @@ void Transformable::erase(const Parameters &erase_pars)
 		{
 		   items.erase(item_iter++);
 		}
-		else 
+		else
 		{
 			++iter;
 	   }
@@ -242,7 +242,7 @@ void Transformable::erase(const vector<string> &erase_par_names)
 		{
 		   items.erase(item_iter++);
 		}
-		else 
+		else
 		{
 			++iter;
 	   }

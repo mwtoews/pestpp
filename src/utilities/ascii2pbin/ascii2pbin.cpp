@@ -1,5 +1,5 @@
 /*
-© Copyright 2012, David Welter
+
 
 This file is part of PEST++.
 
@@ -167,7 +167,7 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-	// Finished with initial error checking.  Start the main program 
+	// Finished with initial error checking.  Start the main program
 	int status = 0;
 	string info_text;
 	double info_value;

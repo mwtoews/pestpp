@@ -400,7 +400,7 @@ void RECEIVOR::process_name()
 
 {
   string rv_chartostring(char *from);
-  slave->name=rv_chartostring(message->data->buf);      
+  slave->name=rv_chartostring(message->data->buf);
 }
 
 //****************************************************************************
@@ -504,7 +504,7 @@ int RECEIVOR::process_run()
 
   try
   {
-    
+
     run=new MODEL_RUN;
     run->init();
     if(!run->set_frm_msg(message)) throw -1;
@@ -541,7 +541,7 @@ int RECEIVOR::process_obs()
 
   try
   {
-    
+
     result=new MODEL_RESULT;
     result->set_frm_msg(message);
     //cout<<"\n receivor is waiting for results mutex..."<<'\n';

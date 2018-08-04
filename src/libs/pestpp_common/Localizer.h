@@ -33,4 +33,4 @@ private:
 	map<string, int> obs2row_map;
 };
 
-#endif 
+#endif

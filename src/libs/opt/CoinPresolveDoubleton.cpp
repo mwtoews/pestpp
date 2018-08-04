@@ -33,7 +33,7 @@ namespace {	/* begin unnamed local namespace */
 /*
    This routine does the grunt work needed to substitute x for y in all rows i
    where coeff[i,y] != 0. Given ax + by = c, we have
-  
+
   	 y = (c - a*x)/b = c/b + (-a/b)*x
 
    Suppose we're fixing row i. We need to adjust the row bounds by
@@ -55,7 +55,7 @@ namespace {	/* begin unnamed local namespace */
         in the column rep, add coeff[i,x]; mcstrt is modified if the column
 	must be moved ;
 	in the row rep, convert coeff[i,y] to coeff[i,x].
-  
+
    The row and column reps are inconsistent during the routine and at
    completion.  In the row rep, column x and y are updated except for
    the doubleton row, and in the column rep only column x is updated
@@ -64,7 +64,7 @@ namespace {	/* begin unnamed local namespace */
 */
 
 bool elim_doubleton (const char *DBGPARAM(msg),
-		     CoinBigIndex *mcstrt, 
+		     CoinBigIndex *mcstrt,
 		     double *rlo, double *rup,
 		     double *colels,
 		     int *hrow, int *hcol,
@@ -125,7 +125,7 @@ bool elim_doubleton (const char *DBGPARAM(msg),
       const bool no_mem = presolve_expand_col(mcstrt,colels,hrow,hincol,
 					      clink,ncols,icolx) ;
       if (no_mem) return (true) ;
-	  
+
       kcsx = mcstrt[icolx] ;
       kcex = kcsx+hincol[icolx] ;
       // recompute y as well
@@ -171,12 +171,12 @@ int *doubleton_id ;
 void check_doubletons (const CoinPresolveAction *paction)
 {
   const CoinPresolveAction * paction0 = paction ;
-  
+
   if (paction) {
     check_doubletons(paction->next) ;
-    
+
     if (strcmp(paction0->name(),"doubleton_action") == 0) {
-      const doubleton_action *daction = 
+      const doubleton_action *daction =
 	dynamic_cast<const doubleton_action *>(paction0) ;
       for (int i = daction->nactions_-1 ; i >= 0 ; --i) {
 	int icolx = daction->actions_[i].icolx ;
@@ -554,7 +554,7 @@ const CoinPresolveAction
     a x + b y = c
     l1 <= x <= u1
     l2 <= y <= u2
-   
+
     l2 <= (c - a x) / b <= u2
     b/-a > 0 ==> (b l2 - c) / -a <= x <= (b u2 - c) / -a
     b/-a < 0 ==> (b u2 - c) / -a <= x <= (b l2 - c) / -a
@@ -562,18 +562,18 @@ const CoinPresolveAction
     {
       double lo1 = -PRESOLVE_INF ;
       double up1 = PRESOLVE_INF ;
-      
+
       if (-PRESOLVE_INF < clo[tgtcoly]) {
 	if (coeffx*coeffy < 0)
 	  lo1 = (coeffy*clo[tgtcoly]-rhs)/-coeffx ;
-	else 
+	else
 	  up1 = (coeffy*clo[tgtcoly]-rhs)/-coeffx ;
       }
-      
+
       if (cup[tgtcoly] < PRESOLVE_INF) {
 	if (coeffx*coeffy < 0)
 	  up1 = (coeffy*cup[tgtcoly]-rhs)/-coeffx ;
-	else 
+	else
 	  lo1 = (coeffy*cup[tgtcoly]-rhs)/-coeffx ;
       }
 /*
@@ -656,7 +656,7 @@ const CoinPresolveAction
   constant term c/b is subtracted out as the constraints are modified,
   so we don't include it when calculating movement for y.
 */
-	  if (movement) { 
+	  if (movement) {
 	    const CoinBigIndex kkcsx = colStarts[tgtcolx] ;
 	    const CoinBigIndex kkcex = kkcsx+colLengths[tgtcolx] ;
 	    for (CoinBigIndex kcol = kkcsx ; kcol < kkcex ; kcol++) {
@@ -725,12 +725,12 @@ const CoinPresolveAction
     bool no_mem = elim_doubleton("ELIMD",
 				 colStarts,rlo,rup,colCoeffs,
 				 rowIndices,colIndices,rowLengths,colLengths,
-				 clink,n, 
+				 clink,n,
 				 rowStarts,rowCoeffs,
 				 -coeffx/coeffy,
 				 rhs/coeffy,
 				 tgtrow,tgtcolx,tgtcoly) ;
-    if (no_mem) 
+    if (no_mem)
       throwCoinError("out of memory","doubleton_action::presolve") ;
 
 /*
@@ -887,7 +887,7 @@ void doubleton_action::postsolve(CoinPostsolveMatrix *prob) const
       << "), kept x(" << jcolx << "); stored col " ;
     if (f->ncoly)
       std::cout << jcoly ;
-    else 
+    else
       std::cout << jcolx ;
     std::cout << "." << std::endl ;
     std::cout
@@ -985,7 +985,7 @@ void doubleton_action::postsolve(CoinPostsolveMatrix *prob) const
   constant correction removed in presolve), and accumulate contributions to
   the reduced cost for y. Don't tweak finite infinity.
 
-  The PRESOLVEASSERT says this row should already be present. 
+  The PRESOLVEASSERT says this row should already be present.
 */
       int ystart = NO_LINK ;
       int nX = 0 ;
@@ -1139,11 +1139,11 @@ void doubleton_action::postsolve(CoinPostsolveMatrix *prob) const
 #         endif
 	}
       }
-	  
+
 #     if PRESOLVE_CONSISTENCY > 0
       presolve_check_free_list(prob) ;
 #     endif
-	  
+
 /*
   Whew! Set the column length and we're done.
 */
@@ -1280,17 +1280,17 @@ void doubleton_action::postsolve(CoinPostsolveMatrix *prob) const
 	kcs = link[kcs] ;
 
 	if (row != irow) {
-	  
+
 	  // undo elim_doubleton(1)
 	  if (-PRESOLVE_INF < rlo[row])
 	    rlo[row] += (coeff*rhs)/coeffy ;
-	  
+
 	  // undo elim_doubleton(2)
 	  if (rup[row] < PRESOLVE_INF)
 	    rup[row] += (coeff*rhs)/coeffy ;
-	  
+
 	  acts[row] += (coeff*rhs)/coeffy ;
-	  
+
 	  djy -= rowduals[row]*coeff ;
 	}
       }
@@ -1336,7 +1336,7 @@ void doubleton_action::postsolve(CoinPostsolveMatrix *prob) const
   means we should calculate rowduals[dblton] so that rcost[jcoly] == 0. We
   may need to change the status of x (an artifact of loosening a bound when
   x was previously a fixed variable).
-  
+
   If we need to push x into the basis, then we calculate rowduals[dblton] so
   that rcost[jcolx] == 0 and make y nonbasic.
 */
@@ -1411,7 +1411,7 @@ void doubleton_action::postsolve(CoinPostsolveMatrix *prob) const
       rowduals[irow] = djy/coeffy ;
       rcosts[jcoly] = 0.0 ;
     }
-    
+
 #   if PRESOLVE_DEBUG > 0 || PRESOLVE_CONSISTENCY > 0
 /*
   Mark the column and row as processed by doubleton action. Then check
@@ -1429,7 +1429,7 @@ void doubleton_action::postsolve(CoinPostsolveMatrix *prob) const
       CoinBigIndex k = mcstrt[jcolx] ;
       const int nx = hincol[jcolx] ;
       double dj = maxmin*dcost[jcolx] ;
-      
+
       for (int kcol = 0 ; kcol < nx ; ++kcol) {
 	const int row = hrow[k] ;
 	const double coeff = colels[k] ;
@@ -1445,7 +1445,7 @@ void doubleton_action::postsolve(CoinPostsolveMatrix *prob) const
       CoinBigIndex k = mcstrt[jcoly] ;
       const int ny = hincol[jcoly] ;
       double dj = maxmin*dcost[jcoly] ;
-      
+
       for (int kcol = 0 ; kcol < ny ; ++kcol) {
 	const int row = hrow[k] ;
 	const double coeff = colels[k] ;

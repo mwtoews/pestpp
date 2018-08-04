@@ -156,7 +156,7 @@ CoinPackedVector *CoinPresolveMonitor::extractCol (int j,
     pkvec->insert(rowIndices[jj],coeffs[jj]) ;
     jj = colLinks[jj] ;
   }
-  
+
   return (pkvec) ;
 }
 

@@ -215,7 +215,7 @@ StringvecFortranCharArray::StringvecFortranCharArray(const vector<string> in, in
 	}
 }
 
-char *StringvecFortranCharArray::get_prt() 
+char *StringvecFortranCharArray::get_prt()
 {
 	return fort_array;
 }
@@ -233,7 +233,7 @@ string get_filename_without_ext(const string &filename)
 	string filename_lower = lower_cp(filename);
 	//size_t found = filename_lower.find_last_of('.');
 	size_t found = filename_lower.find(".pst");
-	if (found != string::npos)	
+	if (found != string::npos)
 	{
 		new_str = new_str.substr(0, found);
 	}
@@ -265,7 +265,7 @@ string get_pathname(const string &complete_path)
 	vector<string> tokens;
 	stringstream ret_val;
 	int ntokens;
-	
+
 	tokenize(complete_path, tokens, OperSys::DIR_SEP);
 	ntokens = tokens.size();
 

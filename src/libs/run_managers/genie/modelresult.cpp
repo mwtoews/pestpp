@@ -275,11 +275,11 @@ void MODEL_RESULT::set_frm_run(MODEL_RUN *run)
 //CTM Feb 2011
 
 /*
-      
+
 */
 
 {
-  
+
   *npar=*run->npar;
   *nobs=*run->nobs;
   *id=*run->id;

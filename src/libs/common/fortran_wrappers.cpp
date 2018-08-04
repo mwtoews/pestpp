@@ -23,7 +23,7 @@ extern "C"
 
   {
 	vector<string> names_vec =  fortran_str_array_2_vec(names, *names_str_len, *names_array_len);
-	
+
 	unordered_map<string, int> *new_table =  new  unordered_map<string, int>;
 	::hashtable_set.insert(new_table);
 	int i = 0;
@@ -73,7 +73,7 @@ extern "C"
     hash_which1_cpp(ptr, name, index, ifail);
   }
 
- 
+
   void hash_free_(void **ptr)
   {
     unordered_map<string, int> *table = static_cast< unordered_map<string, int> *>(*ptr);
