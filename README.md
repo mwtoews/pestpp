@@ -1,7 +1,7 @@
 # PEST++
 Object Oriented Inverse Modeling Software
 <br><br><br>
-[![Travis Status](https://travis-ci.org/jtwhite79/pestpp.svg?branch=develop)](https://travis-ci.org/jtwhite79/pestpp)
+[![Travis Status](https://travis-ci.org/jtwhite79/pestpp.svg?branch=master)](https://travis-ci.org/jtwhite79/pestpp)
 [![Build status](https://ci.appveyor.com/api/projects/status/jlyivnw4jhstp8l8?svg=true)](https://ci.appveyor.com/project/jtwhite79/pestpp)
 
 ## links to latest binaries
@@ -13,7 +13,6 @@ Object Oriented Inverse Modeling Software
 
 ## Overview
 The PEST++ software suite includes several stand-alone tools for model-independent (non-intrusive) computer model parameter estimation and uncertainty analysis.  Codes include:
-<<<<<<< HEAD
 
 * ``pestpp``: deterministic GLM parameter estimation using "on-the-fly" subspace reparameterization, effectively reproducing the SVD-Assist methodology of PEST without any user intervention
 
@@ -23,17 +22,6 @@ The PEST++ software suite includes several stand-alone tools for model-independe
 
 * ``pestpp-opt``: chance-constrainted linear programming
 
-=======
-
-* ``pestpp``: deterministic GLM parameter estimation using "on-the-fly" subspace reparameterization, effectively reproducing the SVD-Assist methodology of PEST without any user intervention
-
-* ``pestpp-gsa``: Global senitivity analysis using either Morris or Sobol
-
-* ``pestpp-swp``: a generic parallel run utility driven by a CSV file of parameter values
-
-* ``pestpp-opt``: chance-constrainted linear programming
-
->>>>>>> origin/develop
 * ``pestpp-ies``: iterative ensemble smoother implementation of GLM.
 
 All members of the software suite can be compiled for PC, MAC, or Linux and have several run managers to support parallelization.  precompiled binaries are available in the "exe" folder.  Windows users should use the ``intel_c_windows`` branch binaries to avoid the dreaded MSVC missing runtime DLL issue
