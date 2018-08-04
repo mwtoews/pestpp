@@ -2,7 +2,7 @@
 Object Oriented Inverse Modeling Software
 <br><br><br>
 [![Travis Status](https://travis-ci.org/jtwhite79/pestpp.svg?branch=develop)](https://travis-ci.org/jtwhite79/pestpp)
-[![Build status](https://ci.appveyor.com/api/projects/status/jlyivnw4jhstp8l8?svg=true)](https://ci.appveyor.com/project/jtwhite79/pestpp)
+[![Build status](https://ci.appveyor.com/api/projects/status/jlyivnw4jhstp8l8/branch=develop?svg=true)](https://ci.appveyor.com/project/jtwhite79/pestpp)
 
 ## links to latest binaries
 
