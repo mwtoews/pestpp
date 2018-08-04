@@ -65,9 +65,9 @@ ClpEventHandler::event(Event whichEvent)
 /* This can do whatever it likes.  Return code -1 means no action.
    This passes in something
 */
-int 
-ClpEventHandler::eventWithInfo(Event whichEvent, void * info) 
-{ 
+int
+ClpEventHandler::eventWithInfo(Event whichEvent, void * info)
+{
   return -1;
 }
 /* set model. */

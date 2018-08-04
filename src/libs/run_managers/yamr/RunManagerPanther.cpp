@@ -1,8 +1,8 @@
-/*  
-	© Copyright 2012, David Welter
-	
+/*
+
+
 	This file is part of PEST++.
-   
+
 	PEST++ is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
@@ -299,7 +299,7 @@ RunManagerPanther::RunManagerPanther(const string &stor_filename, const string &
 	freeaddrinfo(servinfo);
 	fdmax = listener;
 	FD_ZERO(&master);
-	FD_SET(listener, &master);	
+	FD_SET(listener, &master);
 	return;
 }
 
@@ -484,7 +484,7 @@ RunManagerAbstract::RUN_UNTIL_COND RunManagerPanther::run_until(RUN_UNTIL_COND c
 		cout << message.str() << endl << endl;
 		f_rmr << endl << "---------------------" << endl << message.str() << endl << endl;
 
-		//Removed because it was preventing the restart from functioning properly 
+		//Removed because it was preventing the restart from functioning properly
 		//if (model_runs_done == 0)
 		//	throw PestError("no runs completed successfully");
 
@@ -577,7 +577,7 @@ bool RunManagerPanther::listen()
 	tv.tv_sec = 1;
 	tv.tv_usec = 0;
 	read_fds = master; // copy it
-	if (w_select(fdmax+1, &read_fds, NULL, NULL, &tv) == -1) 
+	if (w_select(fdmax+1, &read_fds, NULL, NULL, &tv) == -1)
 	{
 		// there are no slaves available.  W need to keep listening until at least one appears
 		got_message = true;
@@ -593,26 +593,26 @@ bool RunManagerPanther::listen()
 				addr_len = sizeof remote_addr;
 				newfd = w_accept(listener,(struct sockaddr *)&remote_addr, &addr_len);
 				if (newfd == -1) {}
-				else 
+				else
 				{
 					add_slave(newfd);
 				}
 			}
 			else  // handle data from a client
-			{				
+			{
 				//set the ping flag since the slave sent something back
 				list<SlaveInfoRec>::iterator iter = socket_to_iter_map.at(i);
 				iter->set_ping(false);
-				process_message(i);				
+				process_message(i);
 			} // END handle data from client
-		} // END got new incoming connection	
+		} // END got new incoming connection
 	} // END looping through file descriptors
 	return got_message;
 }
 
 void RunManagerPanther::close_slaves()
 {
-	/*for (int i = 0; i <= fdmax; i++) 
+	/*for (int i = 0; i <= fdmax; i++)
 	{
 		list<SlaveInfoRec>::iterator slave_info_iter = socket_to_iter_map.at(i);
 		if (slave_info_iter != slave_info_set.end())
@@ -627,7 +627,7 @@ void RunManagerPanther::close_slaves()
 		for (auto si : sock_nums)
 			close_slave(si);
 		w_sleep(2000);
-		
+
 	}
 }
 
@@ -728,7 +728,7 @@ void RunManagerPanther::schedule_runs()
 						should_schedule = true;
 						model_runs_timed_out += overdue_kill_runs_vec.size();
 					}
-					else if (((duration > overdue_giveup_minutes) || (duration > avg_runtime*overdue_giveup_fac)) 
+					else if (((duration > overdue_giveup_minutes) || (duration > avg_runtime*overdue_giveup_fac))
 						&& free_slave_list.empty())
 					{
 						// If there are no free slaves kill the overdue ones
@@ -744,7 +744,7 @@ void RunManagerPanther::schedule_runs()
 					}
 					else if (duration > avg_runtime*overdue_reched_fac)
 					{
-						//check how many concurrent runs are going	
+						//check how many concurrent runs are going
 						if (n_concur < max_concurrent_runs) should_schedule = true;
 						else should_schedule = false;
 					}
@@ -856,7 +856,7 @@ int RunManagerPanther::schedule_run(int run_id, std::list<list<SlaveInfoRec>::it
 				"  (group id = " << cur_group_id << ", run id = " << run_id << ", concurrent runs = " << get_n_concurrent(run_id) << ")";
 			report(ss.str(), false);
 			free_slave_list.erase(it_slave);
-			scheduled = 1;			
+			scheduled = 1;
 		}
 	}
 	return scheduled;  // 1 = run scheduled; -1 failed to schedule run; 0 run not needed
@@ -911,7 +911,7 @@ void RunManagerPanther::report(std::string message,bool to_cout)
 }
 
 void RunManagerPanther::process_message(int i_sock)
-{	
+{
 	NetPackage net_pack;
 	int err;
 	list<SlaveInfoRec>::iterator slave_info_iter = socket_to_iter_map.at(i_sock);
@@ -970,11 +970,11 @@ void RunManagerPanther::process_message(int i_sock)
 		slave_info_iter->set_state(SlaveInfoRec::State::WAITING);
 	}
 
-	else if ( (net_pack.get_type() == NetPackage::PackType::RUN_FINISHED 
+	else if ( (net_pack.get_type() == NetPackage::PackType::RUN_FINISHED
 		|| net_pack.get_type() == NetPackage::PackType::RUN_FAILED
 		|| net_pack.get_type() == NetPackage::PackType::RUN_KILLED)
 			&& net_pack.get_group_id() != cur_group_id)
-	{		
+	{
 		// this is an old run that did not finish on time
 		// just ignore it
 		int run_id = net_pack.get_run_id();
@@ -984,10 +984,10 @@ void RunManagerPanther::process_message(int i_sock)
 		//throw PestError(ss.str());
 	}
 	else if (net_pack.get_type() == NetPackage::PackType::RUN_FINISHED)
-	{		
+	{
 		int run_id = net_pack.get_run_id();
 		int group_id = net_pack.get_group_id();
-	
+
 		//check if this run already completed on another node
 		if (run_finished(run_id))
 		{
@@ -1018,7 +1018,7 @@ void RunManagerPanther::process_message(int i_sock)
 		int group_id = net_pack.get_group_id();
 		int n_concur = get_n_concurrent(run_id);
 		stringstream ss;
-		
+
 		if (!run_finished(run_id))
 		{
 			ss << "Run " << run_id << " failed on slave:" << host_name << "$" << slave_info_iter->get_work_dir() << "  (group id = " << group_id << ", run id = " << run_id << ", concurrent = " << n_concur << ") ";
@@ -1054,7 +1054,7 @@ void RunManagerPanther::process_message(int i_sock)
 	}
 	else if (net_pack.get_type() == NetPackage::PackType::IO_ERROR)
 	{
-		//string err(net_pack.get_data().begin(),net_pack.get_data().end());		
+		//string err(net_pack.get_data().begin(),net_pack.get_data().end());
 		report("error in model IO files on slave: " + host_name + "$" + slave_info_iter->get_work_dir() + "-terminating slave. ", true);
 		close_slave(i_sock);
 	}
@@ -1072,7 +1072,7 @@ bool RunManagerPanther::process_model_run(int sock_id, NetPackage &net_pack)
 	bool use_run = false;
 	int run_id = net_pack.get_run_id();
 
-	//check if another instance of this model run has already completed 
+	//check if another instance of this model run has already completed
 	if (!run_finished(run_id))
 	{
 		Parameters pars;
@@ -1084,7 +1084,7 @@ bool RunManagerPanther::process_model_run(int sock_id, NetPackage &net_pack)
 		//slave_info_iter->set_state(SlaveInfoRec::State::WAITING);
 		use_run = true;
 		model_runs_done++;
-		
+
 	}
 	// remove currently completed run from the active list
 	auto it = get_active_run_iter(sock_id);
@@ -1226,7 +1226,7 @@ void RunManagerPanther::kill_all_active_runs()
  {
 	 vector<int> sock_id_vec;
 	 auto range_pair = active_runid_to_iterset_map.equal_range(run_id);
-	
+
 	 double duration;
 	 for (auto &i = range_pair.first; i != range_pair.second; ++i)
 	 {
@@ -1306,7 +1306,7 @@ void RunManagerPanther::kill_all_active_runs()
 	 auto range_pair = active_runid_to_iterset_map.equal_range(run_id);
 
 	 for (auto iter = range_pair.first; iter != range_pair.second;)
-	 { 
+	 {
 		 if (iter->second == slave_info_iter)
 		 {
 			 iter = active_runid_to_iterset_map.erase(iter);
@@ -1318,7 +1318,7 @@ void RunManagerPanther::kill_all_active_runs()
 		 }
 	 }
  }
- 
+
  list<list<SlaveInfoRec>::iterator> RunManagerPanther::get_free_slave_list()
  {
 	 list<list<SlaveInfoRec>::iterator> iter_list;
@@ -1406,9 +1406,9 @@ RunManagerPanther::~RunManagerPanther(void)
 	err = w_close(listener);
 	FD_CLR(listener, &master);
 	// this is needed to ensure that the first slave closes properly
-	w_sleep(2000);	
+	w_sleep(2000);
 	for(int i = 0; i <= fdmax; i++) {
-		if (FD_ISSET(i, &master)) 
+		if (FD_ISSET(i, &master))
 		{
 			NetPackage netpack(NetPackage::PackType::TERMINATE, 0, 0,"");
 			char data;
@@ -1420,8 +1420,8 @@ RunManagerPanther::~RunManagerPanther(void)
 	w_cleanup();
 }
 
-RunManagerYAMRCondor::RunManagerYAMRCondor(const std::string & stor_filename, 
-	const std::string & port, std::ofstream & _f_rmr, int _max_n_failure, 
+RunManagerYAMRCondor::RunManagerYAMRCondor(const std::string & stor_filename,
+	const std::string & port, std::ofstream & _f_rmr, int _max_n_failure,
 	double overdue_reched_fac, double overdue_giveup_fac, double overdue_giveup_minutes, string _condor_submit_file): RunManagerPanther(stor_filename,
 		port,_f_rmr,_max_n_failure,overdue_reched_fac,overdue_giveup_fac, overdue_giveup_minutes)
 {
@@ -1435,7 +1435,7 @@ void RunManagerYAMRCondor::run()
 	cout << " on condor cluster " << cluster << endl;
 	RunManagerPanther::run();
 	cleanup(cluster);
-	
+
 }
 
 void RunManagerYAMRCondor::write_submit_file()

@@ -1,5 +1,5 @@
 /*
-	© Copyright 2012, David Welter
+
 
 	This file is part of PEST++.
 
@@ -55,8 +55,8 @@ void MuPoint::set(double _mu, const PhiComponets &_phi_comp)
 }
 
 double MuPoint::f() const
-{ 
-	return phi_comp.meas - target_phi_meas; 
+{
+	return phi_comp.meas - target_phi_meas;
 }
 
 double MuPoint::error_frac()
@@ -66,7 +66,7 @@ double MuPoint::error_frac()
 
 double MuPoint::error_percent()
 {
-	return (phi_comp.meas - target_phi_meas) / target_phi_meas; 
+	return (phi_comp.meas - target_phi_meas) / target_phi_meas;
 }
 
 void MuPoint::print(ostream &os)
@@ -232,7 +232,7 @@ ModelRun SVDSolver::solve(RunManagerAbstract &run_manager, TerminationController
 			os << "  Number of terms in the jacobian equal to zero: " << jac_num_zero << " / " << jac_num_total
 				<< " (" << double(jac_num_zero) / double(jac_num_total) * 100 << "%)" << endl << endl;
 			os.precision(n_prec);
-		}	
+		}
 
 		{
 			const set<string> &failed_parameter_runs = jacobian.get_failed_parameter_names();
@@ -425,7 +425,7 @@ void SVDSolver::calc_lambda_upgrade_vec_JtQJ(const Jacobian &jacobian, const QSq
 	ident.setIdentity();
 	performance_log->log_event("forming JtQJ matrix");
 	Eigen::SparseMatrix<double> JtQJ = jac.transpose() * q_mat * jac;
-	
+
 	if (parcov.nrow() > 0)
 	//if (parcov_scale_fac > 0.0)
 	{
@@ -433,7 +433,7 @@ void SVDSolver::calc_lambda_upgrade_vec_JtQJ(const Jacobian &jacobian, const QSq
 		performance_log->log_event("JtQJ plus parcov.inv");
 		JtQJ = JtQJ + (parcov_scale_fac * *parcov.get(numeric_par_names).inv().e_ptr());
 	}
-	
+
 	Eigen::VectorXd upgrade_vec;
 	if (marquardt_type == MarquardtMatrix::IDENT)
 	{
@@ -464,7 +464,7 @@ void SVDSolver::calc_lambda_upgrade_vec_JtQJ(const Jacobian &jacobian, const QSq
 			recalc_js = true;
 		}
 
-		
+
 
 		// Returns truncated Sigma, U and Vt arrays with small singular parameters trimed off
 		performance_log->log_event("commencing SVD factorization");
@@ -484,7 +484,7 @@ void SVDSolver::calc_lambda_upgrade_vec_JtQJ(const Jacobian &jacobian, const QSq
 
 		VectorXd Sigma_inv = Sigma.array().inverse();
 		performance_log->log_event("commencing linear algebra multiplication to compute ugrade");
-		
+
 		info_str << "Vt info: " << "rows = " << Vt.rows() << ": cols = " << Vt.cols() << ": size = " << Vt.size() << ": nonzeros = " << Vt.nonZeros();
 		performance_log->log_event(info_str.str());
 		info_str.str("");
@@ -628,7 +628,7 @@ void SVDSolver::calc_lambda_upgrade_vecQ12J(const Jacobian &jacobian, const QSqr
 	Eigen::VectorXd upgrade_vec;
 	upgrade_vec = Vt.transpose() * (Sigma_inv.asDiagonal() * (U.transpose() * (q_sqrt  * corrected_residuals)));
 
-	
+
 
 	// scale the upgrade vector using the technique described in the PEST manual
 	if (scale_upgrade)
@@ -716,7 +716,7 @@ void SVDSolver::calc_upgrade_vec(double i_lambda, Parameters &prev_frozen_active
 	(*this.*calc_lambda_upgrade)(jacobian, Q_sqrt, regul, residuals_vec, obs_names_vec,
 		base_run_active_ctl_pars, prev_frozen_active_ctl_pars, i_lambda, upgrade_active_ctl_pars, upgrade_ctl_del_pars,
 		grad_ctl_del_pars, marquardt_type, scale_upgrade);
-	if (upgrade_active_ctl_pars.get_notnormal_keys().size() > 0) 
+	if (upgrade_active_ctl_pars.get_notnormal_keys().size() > 0)
 	{
 		stringstream ss;
 		for (auto &n : upgrade_active_ctl_pars.get_notnormal_keys())
@@ -869,7 +869,7 @@ void SVDSolver::calc_upgrade_vec_freeze(double i_lambda, Parameters &prev_frozen
 	}
 
 
-ModelRun SVDSolver::iteration_reuse_jac(RunManagerAbstract &run_manager, TerminationController &termination_ctl, ModelRun &base_run, 
+ModelRun SVDSolver::iteration_reuse_jac(RunManagerAbstract &run_manager, TerminationController &termination_ctl, ModelRun &base_run,
 	bool rerun_base, const string &jco_filename, const string &res_filename)
 {
 	ModelRun new_base_run(base_run);
@@ -877,14 +877,14 @@ ModelRun SVDSolver::iteration_reuse_jac(RunManagerAbstract &run_manager, Termina
 
 	vector<string> numeric_parname_vec = par_transform.ctl2numeric_cp(new_base_run.get_ctl_pars()).get_keys();
 
-	
+
 	string jac_filename = jco_filename;
 	if (jco_filename.empty()) jac_filename = file_manager.build_filename("jcb");
 	cout << "  reading previously computed jacobian:  " << jac_filename << endl;
 	file_manager.get_ofstream("rec") << "  reading previously computed jacobian:  " << jac_filename << endl;
 	jacobian.read(jac_filename);
 	//todo: make sure the jco has the right pars and obs
-	
+
 	if (!res_filename.empty())
 	{
 		stringstream message;
@@ -936,13 +936,13 @@ ModelRun SVDSolver::iteration_reuse_jac(RunManagerAbstract &run_manager, Termina
 				break;
 			}
 		}
-		
+
 		if (found)
 		{
 			jacobian.set_base_numeric_pars(par_transform.ctl2numeric_cp(new_base_run.get_ctl_pars()));
 			jacobian.set_base_sim_obs(new_base_run.get_obs());
 		}
-		
+
 
 	}
 
@@ -1141,7 +1141,7 @@ ModelRun SVDSolver::iteration_upgrd(RunManagerAbstract &run_manager, Termination
 				Parameters scaled_pars = base_numeric_pars + del_numeric_pars * i_scale;
 				par_transform.numeric2model_ip(scaled_pars);
 				Parameters scaled_ctl_pars = par_transform.numeric2ctl_cp(scaled_pars);
-				output_file_writer.write_upgrade(termination_ctl.get_iteration_number(), 
+				output_file_writer.write_upgrade(termination_ctl.get_iteration_number(),
 					0, i_lambda, i_scale, scaled_ctl_pars);
 
 				stringstream ss;
@@ -1280,7 +1280,7 @@ void SVDSolver::check_limits(const Parameters &init_active_ctl_pars, const Param
 	double b_facorg_lim;
 	pair<bool, double> par_limit;
 	const ParameterRec *p_info;
-	
+
 	for (auto &ipar : upgrade_active_ctl_pars)
 	{
 		name = &(ipar.first);  // parameter name
@@ -1671,7 +1671,7 @@ PhiComponets SVDSolver::phi_estimate(const ModelRun &base_run, const Jacobian &j
 	(*this.*calc_lambda_upgrade)(jacobian, Q_sqrt, regul, residuals_vec, obs_names_vec,
 		base_run_active_ctl_par, freeze_active_ctl_pars, 0, new_pars, upgrade_ctl_del_pars,
 		grad_ctl_del_pars, MarquardtMatrix::IDENT, scale_upgrade);
-	
+
 	//Don't limit parameters as this is just an estimate
 	//limit_parameters_ip(base_run_active_ctl_par, new_pars,
 	//	limit_type, freeze_active_ctl_pars, true);

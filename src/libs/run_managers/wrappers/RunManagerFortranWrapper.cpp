@@ -57,7 +57,7 @@ int rmif_create_panther_(
 		string port =  fortran_str_2_string(f_port, *f_port_len);
 		string info_filename =  fortran_str_2_string(f_info_filename, *info_filename_len);
 		fout_run_manager_log_file.open(info_filename);
-		_run_manager_ptr_ = new RunManagerPanther(storfile, 
+		_run_manager_ptr_ = new RunManagerPanther(storfile,
 			port, fout_run_manager_log_file, *n_max_fail, *overdue_reched_fac, *overdue_giveup_fac,
 			*overdue_giveup_minutes);
 	}

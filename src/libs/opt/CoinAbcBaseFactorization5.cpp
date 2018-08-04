@@ -219,7 +219,7 @@ inline CoinFactorizationDouble gatherUpdate(CoinSimplexInt number,
 #undef INLINE_IT
 //  updateColumnR.  Updates part of column (FTRANR)
 void
-CoinAbcTypeFactorization::updateColumnR ( CoinIndexedVector * regionSparse 
+CoinAbcTypeFactorization::updateColumnR ( CoinIndexedVector * regionSparse
 #if ABC_SMALL<2
 				      , CoinAbcStatistics & statistics
 #endif
@@ -235,11 +235,11 @@ CoinAbcTypeFactorization::updateColumnR ( CoinIndexedVector * regionSparse
     CoinSimplexInt * COIN_RESTRICT regionIndex = regionSparse->getIndices (  );
     CoinSimplexInt numberNonZero = regionSparse->getNumElements (  );
 #endif
-    
+
     const CoinBigIndex *  COIN_RESTRICT startColumn = startColumnRAddress_-numberRows_;
     const CoinSimplexInt *  COIN_RESTRICT indexRow = indexRowRAddress_;
     CoinSimplexInt * COIN_RESTRICT indexRowR2 = indexRowRAddress_+lengthAreaR_;
-    if (gotRCopy()) 
+    if (gotRCopy())
       indexRowR2 += lengthAreaR_;
     const CoinFactorizationDouble *  COIN_RESTRICT element = elementRAddress_;
     const CoinSimplexInt *  COIN_RESTRICT permute = permuteAddress_;
@@ -269,8 +269,8 @@ CoinAbcTypeFactorization::updateColumnR ( CoinIndexedVector * regionSparse
     CoinSimplexInt method=0;
     if (!gotRCopy()||!gotSparse()||methodTime2<methodTime0) {
       method=2;
-    } 
-    /* 
+    }
+    /*
        IF we have row copy of R then always store in old way -
        otherwise unpermuted way.
     */
@@ -441,7 +441,7 @@ CoinAbcTypeFactorization::updateColumnR ( CoinIndexedVector * regionSparse
 #endif
   }
 #if ABC_SMALL<2
-  if (factorizationStatistics()) 
+  if (factorizationStatistics())
     statistics.countAfterR_ += regionSparse->getNumElements();
 #endif
 }
@@ -449,7 +449,7 @@ CoinAbcTypeFactorization::updateColumnR ( CoinIndexedVector * regionSparse
 #include "AbcSimplex.hpp"
 #include "AbcMatrix.hpp"
 // Returns -2 if can't, -1 if singular, -99 memory, 0 OK
-int 
+int
 CoinAbcTypeFactorization::factorize (AbcSimplex * model, CoinIndexedVector & stuff)
 {
   AbcMatrix * matrix = model->abcMatrix();
@@ -458,7 +458,7 @@ CoinAbcTypeFactorization::factorize (AbcSimplex * model, CoinIndexedVector & stu
   int numberColumnBasic = stuff.getNumElements();
   // compute how much in basis
   int numberSlacks = numberRows_ - numberColumnBasic;
-  
+
   CoinBigIndex numberElements = numberSlacks+matrix->countBasis(pivotTemp + numberSlacks,
 					 numberColumnBasic);
   // Not needed for dense
@@ -511,7 +511,7 @@ CoinAbcTypeFactorization::factorize (AbcSimplex * model, CoinIndexedVector & stu
   }
 }
 // 0 success, -1 can't +1 accuracy problems
-int 
+int
 CoinAbcTypeFactorization::replaceColumns ( const AbcSimplex * model,
 					   CoinIndexedVector & stuff,
 					   int firstPivot,int lastPivot,
@@ -570,7 +570,7 @@ CoinAbcTypeFactorization::replaceColumns ( const AbcSimplex * model,
 #endif
 #ifdef ABC_ORDERED_FACTORIZATION
 // Permute in for Ftran
-void 
+void
 CoinAbcTypeFactorization::permuteInForFtran(CoinIndexedVector & regionSparse,
 					    bool full) const
 {
@@ -612,7 +612,7 @@ CoinAbcTypeFactorization::permuteInForFtran(CoinIndexedVector & regionSparse,
   }
 }
 // Permute in for Btran and multiply by pivot Region
-void 
+void
 CoinAbcTypeFactorization::permuteInForBtranAndMultiply(CoinIndexedVector & regionSparse,
 						       bool full) const
 {
@@ -651,7 +651,7 @@ CoinAbcTypeFactorization::permuteInForBtranAndMultiply(CoinIndexedVector & regio
 #endif
 }
 // Permute out for Btran
-void 
+void
 CoinAbcTypeFactorization::permuteOutForBtran(CoinIndexedVector & regionSparse) const
 {
   int numberNonZero=regionSparse.getNumElements();
@@ -675,7 +675,7 @@ CoinAbcTypeFactorization::permuteOutForBtran(CoinIndexedVector & regionSparse) c
 #endif
 #if COIN_BIG_DOUBLE==1
 // To a work array and associate vector
-void 
+void
 CoinAbcTypeFactorization::toLongArray(CoinIndexedVector * vector,int which) const
 {
   assert (which>=0&&which<FACTOR_CPU);
@@ -695,11 +695,11 @@ CoinAbcTypeFactorization::toLongArray(CoinIndexedVector * vector,int which) cons
   }
 }
 // From a work array and dis-associate vector
-void 
+void
 CoinAbcTypeFactorization::fromLongArray(CoinIndexedVector * vector) const
 {
   int which;
-  for (which=0;which<FACTOR_CPU;which++) 
+  for (which=0;which<FACTOR_CPU;which++)
     if (vector==associatedVector_[which])
       break;
   assert (which<FACTOR_CPU);
@@ -718,7 +718,7 @@ CoinAbcTypeFactorization::fromLongArray(CoinIndexedVector * vector) const
   }
 }
 // From a work array and dis-associate vector
-void 
+void
 CoinAbcTypeFactorization::fromLongArray(int which) const
 {
   assert (which<FACTOR_CPU);
@@ -738,33 +738,33 @@ CoinAbcTypeFactorization::fromLongArray(int which) const
   }
 }
 // Returns long double * associated with vector
-long double * 
+long double *
 CoinAbcTypeFactorization::denseVector(CoinIndexedVector * vector) const
 {
   int which;
-  for (which=0;which<FACTOR_CPU;which++) 
+  for (which=0;which<FACTOR_CPU;which++)
     if (vector==associatedVector_[which])
       break;
   assert (which<FACTOR_CPU);
   return longArray_[which].array();
 }
 // Returns long double * associated with vector
-long double * 
+long double *
 CoinAbcTypeFactorization::denseVector(CoinIndexedVector & vector) const
 {
   int which;
-  for (which=0;which<FACTOR_CPU;which++) 
+  for (which=0;which<FACTOR_CPU;which++)
     if (&vector==associatedVector_[which])
       break;
   assert (which<FACTOR_CPU);
   return longArray_[which].array();
 }
 // Returns long double * associated with vector
-const long double * 
+const long double *
 CoinAbcTypeFactorization::denseVector(const CoinIndexedVector * vector) const
 {
   int which;
-  for (which=0;which<FACTOR_CPU;which++) 
+  for (which=0;which<FACTOR_CPU;which++)
     if (vector==associatedVector_[which])
       break;
   assert (which<FACTOR_CPU);
@@ -785,7 +785,7 @@ CoinAbcTypeFactorization::scan(CoinIndexedVector * vector) const
   vector->setNumElements(numberNonZero);
 }
 // Clear all hidden arrays
-void 
+void
 CoinAbcTypeFactorization::clearHiddenArrays()
 {
   for (int which=0;which<FACTOR_CPU;which++) {

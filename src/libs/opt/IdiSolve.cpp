@@ -342,7 +342,7 @@ Idiot::IdiSolve(
      for (int i=0;i<numberColumns;i++) {
        if (model_->getColumnStatus(i)!=ClpSimplex::isFixed)
 	 statusSave[i] = 0;
-       else 
+       else
 	 statusSave[i] = 2;
      }
      memset(statusSave+numberColumns,0,ncols-numberColumns);

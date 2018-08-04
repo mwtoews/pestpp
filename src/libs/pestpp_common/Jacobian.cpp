@@ -1,8 +1,8 @@
-/*  
-	© Copyright 2012, David Welter
-	
+/*
+
+
 	This file is part of PEST++.
-   
+
 	PEST++ is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
@@ -39,7 +39,7 @@ using namespace std;
 using namespace pest_utils;
 using namespace Eigen;
 
-Jacobian::Jacobian(FileManager &_file_manager) : file_manager(_file_manager) 
+Jacobian::Jacobian(FileManager &_file_manager) : file_manager(_file_manager)
 {
 }
 
@@ -49,7 +49,7 @@ void Jacobian::set_base_numeric_pars(Parameters _base_numeric_pars)
 	base_numeric_parameters = _base_numeric_pars;
 }
 
-void Jacobian::set_base_sim_obs(Observations _base_sim_obs) 
+void Jacobian::set_base_sim_obs(Observations _base_sim_obs)
 {
 	base_sim_observations = _base_sim_obs;
 }
@@ -61,7 +61,7 @@ Jacobian::~Jacobian() {
 void Jacobian::remove_cols(std::set<string> &rm_parameter_names)
 {
 	vector<size_t> del_col_ids;
-	
+
 	// build list of columns that needs to be removed from the matrix
 	auto iter_rm_end = rm_parameter_names.end();
 	size_t npar = base_numeric_par_names.size();
@@ -83,7 +83,7 @@ void Jacobian::remove_cols(std::set<string> &rm_parameter_names)
 void Jacobian::add_cols(set<string> &new_pars_names)
 {
 	//Note:  This method does not add the parameters in the base_numeric_parameters container.
-	//       The values must already be in that container 
+	//       The values must already be in that container
 	// check if any of new_par parameters are already in the jacobian
 	set<string> par_name_set;
 	set<string> repeated_pars;
@@ -268,12 +268,12 @@ bool Jacobian::build_runs(Parameters &ctl_pars, Observations &ctl_obs, vector<st
 
 
 bool Jacobian::build_runs(ModelRun &init_model_run, vector<string> numeric_par_names, ParamTransformSeq &par_transform,
-		const ParameterGroupInfo &group_info, const ParameterInfo &ctl_par_info, 
+		const ParameterGroupInfo &group_info, const ParameterInfo &ctl_par_info,
 		RunManagerAbstract &run_manager, set<string> &out_of_bound_par, bool phiredswh_flag, bool calc_init_obs)
 {
 	Parameters pars = init_model_run.get_ctl_pars();
 	Observations obs = init_model_run.get_obs();
-	return build_runs(pars, obs, numeric_par_names, par_transform, group_info, ctl_par_info, run_manager, 
+	return build_runs(pars, obs, numeric_par_names, par_transform, group_info, ctl_par_info, run_manager,
 		out_of_bound_par, phiredswh_flag, calc_init_obs);
 }
 
@@ -284,7 +284,7 @@ void Jacobian::make_runs(RunManagerAbstract &run_manager)
 }
 
 bool Jacobian::process_runs(ParamTransformSeq &par_transform,
-		const ParameterGroupInfo &group_info, 
+		const ParameterGroupInfo &group_info,
 		RunManagerAbstract &run_manager, const PriorInformation &prior_info, bool splitswh_flag)
 {
 	// calculate jacobian
@@ -370,7 +370,7 @@ bool Jacobian::process_runs(ParamTransformSeq &par_transform,
 	return true;
 }
 
-bool Jacobian::get_derivative_parameters(const string &par_name, Parameters &numeric_pars, ParamTransformSeq &par_transform, const ParameterGroupInfo &group_info, const ParameterInfo &ctl_par_info, 
+bool Jacobian::get_derivative_parameters(const string &par_name, Parameters &numeric_pars, ParamTransformSeq &par_transform, const ParameterGroupInfo &group_info, const ParameterInfo &ctl_par_info,
 		vector<double> &delta_numeric_par_vec, bool phiredswh_flag, set<string> &out_of_bound_par)
 {
 	bool success = false;
@@ -421,7 +421,7 @@ std::vector<Eigen::Triplet<double> >  Jacobian::calc_derivative(const string &nu
 	int irow;
 	Parameters::const_iterator par_iter;
 	std::vector<Eigen::Triplet<double> > triplet_list;
-	
+
 	// sort run_list the parameter numeric_par_name;
 	auto compare = [](const JacobianRun &a, const JacobianRun &b)
 	{return a.numeric_derivative_par > b.numeric_derivative_par; };
@@ -458,7 +458,7 @@ std::vector<Eigen::Triplet<double> >  Jacobian::calc_derivative(const string &nu
 				}
 				std::sort(sen_vec.begin(), sen_vec.end(), [](double a, double b) {
 					return std::abs(a) < std::abs(b);});
-				if (abs(sen_vec.back()) >= splitthresh && 
+				if (abs(sen_vec.back()) >= splitthresh &&
 					abs(sen_vec.back() - sen_vec.front()) / sen_vec.front() > splitreldiff )
 				{
 					success = true;
@@ -536,7 +536,7 @@ std::vector<Eigen::Triplet<double> >  Jacobian::calc_derivative(const string &nu
 }
 
 
-bool Jacobian::forward_diff(const string &par_name, const Parameters &numeric_parameters, 
+bool Jacobian::forward_diff(const string &par_name, const Parameters &numeric_parameters,
 		const ParameterGroupInfo &group_info, const ParameterInfo &ctl_par_info,
 		const ParamTransformSeq &par_trans, double &new_par, set<string> &out_of_bound_par)
 {
@@ -560,15 +560,15 @@ bool Jacobian::forward_diff(const string &par_name, const Parameters &numeric_pa
 	new_par = numeric_derivative_pars[par_name] -= incr;
 	out_of_bound_backward = out_of_bounds(par_trans.numeric2ctl_cp(numeric_derivative_pars), ctl_par_info, out_of_bound_par);
 	if (!out_of_bound_backward)
-	{	
+	{
 		return true;
 	}
 	return false;
 }
 
 
-bool Jacobian::central_diff(const string &par_name, const Parameters &pest_parameters, 
-		const ParameterGroupInfo &group_info, const ParameterInfo &ctl_par_info, const ParamTransformSeq &par_trans, vector<double> &new_par_vec, 
+bool Jacobian::central_diff(const string &par_name, const Parameters &pest_parameters,
+		const ParameterGroupInfo &group_info, const ParameterInfo &ctl_par_info, const ParamTransformSeq &par_trans, vector<double> &new_par_vec,
 		vector<Parameters>  &numeric_dir_par_vec, set<string> &out_of_bound_par)
 {
 	double new_par;
@@ -652,7 +652,7 @@ bool Jacobian::out_of_bounds(const Parameters &ctl_parameters,
 double Jacobian::derivative_inc(const string &name, const ParameterGroupInfo &group_info, double cur_par_value, bool central)
 {
 	const ParameterGroupRec *g_rec;
-	double incr = 0.0;	
+	double incr = 0.0;
 
 	//// to do add error checking
 	g_rec = group_info.get_group_rec_ptr(name);
@@ -694,7 +694,7 @@ void Jacobian::transform(const ParamTransformSeq &par_trans, void(ParamTransform
 }
 
 void Jacobian::print(std::ostream &fout) const
-{ 
+{
 	fout << "Jacobian:" << endl;
 	fout << "base_numeric_par_names: " << base_numeric_par_names << endl;
 	fout << "base_numeric_parameters: " << base_numeric_parameters << endl;
@@ -768,7 +768,7 @@ void Jacobian::read(const string &filename)
 	fin.open(filename.c_str(), ifstream::binary|ios::in);
 
 	if (!fin)
-	{	
+	{
 		throw runtime_error("unable to open binary jacobian file: " + filename + " for reading");
 	}
 
@@ -789,7 +789,7 @@ void Jacobian::read(const string &filename)
 	fin.read((char*)&n_nonzero, sizeof(n_nonzero));
 
 	file_manager.get_ofstream("rec") << "  -->reading " << n_nonzero <<
-		" jacobian elements for " << n_par << " parameters and" << endl << 
+		" jacobian elements for " << n_par << " parameters and" << endl <<
 		"  --> " << n_obs_and_pi << " observations and prior info" << endl;
 
 	cout << "  -->reading " << n_nonzero <<

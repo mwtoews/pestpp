@@ -1,8 +1,8 @@
-/*  
-    © Copyright 2012, David Welter
-    
+/*
+
+
     This file is part of PEST++.
-   
+
     PEST++ is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
@@ -63,7 +63,7 @@ private:
 	static const int max_recv_fails = 1000;
 	static const int max_send_fails = 1000;
 #endif
-	static const int recv_timeout_secs = 1;	
+	static const int recv_timeout_secs = 1;
 	bool terminate;
 	fd_set master;
 	std::vector<std::string> comline_vec;
@@ -73,7 +73,7 @@ private:
 	std::vector<std::string> outfile_vec;
 	std::vector<std::string> obs_name_vec;
 	std::vector<std::string> par_name_vec;
-	
+
 	ModelInterface mi;
 	void run_async(pest_utils::thread_flag* terminate, pest_utils::thread_flag* finished,
 		pest_utils::thread_exceptions *shared_execptions,

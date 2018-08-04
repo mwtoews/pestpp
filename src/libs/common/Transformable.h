@@ -1,8 +1,8 @@
-/*  
-	© Copyright 2012, David Welter
-	
+/*
+
+
 	This file is part of PEST++.
-   
+
 	PEST++ is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
@@ -87,7 +87,7 @@ public:
 	template <class NameIterator>
 	Transformable get_subset (NameIterator first, NameIterator last) const;
 	void update_rec(const string &name, double value);
-	void update(const vector<string> &names, const vector<double> &values); 
+	void update(const vector<string> &names, const vector<double> &values);
 	void update_without_clear(const vector<string> &names, const vector<double> &values);
 	void update_without_clear(const vector<string> &names, const Eigen::VectorXd &values);
 	const_iterator find(const string &name) const;
@@ -117,7 +117,7 @@ public:
 	Parameters() : Transformable(){}
 	Parameters(const Transformable &copyin) : Transformable(copyin) {}
 	Parameters(const Parameters &copyin) : Transformable(copyin) {}
-	Parameters(const Parameters &copyin, const vector<string> &copy_names) : Transformable(copyin, copy_names){} 
+	Parameters(const Parameters &copyin, const vector<string> &copy_names) : Transformable(copyin, copy_names){}
 	Parameters(const std::vector<std::string> &names, const Eigen::VectorXd &values) : Transformable(names, values) {}
 	template <class NameIterator>
 	Parameters get_subset (NameIterator first, NameIterator last)const;
@@ -131,7 +131,7 @@ class Observations : public Transformable {
 public:
 	Observations() : Transformable(){}
 	Observations(const Observations &copyin) : Transformable(copyin) {}
-	Observations(const Observations &copyin, const vector<string> &copy_names) : Transformable(copyin, copy_names){} 
+	Observations(const Observations &copyin, const vector<string> &copy_names) : Transformable(copyin, copy_names){}
 	Observations(const vector<string> &copyin, const Eigen::VectorXd &copy_vec) : Transformable(copyin, copy_vec) {}
 	template <class NameIterator>
 	Observations get_subset(NameIterator first, NameIterator last)const;
@@ -141,7 +141,7 @@ private:
 
 
 template <class NameIterator>
-Transformable Transformable::get_subset (const NameIterator first, const NameIterator last) const 
+Transformable Transformable::get_subset (const NameIterator first, const NameIterator last) const
 {
 	Transformable subset;
 	for(auto i = first; i!=last; ++i)

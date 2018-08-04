@@ -1,8 +1,8 @@
-/*  
-	© Copyright 2012, David Welter
-	
+/*
+
+
 	This file is part of PEST++.
-   
+
 	PEST++ is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
@@ -64,9 +64,9 @@ class SVD_REDSVD : public SVDPackage
 public:
 	SVD_REDSVD(int _n_max_sing = 1000, double _eign_thres = 1.0e-7) : SVDPackage("RedSVD", _n_max_sing, _eign_thres) {}
 	SVD_REDSVD(const SVD_REDSVD &rhs) : SVDPackage(rhs) {}
-	virtual void solve_ip(Eigen::SparseMatrix<double>& A, Eigen::VectorXd &Sigma, Eigen::SparseMatrix<double>& U, 
+	virtual void solve_ip(Eigen::SparseMatrix<double>& A, Eigen::VectorXd &Sigma, Eigen::SparseMatrix<double>& U,
 		Eigen::SparseMatrix<double>& VT, Eigen::VectorXd &Sigma_trunc);
-	virtual void solve_ip(Eigen::SparseMatrix<double>& A, Eigen::VectorXd &Sigma, Eigen::SparseMatrix<double>& U, 
+	virtual void solve_ip(Eigen::SparseMatrix<double>& A, Eigen::VectorXd &Sigma, Eigen::SparseMatrix<double>& U,
 		Eigen::SparseMatrix<double>& VT, Eigen::VectorXd &Sigma_trunc, double _eigen_thres);
 	virtual void solve_ip(Eigen::MatrixXd& A, Eigen::MatrixXd &Sigma, Eigen::MatrixXd& U,
 		Eigen::MatrixXd& V, double _eigen_thres, int _max_sing);

@@ -29,7 +29,7 @@ extern "C" {
 #endif
 
      /**@name Version info
-      * 
+      *
       * A Clp library has a version number of the form <major>.<minor>.<release>,
       * where each of major, minor, and release are nonnegative integers.
       * For a checkout of the Clp stable branch, release is 9999.
@@ -53,7 +53,7 @@ extern "C" {
         For (almost) all Clp_* functions outside this group there is an exact C++
         analogue created by taking the first parameter out, removing the Clp_
         from name and applying the method to an object of type ClpSimplex.
-        
+
         Similarly, for all ClpSolve_* functions there is an exact C++
         analogue created by taking the first parameter out, removing the ClpSolve_
         from name and applying the method to an object of type ClpSolve.
@@ -66,7 +66,7 @@ extern "C" {
      COINLIBAPI void COINLINKAGE Clp_deleteModel(Clp_Simplex * model);
      /** Default constructor */
      COINLIBAPI Clp_Solve * COINLINKAGE ClpSolve_new();
-     /** Destructor */ 
+     /** Destructor */
      COINLIBAPI void COINLINKAGE ClpSolve_delete(Clp_Solve * solve);
      /*@}*/
 
@@ -231,16 +231,16 @@ extern "C" {
      /** Integer information */
      COINLIBAPI char * COINLINKAGE Clp_integerInformation(Clp_Simplex * model);
      /** Gives Infeasibility ray.
-      * 
+      *
       * Use Clp_freeRay to free the returned array.
-      * 
+      *
       * @return infeasibility ray, or NULL returned if none/wrong.
       */
      COINLIBAPI double * COINLINKAGE Clp_infeasibilityRay(Clp_Simplex * model);
      /** Gives ray in which the problem is unbounded.
-      * 
+      *
       * Use Clp_freeRay to free the returned array.
-      * 
+      *
       * @return unbounded ray, or NULL returned if none/wrong.
       */
      COINLIBAPI double * COINLINKAGE Clp_unboundedRay(Clp_Simplex * model);
@@ -303,7 +303,7 @@ extern "C" {
          See  ClpSolve.hpp for options
       */
      COINLIBAPI int COINLINKAGE Clp_initialSolve(Clp_Simplex * model);
-     /** Pass solve options. (Exception to direct analogue rule) */ 
+     /** Pass solve options. (Exception to direct analogue rule) */
      COINLIBAPI int COINLINKAGE Clp_initialSolveWithOptions(Clp_Simplex * model, Clp_Solve *);
      /** Dual initial solve */
      COINLIBAPI int COINLINKAGE Clp_initialDualSolve(Clp_Simplex * model);
@@ -449,7 +449,7 @@ extern "C" {
      COINLIBAPI void COINLINKAGE Clp_setSmallElementValue(Clp_Simplex * model, double value);
      /*@}*/
 
-     
+
      /**@name Get and set ClpSolve options
      */
      /*@{*/
@@ -502,10 +502,10 @@ extern "C" {
 
      COINLIBAPI int COINLINKAGE ClpSolve_doImpliedFree(Clp_Solve *);
      COINLIBAPI void COINLINKAGE ClpSolve_setDoImpliedFree(Clp_Solve *, int doImpliedFree);
-     
+
      COINLIBAPI int COINLINKAGE ClpSolve_doDupcol(Clp_Solve *);
      COINLIBAPI void COINLINKAGE ClpSolve_setDoDupcol(Clp_Solve *, int doDupcol);
-     
+
      COINLIBAPI int COINLINKAGE ClpSolve_doDuprow(Clp_Solve *);
      COINLIBAPI void COINLINKAGE ClpSolve_setDoDuprow(Clp_Solve *, int doDuprow);
 

@@ -271,8 +271,8 @@ CbcOrClpParam::gutsOfConstructor()
           lengthName_--;
      }
 }
-// Sets value of fake keyword to current size of keywords 
-void 
+// Sets value of fake keyword to current size of keywords
+void
 CbcOrClpParam::setFakeKeyWord(int fakeValue)
 {
   fakeKeyWord_ = static_cast<int>(definedKeyWords_.size());
@@ -283,7 +283,7 @@ CbcOrClpParam::setFakeKeyWord(int fakeValue)
 /* Returns current parameter option position
    but if fake keyword returns fakeValue_
 */
-int 
+int
 CbcOrClpParam::currentOptionAsInteger (  ) const
 {
   int fakeInteger;
@@ -293,7 +293,7 @@ CbcOrClpParam::currentOptionAsInteger (  ) const
    but if fake keyword returns fakeValue_ and sets
    fakeInteger to value
 */
-int 
+int
 CbcOrClpParam::currentOptionAsInteger ( int & fakeInteger ) const
 {
   fakeInteger=-COIN_INT_MAX;
@@ -419,7 +419,7 @@ CbcOrClpParam::parameterOption ( std::string check ) const
 	      if (*endPointer != '\0') {
 		return -1;
 	      }
-	      if (n==4) 
+	      if (n==4)
 		return value + 1000;
 	      else
 		return -value - 1000;
@@ -1118,7 +1118,7 @@ CbcOrClpParam::setCurrentOptionWithMessage ( int value )
      if (value != currentKeyWord_) {
          char current[100];
 	 char newString[100];
-	 if (currentKeyWord_>=0&&(fakeKeyWord_<=0||currentKeyWord_<fakeKeyWord_)) 
+	 if (currentKeyWord_>=0&&(fakeKeyWord_<=0||currentKeyWord_<fakeKeyWord_))
 	   strcpy(current,definedKeyWords_[currentKeyWord_].c_str());
 	 else if (currentKeyWord_<0)
 	   sprintf(current,"minus%d",-currentKeyWord_-1000);
@@ -1156,7 +1156,7 @@ CbcOrClpParam::setCurrentOptionWithMessage ( const std::string value )
 #endif
          if (action == currentKeyWord_)
 	   return NULL;
-	 if (currentKeyWord_>=0&&(fakeKeyWord_<=0||currentKeyWord_<fakeKeyWord_)) 
+	 if (currentKeyWord_>=0&&(fakeKeyWord_<=0||currentKeyWord_<fakeKeyWord_))
 	   strcpy(current,definedKeyWords_[currentKeyWord_].c_str());
 	 else if (currentKeyWord_<0)
 	   sprintf(current,"minus%d",-currentKeyWord_-1000);
@@ -2714,7 +2714,7 @@ stopping",
      parameters[numberParameters++] =
           CbcOrClpParam("maxN!odes", "Maximum number of nodes to do",
                         -1, 2147483647, CBC_PARAM_INT_MAXNODES);
-     parameters[numberParameters-1].setLonghelp 
+     parameters[numberParameters-1].setLonghelp
      (
           "This is a repeatable way to limit search.  Normally using time is easier \
 but then the results may not be repeatable."
@@ -2858,7 +2858,7 @@ cc is number of times to do root phase.  Yet another one from the Italian idea f
 (This time - Andrea Lodi , Matteo Fischetti , Michele Monaci , Domenico Salvagnin , \
 and Andrea Tramontani). \
 The solvers do not interact with each other.  However if extra passes are specified \
-then cuts are collected and used in later passes - so there is interaction there." 
+then cuts are collected and used in later passes - so there is interaction there."
      );
      parameters[numberParameters++] =
           CbcOrClpParam("naive!Heuristics", "Whether to try some stupid heuristic",

@@ -19,7 +19,7 @@ int NetPackage::get_new_group_id()
 
 bool NetPackage::allowable_ascii_char(int8_t value)
 {
-	// This is for security resasons.  Only \0 
+	// This is for security resasons.  Only \0
 	//  and printable characters are allowed
 	bool ret_val = false;
 	if (value == 0 || (value >= 32 && value <= 176))
@@ -127,7 +127,7 @@ void NetPackage::reset(PackType _type, int _group, int _run_id, const string &_d
 	for (int i = 0; i < max_len; ++i)
 	{
 		if (!allowable_ascii_char(_desc[i]))
-		{ 
+		{
 		}
 		else
 		{
@@ -275,8 +275,8 @@ int  NetPackage::recv(int sockfd)
 
 void NetPackage::print_header(std::ostream &fout)
 {
-	fout << "NetPackage: type = " << int(type) <<", group = " << group << ", run_id = " << run_id << ", description = " << desc << 
-		", data package size = " << data.size() << endl; 
+	fout << "NetPackage: type = " << int(type) <<", group = " << group << ", run_id = " << run_id << ", description = " << desc <<
+		", data package size = " << data.size() << endl;
 }
 
 //template std::string NetPackage::extract_string< std::vector<int8_t>::iterator>(std::vector<int8_t>::iterator first, std::vector<int8_t>::iterator last);

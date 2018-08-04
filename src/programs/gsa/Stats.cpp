@@ -121,7 +121,7 @@ void RunningStats::add(const std::vector<double> &sample)
 {
 	for (auto &s : sample)
 	{
-	   add(s); 
+	   add(s);
 	}
 }
 

@@ -161,7 +161,7 @@ const CoinPresolveAction
       if (!colmapping[ndx]) {
 	mcstrt[n_compressed] = mcstrt[ndx] ;
 	hincol[n_compressed] = hincol[ndx] ;
-      
+
 	clo[n_compressed]   = clo[ndx] ;
 	cup[n_compressed]   = cup[ndx] ;
 
@@ -357,7 +357,7 @@ void drop_empty_cols_action::postsolve(CoinPostsolveMatrix *prob) const
     }
   }
   assert (!ncols) ;
-  
+
   delete [] colmapping ;
 /*
   Reintroduce the dropped columns.
@@ -418,7 +418,7 @@ const CoinPresolveAction
   //int *mrstrt	= prob->mrstrt_;
   int *hinrow	= prob->hinrow_;
   //int *hcol	= prob->hcol_;
-  
+
   double *rlo	= prob->rlo_;
   double *rup	= prob->rup_;
 
@@ -430,7 +430,7 @@ const CoinPresolveAction
   bool fixInfeasibility = ((prob->presolveOptions_&0x4000) != 0) ;
   // Relax tolerance
   double tolerance = 10.0*prob->feasibilityTolerance_;
-  
+
 
   int i;
   int nactions = 0;
@@ -514,7 +514,7 @@ const CoinPresolveAction
   // remap matrix
   for (i=0;i<ncols;i++) {
     int j;
-    for (j=mcstrt[i];j<mcstrt[i]+hincol[i];j++) 
+    for (j=mcstrt[i];j<mcstrt[i]+hincol[i];j++)
       hrow[j] = rowmapping[hrow[j]];
   }
   delete [] rowmapping;

@@ -11,7 +11,7 @@
   typedef int socklen_t;
 #endif
 //for linux
-#ifdef OS_LINUX 
+#ifdef OS_LINUX
   #include <arpa/inet.h>
   #include <unistd.h>
   #include <sys/types.h>

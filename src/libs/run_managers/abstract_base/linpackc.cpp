@@ -90,7 +90,7 @@ int linpack_wrap(void)
      printf("    Reps Time(s) DGEFA   DGESL  OVERHEAD    KFLOPS\n");
      printf("----------------------------------------------------\n");
      nreps=1000;
-	
+
      linpack(nreps,arsize);
      free(mempool);
      printf("\n");

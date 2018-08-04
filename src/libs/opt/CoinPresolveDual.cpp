@@ -39,7 +39,7 @@
 /*
   In this transform we're looking to prove bounds on the duals y<i> and
   reduced costs cbar<j>. We can use this in two ways.
-  
+
   First, if we can prove a bound on the reduced cost cbar<j> with strict
   inequality,
     * cbar<j> > 0 ==> x<j> NBLB at optimality
@@ -66,7 +66,7 @@
   the circumstances, cbar<j> = c<j>, hence we need only look at c<j> to
   determine the favourable direction.
 
-  
+
   To get from bounds on the duals to bounds on the reduced costs, note that
     cbar<j> = c<j> - (SUM{P}a<ij>y<i> + SUM{M}a<ij>y<i>)
   for P = {a<ij> > 0} and M = {a<ij> < 0}. Then
@@ -86,8 +86,8 @@
     y<t> <= 1/a<tj>[c<j> - (SUM{P\t}a<ij>ymin<i> + SUM{M}a<ij>ymax<i>)]
   If a<tj> < 0,
     y<t> >= 1/a<tj>[c<j> - (SUM{P}a<ij>ymin<i> + SUM{M\t}a<ij>ymax<i>)]
-  For l<j> = -infty, cbar<j> <= 0, hence cbarmin <= 0: 
-    0 >= c<j> - (SUM{P}a<ij>ymax<i> + SUM{M}a<ij>ymin<i>) 
+  For l<j> = -infty, cbar<j> <= 0, hence cbarmin <= 0:
+    0 >= c<j> - (SUM{P}a<ij>ymax<i> + SUM{M}a<ij>ymin<i>)
   Solve for y<t>, a<tj> > 0:
     y<t> >= 1/a<tj>[c<j> - (SUM{P\t}a<ij>ymax<i> + SUM{M}a<ij>ymin<i>)]
   If a<tj> < 0,
@@ -134,7 +134,7 @@ const CoinPresolveAction
 {
 # if PRESOLVE_DEBUG > 0
   std::cout
-    << "Entering remove_dual_action::presolve, " << prob->nrows_ 
+    << "Entering remove_dual_action::presolve, " << prob->nrows_
     << "x" << prob->ncols_ << "." << std::endl ;
 # endif
 # if PRESOLVE_DEBUG > 0 || PRESOLVE_CONSISTENCY > 0
@@ -203,14 +203,14 @@ const CoinPresolveAction
   for (int j = 0 ; j < ncols ; j++) {
     char type;
     if (cup[j] >= ekkinf) {
-      if(clo[j] <= -ekkinf) 
+      if(clo[j] <= -ekkinf)
 	type=0;
       else
 	type=1;
     } else {
-      if(clo[j] <= -ekkinf) 
+      if(clo[j] <= -ekkinf)
 	type=2;
-      else if(clo[j] < cup[j]) 
+      else if(clo[j] < cup[j])
 	type=3;
       else
 	type=4;
@@ -426,7 +426,7 @@ const CoinPresolveAction
 #if USE_ACTIVE>2
 	    printf("(%d has one entry) ",icol);
 #endif
-	    if (active[icol]==3 || clo[icol]<-1.0e30) 
+	    if (active[icol]==3 || clo[icol]<-1.0e30)
 	      nOne=0; // no good
 	  }
 	}
@@ -509,11 +509,11 @@ const CoinPresolveAction
   cbar<j> = c<j> - y<i>a<ij>, hence y<i> = c<j>/a<ij> at cbar<j> = 0. The
   question is whether this is an upper or lower bound on y<i>.
     * x<j> NBLB ==> cbar<j> >= 0
-      a<ij> > 0 ==> increasing y<i> decreases cbar<j> ==> upper bound 
-      a<ij> < 0 ==> increasing y<i> increases cbar<j> ==> lower bound 
+      a<ij> > 0 ==> increasing y<i> decreases cbar<j> ==> upper bound
+      a<ij> < 0 ==> increasing y<i> increases cbar<j> ==> lower bound
     * x<j> NBUB ==> cbar<j> <= 0
-      a<ij> > 0 ==> increasing y<i> decreases cbar<j> ==> lower bound 
-      a<ij> < 0 ==> increasing y<i> increases cbar<j> ==> upper bound 
+      a<ij> > 0 ==> increasing y<i> decreases cbar<j> ==> lower bound
+      a<ij> < 0 ==> increasing y<i> increases cbar<j> ==> upper bound
   The condition below (simple test for equality to choose the bound) looks
   a bit odd, but a bit of boolean algebra should convince you it's correct.
   We have a bound; the only question is whether it's upper or lower.
@@ -585,7 +585,7 @@ const CoinPresolveAction
 	const double &aij = colels[k] ;
 	const double mindelta = aij*ymin[i] ;
 	const double maxdelta = aij*ymax[i] ;
-	
+
 	if (aij > 0.0) {
 	  if (ymin[i] >= -ekkinf2) {
 	    cbarjmax -= mindelta ;
@@ -681,7 +681,7 @@ const CoinPresolveAction
 #		  endif
 		  ymin[i] = newValue ;
 		  tightened++ ;
-		  // Huh? asymmetric 
+		  // Huh? asymmetric
 		  // cbarjmin = 0.0 ;
 		}
 	      }
@@ -732,7 +732,7 @@ const CoinPresolveAction
 	    for (CoinBigIndex k = kcs; k < kce; k++) {
 	      const int i = hrow[k] ;
 	      const double coeff = colels[k] ;
-	      
+
 	      if (coeff < 0.0&&ymin[i] < -ekkinf2) {
 		// ymax[i] has upper bound
 		if (cbarjmin>ymax[i]*coeff+ztolcbarj) {
@@ -774,7 +774,7 @@ const CoinPresolveAction
 	    for (CoinBigIndex k = kcs; k < kce; k++) {
 	      const int i = hrow[k] ;
 	      const double coeff = colels[k] ;
-	      
+
 	      if (coeff < 0.0) {
 		ymax[i] += cbarjmax/coeff ;
 		cbarjmax =0.0 ;
@@ -1064,7 +1064,7 @@ const CoinPresolveAction
   Process columns fixed at lower bound.
 */
   if (nfixdown_cols < ncols) {
-    int *fixdown_cols = fix_cols+nfixdown_cols ; 
+    int *fixdown_cols = fix_cols+nfixdown_cols ;
     nfixdown_cols = ncols-nfixdown_cols ;
 #   if PRESOLVE_DEBUG > 1
     std::cout << "NDUAL(lower):" ;
@@ -1095,7 +1095,7 @@ const CoinPresolveAction
     const bool no_rub = (rup[i] >= ekkinf) ;
     canFix[i] = 0 ;
     if (no_rub && !no_rlb ) {
-      if (ymin[i] > 0.0) 
+      if (ymin[i] > 0.0)
 	canFix[i] = -1 ;
       else
 	canFix[i] = -2 ;
@@ -1257,12 +1257,12 @@ const CoinPresolveAction
   // get min max stuff - we can re-use ymin/ymax
   int * infCount = prob->usefulRowInt_+2*nrows;
   {
-    // copied from CglProbing 
+    // copied from CglProbing
     int i, j, k, kre;
     int krs;
     int iflagu, iflagl;
     double dmaxup, dmaxdown;
-    
+
     for (i = 0; i < nrows; ++i) {
       if (rlo[i]==rup[i]) {
 	infCount[i]=10|(10<<16);
@@ -1273,7 +1273,7 @@ const CoinPresolveAction
 	dmaxdown = 0.0;
 	krs = mrstrt[i];
 	kre = mrstrt[i]+hinrow[i];
-      
+
 	/* ------------------------------------------------------------*/
 	/* Compute L(i) and U(i) */
 	/* ------------------------------------------------------------*/
@@ -1281,20 +1281,20 @@ const CoinPresolveAction
 	  double value=rowels[k];
 	  j = hcol[k];
 	  if (value > 0.0) {
-	    if (cup[j] < 1.0e12) 
+	    if (cup[j] < 1.0e12)
 	      dmaxup += cup[j] * value;
 	    else
 	      ++iflagu;
-	    if (clo[j] > -1.0e12) 
+	    if (clo[j] > -1.0e12)
 	      dmaxdown += clo[j] * value;
 	    else
 	      ++iflagl;
 	  } else if (value<0.0) {
-	    if (cup[j] < 1.0e12) 
+	    if (cup[j] < 1.0e12)
 	      dmaxdown += cup[j] * value;
 	    else
 	      ++iflagl;
-	    if (clo[j] > -1.0e12) 
+	    if (clo[j] > -1.0e12)
 	      dmaxup += clo[j] * value;
 	    else
 	      ++iflagu;
@@ -1513,7 +1513,7 @@ const CoinPresolveAction
 	  }
 	}
       }
-      if (canFixThis>0) 
+      if (canFixThis>0)
 	canFix[makeEqCnt++] = i ;
     }
   }
@@ -1617,7 +1617,7 @@ void remove_dual_action::postsolve (CoinPostsolveMatrix *prob) const
   presolve_check_sol(prob,2,2,2) ;
   presolve_check_nbasic(prob) ;
 # endif
- 
+
 /*
   For each record, restore the row bounds. If we have status arrays, check
   the status of the logical and adjust if necessary.

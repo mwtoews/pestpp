@@ -32,7 +32,7 @@ VectorXd Sobol::gen_rand_vec(long nsample, double min, double max)
 	VectorXd v(nsample);
 	long v_len = v.size();
 
-	
+
 	if (par_dist == PARAM_DIST::normal)
 	{
 		std::normal_distribution<> distribution((max + min) / 2.0, (max - min) / 4.0);
@@ -81,7 +81,7 @@ MatrixXd Sobol::gen_N_matrix(const MatrixXd &m1, const MatrixXd &m2, const vecto
   for (int i : idx_vec)
   {
 	n.col(i) = m1.col(i);
-  }  
+  }
   return n;
 }
 
@@ -101,7 +101,7 @@ void Sobol::assemble_runs(RunManagerAbstract &run_manager)
 	MatrixXd c;
 	run_manager.reinitialize();
 	gen_m1_m2();
-	
+
 	//calculate a0
 	int n_adj_par = adj_par_name_vec.size();
 
@@ -216,7 +216,7 @@ void Sobol::calc_sen_single(RunManagerAbstract &run_manager, ModelRun model_run,
 	y_ab.reserve(ya.size() + yb.size()); // preallocate memory
 	y_ab.insert(y_ab.end(), ya.begin(), ya.end());
 	y_ab.insert(y_ab.end(), yb.begin(), yb.end());
-	
+
 	//Compute Mean for the S_i's
 	double mean_sq_si = vec_mean_missing_data(ya_yb_prod, MISSING_DATA);
 	// Compute Var for S_i's

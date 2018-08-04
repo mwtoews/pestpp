@@ -39,7 +39,7 @@ void MorrisObsSenFile::add_sen_run_pair(const std::string &par_name, double p1, 
 	// compute sensitivities of individual observations
 	double isen;
 	double del_par = p2 - p1;
-	
+
 	for (const auto &iobs : obs_names_vec)
 	{
 		isen = (obs2[iobs] - obs1[iobs]) / del_par;
@@ -143,9 +143,9 @@ MatrixXd MorrisMethod::create_P_star_mat(int k)
 MorrisMethod::MorrisMethod(Pest &_pest_scenario,
 	FileManager &_file_manager, ObjectiveFunc *_obj_func_ptr,
 	const ParamTransformSeq &_par_transform,
-	int _p, int _r, double _delta, 
+	int _p, int _r, double _delta,
 	bool _calc_pooled_obs, bool _calc_morris_obs_sen, PARAM_DIST _par_dist, unsigned int _seed)
-	: GsaAbstractBase(_pest_scenario, _file_manager, _obj_func_ptr, _par_transform, 
+	: GsaAbstractBase(_pest_scenario, _file_manager, _obj_func_ptr, _par_transform,
 		_par_dist, _seed),
 	calc_obs_sen(_calc_pooled_obs), calc_morris_obs_sen(_calc_morris_obs_sen)
 {
@@ -202,7 +202,7 @@ MatrixXd MorrisMethod::create_P_mat(int k)
 	}
 	// Shuffle random index vector
 	shuffle(rand_idx.begin(), rand_idx.end(), rand_engine);
-	
+
 	for(int irow=0; irow<k; ++irow)
 	{
 	  p_mat(irow, rand_idx[irow]) = 1;
@@ -292,7 +292,7 @@ void  MorrisMethod::calc_sen(RunManagerAbstract &run_manager, ModelRun model_run
 	Observations obs0;
 	Parameters pars1;
 	Observations obs1;
-	
+
 	map<string, RunningStats > sen_map;
 	map<string, RunningStats> obs_stats_map;
 
@@ -345,7 +345,7 @@ void  MorrisMethod::calc_sen(RunManagerAbstract &run_manager, ModelRun model_run
 		}
 
 		if (run0_ok && run1_ok && !par_name_1.empty())
-		{ 
+		{
 			Parameters tmp_ctl_par = base_partran_seq_ptr->numeric2ctl_cp(pars0);
 			run0.update_ctl(tmp_ctl_par, obs0);
 			double phi0 = run0.get_phi(DynamicRegularization::get_zero_reg_instance());

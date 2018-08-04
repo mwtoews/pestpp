@@ -26,7 +26,7 @@ class RunningStats;
 class TornadoPlot : public GsaAbstractBase
 {
 public:
-	TornadoPlot(const std::vector<std::string> &_adj_par_name_vec, const Parameters &_fixed_ctl_pars, const Parameters &_init_pars, 
+	TornadoPlot(const std::vector<std::string> &_adj_par_name_vec, const Parameters &_fixed_ctl_pars, const Parameters &_init_pars,
 		const Parameters &lower_bnd,
 		const Parameters &upper_bnd, const std::set<std::string> &_log_trans_pars,
 		ParamTransformSeq *base_partran_seq,

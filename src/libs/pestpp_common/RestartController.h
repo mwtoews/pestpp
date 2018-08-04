@@ -19,7 +19,7 @@ public:
 	static void write_start_iteration(std::ostream &fout, const std::string &solver_type, int _iter_num, int _global_iter_num);
 	static void write_start_parameters_updated(std::ostream &fout, const std::string &parameter_filename);
 	static void write_finish_parameters_updated(std::ostream &fout, const std::string &parameter_filename);
-	static void write_jac_runs_built(std::ostream &fout); 
+	static void write_jac_runs_built(std::ostream &fout);
 	static void write_upgrade_runs_built(std::ostream &fout);
 	static void write_iteration_complete(std::ostream &fout);
 	RestartOption get_restart_option() const { return restart_option; }
@@ -34,7 +34,7 @@ private:
 	PARAMETER_STATE parameter_state;
 	int global_iter_no;
 	int local_iter_no;
-	RestartOption restart_option; 
+	RestartOption restart_option;
 	IterationType iteration_type;
 	int nopt_count;
 	int nphinored_count;

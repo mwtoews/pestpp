@@ -665,7 +665,7 @@ Clp_infeasibilityRay(Clp_Simplex * model)
 {
      const double * ray = model->model_->internalRay();
      double * array = NULL;
-     int numberRows = model->model_->numberRows(); 
+     int numberRows = model->model_->numberRows();
      int status = model->model_->status();
      if (status == 1 && ray) {
           array = static_cast<double*>(malloc(numberRows*sizeof(double)));
@@ -682,7 +682,7 @@ Clp_unboundedRay(Clp_Simplex * model)
 {
      const double * ray = model->model_->internalRay();
      double * array = NULL;
-     int numberColumns = model->model_->numberColumns(); 
+     int numberColumns = model->model_->numberColumns();
      int status = model->model_->status();
      if (status == 2 && ray) {
           array = static_cast<double*>(malloc(numberColumns*sizeof(double)));
@@ -1243,16 +1243,16 @@ Clp_idiot(Clp_Simplex * model, int tryhard)
 }
 #endif
 
-COINLIBAPI Clp_Solve * COINLINKAGE 
-ClpSolve_new() 
-{ 
-    return new Clp_Solve(); 
+COINLIBAPI Clp_Solve * COINLINKAGE
+ClpSolve_new()
+{
+    return new Clp_Solve();
 }
 
-COINLIBAPI void COINLINKAGE 
-ClpSolve_delete(Clp_Solve * solve) 
-{ 
-    delete solve; 
+COINLIBAPI void COINLINKAGE
+ClpSolve_delete(Clp_Solve * solve)
+{
+    delete solve;
 }
 
 // space- and error-saving macros
@@ -1270,19 +1270,19 @@ ClpSolve_ ## prop (Clp_Solve *s, int val) \
     s->options.prop(val); \
 }
 
-COINLIBAPI void COINLINKAGE 
-ClpSolve_setSpecialOption(Clp_Solve * s, int which, int value, int extraInfo) 
+COINLIBAPI void COINLINKAGE
+ClpSolve_setSpecialOption(Clp_Solve * s, int which, int value, int extraInfo)
 {
     s->options.setSpecialOption(which,value,extraInfo);
 }
 
-COINLIBAPI int COINLINKAGE 
+COINLIBAPI int COINLINKAGE
 ClpSolve_getSpecialOption(Clp_Solve * s, int which)
 {
     return s->options.getSpecialOption(which);
 }
 
-COINLIBAPI void COINLINKAGE 
+COINLIBAPI void COINLINKAGE
 ClpSolve_setSolveType(Clp_Solve * s, int method, int extraInfo)
 {
     s->options.setSolveType(static_cast<ClpSolve::SolveType>(method), extraInfo);
@@ -1300,7 +1300,7 @@ ClpSolveGetIntProperty(getPresolveType)
 ClpSolveGetIntProperty(getPresolvePasses)
 
 
-COINLIBAPI int COINLINKAGE 
+COINLIBAPI int COINLINKAGE
 ClpSolve_getExtraInfo(Clp_Solve * s, int which) {
      return s->options.getExtraInfo(which);
 }

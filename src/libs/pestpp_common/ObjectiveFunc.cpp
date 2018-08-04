@@ -1,8 +1,8 @@
-/*  
-    © Copyright 2012, David Welter
-    
+/*
+
+
     This file is part of PEST++.
-   
+
     PEST++ is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
@@ -29,7 +29,7 @@ using namespace std;
 
 const PhiComponets& PhiComponets::operator=(const PhiComponets &rhs)
 {
-	meas = rhs.meas; 
+	meas = rhs.meas;
 	regul=rhs.regul;
 	return * this;
 }
@@ -55,10 +55,10 @@ PhiComponets ObjectiveFunc::get_phi_comp(const Observations &sim_obs, const Para
 	double tmp_weight = 1;
 	const string *group = 0;
 	for (const auto &i_sim : sim_obs)
-	{ 
+	{
 		info_iter = obs_info_ptr->observations.find(i_sim.first);
 		obs_iter = observations_ptr->find(i_sim.first);
-		if (info_iter != info_end && obs_iter !=obs_end) 
+		if (info_iter != info_end && obs_iter !=obs_end)
 		{
 			group = &((*info_iter).second.group);
 			tmp_weight = (*info_iter).second.weight;
@@ -118,7 +118,7 @@ PhiComponets ObjectiveFunc::get_phi_comp(const Observations &sim_obs, const Para
 
 
 
-map<string, double> ObjectiveFunc::get_group_phi(const Observations &sim_obs, const Parameters &pars, 
+map<string, double> ObjectiveFunc::get_group_phi(const Observations &sim_obs, const Parameters &pars,
 	const DynamicRegularization &dynamic_reg, PhiComponets::OBS_TYPE obs_type) const
 {
 	map<string, double> group_phi;
@@ -133,10 +133,10 @@ map<string, double> ObjectiveFunc::get_group_phi(const Observations &sim_obs, co
 	bool use_regul = dynamic_reg.get_use_dynamic_reg();
 	// first add all groups to group_phi
 	for (const auto &i_grp : obs_info_ptr->groups)
-	{ 
+	{
 		group = &(i_grp.first);
 		bool is_reg = ObservationGroupRec::is_regularization(*group);
-		if (obs_type == PhiComponets::OBS_TYPE::ALL 
+		if (obs_type == PhiComponets::OBS_TYPE::ALL
 			|| (is_reg && obs_type == PhiComponets::OBS_TYPE::REGUL)
 			|| (!is_reg && obs_type == PhiComponets::OBS_TYPE::MEAS) )
 		{
@@ -148,7 +148,7 @@ map<string, double> ObjectiveFunc::get_group_phi(const Observations &sim_obs, co
 	{
 		info_iter = (*obs_info_ptr).observations.find(i_sim.first);
 		obs_iter = observations_ptr->find(i_sim.first);
-		if (info_iter != info_end && obs_iter !=obs_end) 
+		if (info_iter != info_end && obs_iter !=obs_end)
 		{
 			group = &((*info_iter).second.group);
 			tmp_weight = (*info_iter).second.weight;
@@ -198,12 +198,12 @@ map<string, double> ObjectiveFunc::get_group_phi(const Observations &sim_obs, co
 	//normalize the results
 	for (auto &gp : group_phi)
 	{
-		gp.second = min(numeric_limits<double>::max(), gp.second);		
+		gp.second = min(numeric_limits<double>::max(), gp.second);
 		//gp.second = max(numeric_limits<double>::min(), gp.second);
 		if (gp.second <= numeric_limits<double>::min())
 			gp.second = 0.0;
 	}
-	
+
 	return group_phi;
 }
 

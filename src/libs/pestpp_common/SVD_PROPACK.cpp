@@ -1,8 +1,8 @@
-/*  
-	© Copyright 2012, David Welter
-	
+/*
+
+
 	This file is part of PEST++.
-   
+
 	PEST++ is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
@@ -27,8 +27,8 @@ using namespace Eigen;
 
 extern "C" {
   double DEF_DLAMCH(char*);
-//  void DEF_DLANBPRO_SPARCE(int *m, int *n, int *k0, int *k, double *U, 
-//			   int *ldu, double *V, int *ldv, double *B, int *ldb, 
+//  void DEF_DLANBPRO_SPARCE(int *m, int *n, int *k0, int *k, double *U,
+//			   int *ldu, double *V, int *ldv, double *B, int *ldb,
 //		   double *rnorm, double *doption, int *ioption, double *work,
 //			   int *iwork, double *dparm, int *iparm, int *ierr);
   void DEF_DLANSVD(char *jobu, char *jobv,int *m,int *n,int *k, int *kmax, double *U, int *ldu, double *Sigma, double *bnd,

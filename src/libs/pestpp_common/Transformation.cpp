@@ -1,8 +1,8 @@
-/*  
-	© Copyright 2012, David Welter
-	
+/*
+
+
 	This file is part of PEST++.
-   
+
 	PEST++ is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
@@ -69,10 +69,10 @@ void TranMapBase::reset(const Parameters &pars)
 
 void TranMapBase::print(ostream &os) const
 {
-	os << "Transformation name = " << name << "; (type=TranMapBase)" << endl; 
+	os << "Transformation name = " << name << "; (type=TranMapBase)" << endl;
 	for (map<string,double>::const_iterator b=items.begin(), e=items.end();
 		b!=e; ++b) {
-			os << "  item name = " << (*b).first << ";  value = " << (*b).second << endl;   
+			os << "  item name = " << (*b).first << ";  value = " << (*b).second << endl;
 	}
 }
 
@@ -80,7 +80,7 @@ pair<bool, double> TranMapBase::get_value(const string &name) const
 {
 	pair<bool, double> ret_val(false, 0.0);
 	map<string, double>::const_iterator it;
-	
+
 	it = items.find(name);
 	if (it !=items.end()) {
 		ret_val = pair<bool, double>(true, (*it).second);
@@ -99,7 +99,7 @@ void TranSetBase::print(ostream &os) const
 	os << "Transformation name = " << name << "; (type=TranSetBase)" << endl;
 	for (set<string>::const_iterator b=items.begin(), e=items.end();
 		b!=e; ++b) {
-			os << "  item name = " << *b << endl;   
+			os << "  item name = " << *b << endl;
 	}
 }
 
@@ -107,7 +107,7 @@ bool TranSetBase::has_value(const string &name) const
 {
 	bool ret_val = false;
 	set<string>::const_iterator it;
-	
+
 	it = items.find(name);
 	if (it !=items.end()) {
 		ret_val = true;
@@ -275,10 +275,10 @@ void TranScale::d2_to_d1(Transformable &del_data, Transformable &data)
 
 void TranScale::print(ostream &os) const
 {
-	os << "Transformation name = " << name << "; (type=TranScale)" << endl; 
+	os << "Transformation name = " << name << "; (type=TranScale)" << endl;
 	for (map<string,double>::const_iterator b=items.begin(), e=items.end();
 		b!=e; ++b) {
-			os << "  item name = " << (*b).first << ";  scale value = " << (*b).second << endl;   
+			os << "  item name = " << (*b).first << ";  scale value = " << (*b).second << endl;
 	}
 }
 
@@ -286,7 +286,7 @@ void TranScale::print(ostream &os) const
 void TranLog10::forward(Transformable &data)
 {
 	Transformable::iterator data_iter, data_end = data.end();
-	for (set<string>::const_iterator b=items.begin(), e=items.end(); b!=e; ++b) 
+	for (set<string>::const_iterator b=items.begin(), e=items.end(); b!=e; ++b)
 	{
 		data_iter = data.find(*b);
 		if (data_iter != data_end)
@@ -394,7 +394,7 @@ void TranLog10::print(ostream &os) const
 	os << "Transformation name = " << name << "; (type=TranLog10)" << endl;
 	for (set<string>::const_iterator b=items.begin(), e=items.end();
 		b!=e; ++b) {
-			os << "  item name = " << *b << endl;   
+			os << "  item name = " << *b << endl;
 	}
 }
 
@@ -464,19 +464,19 @@ void TranFixed::d2_to_d1(Transformable &del_data, Transformable &data)
 
 void TranFixed::print(ostream &os) const
 {
-	os << "Transformation name = " << name << "; (type=TranFixed)" << endl; 
+	os << "Transformation name = " << name << "; (type=TranFixed)" << endl;
 	for (map<string,double>::const_iterator b=items.begin(), e=items.end();
 		b!=e; ++b) {
-			os << "  item name = " << (*b).first << ";  imposed value = " << (*b).second << endl;   
+			os << "  item name = " << (*b).first << ";  imposed value = " << (*b).second << endl;
 	}
 }
 
 void TranFrozen::print(ostream &os) const
 {
-	os << "Transformation name = " << name << "; (type=TranFrozen)" << endl; 
+	os << "Transformation name = " << name << "; (type=TranFrozen)" << endl;
 	for (map<string,double>::const_iterator b=items.begin(), e=items.end();
 		b!=e; ++b) {
-			os << "  item name = " << (*b).first << ";  imposed value = " << (*b).second << endl;   
+			os << "  item name = " << (*b).first << ";  imposed value = " << (*b).second << endl;
 	}
 }
 
@@ -541,11 +541,11 @@ void TranTied::d2_to_d1(Transformable &del_data, Transformable &data)
 
 void TranTied::print(ostream &os) const
 {
-	os << "Transformation name = " << name << "; (type=TranTied)" << endl; 
+	os << "Transformation name = " << name << "; (type=TranTied)" << endl;
 	for (map<string, pair_string_double>::const_iterator b=items.begin(), e=items.end();
 		b!=e; ++b) {
-			os << "  item name = " << (*b).first << "   tied to \"" << (*b).second.first << 
-				"\" with factor " <<  (*b).second.second<<  endl;   
+			os << "  item name = " << (*b).first << "   tied to \"" << (*b).second.first <<
+				"\" with factor " <<  (*b).second.second<<  endl;
 	}
 }
 
@@ -562,7 +562,7 @@ TranSVD::TranSVD(int _max_sing, double _eign_thresh, const string &_name) : Tran
 }
 
 
-TranSVD::TranSVD(const TranSVD &rhs) 
+TranSVD::TranSVD(const TranSVD &rhs)
 	: Transformation(rhs), base_parameter_names(rhs.base_parameter_names),
 	super_parameter_names(rhs.super_parameter_names),
 	obs_names(rhs.obs_names),
@@ -634,10 +634,10 @@ void TranSVD::update_reset_frozen_pars(const Jacobian &jacobian, const QSqrtMatr
 	tran_svd_pack->set_eign_thres(_eigthresh);
 	obs_names = _obs_names;
 
-	
+
 
 	//these are where the derivative was computed so they can be different than the frozen values;
-	init_base_numeric_parameters = base_numeric_pars;  
+	init_base_numeric_parameters = base_numeric_pars;
 	base_parameter_names = par_names;
 	//remove frozen parameters from base_parameter_names
 	auto end_iter = std::remove_if(base_parameter_names.begin(), base_parameter_names.end(),
@@ -912,7 +912,7 @@ TranSVD::~TranSVD()
 
 void TranSVD::print(ostream &os) const
 {
-	os << "Transformation name = " << name << "; (type=TranSVD)" << endl; 
+	os << "Transformation name = " << name << "; (type=TranSVD)" << endl;
 	os << "  Singular Values = " << Sigma << endl;
 }
 
@@ -1021,10 +1021,10 @@ void TranNormalize::insert(const string &item_name, double _offset, double _scal
 
 void TranNormalize::print(ostream &os) const
 {
-	os << "Transformation name = " << name << "; (type=TranNormalize)" << endl; 
+	os << "Transformation name = " << name << "; (type=TranNormalize)" << endl;
 	for (map<string,NormData>::const_iterator b=items.begin(), e=items.end();
 		b!=e; ++b) {
 			os << "  item name = " << (*b).first << ";  scale value = " << (*b).second.scale
-				<< ";  offset value = " << (*b).second.offset <<endl;   
+				<< ";  offset value = " << (*b).second.offset <<endl;
 	}
 }

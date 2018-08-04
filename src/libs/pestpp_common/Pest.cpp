@@ -1,8 +1,8 @@
-/*  
-	© Copyright 2012, David Welter
-	
+/*
+
+
 	This file is part of PEST++.
-   
+
 	PEST++ is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
@@ -70,8 +70,8 @@ void Pest::check_inputs(ostream &f_rec)
 		else if (find(ctl_ordered_obs_group_names.begin(), ctl_ordered_obs_group_names.end(), pareto_info.obsgroup) == ctl_ordered_obs_group_names.end())
 			throw PestError("pareto obsgroup not found: " + pareto_info.obsgroup);
 		//make sure at least one other obs group has a nonzero weight obs in it
-		
-		
+
+
 		for (auto &on : ctl_ordered_obs_names)
 		{
 				if (observation_info.get_group(on) == pareto_info.obsgroup)
@@ -79,7 +79,7 @@ void Pest::check_inputs(ostream &f_rec)
 				else if (observation_info.get_weight(on) > 0.0)
 					found_other = true;
 		}
-		
+
 		if (!found_pareto || !found_other)
 		{
 			for (auto &pi : ctl_ordered_pi_names)
@@ -133,7 +133,7 @@ void Pest::check_inputs(ostream &f_rec)
 		}
 		if (prec->dercom > 1)
 		{
-			par_warnings.push_back(pname + " has 'dercom' > 1, pestpp suite doesn't support 'dercom' > 1, ignoring");		
+			par_warnings.push_back(pname + " has 'dercom' > 1, pestpp suite doesn't support 'dercom' > 1, ignoring");
 		}
 
 	}
@@ -246,7 +246,7 @@ void Pest::check_inputs(ostream &f_rec)
 		{
 			cout << "'base_jacobian' is none, so 'hotstart_resfile' being ignored..." << endl;
 			f_rec << "'base_jacobian' is none, so 'hotstart_resfile' being ignored..." << endl;
-		}		
+		}
 }
 
 void Pest::check_io()
@@ -261,7 +261,7 @@ void Pest::check_io()
 		if (!check_exist_in(file)) inaccessible_files.push_back(file);
 	for (auto &file : model_exec_info.inpfile_vec)
 		if (!check_exist_out(file)) inaccessible_files.push_back(file);
-	
+
 	if (inaccessible_files.size() != 0)
 	{
 		string missing;
@@ -270,7 +270,7 @@ void Pest::check_io()
 		cout << "Could not access the following model interface files: " << missing;
 		throw PestError("Could not access the following model interface files: "+missing);
 		//cout << "WARNING: could not access the following model interface files: " << missing << endl;
-		
+
 	}
 }
 
@@ -341,7 +341,7 @@ int Pest::process_ctl_file(ifstream &fin, string pst_filename)
 	double wfinit = 1.0;
 	double wfmin = numeric_limits<double>::min();
 	double wfmax = numeric_limits<double>::max();
-	double wffac; 
+	double wffac;
 	double wftol;
 	bool use_dynamic_reg = false;
 	bool reg_adj_grp_weights = false;
@@ -385,7 +385,7 @@ int Pest::process_ctl_file(ifstream &fin, string pst_filename)
 		{
 			pestpp_input.push_back(line);
 		}
-			
+
 		else if (line_upper[0] == '*')
 		{
 			section = upper_cp(strip_cp(line_upper, "both", " *\t\n"));
@@ -440,7 +440,7 @@ int Pest::process_ctl_file(ifstream &fin, string pst_filename)
 				// and PEST++ does not use them
 				set<string> remove_tags = { "aui", "auid", "noaui", "senreuse", "nsenreuse", "boundscale", "noboundscale" };
 				auto end_iter = std::remove_if(tokens.begin(), tokens.end(),
-					[&remove_tags](string &str)->bool{return (remove_tags.find(upper_cp(str)) != remove_tags.end() 
+					[&remove_tags](string &str)->bool{return (remove_tags.find(upper_cp(str)) != remove_tags.end()
 					|| remove_tags.find(lower_cp(str)) != remove_tags.end()); });
 				tokens.resize(std::distance(tokens.begin(), end_iter));
 
@@ -572,7 +572,7 @@ int Pest::process_ctl_file(ifstream &fin, string pst_filename)
 				ss << "observation covariance matrix detected for group '" << tokens[0] << "' - these are not supported...yet!";
 				string s = ss.str();
 				throw PestError(s);
-			}	
+			}
 			ObservationGroupRec group_rec;
 			observation_info.groups[name] = group_rec;
 			vector<string>::iterator is = find(ctl_ordered_obs_group_names.begin(), ctl_ordered_obs_group_names.end(), name);
@@ -604,7 +604,7 @@ int Pest::process_ctl_file(ifstream &fin, string pst_filename)
 				if (is == ctl_ordered_obs_group_names.end())
 				{
 					ctl_ordered_obs_group_names.push_back(pi_name_group.second);
-				}				
+				}
 				prior_info_string.clear();
 			}
 			else if (tokens[0] == "&") {
@@ -792,7 +792,7 @@ int Pest::process_ctl_file(ifstream &fin, string pst_filename)
 
 	for(vector<string>::const_iterator b=pestpp_input.begin(),e=pestpp_input.end();
 		b!=e; ++b) {
-			
+
 			pestpp_options.parce_line(*b);
 	}
 

@@ -1,8 +1,8 @@
-/*  
-	© Copyright 2012, David Welter
-	
+/*
+
+
 	This file is part of PEST++.
-   
+
 	PEST++ is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
@@ -35,7 +35,7 @@
 using namespace std;
 using namespace pest_utils;
 
-ModelRun::ModelRun(const ObjectiveFunc *_obj_func_ptr, const Observations &_sim_obs) 
+ModelRun::ModelRun(const ObjectiveFunc *_obj_func_ptr, const Observations &_sim_obs)
 	: obj_func_ptr(_obj_func_ptr), sim_obs(_sim_obs), obs_is_valid(false)
 {
 }
@@ -45,7 +45,7 @@ ModelRun& ModelRun::operator=(const ModelRun &rhs)
 	frozen_ctl_par_names = rhs.frozen_ctl_par_names;
 	obj_func_ptr = rhs.obj_func_ptr;
 	ctl_pars = rhs.ctl_pars;
-	sim_obs = rhs.sim_obs; 
+	sim_obs = rhs.sim_obs;
 	obs_is_valid = rhs.obs_is_valid;
 	return *this;
 }
@@ -144,7 +144,7 @@ vector<double> ModelRun::get_residuals_vec(const vector<string> &obs_names)
 //	}
 //	PhiComponets phi_comp = obj_func_ptr->full_report(os, sim_obs, get_ctl_pars(), dynamic_reg,limit_par);
 //	output
-//	
+//
 //}
 
 

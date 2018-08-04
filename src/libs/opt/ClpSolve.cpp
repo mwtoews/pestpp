@@ -722,13 +722,13 @@ ClpSimplex::dealWithAbc(int solveType, int startUp,
       {
 	int n;
 	n=0;
-	for (int i=0;i<20;i++) 
+	for (int i=0;i<20;i++)
 	  n+= abcPricing[i];
 	printf("CCSparse pricing done %d times",n);
 	int n2=0;
-	for (int i=0;i<20;i++) 
+	for (int i=0;i<20;i++)
 	  n2+= abcPricingDense[i];
-	if (n2) 
+	if (n2)
 	  printf(" and dense pricing done %d times\n",n2);
 	else
 	  printf("\n");
@@ -784,7 +784,7 @@ ClpSimplex::dealWithAbc(int solveType, int startUp,
 					this->dualRowSolution(),
 					this->dualColumnSolution());
       memset(this->primalRowSolution(), 0, numberRows_ * sizeof(double));
-      this->clpMatrix()->times(1.0, 
+      this->clpMatrix()->times(1.0,
 			       this->primalColumnSolution(),
 			       this->primalRowSolution());
       this->checkSolutionInternal();
@@ -935,10 +935,10 @@ ClpSimplex::initialSolve(ClpSolve & options)
      }
 #endif
 #endif
-#ifndef CLPSOLVE_ACTIONS 
+#ifndef CLPSOLVE_ACTIONS
 #define CLPSOLVE_ACTIONS 2
 #endif
-#if CLPSOLVE_ACTIONS 
+#if CLPSOLVE_ACTIONS
      bool wasAutomatic = (method==ClpSolve::automatic);
 #endif
      if (presolve != ClpSolve::presolveOff) {
@@ -985,7 +985,7 @@ ClpSimplex::initialSolve(ClpSolve & options)
                          << CoinMessageEol;
                model2 = this;
 	       eventHandler()->event(ClpEventHandler::presolveInfeasible);
-               problemStatus_ = pinfo->presolveStatus(); 
+               problemStatus_ = pinfo->presolveStatus();
                if (options.infeasibleReturn() || (moreSpecialOptions_ & 1) != 0) {
 		 delete pinfo;
                     return -1;
@@ -1247,13 +1247,13 @@ ClpSimplex::initialSolve(ClpSolve & options)
      int primalStartup = 1;
      model2->eventHandler()->event(ClpEventHandler::presolveBeforeSolve);
      int tryItSave = 0;
-#if CLPSOLVE_ACTIONS 
+#if CLPSOLVE_ACTIONS
      if (method == ClpSolve::automatic )
        model2->moreSpecialOptions_ |= 8192; // stop switch over
 #endif
      // switch to primal from automatic if just one cost entry
      if (method == ClpSolve::automatic && model2->numberColumns() > 5000
-#ifndef CLPSOLVE_ACTIONS 
+#ifndef CLPSOLVE_ACTIONS
 	 && (specialOptions_ & 1024) != 0
 #endif
 	 ) {
@@ -1271,13 +1271,13 @@ ClpSimplex::initialSolve(ClpSolve & options)
 		allOnes=false;
 	    }
           }
-          if (nNon <= 1 || allOnes || 
+          if (nNon <= 1 || allOnes ||
 	      (options.getExtraInfo(1) > 0 && options.getSpecialOption(1)==2)) {
 #ifdef COIN_DEVELOP
                printf("Forcing primal\n");
 #endif
                method = ClpSolve::usePrimal;
-#ifndef CLPSOLVE_ACTIONS 
+#ifndef CLPSOLVE_ACTIONS
                tryItSave = (numberRows > 200 && numberColumns > 2000 &&
 			    (numberColumns > 2 * numberRows || (specialOptions_ & 1024) != 0)) ? 3 : 0;
 #else
@@ -2108,9 +2108,9 @@ ClpSimplex::initialSolve(ClpSolve & options)
                     if (nPasses > 70) {
                          info.setStartingWeight(1.0e3);
                          info.setReduceIterations(6);
-			 //if (nPasses > 200) 
+			 //if (nPasses > 200)
 			 //info.setFeasibilityTolerance(1.0e-9);
-			 //if (nPasses > 1900) 
+			 //if (nPasses > 1900)
 			 //info.setWeightFactor(0.93);
 			 if (nPasses > 900) {
 			   double reductions=nPasses/6.0;
@@ -2192,7 +2192,7 @@ ClpSimplex::initialSolve(ClpSolve & options)
 #ifndef LACI_TRY
                     //if (doIdiot>0)
 #if 0 //def ABC_INHERIT
-		    if (!model2->abcState()) 
+		    if (!model2->abcState())
 #endif
                     info.setStrategy(512 | info.getStrategy());
 #endif
@@ -2222,9 +2222,9 @@ ClpSimplex::initialSolve(ClpSolve & options)
 			info.setStartingWeight(1.0e3);
 			info.setReduceIterations(6);
 #endif
-			info.crash(nPasses, model2->messageHandler(), 
+			info.crash(nPasses, model2->messageHandler(),
 				   model2->messagesPointer(),false);
-			infoDual.crash(nPasses, model2->messageHandler(), 
+			infoDual.crash(nPasses, model2->messageHandler(),
 				   model2->messagesPointer(),false);
 			// two copies of solutions
 			ClpSimplex temp(*model2);
@@ -2258,7 +2258,7 @@ ClpSimplex::initialSolve(ClpSolve & options)
 			  tempModel[i]->clpMatrix()->transposeTimes(-1.0,
 							      dualRow[i],
 							      dualColumn[i]);
-			  tempModel[i]->clpMatrix()->times(1.0, 
+			  tempModel[i]->clpMatrix()->times(1.0,
 						     primalColumn[i],
 						     primalRow[i]);
 			  tempModel[i]->checkSolutionInternal();
@@ -2760,9 +2760,9 @@ ClpSimplex::initialSolve(ClpSolve & options)
 #if 1
 #ifdef ABC_INHERIT
 		      //small.writeMps("try.mps");
-		      if (iPass||!numberArtificials) 
+		      if (iPass||!numberArtificials)
 		         small.dealWithAbc(1,1);
-		       else 
+		       else
 		         small.dealWithAbc(0,0);
 #else
 		      if (iPass||!numberArtificials)
@@ -3630,7 +3630,7 @@ ClpSimplex::initialSolve(ClpSolve & options)
                          dual();
                     } else {
 		        if ((moreSpecialOptions_&65536)==0) {
-			  if (numberRows_<10000||true) 
+			  if (numberRows_<10000||true)
 			    setPerturbation(100); // probably better to perturb after n its
 			  else if (savePerturbation<100)
 			    setPerturbation(51); // probably better to perturb after n its
@@ -4314,7 +4314,7 @@ ClpSimplexProgress::setInfeasibility(double value)
      realInfeasibility_[CLP_PROGRESS-1] = value;
 }
 // Returns number of primal infeasibilities (if -1) - current if (0)
-int 
+int
 ClpSimplexProgress::numberInfeasibilities(int back) const
 {
     return numberInfeasibilities_[CLP_PROGRESS-1-back];
@@ -5308,8 +5308,8 @@ ClpSimplex::solveDW(CoinStructuredModel * model,ClpSolve & options)
                // scale objective to be reasonable
                double scaleFactor =
                     sub[iBlock].scaleObjective((sumArtificials > 1.0e-5) ? -1.0e-4 : -1.0e9);
-		    
-	       if (reducePrint) 
+
+	       if (reducePrint)
 		   sub[iBlock].setLogLevel(0);
                if (iPass) {
                     sub[iBlock].primal();
@@ -5700,7 +5700,7 @@ CoinPthreadStuff::CoinPthreadStuff(int numberThreads,
 				   void * parallelManager(void * stuff))
 {
   numberThreads_=numberThreads;
-  if (numberThreads>8) 
+  if (numberThreads>8)
     numberThreads=1;
   // For waking up thread
   memset(mutex_,0,sizeof(mutex_));
@@ -5714,7 +5714,7 @@ CoinPthreadStuff::CoinPthreadStuff(int numberThreads,
   }
 #ifdef PTHREAD_BARRIER_SERIAL_THREAD
   //pthread_barrierattr_t attr;
-  pthread_barrier_init(&barrier_, /*&attr*/ NULL, numberThreads+1); 
+  pthread_barrier_init(&barrier_, /*&attr*/ NULL, numberThreads+1);
 #endif
   for (int iThread=0;iThread<numberThreads;iThread++) {
     pthread_create(&abcThread_[iThread], NULL, parallelManager, reinterpret_cast<void *>(this));
@@ -5726,7 +5726,7 @@ CoinPthreadStuff::CoinPthreadStuff(int numberThreads,
   for (int iThread=0;iThread<numberThreads;iThread++) {
     threadInfo_[iThread].status = -1;
     threadInfo_[iThread].stuff[3]=1; // idle
-    locked_[iThread]=0; 
+    locked_[iThread]=0;
   }
 }
 CoinPthreadStuff::~CoinPthreadStuff()
@@ -5741,8 +5741,8 @@ CoinPthreadStuff::~CoinPthreadStuff()
     }
   }
 }
-// so thread can find out which one it is 
-int 
+// so thread can find out which one it is
+int
 CoinPthreadStuff::whichThread() const
 {
   pthread_t thisThread=pthread_self();
@@ -5754,7 +5754,7 @@ CoinPthreadStuff::whichThread() const
   assert (whichThread<NUMBER_THREADS+1);
   return whichThread;
 }
-void 
+void
 CoinPthreadStuff::startParallelTask(int type, int iThread, void * info)
 {
   /*
@@ -5825,7 +5825,7 @@ CoinPthreadStuff::waitAllTasks()
   int nWait=0;
   for (int iThread=0;iThread<numberThreads_;iThread++) {
     int idle = threadInfo_[iThread].stuff[3];
-    if (!idle) 
+    if (!idle)
       nWait++;
   }
 #ifdef DETAIL_THREAD
@@ -5947,7 +5947,7 @@ ClpSimplex::solveBenders(CoinStructuredModel * model,ClpSolve & options)
 #define ADD_ARTIFICIALS
 #ifdef ADD_ARTIFICIALS
      int * originalSubColumns = new int [numberBlocks];
-     for (iBlock = 0; iBlock < numberBlocks; iBlock++) 
+     for (iBlock = 0; iBlock < numberBlocks; iBlock++)
        originalSubColumns[iBlock]=9999999;
 #endif
      int masterBlock = -1;
@@ -6284,7 +6284,7 @@ ClpSimplex::solveBenders(CoinStructuredModel * model,ClpSolve & options)
           //masterModel.scaling(0);
 	  // get obj for debug
 	  double objSum=masterModel.objectiveValue();
-	  for (int i=0;i<numberBlocks;i++) 
+	  for (int i=0;i<numberBlocks;i++)
 	    objSum += sub[i].objectiveValue();
 	  //printf("objsum %g\n",objSum);
           if (0) {
@@ -6349,7 +6349,7 @@ ClpSimplex::solveBenders(CoinStructuredModel * model,ClpSolve & options)
 	    double * lower = masterModel.columnLower();
 	    double * upper = masterModel.columnUpper();
 	    double * solution = masterModel.primalColumnSolution();
-	    const int * columnBack = 
+	    const int * columnBack =
 	      model->coinBlock(masterBlock)->originalColumns();
 	    if (!numberTimesUnbounded) {
 	      for (int iColumn = 0; iColumn < numberMasterColumns; iColumn++) {
@@ -6375,7 +6375,7 @@ ClpSimplex::solveBenders(CoinStructuredModel * model,ClpSolve & options)
 #endif
 	    } else {
 	      abort(); // probably can happen
-	    } 
+	    }
 	    numberTimesUnbounded++;
 #ifdef ABC_INHERIT
 	    masterModel.dealWithAbc(0,0,true);
@@ -6393,7 +6393,7 @@ ClpSimplex::solveBenders(CoinStructuredModel * model,ClpSolve & options)
 	    double * lower = masterModel.columnLower();
 	    double * upper = masterModel.columnUpper();
 	    //double * solution = masterModel.primalColumnSolution();
-	    const int * columnBack = 
+	    const int * columnBack =
 	      model->coinBlock(masterBlock)->originalColumns();
 	    int nTrusted=0;
 	    for (int iColumn = 0; iColumn < numberMasterColumns; iColumn++) {
@@ -6441,7 +6441,7 @@ ClpSimplex::solveBenders(CoinStructuredModel * model,ClpSolve & options)
 		treatSubAsFeasible = CoinMax(0.9*treatSubAsFeasible,1.0e-6);
 		printf("Reducing sub primal tolerance to %g\n",treatSubAsFeasible);
 	      }
-	    }	      
+	    }
 	    if (masterModel.objectiveValue() < lastObjective + 1.0e-7 && iPass > 5555)
 	      break; // finished
 	    lastObjective = masterModel.objectiveValue();
@@ -6540,8 +6540,8 @@ ClpSimplex::solveBenders(CoinStructuredModel * model,ClpSolve & options)
 	  if (masterStatus==2) {
 	    // adjust variables with no elements
 	    const int * columnLength = masterModel.matrix()->getVectorLengths();
-	    const double * lower = masterModel.columnLower(); 
-	    const double * upper = masterModel.columnUpper(); 
+	    const double * lower = masterModel.columnLower();
+	    const double * upper = masterModel.columnUpper();
 	    const double * obj = masterModel.objective();
 	    for (int i=0;i<numberMasterColumns;i++) {
 	      double value=primal[i];
@@ -6566,11 +6566,11 @@ ClpSimplex::solveBenders(CoinStructuredModel * model,ClpSolve & options)
 	      int start=originalSubColumns[iBlock];
 	      int numberColumns2=sub[iBlock].numberColumns();
 	      if (iFudge>=lowFudge&&iFudge<=abs(highFudge)) {
-		for (int i=start;i<numberColumns2;i++) 
+		for (int i=start;i<numberColumns2;i++)
 		  columnUpper2[i]=COIN_DBL_MAX;
 		memset(obj,0,originalSubColumns[iBlock]*sizeof(double));
 	      } else {
-		for (int i=start;i<numberColumns2;i++) 
+		for (int i=start;i<numberColumns2;i++)
 		  columnUpper2[i]=0.0;
 		memcpy(obj,saveObjective[iBlock],originalSubColumns[iBlock]*sizeof(double));
 		if (highFudge<0) {
@@ -6981,7 +6981,7 @@ ClpSimplex::solveBenders(CoinStructuredModel * model,ClpSolve & options)
 		    }
 		  }
 #endif
-		  // recompute 
+		  // recompute
 		  if (logLevel>3) {
 		    printf("objValue %g from lp %g, obj2 %g, obj3 %g\n",
 			   objValue,sub[iBlock].objectiveValue(),
@@ -7004,7 +7004,7 @@ ClpSimplex::solveBenders(CoinStructuredModel * model,ClpSolve & options)
 		      elementAdd[number++] = -value;
 		    }
 		  }
-		  
+
 		  infeas += primal[numberMasterColumns+iBlock];
 		  columnAdd[number] = numberMasterColumns + iBlock;
 		  elementAdd[number++] = -1.0;
@@ -7060,7 +7060,7 @@ ClpSimplex::solveBenders(CoinStructuredModel * model,ClpSolve & options)
 		  if (infeas < -1.0e-6 || (problemState[iBlock]&4)!=0) {
 		    // take
 		    // double check infeasibility
-		    if (logLevel>3) 
+		    if (logLevel>3)
 		      printf("objValue %g objectiveValue() %g\n",
 			     objValue,sub[iBlock].objectiveValue());
 		    double sum=0.0;
@@ -7068,9 +7068,9 @@ ClpSimplex::solveBenders(CoinStructuredModel * model,ClpSolve & options)
 		      int iColumn=columnAdd[i];
 		      sum  += primal[iColumn]*elementAdd[i];
 		    }
-		    if (logLevel>3) 
+		    if (logLevel>3)
 		      printf("Sum %g rhs %g\n",sum,-objValue);
-		    if (logLevel>1) 
+		    if (logLevel>1)
 		      printf("Cut for block %d has %d elements\n",iBlock,number-1-start);
 		    blockPrint[numberProposals]=iBlock;
 		    objective[numberProposals] = -objValue;
@@ -7094,7 +7094,7 @@ ClpSimplex::solveBenders(CoinStructuredModel * model,ClpSolve & options)
 		    memset(farkas,0,(2*numberColumns+numberRows)*sizeof(double));
 		    // Looks to me as if ray should be flipped according to mosek
 		    sub[iBlock].clpMatrix()->transposeTimes(-1.0,ray,farkas);
-		    // now farkas has A_T_y 
+		    // now farkas has A_T_y
 		    // Put nonzero bounds in bound
 		    const double * columnLower = sub[iBlock].columnLower();
 		    const double * columnUpper = sub[iBlock].columnUpper();
@@ -7113,13 +7113,13 @@ ClpSimplex::solveBenders(CoinStructuredModel * model,ClpSolve & options)
 			if (value) {
 			  //printf("basic %d direction %d farkas %g\n",
 			  //	   i,sub[iBlock].directionOut(),value);
-			  if (value<0.0) 
+			  if (value<0.0)
 			    boundValue=columnLower[i];
 			  else
 			    boundValue=columnUpper[i];
 			}
 		      } else if (fabs(value)>1.0e-8) {
-			if (value<0.0) 
+			if (value<0.0)
 			  boundValue=columnLower[i];
 			else
 			  boundValue=columnUpper[i];
@@ -7165,13 +7165,13 @@ ClpSimplex::solveBenders(CoinStructuredModel * model,ClpSolve & options)
 			if (value) {
 			  //printf("row basic %d direction %d ray %g\n",
 			  //	   i,sub[iBlock].directionOut(),value);
-			  if (value<0.0) 
+			  if (value<0.0)
 			    rhsValue=rowLower[i];
 			  else
 			    rhsValue=rowUpper[i];
 			}
 		      } else if (fabs(value)>1.0e-10) {
-			if (value<0.0) 
+			if (value<0.0)
 			  rhsValue=rowLower[i];
 			else
 			  rhsValue=rowUpper[i];
@@ -7182,8 +7182,8 @@ ClpSimplex::solveBenders(CoinStructuredModel * model,ClpSolve & options)
 			numberBad++;
 			value=0.0;
 		      }
-		      ray[i]=value; 
-		      if (!value) 
+		      ray[i]=value;
+		      if (!value)
 			rhsValue=0.0;
 		      // for mosek flip value back
 		      double yvalue = -value;
@@ -7232,31 +7232,31 @@ ClpSimplex::solveBenders(CoinStructuredModel * model,ClpSolve & options)
 		      double value = farkas[i];
 		      if (fabs(value)>1.0e-9) {
 			offset += value*masterSolution[i];
-			if (logLevel>2) 
+			if (logLevel>2)
 			  printf("(%d,%g) ",i,value);
 		      } else {
 			farkas[i]=0.0;
 		      }
 		    }
 		    trueOffset = bSum+offset;
-		    if (sub[iBlock].algorithm()>0) 
+		    if (sub[iBlock].algorithm()>0)
 		      trueOffset *= 1.0e-5;
-		    if (logLevel>2) 
+		    if (logLevel>2)
 		      printf(" - offset %g - ? rhs of %g\n",offset,trueOffset);
 		    //delete [] ray;
 		    delete [] farkas;
 		  }
 		  // if primal then scale
 		  if (sub[iBlock].algorithm()>0) {
-		    for (int i = 0; i < numberRows2; i++) 
-		      solution[i] = -1.0e-5*solution[i]; 
+		    for (int i = 0; i < numberRows2; i++)
+		      solution[i] = -1.0e-5*solution[i];
 		  } else {
-		    for (int i = 0; i < numberRows2; i++) 
-		      solution[i] = -solution[i]; 
+		    for (int i = 0; i < numberRows2; i++)
+		      solution[i] = -solution[i];
 		  }
 		  first[iBlock]->transposeTimes(solution, elementAdd + start);
-		  for (int i = 0; i < numberRows2; i++) 
-		    solution[i] = -solution[i]; 
+		  for (int i = 0; i < numberRows2; i++)
+		    solution[i] = -solution[i];
 		  for (int i = 0; i < numberRows2; i++) {
 		    if (sub[iBlock].getRowStatus(i)==basic && fabs(solution[i])<1.0e-7)
 		      solution[i]=0.0;
@@ -7328,7 +7328,7 @@ ClpSimplex::solveBenders(CoinStructuredModel * model,ClpSolve & options)
 		      }
 		    }
 		    objValue += loX+upX;
-		    if (logLevel>2) 
+		    if (logLevel>2)
 		      printf("Inf Offsets %g %g - new Objvalue %g\n",loX,upX,objValue);
 #define OBJ_OFFSET 0
 #if OBJ_OFFSET==1
@@ -7352,8 +7352,8 @@ ClpSimplex::solveBenders(CoinStructuredModel * model,ClpSolve & options)
 		       int numberRows2=temp->numberRows();
 		       // bug somewhere - if primal then flip
 		       if (temp->algorithm_>0) {
-			 for (int i = 0; i < numberRows2; i++) 
-			   solution[i] = - 1.0e-5 * solution[i]; 
+			 for (int i = 0; i < numberRows2; i++)
+			   solution[i] = - 1.0e-5 * solution[i];
 		       }
 		       double objValue7=0.0;
 		       const double * lower = temp->rowLower();
@@ -7449,9 +7449,9 @@ ClpSimplex::solveBenders(CoinStructuredModel * model,ClpSolve & options)
 		      int iColumn=columnAdd[i];
 		      sum  += primal[iColumn]*elementAdd[i];
 		    }
-		    if (logLevel>2) 
+		    if (logLevel>2)
 		      printf("Sum %g rhs %g\n",sum,objValue);
-		    if (logLevel>1) 
+		    if (logLevel>1)
 		      printf("Cut for block %d has %d elements (infeasibility)\n",iBlock,number-start);
 		    blockPrint[numberProposals]=iBlock;
 		    // take
@@ -7573,8 +7573,8 @@ ClpSimplex::solveBenders(CoinStructuredModel * model,ClpSolve & options)
 		       int numberRows2=temp->numberRows();
 		       // bug somewhere - if primal then flip
 		       if (true) {
-			 for (int i = 0; i < numberRows2; i++) 
-			   solution[i] = - 1.0e-5 * solution[i]; 
+			 for (int i = 0; i < numberRows2; i++)
+			   solution[i] = - 1.0e-5 * solution[i];
 		       }
 		       double objValue=0.0;
 		       const double * lower = temp->rowLower();
@@ -7681,7 +7681,7 @@ ClpSimplex::solveBenders(CoinStructuredModel * model,ClpSolve & options)
      const int * rowBack = model->coinBlock(masterBlock)->originalRows();
      int numberRows2 = model->coinBlock(masterBlock)->numberRows();
 #ifndef NDEBUG
-     for (int iColumn = 0; iColumn < numberColumns_; iColumn++) 
+     for (int iColumn = 0; iColumn < numberColumns_; iColumn++)
        fullColumnSolution[iColumn]=COIN_DBL_MAX;
 #endif
      for (int iColumn = 0; iColumn < numberColumns2; iColumn++) {
@@ -7717,7 +7717,7 @@ ClpSimplex::solveBenders(CoinStructuredModel * model,ClpSolve & options)
           }
      }
 #ifndef NDEBUG
-     for (int iColumn = 0; iColumn < numberColumns_; iColumn++) 
+     for (int iColumn = 0; iColumn < numberColumns_; iColumn++)
        assert(fullColumnSolution[iColumn]!=COIN_DBL_MAX);
 #endif
      double * fullSolution = primalRowSolution();
@@ -7732,12 +7732,12 @@ ClpSimplex::solveBenders(CoinStructuredModel * model,ClpSolve & options)
        if (getRowStatus(iRow)==ClpSimplex::basic)
 	 numberRowBasic++;
 #ifndef NDEBUG
-       if (fullSolution[iRow]<rowLower_[iRow]-primalTolerance_) { 
+       if (fullSolution[iRow]<rowLower_[iRow]-primalTolerance_) {
 	 numberInfeasibilities++;
 	 sumInfeasibilities -= fullSolution[iRow]-rowLower_[iRow];
 	 if (getRowStatus(iRow)!=basic)
 	   setRowStatus(iRow,superBasic);
-       } else if (fullSolution[iRow]>rowUpper_[iRow]+primalTolerance_) { 
+       } else if (fullSolution[iRow]>rowUpper_[iRow]+primalTolerance_) {
 	 numberInfeasibilities++;
 	 sumInfeasibilities += fullSolution[iRow]-rowUpper_[iRow];
 	 if (getRowStatus(iRow)!=basic)

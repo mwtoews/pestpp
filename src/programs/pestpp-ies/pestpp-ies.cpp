@@ -230,7 +230,7 @@ int main(int argc, char* argv[])
 
 		// create pest run and process control file to initialize it
 		Pest pest_scenario;
-		
+
 		try {
 			performance_log.log_event("starting to process control file", 1);
 			pest_scenario.process_ctl_file(file_manager.open_ifile_ext("pst"), file_manager.build_filename("pst"));
@@ -249,9 +249,9 @@ int main(int argc, char* argv[])
 		pest_scenario.check_inputs(fout_rec);
 
 
-		
+
 		//Initialize OutputFileWriter to handle IO of suplementary files (.par, .par, .svd)
-		//bool save_eign = pest_scenario.get_svd_info().eigwrite > 0;	
+		//bool save_eign = pest_scenario.get_svd_info().eigwrite > 0;
 		pest_scenario.get_pestpp_options_ptr()->set_iter_summary_flag(false);
 		OutputFileWriter output_file_writer(file_manager, pest_scenario, restart_flag);
 		//output_file_writer.scenario_report(fout_rec);
@@ -261,7 +261,7 @@ int main(int argc, char* argv[])
 		output_file_writer.scenario_obs_report(fout_rec);
 		//fout_rec << "    pestpp-ies parameter csv file = " << left << setw(50) << ppopt.get_ies_par_csv() << endl;
 		//fout_rec << "    pestpp-ies observation csv file = " << left << setw(50) << ppopt.get_ies_obs_csv() << endl;
-		
+
 
 		//reset some default args for ies here:
 		PestppOptions *ppo = pest_scenario.get_pestpp_options_ptr();
@@ -273,8 +273,8 @@ int main(int argc, char* argv[])
 		if (pp_args.find("OVERDUE_resched_FAC") == pp_args.end())
 			ppo->set_overdue_giveup_fac(1.15);
 		RunManagerAbstract *run_manager_ptr;
-		
-		
+
+
 		if (run_manager_type == RunManagerType::PANTHER)
 		{
 			string port = socket_str;
@@ -312,9 +312,9 @@ int main(int argc, char* argv[])
 		//Allocates Space for Run Manager.  This initializes the model parameter names and observations names.
 		//Neither of these will change over the course of the simulation
 
-		
+
 		run_manager_ptr->initialize(base_trans_seq.ctl2model_cp(cur_ctl_parameters), pest_scenario.get_ctl_observations());
-	
+
 		IterEnsembleSmoother ies(pest_scenario, file_manager, output_file_writer, &performance_log, run_manager_ptr);
 
 		ies.initialize();
@@ -322,7 +322,7 @@ int main(int argc, char* argv[])
 		ies.iterate_2_solution();
 		ies.finalize();
 
-		
+
 
 		// clean up
 		fout_rec.close();

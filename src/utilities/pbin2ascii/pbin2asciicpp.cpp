@@ -1,5 +1,5 @@
 /*
-© Copyright 2012, David Welter
+
 
 This file is part of PEST++.
 
@@ -21,7 +21,7 @@ along with PEST++.  If not, see<http://www.gnu.org/licenses/>.
 /*
 NOTE:
 	This project can be compiled under different configurations, and produces a different binary
-	based on the configuration chosen.  To change configurations, you will need to go into the 
+	based on the configuration chosen.  To change configurations, you will need to go into the
 	configuration manager and choose the configuration that matches your need.
 
 	Default Configuration:
@@ -111,7 +111,7 @@ int main(int argc, char* argv[])
 	{
 		ifstream fin_ext(ext_filename);
 		if(!fin_ext.good())
-		{	
+		{
 			fin_ext.close();
 			throw PestFileError(ext_filename);
 		}

@@ -122,7 +122,7 @@ void ClpTracePrint(std::string fileName, std::string message, int lineNumber)
 {
   if (!clpTraceModel) {
     std::cout<<fileName<<":"<<lineNumber<<" : \'"
-	     <<message<<"\' failed."<<std::endl;	
+	     <<message<<"\' failed."<<std::endl;
   } else {
     char line[1000];
     sprintf(line,"%s: %d : \'%s\' failed.",fileName.c_str(),lineNumber,message.c_str());

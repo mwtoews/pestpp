@@ -47,8 +47,8 @@ RunManager* rmic_create_panther(
 {
 	RunManager *run_manager_ptr = nullptr;
 	fout_run_manager_log_file.open(info_filename);
-	run_manager_ptr = new RunManagerPanther(storfile, port, 
-		fout_run_manager_log_file, n_max_fail, overdue_reched_fac, 
+	run_manager_ptr = new RunManagerPanther(storfile, port,
+		fout_run_manager_log_file, n_max_fail, overdue_reched_fac,
 		overdue_giveup_fac, overdue_giveup_minutes);
 	return run_manager_ptr;
 }
@@ -71,7 +71,7 @@ RunManager* rmic_create_genie(char **comline, int comline_array_len,
 	return run_manager_ptr;
 }
 
-int rmic_initialize(RunManager *run_manager_ptr, 
+int rmic_initialize(RunManager *run_manager_ptr,
 	char **pname, int pname_array_len,
 	char **oname, int oname_array_len)
 
@@ -153,7 +153,7 @@ int rmic_run_until_(RunManager *run_manager_ptr, int *condition, int no_ops, dou
 int rmic_get_run(RunManager *run_manager_ptr, int run_id, double *parameter_data, int npar, double *obs_data, int nobs)
 {
 	int err = 1;
-	try 
+	try
 	{
 	   bool success;
 	   success = run_manager_ptr->get_run(run_id, parameter_data, npar, obs_data, nobs);
@@ -193,7 +193,7 @@ int rmic_get_failed_runs_alloc(RunManager *run_manager_ptr, int *run_id_array, i
         n_failed = fail_set.size();
         run_id_array = new int[n_failed];
         std::copy_n(fail_set.begin(), n_failed, run_id_array);
-	*nfail = n_failed; 
+	*nfail = n_failed;
 	}
     catch(PestIndexError ex)
 	{

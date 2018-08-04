@@ -1922,8 +1922,8 @@ ClpPackedMatrix::subsetTransposeTimes(const ClpSimplex * model,
                CoinBigIndex j;
 	       int columnNext = which[1];
                CoinBigIndex startNext=columnStart[columnNext];
-	       //coin_prefetch_const(row+startNext); 
-	       //coin_prefetch_const(elementByColumn+startNext); 
+	       //coin_prefetch_const(row+startNext);
+	       //coin_prefetch_const(elementByColumn+startNext);
                CoinBigIndex endNext=columnStart[columnNext+1];
                for (j = columnStart[iColumn];
                          j < columnStart[iColumn+1]; j++) {
@@ -1935,8 +1935,8 @@ ClpPackedMatrix::subsetTransposeTimes(const ClpSimplex * model,
                     CoinBigIndex end = endNext;
                     columnNext = which[jColumn+2];
 		    startNext=columnStart[columnNext];
-		    //coin_prefetch_const(row+startNext); 
-		    //coin_prefetch_const(elementByColumn+startNext); 
+		    //coin_prefetch_const(row+startNext);
+		    //coin_prefetch_const(elementByColumn+startNext);
 		    endNext=columnStart[columnNext+1];
                     array[jColumn] = value;
                     value = 0.0;
@@ -3456,7 +3456,7 @@ ClpPackedMatrix::scale(ClpModel * model, const ClpSimplex * /*baseModel*/) const
 #if 0
 	  for (iColumn = 0; iColumn < numberColumns; iColumn++) {
 	    if (columnUpper[iColumn] >
-		columnLower[iColumn] + 1.0e-12 && columnLength[iColumn]) 
+		columnLower[iColumn] + 1.0e-12 && columnLength[iColumn])
 	      assert(usefulColumn[iColumn]!=0);
 	    else
 	      assert(usefulColumn[iColumn]==0);
@@ -4264,17 +4264,17 @@ ClpPackedMatrix::gutsOfTransposeTimesByRowGE3a(const CoinIndexedVector * COIN_RE
 #endif
      // ** Row copy is already scaled
      int nextRow=whichRow[0];
-     CoinBigIndex nextStart = rowStart[nextRow]; 
-     CoinBigIndex nextEnd = rowStart[nextRow+1]; 
+     CoinBigIndex nextStart = rowStart[nextRow];
+     CoinBigIndex nextEnd = rowStart[nextRow+1];
      for (int i = 0; i < numberInRowArray; i++) {
           double value = pi[i] * scalar;
 	  CoinBigIndex start=nextStart;
 	  CoinBigIndex end=nextEnd;
 	  nextRow=whichRow[i+1];
-	  nextStart = rowStart[nextRow]; 
+	  nextStart = rowStart[nextRow];
 	  //coin_prefetch_const(column + nextStart);
 	  //coin_prefetch_const(element + nextStart);
-	  nextEnd = rowStart[nextRow+1]; 
+	  nextEnd = rowStart[nextRow+1];
           CoinBigIndex j;
           for (j = start; j < end; j++) {
                int iColumn = column[j];

@@ -1,9 +1,9 @@
 
-/*  
-	© Copyright 2012, David Welter
-	
+/*
+
+
 	This file is part of PEST++.
-   
+
 	PEST++ is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
@@ -172,8 +172,8 @@ fstream &FileManager::open_iofile_absolute(const string &tag, const string &file
 	fstream &f_new = *(ret.first->second);
 	if (ret.second != false  && !f_new.is_open())
 	{
-		// a file needs to exist before it can be opened it with read and write 
-		// permission.   So open it with write permission to crteate it, close 
+		// a file needs to exist before it can be opened it with read and write
+		// permission.   So open it with write permission to crteate it, close
 		// and then reopen it with read and write permisssion.
 		f_new.open(filename, ios_base::out | ios_base::binary);
 		f_new.close();
@@ -231,7 +231,7 @@ void FileManager::close_file(const string &tag)
 			it->second->close();
 			delete it->second;
 			iofile_map.erase(it);
-		
+
 		}
 	}
 	filename_map.erase(tag);

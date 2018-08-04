@@ -1,8 +1,8 @@
-/*  
-	© Copyright 2012, David Welter
-	
+/*
+
+
 	This file is part of PEST++.
-   
+
 	PEST++ is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
@@ -69,8 +69,8 @@ protected:
 	enum class UpgradeBounds {ROBUST, CHEAP};
 public:
 	SVDSolver(Pest &_pest_scenario, FileManager &_file_manager, ObjectiveFunc *_obj_func,
-		const ParamTransformSeq &_par_transform, Jacobian &_jacobian, 
-		OutputFileWriter &_output_file_writer, SVDSolver::MAT_INV _mat_inv, 
+		const ParamTransformSeq &_par_transform, Jacobian &_jacobian,
+		OutputFileWriter &_output_file_writer, SVDSolver::MAT_INV _mat_inv,
 		PerformanceLog *_performance_log, const string &description = string("base parameter solution"),Covariance parcov=Covariance(),
 		bool _phiredswh_flag = false, bool _splitswh_flag = false, bool _save_next_jacobian = true);
 	virtual ModelRun compute_jacobian(RunManagerAbstract &run_manager, TerminationController &termination_ctl, ModelRun &cur_run, bool restart_runs = false);
@@ -95,7 +95,7 @@ protected:
 		Eigen::VectorXd uvec;
 		double norm;
 		vector<string> par_name_vec;
-		Parameters frozen_numeric_pars; 
+		Parameters frozen_numeric_pars;
 	};
 
 	const static string svd_solver_type_name;
@@ -157,7 +157,7 @@ protected:
 		Parameters &grad_active_ctl_del_pars, MarquardtMatrix marquardt_type, bool scale_upgrade=false);
 	void check_limits(const Parameters &init_ctl_pars, const Parameters &upgrade_ctl_pars,
 		map<string, LimitType> &limit_type_map, Parameters &active_ctl_parameters_at_limit);
-	Eigen::VectorXd calc_residual_corrections(const Jacobian &jacobian, const Parameters &del_numeric_pars, 
+	Eigen::VectorXd calc_residual_corrections(const Jacobian &jacobian, const Parameters &del_numeric_pars,
 							   const vector<string> obs_name_vec);
 	void dynamic_weight_adj(const ModelRun &base_run, const Jacobian &jacobian, QSqrtMatrix &Q_sqrt,
 		const Eigen::VectorXd &Residuals, const vector<string> &obs_name_vec,
@@ -170,7 +170,7 @@ protected:
 	Parameters read_frozen_pars(std::istream &fin, int id);
 	PhiComponets phi_estimate(const ModelRun &base_run, const Jacobian &jacobian, QSqrtMatrix &Q_sqrt, const DynamicRegularization &regul,
 		const Eigen::VectorXd &residuals_vec, const vector<string> &obs_names_vec,
-		const Parameters &base_run_active_ctl_par, const Parameters &freeze_active_ctl_pars, 
+		const Parameters &base_run_active_ctl_par, const Parameters &freeze_active_ctl_pars,
 		DynamicRegularization &tmp_regul_scheme, bool scale_upgrade = false);
 	int check_bnd_par(Parameters &new_freeze_active_ctl_pars, const Parameters &current_active_ctl_pars, const Parameters &new_upgrade_active_ctl_pars, const Parameters &new_grad_active_ctl_pars = Parameters());
 };

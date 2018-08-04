@@ -1361,7 +1361,7 @@ ClpModel::resize (int newNumberRows, int newNumberColumns)
 #ifndef CLP_NO_STD
      if (lengthNames_) {
           // redo row and column names (make sure clean)
-          int numberRowNames = 
+          int numberRowNames =
 	    CoinMin(static_cast<int>(rowNames_.size()),numberRows_);
           if (numberRowNames < newNumberRows) {
                rowNames_.resize(newNumberRows);
@@ -1372,13 +1372,13 @@ ClpModel::resize (int newNumberRows, int newNumberColumns)
                     rowNames_[iRow] = name;
                }
           }
-          int numberColumnNames = 
+          int numberColumnNames =
 	    CoinMin(static_cast<int>(columnNames_.size()),numberColumns_);
           if (numberColumnNames < newNumberColumns) {
                columnNames_.resize(newNumberColumns);
                lengthNames_ = CoinMax(lengthNames_, 8);
                char name[9];
-               for (int iColumn = numberColumnNames; 
+               for (int iColumn = numberColumnNames;
 		    iColumn < newNumberColumns; iColumn++) {
                     sprintf(name, "C%7.7d", iColumn);
                     columnNames_[iColumn] = name;
@@ -1625,7 +1625,7 @@ ClpModel::deleteColumns(int number, const int * which)
      setColumnScale(NULL);
 }
 // Deletes rows AND columns (does not reallocate)
-void 
+void
 ClpModel::deleteRowsAndColumns(int numberRows, const int * whichRows,
 			       int numberColumns, const int * whichColumns)
 {
@@ -1647,7 +1647,7 @@ ClpModel::deleteRowsAndColumns(int numberRows, const int * whichRows,
 	backColumns[iColumn]=-1;
     }
     assert (objective_->type()==1);
-    double * obj = objective(); 
+    double * obj = objective();
     for (int i=0;i<numberColumns_;i++) {
       if (!backColumns[i]) {
 	columnActivity_[newNumberColumns] = columnActivity_[i];
@@ -1667,7 +1667,7 @@ ClpModel::deleteRowsAndColumns(int numberRows, const int * whichRows,
     if (lengthNames_) {
       for (int i=0;i<numberColumns_;i++) {
 	int iColumn=backColumns[i];
-	if (iColumn) 
+	if (iColumn)
 	  columnNames_[iColumn] = columnNames_[i];
       }
       columnNames_.erase(columnNames_.begin() + newNumberColumns, columnNames_.end());
@@ -1698,7 +1698,7 @@ ClpModel::deleteRowsAndColumns(int numberRows, const int * whichRows,
     if (lengthNames_) {
       for (int i=0;i<numberRows_;i++) {
 	int iRow=backRows[i];
-	if (iRow) 
+	if (iRow)
 	  rowNames_[iRow] = rowNames_[i];
       }
       rowNames_.erase(rowNames_.begin() + newNumberRows, rowNames_.end());
@@ -2634,7 +2634,7 @@ ClpModel::addColumns( CoinModel & modelObject, bool tryPlusMinusOne, bool checkD
 		    const double * element = matrix.getElements();
 		    // make sure matrix has enough rows
 		    matrix_->setDimensions(numberRows_, -1);
-		    addColumns(numberColumns2, columnLower, columnUpper, 
+		    addColumns(numberColumns2, columnLower, columnUpper,
 			       objective, columnStart, row, element);
 #ifndef SLIM_CLP
                } else {
@@ -2890,7 +2890,7 @@ ClpModel::popMessageHandler(CoinMessageHandler * oldHandler, bool oldDefault)
      handler_ = oldHandler;
 }
 // Overrides message handler with a default one
-void 
+void
 ClpModel::setDefaultMessageHandler()
 {
      int logLevel = handler_->logLevel();

@@ -1,8 +1,8 @@
-/*  
-	© Copyright 2012, David Welter
-	
+/*
+
+
 	This file is part of PEST++.
-   
+
 	PEST++ is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
@@ -23,7 +23,7 @@
 
 /** @file
  @brief Transformation Classes
- 
+
  This file defines the classes used to implement transformations.
 */
 #include <string>
@@ -45,9 +45,9 @@ using namespace std;
 
 /**
  @brief Transformation Base Class
- 
+
  This is the pure virtual base class for all transformations.  The class can not be
- instantiated and all transformations classes must defive from it. 
+ instantiated and all transformations classes must defive from it.
 */
 class Transformation {
 public:
@@ -90,7 +90,7 @@ protected:
 
 /**
  @brief Transformation Base Class for Transformations based on an STL map
- 
+
  This is the pure virtual base class for Transformations based on an STL map.  The class can not be
  instantiated but provides a common framework to build transformations based using an STL map
 */
@@ -110,7 +110,7 @@ public:
 	void clear() {items.clear();}
 	void insert (const Parameters &pars);
 	void reset(const Parameters &pars);
-	/** Returns the transformation value associated with the name of an transformable item.  
+	/** Returns the transformation value associated with the name of an transformable item.
 	The results are returned as a pair<bool, double> where the first element in the pair will be
 	false if the items is not part of the transformation and true if it is
 	 */
@@ -125,7 +125,7 @@ protected:
 
 /**
  @brief Transformation Base Class for Transformations based on an STL set
- 
+
  This is the pure virtual base class for Transformations based on an STL set.  The class can not be
  instantiated but provides a common framework to build transformations based using an STL set
 */
@@ -149,9 +149,9 @@ protected:
 
 /**
  @brief Offset Transformation Class
- 
+
  This class provides an offset transformation in which an offset is added in the forward transformation
- and subtracted in the reverse transformation.    
+ and subtracted in the reverse transformation.
 */
 class TranOffset: public TranMapBase {
 public:
@@ -172,9 +172,9 @@ private:
 
 /**
  @brief Scale Transformation Class
- 
+
  This class provides an scaled transformation in which value is multiple by scaling value in the forward transformation
- and dvided by it in the reverse transformation.    
+ and dvided by it in the reverse transformation.
 */
 class TranScale: public TranMapBase {
 public:
@@ -196,9 +196,9 @@ private:
 
 /**
  @brief Log10 Transformation Class
- 
+
  This class provides an log10 transformation in which value is log10 transformed is applied in the forward direction
- and inverse log10 transform is applied in the reverse direction.    
+ and inverse log10 transform is applied in the reverse direction.
 */
 class TranLog10: public TranSetBase {
 public:
@@ -218,7 +218,7 @@ public:
 
 /**
  @brief Fixed Value Transformation Class
- 
+
  This class provides tansformation that adds an additiona transformable items with a fixed
  value in the forward transformation and removes the item in the reverse transformation.
 */
@@ -253,7 +253,7 @@ private:
 
 /**
  @brief Tied Transformation Class
- 
+
  This class provides tansformation that ties a transformable item to another transformable
  item.  In the forard direction this transformation will add a new Tied transformable item.
  This item is assigned the scaled value of the items that it is tied to.  In the reverse direction
@@ -281,7 +281,7 @@ protected:
 
 /**
  @brief Super Parameter or SVD Assist (SVDA) Transformation
- 
+
  This class provides a transformation for super parameters.  In the forward direction base parameters
  are transformed to super parameters and in the reverse direction super paraeters are transformed to
  base parameters

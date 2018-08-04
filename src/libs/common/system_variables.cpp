@@ -1,8 +1,8 @@
-/*  
-    © Copyright 2012, David Welter
-    
+/*
+
+
     This file is part of PEST++.
-   
+
     PEST++ is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
@@ -164,7 +164,7 @@ int start(string &cmd_string)
 	//  argv[icmd] = cmds[icmd].data();
 	//}
 	//argv[cmds.size() + 1] = NULL; //last arg must be NULL
-	
+
 	arg_v.push_back(NULL);
 	pid_t pid = fork();
 	if (pid == 0)

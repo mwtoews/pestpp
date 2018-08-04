@@ -1822,7 +1822,7 @@ Idiot::crossOver(int mode)
                if (allowInfeasible) {
                     // fix up so will be feasible
 		    const double * dual = model_->dualRowSolution();
-                    for (i = 0; i < nrows; i++) 
+                    for (i = 0; i < nrows; i++)
 		      rhs[i]=fabs(dual[i]);
 		    std::sort(rhs,rhs+nrows);
 		    int nSmall=nrows;
@@ -1914,7 +1914,7 @@ Idiot::crossOver(int mode)
 #endif
                          }
                     }
-		    sprintf(line,"sum of infeasibilities %g - %d fixed rows, %d fixed columns - might free %d rows", 
+		    sprintf(line,"sum of infeasibilities %g - %d fixed rows, %d fixed columns - might free %d rows",
 			   sum,nFixedRows,nFixed,nFreed);
 	       } else {
                     memset(rhs, 0, nrows * sizeof(double));
@@ -1941,7 +1941,7 @@ Idiot::crossOver(int mode)
                          }
 		    }
 		    double averageInfeasibility=sum/nrows;
-                    sprintf(line,"sum of infeasibilities %g - average %g, %d fixed columns", 
+                    sprintf(line,"sum of infeasibilities %g - average %g, %d fixed columns",
 			   sum,averageInfeasibility,nFixed);
                }
 	       const CoinMessages * messages = model_->messagesPointer();
@@ -1995,15 +1995,15 @@ Idiot::crossOver(int mode)
 		   status=factor.factorize(*matrix,rowIsBasic,columnIsBasic,areaFactor);
 		   if (status==-99) {
 		     // put all slacks in
-		     for (int i=0;i<nrows;i++) 
+		     for (int i=0;i<nrows;i++)
 		       rowIsBasic[i]=i;
-		     for (int i=0;i<ncols;i++) 
+		     for (int i=0;i<ncols;i++)
 		      columnIsBasic[i]=-1;
 		     break;
 		   } else if (status==-1) {
 		     factor.pivotTolerance(0.99);
 		     // put all slacks in
-		     for (int i=0;i<nrows;i++) 
+		     for (int i=0;i<nrows;i++)
 		       rowIsBasic[i]=i;
 		     for (int i=0;i<ncols;i++) {
 		       int iRow=columnIsBasic[i];
@@ -2076,7 +2076,7 @@ Idiot::crossOver(int mode)
                     delete model_;
                     model_ = saveModel;
                     saveModel = NULL;
-               } 
+               }
           } else {
                // not feasible
                addAll = 1;

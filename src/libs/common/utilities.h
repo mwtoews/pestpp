@@ -3,7 +3,7 @@
 
 /* @file
  @brief Utility Functions
- 
+
  This file contains a variety of utility functions for string and numeric operations.
 */
 
@@ -36,7 +36,7 @@ namespace pest_utils
 	double get_duration_sec(std::chrono::system_clock::time_point start_time);
 
    /* @brief Sign of a number
- 
+
    Returns the sign of a val (-1, 1 or 0).
   */
 	inline int sign(double val)
@@ -45,11 +45,11 @@ namespace pest_utils
 		if (val < 0) return -1;
 		return 0;
 	}
- 
-	  
+
+
 	/* @brief Splits a string and returns the sub-strings.
-	
-	String str is split into sub-strings using the characters specified 
+
+	String str is split into sub-strings using the characters specified
 	in delimiters and the sub-strings are are returned in the tokens constainer.
 	If trimEmpty is specified as true, empty records are removed from
 	tokens before it is returned
@@ -60,7 +60,7 @@ namespace pest_utils
 
 
 	/* @brief Convert a string to another type.
-	
+
 	String s is converted to the type of the return variable x.  If extra
 	characters are left over after the conversion and failIfLeftoverChars is set
 	to true, a PestConversionError exception is thrown
@@ -76,12 +76,12 @@ namespace pest_utils
 	}
 
 	/* @brief Convert a string to another type.
-	
+
 	String s is converted to the type T.  If extra
 	characters are left over after the conversion and failIfLeftoverChars is set
 	to true, a PestConversionError exception is thrown.
 
-	The tepmplatized return type must be included in the fuction call.  The following example shows 
+	The tepmplatized return type must be included in the fuction call.  The following example shows
 	how to call this function to convert a string to an integer
 	convert_cp<int>("10")
 	*/
@@ -95,10 +95,10 @@ namespace pest_utils
 	}
 
 	/* @brief Strip leading and/or trailing characters from a string
-	
-		The characters contained in arguement delimiters are stripped from 
+
+		The characters contained in arguement delimiters are stripped from
 		string s.  op can be specified as "front", "back" or "both" to control
-		whether the characters are stripped from the begining, end or both sides 
+		whether the characters are stripped from the begining, end or both sides
 		of string s.
 	*/
 
@@ -108,30 +108,30 @@ namespace pest_utils
 		const string &delimiters=" \t\n\r");
 
 	/* @brief Strip leading and/or trailing characters from a string
-	
-		The characters contained in arguement delimiters are stripped from 
+
+		The characters contained in arguement delimiters are stripped from
 		string s and the updated string is returned without modifying s.  op can be specified as "front", "back" or "both" to control
-		whether the characters are stripped from the begining, end or both sides 
+		whether the characters are stripped from the begining, end or both sides
 		of string s.
 	*/
-	string strip_cp(const string &s, const string &op="both", 
+	string strip_cp(const string &s, const string &op="both",
 		const string &delimiters=" \t\n\r");
 
 	/* @brief Convert all the characters in a string to upper case
-	
+
 		All characters in string s are converted to upper case
 	*/
 	void upper_ip(string &s);
 
 	/* @brief Convert all the characters in a string to upper case
-	
-		All characters in string s are converted to upper case and returned as 
+
+		All characters in string s are converted to upper case and returned as
 		a new string without modifying the original string
 	*/
 	string upper_cp(const string &s);
 
 		/* @brief Convert all the characters in a string to upper case.
-	
+
 		All characters in string s are converted to lower case.
 	*/
 	string upper(char *);
@@ -139,8 +139,8 @@ namespace pest_utils
 	void lower_ip(string &s);
 
 	/* @brief Convert all the characters in a string to lower case.
-	
-		All characters in string s are converted to lower case and returned as 
+
+		All characters in string s are converted to lower case and returned as
 		a new string without modifying the original string.
 	*/
 	string lower_cp(const string &s);

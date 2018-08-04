@@ -128,7 +128,7 @@ extern int CbcOrClpEnvironmentIndex;
 #ifdef CLP_USER_DRIVEN1
 /* Returns true if variable sequenceOut can leave basis when
    model->sequenceIn() enters.
-   This function may be entered several times for each sequenceOut.  
+   This function may be entered several times for each sequenceOut.
    The first time realAlpha will be positive if going to lower bound
    and negative if going to upper bound (scaled bounds in lower,upper) - then will be zero.
    currentValue is distance to bound.
@@ -862,7 +862,7 @@ int ClpMain1(int argc, const char *argv[],AbcSimplex * models)
 				   if (type==CLP_PARAM_ACTION_EITHERSIMPLEX||
 				       type==CBC_PARAM_ACTION_BAB)
 				     solveOptions.setSpecialOption(3,0); // allow +-1
-				   if (dualize==4) { 
+				   if (dualize==4) {
 				     solveOptions.setSpecialOption(4, 77);
 				     dualize=0;
 				   }
@@ -947,12 +947,12 @@ int ClpMain1(int argc, const char *argv[],AbcSimplex * models)
 					  solveOptions.setSpecialOption(6, 1,doCrash-3);
 					  doCrash=0;
 					}
-                                        if (doIdiot > 0) 
+                                        if (doIdiot > 0)
                                              solveOptions.setSpecialOption(1, 2, doIdiot);
                                    } else {
                                         method = ClpSolve::useBarrier;
 #ifdef ABC_INHERIT
-                                        if (doIdiot > 0) 
+                                        if (doIdiot > 0)
                                              solveOptions.setSpecialOption(1, 2, doIdiot); // dense threshold
 #endif
                                         if (crossover == 1) {
@@ -1158,13 +1158,13 @@ int ClpMain1(int argc, const char *argv[],AbcSimplex * models)
 						if (value) {
 						  //printf("basic %d direction %d farkas %g\n",
 						  //	   i,simplex->directionOut(),value);
-						  if (value<0.0) 
+						  if (value<0.0)
 						    boundValue=columnLower[i];
 						  else
 						    boundValue=columnUpper[i];
 						}
 					      } else if (fabs(value)>1.0e-10) {
-						if (value<0.0) 
+						if (value<0.0)
 						  boundValue=columnLower[i];
 						else
 						  boundValue=columnUpper[i];
@@ -1189,13 +1189,13 @@ int ClpMain1(int argc, const char *argv[],AbcSimplex * models)
 						if (value) {
 						  //printf("row basic %d direction %d ray %g\n",
 						  //	   i,simplex->directionOut(),value);
-						  if (value<0.0) 
+						  if (value<0.0)
 						    rhsValue=rowLower[i];
 						  else
 						    rhsValue=rowUpper[i];
 						}
 					      } else if (fabs(value)>1.0e-10) {
-						if (value<0.0) 
+						if (value<0.0)
 						  rhsValue=rowLower[i];
 						else
 						  rhsValue=rowUpper[i];
@@ -1258,7 +1258,7 @@ int ClpMain1(int argc, const char *argv[],AbcSimplex * models)
                                         << generalPrint
                                         << CoinMessageEol;
 					// switch off (user can switch back on)
-					parameters[whichParam(CLP_PARAM_INT_DUALIZE, 
+					parameters[whichParam(CLP_PARAM_INT_DUALIZE,
 							      numberParameters, parameters)].setIntValue(dualize);
                                    }
                                    if (status >= 0)
@@ -2302,7 +2302,7 @@ clp watson.mps -\nscaling off\nprimalsimplex"
 					  fp = fopen(fileName.c_str(), "a");
                                    }
                                    if (fp) {
-				     // See if Glpk 
+				     // See if Glpk
 				     if (type == CLP_PARAM_ACTION_GMPL_SOLUTION) {
 				       int numberRows = models[iModel].getNumRows();
 				       int numberColumns = models[iModel].getNumCols();
@@ -2332,7 +2332,7 @@ clp watson.mps -\nscaling off\nprimalsimplex"
 				       } else if (iStat >= 3 && iStat <= 5) {
 					 iStat2 = GLP_FEAS;
 				       }
-				       double objValue = models[iModel].getObjValue() 
+				       double objValue = models[iModel].getObjValue()
 					 * models[iModel].getObjSense();
 				       fprintf(fp,"%d 2 %g\n",iStat2,objValue);
 				       if (numberGlpkRows > numberRows) {
@@ -2808,7 +2808,7 @@ clp watson.mps -\nscaling off\nprimalsimplex"
                                                        for (; i < static_cast<size_t>(lengthPrint); i++)
                                                             fprintf(fp, " ");
                                                   }
-						  fprintf(fp, printFormat, 
+						  fprintf(fp, printFormat,
                                                           primalColumnSolution[iColumn],
                                                           dualColumnSolution[iColumn]);
                                              }
@@ -2906,7 +2906,7 @@ clp watson.mps -\nscaling off\nprimalsimplex"
        // free up as much as possible
        glp_free(cbc_glp_prob);
        glp_mpl_free_wksp(cbc_glp_tran);
-       glp_free_env(); 
+       glp_free_env();
        cbc_glp_prob = NULL;
        cbc_glp_tran = NULL;
      }
@@ -3510,11 +3510,11 @@ static void statistics(ClpSimplex * originalModel, ClpSimplex * model)
 	     }
 	   }
 	   if (!objective[iColumn]) {
-	     if (model->logLevel() > 4) 
+	     if (model->logLevel() > 4)
 	     printf("Singleton %d with no objective in row with %d elements - rhs %g,%g\n",iColumn,rowLength[iRow],rowLower[iRow],rowUpper[iRow]);
 	     nPossibleZeroCost++;
 	   } else if (value!=-COIN_DBL_MAX) {
-	     if (model->logLevel() > 4) 
+	     if (model->logLevel() > 4)
 	       printf("Singleton %d (%s) with objective in row %d (%s) with %d equal elements - rhs %g,%g\n",iColumn,model->getColumnName(iColumn).c_str(),
 		      iRow,model->getRowName(iRow).c_str(),
 		      rowLength[iRow],rowLower[iRow],rowUpper[iRow]);
@@ -3550,7 +3550,7 @@ static void statistics(ClpSimplex * originalModel, ClpSimplex * model)
 	 int numberRowsDone=0;
 	 int numberMarkedColumns=0;
 	 int maximumBlockSize=0;
-	 for (int i=0;i<numberRows+2*numberColumns;i++) 
+	 for (int i=0;i<numberRows+2*numberColumns;i++)
 	   blockStart[i]=-1;
 	 for (int i=0;i<numberRows+1;i++)
 	   blockCount[i]=0;
@@ -3620,7 +3620,7 @@ static void statistics(ClpSimplex * originalModel, ClpSimplex * model)
 	   }
 	   maximumBlockSize=CoinMax(maximumBlockSize,blockCount[iBlock]);
 	   numberRowsDone++;
-	   if (thisBestValue*numberRowsDone > maximumBlockSize&&numberRowsDone>halfway) { 
+	   if (thisBestValue*numberRowsDone > maximumBlockSize&&numberRowsDone>halfway) {
 	     thisBestBreak=iRow;
 	     thisBestValue=static_cast<double>(maximumBlockSize)/
 	       static_cast<double>(numberRowsDone);
@@ -3645,7 +3645,7 @@ static void statistics(ClpSimplex * originalModel, ClpSimplex * model)
        if (firstMaster<lastMaster) {
 	 printf("%d master rows %d <= < %d\n",lastMaster-firstMaster,
 		firstMaster,lastMaster);
-	 for (int i=0;i<numberRows+2*numberColumns;i++) 
+	 for (int i=0;i<numberRows+2*numberColumns;i++)
 	   blockStart[i]=-1;
 	 for (int i=firstMaster;i<lastMaster;i++)
 	   blockStart[i]=-2;
@@ -3688,7 +3688,7 @@ static void statistics(ClpSimplex * originalModel, ClpSimplex * model)
 	   }
 	   firstRow++;
 	 }
-	 // adjust 
+	 // adjust
 	 numberBlocks++;
 	 for (int i=0;i<numberBlocks;i++) {
 	   blockCount[i]=0;
@@ -3744,7 +3744,7 @@ static void statistics(ClpSimplex * originalModel, ClpSimplex * model)
 		numberBlocks,largestRows,largestColumns,numberMaster,numberEmpty,numberRows,
 		numberMasterColumns,numberEmptyColumns,numberMasterIntegers,
 		numberColumns);
-	 for (int i=0;i<numberBlocks;i++) 
+	 for (int i=0;i<numberBlocks;i++)
 	   printf("Block %d has %d rows and %d columns (%d elements, %d integers)\n",
 		  i,blockCount[i],nextColumn[i],blockEls[i],countIntegers[i]);
 	 FILE * fpBlocks = fopen("blocks.data","wb");
@@ -3793,7 +3793,7 @@ static void statistics(ClpSimplex * originalModel, ClpSimplex * model)
 	     subset.writeMps(name,0,1);
 	   }
 	   delete [] whichRows;
-	 } 
+	 }
        }
        delete [] blockStart;
      }
