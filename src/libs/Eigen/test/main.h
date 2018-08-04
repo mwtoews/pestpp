@@ -83,10 +83,10 @@
 
 namespace Eigen
 {
-  static std::vector<std::string> g_test_stack;
-  static int g_repeat;
-  static unsigned int g_seed;
-  static bool g_has_set_repeat, g_has_set_seed;
+static std::vector<std::string> g_test_stack;
+static int g_repeat;
+static unsigned int g_seed;
+static bool g_has_set_repeat, g_has_set_seed;
 }
 
 #define EI_PP_MAKE_STRING2(S) #S
@@ -96,100 +96,100 @@ namespace Eigen
 
 #ifndef EIGEN_NO_ASSERTION_CHECKING
 
-  namespace Eigen
-  {
-    static const bool should_raise_an_assert = false;
+namespace Eigen
+{
+static const bool should_raise_an_assert = false;
 
-    // Used to avoid to raise two exceptions at a time in which
-    // case the exception is not properly caught.
-    // This may happen when a second exceptions is triggered in a destructor.
-    static bool no_more_assert = false;
-    static bool report_on_cerr_on_assert_failure = true;
+// Used to avoid to raise two exceptions at a time in which
+// case the exception is not properly caught.
+// This may happen when a second exceptions is triggered in a destructor.
+static bool no_more_assert = false;
+static bool report_on_cerr_on_assert_failure = true;
 
-    struct eigen_assert_exception
-    {
-      eigen_assert_exception(void) {}
-      ~eigen_assert_exception() { Eigen::no_more_assert = false; }
-    };
-  }
-  // If EIGEN_DEBUG_ASSERTS is defined and if no assertion is triggered while
-  // one should have been, then the list of excecuted assertions is printed out.
-  //
-  // EIGEN_DEBUG_ASSERTS is not enabled by default as it
-  // significantly increases the compilation time
-  // and might even introduce side effects that would hide
-  // some memory errors.
-  #ifdef EIGEN_DEBUG_ASSERTS
+struct eigen_assert_exception
+{
+eigen_assert_exception(void) {}
+~eigen_assert_exception() { Eigen::no_more_assert = false; }
+};
+}
+// If EIGEN_DEBUG_ASSERTS is defined and if no assertion is triggered while
+// one should have been, then the list of excecuted assertions is printed out.
+//
+// EIGEN_DEBUG_ASSERTS is not enabled by default as it
+// significantly increases the compilation time
+// and might even introduce side effects that would hide
+// some memory errors.
+#ifdef EIGEN_DEBUG_ASSERTS
 
-    namespace Eigen
-    {
-      namespace internal
-      {
-        static bool push_assert = false;
-      }
-      static std::vector<std::string> eigen_assert_list;
-    }
-    #define eigen_assert(a)                       \
-      if( (!(a)) && (!no_more_assert) )     \
-      { \
-        if(report_on_cerr_on_assert_failure) \
-          std::cerr <<  #a << " " __FILE__ << "(" << __LINE__ << ")\n"; \
-        Eigen::no_more_assert = true;       \
-        throw Eigen::eigen_assert_exception(); \
-      }                                     \
-      else if (Eigen::internal::push_assert)       \
-      {                                     \
-        eigen_assert_list.push_back(std::string(EI_PP_MAKE_STRING(__FILE__) " (" EI_PP_MAKE_STRING(__LINE__) ") : " #a) ); \
-      }
+namespace Eigen
+{
+namespace internal
+{
+static bool push_assert = false;
+}
+static std::vector<std::string> eigen_assert_list;
+}
+#define eigen_assert(a)                       \
+if( (!(a)) && (!no_more_assert) )     \
+{ \
+if(report_on_cerr_on_assert_failure) \
+std::cerr <<  #a << " " __FILE__ << "(" << __LINE__ << ")\n"; \
+Eigen::no_more_assert = true;       \
+throw Eigen::eigen_assert_exception(); \
+}                                     \
+else if (Eigen::internal::push_assert)       \
+{                                     \
+eigen_assert_list.push_back(std::string(EI_PP_MAKE_STRING(__FILE__) " (" EI_PP_MAKE_STRING(__LINE__) ") : " #a) ); \
+}
 
-    #define VERIFY_RAISES_ASSERT(a)                                                   \
-      {                                                                               \
-        Eigen::no_more_assert = false;                                                \
-        Eigen::eigen_assert_list.clear();                                                \
-        Eigen::internal::push_assert = true;                                                 \
-        Eigen::report_on_cerr_on_assert_failure = false;                              \
-        try {                                                                         \
-          a;                                                                          \
-          std::cerr << "One of the following asserts should have been triggered:\n";  \
-          for (uint ai=0 ; ai<eigen_assert_list.size() ; ++ai)                           \
-            std::cerr << "  " << eigen_assert_list[ai] << "\n";                          \
-          VERIFY(Eigen::should_raise_an_assert && # a);                               \
-        } catch (Eigen::eigen_assert_exception) {                                        \
-          Eigen::internal::push_assert = false; VERIFY(true);                                \
-        }                                                                             \
-        Eigen::report_on_cerr_on_assert_failure = true;                               \
-        Eigen::internal::push_assert = false;                                                \
-      }
+#define VERIFY_RAISES_ASSERT(a)                                                   \
+{                                                                               \
+Eigen::no_more_assert = false;                                                \
+Eigen::eigen_assert_list.clear();                                                \
+Eigen::internal::push_assert = true;                                                 \
+Eigen::report_on_cerr_on_assert_failure = false;                              \
+try {                                                                         \
+a;                                                                          \
+std::cerr << "One of the following asserts should have been triggered:\n";  \
+for (uint ai=0 ; ai<eigen_assert_list.size() ; ++ai)                           \
+std::cerr << "  " << eigen_assert_list[ai] << "\n";                          \
+VERIFY(Eigen::should_raise_an_assert && # a);                               \
+} catch (Eigen::eigen_assert_exception) {                                        \
+Eigen::internal::push_assert = false; VERIFY(true);                                \
+}                                                                             \
+Eigen::report_on_cerr_on_assert_failure = true;                               \
+Eigen::internal::push_assert = false;                                                \
+}
 
-  #else // EIGEN_DEBUG_ASSERTS
-    // see bug 89. The copy_bool here is working around a bug in gcc <= 4.3
-    #define eigen_assert(a) \
-      if( (!Eigen::internal::copy_bool(a)) && (!no_more_assert) )\
-      {                                       \
-        Eigen::no_more_assert = true;         \
-        if(report_on_cerr_on_assert_failure)  \
-          eigen_plain_assert(a);              \
-        else                                  \
-          throw Eigen::eigen_assert_exception(); \
-      }
-    #define VERIFY_RAISES_ASSERT(a) {                             \
-        Eigen::no_more_assert = false;                            \
-        Eigen::report_on_cerr_on_assert_failure = false;          \
-        try {                                                     \
-          a;                                                      \
-          VERIFY(Eigen::should_raise_an_assert && # a);           \
-        }                                                         \
-        catch (Eigen::eigen_assert_exception&) { VERIFY(true); }     \
-        Eigen::report_on_cerr_on_assert_failure = true;           \
-      }
+#else // EIGEN_DEBUG_ASSERTS
+// see bug 89. The copy_bool here is working around a bug in gcc <= 4.3
+#define eigen_assert(a) \
+if( (!Eigen::internal::copy_bool(a)) && (!no_more_assert) )\
+{                                       \
+Eigen::no_more_assert = true;         \
+if(report_on_cerr_on_assert_failure)  \
+eigen_plain_assert(a);              \
+else                                  \
+throw Eigen::eigen_assert_exception(); \
+}
+#define VERIFY_RAISES_ASSERT(a) {                             \
+Eigen::no_more_assert = false;                            \
+Eigen::report_on_cerr_on_assert_failure = false;          \
+try {                                                     \
+a;                                                      \
+VERIFY(Eigen::should_raise_an_assert && # a);           \
+}                                                         \
+catch (Eigen::eigen_assert_exception&) { VERIFY(true); }     \
+Eigen::report_on_cerr_on_assert_failure = true;           \
+}
 
-  #endif // EIGEN_DEBUG_ASSERTS
+#endif // EIGEN_DEBUG_ASSERTS
 
-  #define EIGEN_USE_CUSTOM_ASSERT
+#define EIGEN_USE_CUSTOM_ASSERT
 
 #else // EIGEN_NO_ASSERTION_CHECKING
 
-  #define VERIFY_RAISES_ASSERT(a) {}
+#define VERIFY_RAISES_ASSERT(a) {}
 
 #endif // EIGEN_NO_ASSERTION_CHECKING
 
@@ -199,17 +199,17 @@ namespace Eigen
 
 inline void verify_impl(bool condition, const char *testname, const char *file, int line, const char *condition_as_string)
 {
-  if (!condition)
-  {
-    std::cerr << "Test " << testname << " failed in " << file << " (" << line << ")"
-      << std::endl << "    " << condition_as_string << std::endl;
-    std::cerr << "Stack:\n";
-    const int test_stack_size = static_cast<int>(Eigen::g_test_stack.size());
-    for(int i=test_stack_size-1; i>=0; --i)
-      std::cerr << "  - " << Eigen::g_test_stack[i] << "\n";
-    std::cerr << "\n";
-    abort();
-  }
+if (!condition)
+{
+std::cerr << "Test " << testname << " failed in " << file << " (" << line << ")"
+<< std::endl << "    " << condition_as_string << std::endl;
+std::cerr << "Stack:\n";
+const int test_stack_size = static_cast<int>(Eigen::g_test_stack.size());
+for(int i=test_stack_size-1; i>=0; --i)
+std::cerr << "  - " << Eigen::g_test_stack[i] << "\n";
+std::cerr << "\n";
+abort();
+}
 }
 
 #define VERIFY(a) ::verify_impl(a, g_test_stack.back().c_str(), __FILE__, __LINE__, EI_PP_MAKE_STRING(a))
@@ -225,10 +225,10 @@ inline void verify_impl(bool condition, const char *testname, const char *file, 
 #define VERIFY_IS_UNITARY(a) VERIFY(test_isUnitary(a))
 
 #define CALL_SUBTEST(FUNC) do { \
-    g_test_stack.push_back(EI_PP_MAKE_STRING(FUNC)); \
-    FUNC; \
-    g_test_stack.pop_back(); \
-  } while (0)
+g_test_stack.push_back(EI_PP_MAKE_STRING(FUNC)); \
+FUNC; \
+g_test_stack.pop_back(); \
+} while (0)
 
 
 namespace Eigen {
@@ -273,11 +273,11 @@ inline bool test_isMuchSmallerThan(const std::complex<double>& a, const std::com
 
 inline bool test_isApprox(const long double& a, const long double& b)
 {
-    bool ret = internal::isApprox(a, b, test_precision<long double>());
-    if (!ret) std::cerr
-        << std::endl << "    actual   = " << a
-        << std::endl << "    expected = " << b << std::endl << std::endl;
-    return ret;
+bool ret = internal::isApprox(a, b, test_precision<long double>());
+if (!ret) std::cerr
+<< std::endl << "    actual   = " << a
+<< std::endl << "    expected = " << b << std::endl << std::endl;
+return ret;
 }
 
 inline bool test_isMuchSmallerThan(const long double& a, const long double& b)
@@ -288,7 +288,7 @@ inline bool test_isApproxOrLessThan(const long double& a, const long double& b)
 template<typename Type1, typename Type2>
 inline bool test_isApprox(const Type1& a, const Type2& b)
 {
-  return a.isApprox(b, test_precision<typename Type1::Scalar>());
+return a.isApprox(b, test_precision<typename Type1::Scalar>());
 }
 
 // The idea behind this function is to compare the two scalars a and b where
@@ -301,27 +301,27 @@ inline bool test_isApprox(const Type1& a, const Type2& b)
 template<typename Scalar,typename ScalarRef>
 inline bool test_isApproxWithRef(const Scalar& a, const Scalar& b, const ScalarRef& ref)
 {
-  return test_isApprox(a+ref, b+ref);
+return test_isApprox(a+ref, b+ref);
 }
 
 template<typename Derived1, typename Derived2>
 inline bool test_isMuchSmallerThan(const MatrixBase<Derived1>& m1,
-                                   const MatrixBase<Derived2>& m2)
+const MatrixBase<Derived2>& m2)
 {
-  return m1.isMuchSmallerThan(m2, test_precision<typename internal::traits<Derived1>::Scalar>());
+return m1.isMuchSmallerThan(m2, test_precision<typename internal::traits<Derived1>::Scalar>());
 }
 
 template<typename Derived>
 inline bool test_isMuchSmallerThan(const MatrixBase<Derived>& m,
-                                   const typename NumTraits<typename internal::traits<Derived>::Scalar>::Real& s)
+const typename NumTraits<typename internal::traits<Derived>::Scalar>::Real& s)
 {
-  return m.isMuchSmallerThan(s, test_precision<typename internal::traits<Derived>::Scalar>());
+return m.isMuchSmallerThan(s, test_precision<typename internal::traits<Derived>::Scalar>());
 }
 
 template<typename Derived>
 inline bool test_isUnitary(const MatrixBase<Derived>& m)
 {
-  return m.isUnitary(test_precision<typename internal::traits<Derived>::Scalar>());
+return m.isUnitary(test_precision<typename internal::traits<Derived>::Scalar>());
 }
 
 // Forward declaration to avoid ICC warning
@@ -331,59 +331,59 @@ bool test_is_equal(const T& actual, const U& expected);
 template<typename T, typename U>
 bool test_is_equal(const T& actual, const U& expected)
 {
-    if (actual==expected)
-        return true;
-    // false:
-    std::cerr
-        << std::endl << "    actual   = " << actual
-        << std::endl << "    expected = " << expected << std::endl << std::endl;
-    return false;
+if (actual==expected)
+return true;
+// false:
+std::cerr
+<< std::endl << "    actual   = " << actual
+<< std::endl << "    expected = " << expected << std::endl << std::endl;
+return false;
 }
 
 /** Creates a random Partial Isometry matrix of given rank.
-  *
-  * A partial isometry is a matrix all of whose singular values are either 0 or 1.
-  * This is very useful to test rank-revealing algorithms.
-  */
+*
+* A partial isometry is a matrix all of whose singular values are either 0 or 1.
+* This is very useful to test rank-revealing algorithms.
+*/
 // Forward declaration to avoid ICC warning
 template<typename MatrixType>
 void createRandomPIMatrixOfRank(typename MatrixType::Index desired_rank, typename MatrixType::Index rows, typename MatrixType::Index cols, MatrixType& m);
 template<typename MatrixType>
 void createRandomPIMatrixOfRank(typename MatrixType::Index desired_rank, typename MatrixType::Index rows, typename MatrixType::Index cols, MatrixType& m)
 {
-  typedef typename internal::traits<MatrixType>::Index Index;
-  typedef typename internal::traits<MatrixType>::Scalar Scalar;
-  enum { Rows = MatrixType::RowsAtCompileTime, Cols = MatrixType::ColsAtCompileTime };
+typedef typename internal::traits<MatrixType>::Index Index;
+typedef typename internal::traits<MatrixType>::Scalar Scalar;
+enum { Rows = MatrixType::RowsAtCompileTime, Cols = MatrixType::ColsAtCompileTime };
 
-  typedef Matrix<Scalar, Dynamic, 1> VectorType;
-  typedef Matrix<Scalar, Rows, Rows> MatrixAType;
-  typedef Matrix<Scalar, Cols, Cols> MatrixBType;
+typedef Matrix<Scalar, Dynamic, 1> VectorType;
+typedef Matrix<Scalar, Rows, Rows> MatrixAType;
+typedef Matrix<Scalar, Cols, Cols> MatrixBType;
 
-  if(desired_rank == 0)
-  {
-    m.setZero(rows,cols);
-    return;
-  }
+if(desired_rank == 0)
+{
+m.setZero(rows,cols);
+return;
+}
 
-  if(desired_rank == 1)
-  {
-    // here we normalize the vectors to get a partial isometry
-    m = VectorType::Random(rows).normalized() * VectorType::Random(cols).normalized().transpose();
-    return;
-  }
+if(desired_rank == 1)
+{
+// here we normalize the vectors to get a partial isometry
+m = VectorType::Random(rows).normalized() * VectorType::Random(cols).normalized().transpose();
+return;
+}
 
-  MatrixAType a = MatrixAType::Random(rows,rows);
-  MatrixType d = MatrixType::Identity(rows,cols);
-  MatrixBType  b = MatrixBType::Random(cols,cols);
+MatrixAType a = MatrixAType::Random(rows,rows);
+MatrixType d = MatrixType::Identity(rows,cols);
+MatrixBType  b = MatrixBType::Random(cols,cols);
 
-  // set the diagonal such that only desired_rank non-zero entries reamain
-  const Index diag_size = (std::min)(d.rows(),d.cols());
-  if(diag_size != desired_rank)
-    d.diagonal().segment(desired_rank, diag_size-desired_rank) = VectorType::Zero(diag_size-desired_rank);
+// set the diagonal such that only desired_rank non-zero entries reamain
+const Index diag_size = (std::min)(d.rows(),d.cols());
+if(diag_size != desired_rank)
+d.diagonal().segment(desired_rank, diag_size-desired_rank) = VectorType::Zero(diag_size-desired_rank);
 
-  HouseholderQR<MatrixAType> qra(a);
-  HouseholderQR<MatrixBType> qrb(b);
-  m = qra.householderQ() * d * qrb.householderQ();
+HouseholderQR<MatrixAType> qra(a);
+HouseholderQR<MatrixBType> qrb(b);
+m = qra.householderQ() * d * qrb.householderQ();
 }
 
 // Forward declaration to avoid ICC warning
@@ -392,38 +392,38 @@ void randomPermutationVector(PermutationVectorType& v, typename PermutationVecto
 template<typename PermutationVectorType>
 void randomPermutationVector(PermutationVectorType& v, typename PermutationVectorType::Index size)
 {
-  typedef typename PermutationVectorType::Index Index;
-  typedef typename PermutationVectorType::Scalar Scalar;
-  v.resize(size);
-  for(Index i = 0; i < size; ++i) v(i) = Scalar(i);
-  if(size == 1) return;
-  for(Index n = 0; n < 3 * size; ++n)
-  {
-    Index i = internal::random<Index>(0, size-1);
-    Index j;
-    do j = internal::random<Index>(0, size-1); while(j==i);
-    std::swap(v(i), v(j));
-  }
+typedef typename PermutationVectorType::Index Index;
+typedef typename PermutationVectorType::Scalar Scalar;
+v.resize(size);
+for(Index i = 0; i < size; ++i) v(i) = Scalar(i);
+if(size == 1) return;
+for(Index n = 0; n < 3 * size; ++n)
+{
+Index i = internal::random<Index>(0, size-1);
+Index j;
+do j = internal::random<Index>(0, size-1); while(j==i);
+std::swap(v(i), v(j));
+}
 }
 
 template<typename T> bool isNotNaN(const T& x)
 {
-  return x==x;
+return x==x;
 }
 
 template<typename T> bool isNaN(const T& x)
 {
-  return x!=x;
+return x!=x;
 }
 
 template<typename T> bool isInf(const T& x)
 {
-  return x > NumTraits<T>::highest();
+return x > NumTraits<T>::highest();
 }
 
 template<typename T> bool isMinusInf(const T& x)
 {
-  return x < NumTraits<T>::lowest();
+return x < NumTraits<T>::lowest();
 }
 
 } // end namespace Eigen
@@ -452,101 +452,101 @@ using namespace Eigen;
 
 inline void set_repeat_from_string(const char *str)
 {
-  errno = 0;
-  g_repeat = int(strtoul(str, 0, 10));
-  if(errno || g_repeat <= 0)
-  {
-    std::cout << "Invalid repeat value " << str << std::endl;
-    exit(EXIT_FAILURE);
-  }
-  g_has_set_repeat = true;
+errno = 0;
+g_repeat = int(strtoul(str, 0, 10));
+if(errno || g_repeat <= 0)
+{
+std::cout << "Invalid repeat value " << str << std::endl;
+exit(EXIT_FAILURE);
+}
+g_has_set_repeat = true;
 }
 
 inline void set_seed_from_string(const char *str)
 {
-  errno = 0;
-  g_seed = int(strtoul(str, 0, 10));
-  if(errno || g_seed == 0)
-  {
-    std::cout << "Invalid seed value " << str << std::endl;
-    exit(EXIT_FAILURE);
-  }
-  g_has_set_seed = true;
+errno = 0;
+g_seed = int(strtoul(str, 0, 10));
+if(errno || g_seed == 0)
+{
+std::cout << "Invalid seed value " << str << std::endl;
+exit(EXIT_FAILURE);
+}
+g_has_set_seed = true;
 }
 
 int main(int argc, char *argv[])
 {
-    g_has_set_repeat = false;
-    g_has_set_seed = false;
-    bool need_help = false;
+g_has_set_repeat = false;
+g_has_set_seed = false;
+bool need_help = false;
 
-    for(int i = 1; i < argc; i++)
-    {
-      if(argv[i][0] == 'r')
-      {
-        if(g_has_set_repeat)
-        {
-          std::cout << "Argument " << argv[i] << " conflicting with a former argument" << std::endl;
-          return 1;
-        }
-        set_repeat_from_string(argv[i]+1);
-      }
-      else if(argv[i][0] == 's')
-      {
-        if(g_has_set_seed)
-        {
-          std::cout << "Argument " << argv[i] << " conflicting with a former argument" << std::endl;
-          return 1;
-        }
-         set_seed_from_string(argv[i]+1);
-      }
-      else
-      {
-        need_help = true;
-      }
-    }
+for(int i = 1; i < argc; i++)
+{
+if(argv[i][0] == 'r')
+{
+if(g_has_set_repeat)
+{
+std::cout << "Argument " << argv[i] << " conflicting with a former argument" << std::endl;
+return 1;
+}
+set_repeat_from_string(argv[i]+1);
+}
+else if(argv[i][0] == 's')
+{
+if(g_has_set_seed)
+{
+std::cout << "Argument " << argv[i] << " conflicting with a former argument" << std::endl;
+return 1;
+}
+set_seed_from_string(argv[i]+1);
+}
+else
+{
+need_help = true;
+}
+}
 
-    if(need_help)
-    {
-      std::cout << "This test application takes the following optional arguments:" << std::endl;
-      std::cout << "  rN     Repeat each test N times (default: " << DEFAULT_REPEAT << ")" << std::endl;
-      std::cout << "  sN     Use N as seed for random numbers (default: based on current time)" << std::endl;
-      std::cout << std::endl;
-      std::cout << "If defined, the environment variables EIGEN_REPEAT and EIGEN_SEED" << std::endl;
-      std::cout << "will be used as default values for these parameters." << std::endl;
-      return 1;
-    }
+if(need_help)
+{
+std::cout << "This test application takes the following optional arguments:" << std::endl;
+std::cout << "  rN     Repeat each test N times (default: " << DEFAULT_REPEAT << ")" << std::endl;
+std::cout << "  sN     Use N as seed for random numbers (default: based on current time)" << std::endl;
+std::cout << std::endl;
+std::cout << "If defined, the environment variables EIGEN_REPEAT and EIGEN_SEED" << std::endl;
+std::cout << "will be used as default values for these parameters." << std::endl;
+return 1;
+}
 
-    char *env_EIGEN_REPEAT = getenv("EIGEN_REPEAT");
-    if(!g_has_set_repeat && env_EIGEN_REPEAT)
-      set_repeat_from_string(env_EIGEN_REPEAT);
-    char *env_EIGEN_SEED = getenv("EIGEN_SEED");
-    if(!g_has_set_seed && env_EIGEN_SEED)
-      set_seed_from_string(env_EIGEN_SEED);
+char *env_EIGEN_REPEAT = getenv("EIGEN_REPEAT");
+if(!g_has_set_repeat && env_EIGEN_REPEAT)
+set_repeat_from_string(env_EIGEN_REPEAT);
+char *env_EIGEN_SEED = getenv("EIGEN_SEED");
+if(!g_has_set_seed && env_EIGEN_SEED)
+set_seed_from_string(env_EIGEN_SEED);
 
-    if(!g_has_set_seed) g_seed = (unsigned int) time(NULL);
-    if(!g_has_set_repeat) g_repeat = DEFAULT_REPEAT;
+if(!g_has_set_seed) g_seed = (unsigned int) time(NULL);
+if(!g_has_set_repeat) g_repeat = DEFAULT_REPEAT;
 
-    std::cout << "Initializing random number generator with seed " << g_seed << std::endl;
-    std::stringstream ss;
-    ss << "Seed: " << g_seed;
-    g_test_stack.push_back(ss.str());
-    srand(g_seed);
-    std::cout << "Repeating each test " << g_repeat << " times" << std::endl;
+std::cout << "Initializing random number generator with seed " << g_seed << std::endl;
+std::stringstream ss;
+ss << "Seed: " << g_seed;
+g_test_stack.push_back(ss.str());
+srand(g_seed);
+std::cout << "Repeating each test " << g_repeat << " times" << std::endl;
 
-    Eigen::g_test_stack.push_back(std::string(EI_PP_MAKE_STRING(EIGEN_TEST_FUNC)));
+Eigen::g_test_stack.push_back(std::string(EI_PP_MAKE_STRING(EIGEN_TEST_FUNC)));
 
-    EIGEN_CAT(test_,EIGEN_TEST_FUNC)();
-    return 0;
+EIGEN_CAT(test_,EIGEN_TEST_FUNC)();
+return 0;
 }
 
 // These warning are disabled here such that they are still ON when parsing Eigen's header files.
 #if defined __INTEL_COMPILER
-  // remark #383: value copied to temporary, reference to temporary used
-  //  -> this warning is raised even for legal usage as: g_test_stack.push_back("foo"); where g_test_stack is a std::vector<std::string>
-  // remark #1418: external function definition with no prior declaration
-  //  -> this warning is raised for all our test functions. Declaring them static would fix the issue.
-  // warning #279: controlling expression is constant
-  // remark #1572: floating-point equality and inequality comparisons are unreliable
-  #pragma warning disable 279 383 1418 1572
+// remark #383: value copied to temporary, reference to temporary used
+//  -> this warning is raised even for legal usage as: g_test_stack.push_back("foo"); where g_test_stack is a std::vector<std::string>
+// remark #1418: external function definition with no prior declaration
+//  -> this warning is raised for all our test functions. Declaring them static would fix the issue.
+// warning #279: controlling expression is constant
+// remark #1572: floating-point equality and inequality comparisons are unreliable
+#pragma warning disable 279 383 1418 1572
 #endif

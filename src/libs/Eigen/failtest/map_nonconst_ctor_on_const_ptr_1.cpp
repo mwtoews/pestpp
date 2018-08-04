@@ -9,7 +9,7 @@
 using namespace Eigen;
 
 void foo(CV_QUALIFIER float *ptr, DenseIndex size){
-    Map<ArrayXf> m(ptr, size);
+Map<ArrayXf> m(ptr, size);
 }
 
 int main() {}

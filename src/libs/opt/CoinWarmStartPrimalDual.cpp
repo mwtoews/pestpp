@@ -16,58 +16,58 @@
 //#############################################################################
 
 /*
-  Generate a `diff' that can convert the warm start passed as a parameter to
-  the warm start specified by this.
+Generate a `diff' that can convert the warm start passed as a parameter to
+the warm start specified by this.
 
-  The capabilities are limited: the basis passed as a parameter can be no
-  larger than the basis pointed to by this.
+The capabilities are limited: the basis passed as a parameter can be no
+larger than the basis pointed to by this.
 */
 
 CoinWarmStartDiff*
 CoinWarmStartPrimalDual::generateDiff (const CoinWarmStart *const oldCWS) const
-{ 
+{
 /*
-  Make sure the parameter is CoinWarmStartPrimalDual or derived class.
+Make sure the parameter is CoinWarmStartPrimalDual or derived class.
 */
-  const CoinWarmStartPrimalDual *old =
-      dynamic_cast<const CoinWarmStartPrimalDual *>(oldCWS) ;
-  if (!old)
-  { throw CoinError("Old warm start not derived from CoinWarmStartPrimalDual.",
-		    "generateDiff","CoinWarmStartPrimalDual") ; }
+const CoinWarmStartPrimalDual *old =
+dynamic_cast<const CoinWarmStartPrimalDual *>(oldCWS) ;
+if (!old)
+{ throw CoinError("Old warm start not derived from CoinWarmStartPrimalDual.",
+"generateDiff","CoinWarmStartPrimalDual") ; }
 
-  CoinWarmStartPrimalDualDiff* diff = new CoinWarmStartPrimalDualDiff;
-  CoinWarmStartDiff* vecdiff;
-  vecdiff = primal_.generateDiff(&old->primal_);
-  diff->primalDiff_.swap(*dynamic_cast<CoinWarmStartVectorDiff<double>*>(vecdiff));
-  delete vecdiff;
-  vecdiff = dual_.generateDiff(&old->dual_);
-  diff->dualDiff_.swap(*dynamic_cast<CoinWarmStartVectorDiff<double>*>(vecdiff));
-  delete vecdiff;
+CoinWarmStartPrimalDualDiff* diff = new CoinWarmStartPrimalDualDiff;
+CoinWarmStartDiff* vecdiff;
+vecdiff = primal_.generateDiff(&old->primal_);
+diff->primalDiff_.swap(*dynamic_cast<CoinWarmStartVectorDiff<double>*>(vecdiff));
+delete vecdiff;
+vecdiff = dual_.generateDiff(&old->dual_);
+diff->dualDiff_.swap(*dynamic_cast<CoinWarmStartVectorDiff<double>*>(vecdiff));
+delete vecdiff;
 
-  return diff;
+return diff;
 }
 
 //#############################################################################
 
 /*
-  Apply diff to this warm start.
+Apply diff to this warm start.
 
-  Update this warm start by applying diff. It's assumed that the
-  allocated capacity of the warm start is sufficiently large.
+Update this warm start by applying diff. It's assumed that the
+allocated capacity of the warm start is sufficiently large.
 */
 
 void
 CoinWarmStartPrimalDual::applyDiff (const CoinWarmStartDiff *const cwsdDiff)
 {
 /*
-  Make sure we have a CoinWarmStartPrimalDualDiff
+Make sure we have a CoinWarmStartPrimalDualDiff
 */
-  const CoinWarmStartPrimalDualDiff *diff =
-    dynamic_cast<const CoinWarmStartPrimalDualDiff *>(cwsdDiff) ;
-  if (!diff)
-  { throw CoinError("Diff not derived from CoinWarmStartPrimalDualDiff.",
-		    "applyDiff","CoinWarmStartPrimalDual") ; }
+const CoinWarmStartPrimalDualDiff *diff =
+dynamic_cast<const CoinWarmStartPrimalDualDiff *>(cwsdDiff) ;
+if (!diff)
+{ throw CoinError("Diff not derived from CoinWarmStartPrimalDualDiff.",
+"applyDiff","CoinWarmStartPrimalDual") ; }
 
-  primal_.applyDiff(&diff->primalDiff_);
-  dual_.applyDiff(&diff->dualDiff_);
+primal_.applyDiff(&diff->primalDiff_);
+dual_.applyDiff(&diff->dualDiff_);
 }

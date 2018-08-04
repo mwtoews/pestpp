@@ -12,33 +12,33 @@ double sobol_u_missing_data(const std::vector<double> &x_vec, const std::vector<
 
 class RunningStats
 {
-	//Based on paper "Computing the standard deviation efficiently" by Mark Hoemmen, Berkeley
+//Based on paper "Computing the standard deviation efficiently" by Mark Hoemmen, Berkeley
 public:
-	RunningStats() : n(0), mk(0.0), mk_abs(0.0), qk(0.0) {}
-	virtual void reset();
-	virtual void add(double sample);
-	virtual void add(const std::vector<double> &sample);
-	virtual double comp_var() const;
-	virtual double comp_sigma()const;
-	virtual double comp_mean()const;
-	virtual double comp_abs_mean()const;
-	virtual long comp_nsamples()const;
-	virtual ~RunningStats() {};
+RunningStats() : n(0), mk(0.0), mk_abs(0.0), qk(0.0) {}
+virtual void reset();
+virtual void add(double sample);
+virtual void add(const std::vector<double> &sample);
+virtual double comp_var() const;
+virtual double comp_sigma()const;
+virtual double comp_mean()const;
+virtual double comp_abs_mean()const;
+virtual long comp_nsamples()const;
+virtual ~RunningStats() {};
 private:
-	long n;
-	double mk;
-	double mk_abs;
-	double qk;
+long n;
+double mk;
+double mk_abs;
+double qk;
 };
 
 class RunningStatsMissingData : public RunningStats
 {
-	//Based on paper "Computing the standard deviation efficiently" by Mark Hoemmen, Berkeley
+//Based on paper "Computing the standard deviation efficiently" by Mark Hoemmen, Berkeley
 public:
-	RunningStatsMissingData(double _missing_value) : RunningStats(), missing_value(_missing_value){}
-	virtual void add(double sample);
-	virtual void add(const std::vector<double> &sample);
-	~RunningStatsMissingData() {};
+RunningStatsMissingData(double _missing_value) : RunningStats(), missing_value(_missing_value){}
+virtual void add(double sample);
+virtual void add(const std::vector<double> &sample);
+~RunningStatsMissingData() {};
 private:
-	double missing_value;
+double missing_value;
 };

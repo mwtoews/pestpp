@@ -15,90 +15,90 @@
 
 template<typename LineType> void parametrizedline(const LineType& _line)
 {
-  /* this test covers the following files:
-     ParametrizedLine.h
-  */
-  using std::abs;
-  typedef typename LineType::Index Index;
-  const Index dim = _line.dim();
-  typedef typename LineType::Scalar Scalar;
-  typedef typename NumTraits<Scalar>::Real RealScalar;
-  typedef Matrix<Scalar, LineType::AmbientDimAtCompileTime, 1> VectorType;
-  typedef Hyperplane<Scalar,LineType::AmbientDimAtCompileTime> HyperplaneType;
+/* this test covers the following files:
+ParametrizedLine.h
+*/
+using std::abs;
+typedef typename LineType::Index Index;
+const Index dim = _line.dim();
+typedef typename LineType::Scalar Scalar;
+typedef typename NumTraits<Scalar>::Real RealScalar;
+typedef Matrix<Scalar, LineType::AmbientDimAtCompileTime, 1> VectorType;
+typedef Hyperplane<Scalar,LineType::AmbientDimAtCompileTime> HyperplaneType;
 
-  VectorType p0 = VectorType::Random(dim);
-  VectorType p1 = VectorType::Random(dim);
+VectorType p0 = VectorType::Random(dim);
+VectorType p1 = VectorType::Random(dim);
 
-  VectorType d0 = VectorType::Random(dim).normalized();
+VectorType d0 = VectorType::Random(dim).normalized();
 
-  LineType l0(p0, d0);
+LineType l0(p0, d0);
 
-  Scalar s0 = internal::random<Scalar>();
-  Scalar s1 = abs(internal::random<Scalar>());
+Scalar s0 = internal::random<Scalar>();
+Scalar s1 = abs(internal::random<Scalar>());
 
-  VERIFY_IS_MUCH_SMALLER_THAN( l0.distance(p0), RealScalar(1) );
-  VERIFY_IS_MUCH_SMALLER_THAN( l0.distance(p0+s0*d0), RealScalar(1) );
-  VERIFY_IS_APPROX( (l0.projection(p1)-p1).norm(), l0.distance(p1) );
-  VERIFY_IS_MUCH_SMALLER_THAN( l0.distance(l0.projection(p1)), RealScalar(1) );
-  VERIFY_IS_APPROX( Scalar(l0.distance((p0+s0*d0) + d0.unitOrthogonal() * s1)), s1 );
+VERIFY_IS_MUCH_SMALLER_THAN( l0.distance(p0), RealScalar(1) );
+VERIFY_IS_MUCH_SMALLER_THAN( l0.distance(p0+s0*d0), RealScalar(1) );
+VERIFY_IS_APPROX( (l0.projection(p1)-p1).norm(), l0.distance(p1) );
+VERIFY_IS_MUCH_SMALLER_THAN( l0.distance(l0.projection(p1)), RealScalar(1) );
+VERIFY_IS_APPROX( Scalar(l0.distance((p0+s0*d0) + d0.unitOrthogonal() * s1)), s1 );
 
-  // casting
-  const int Dim = LineType::AmbientDimAtCompileTime;
-  typedef typename GetDifferentType<Scalar>::type OtherScalar;
-  ParametrizedLine<OtherScalar,Dim> hp1f = l0.template cast<OtherScalar>();
-  VERIFY_IS_APPROX(hp1f.template cast<Scalar>(),l0);
-  ParametrizedLine<Scalar,Dim> hp1d = l0.template cast<Scalar>();
-  VERIFY_IS_APPROX(hp1d.template cast<Scalar>(),l0);
+// casting
+const int Dim = LineType::AmbientDimAtCompileTime;
+typedef typename GetDifferentType<Scalar>::type OtherScalar;
+ParametrizedLine<OtherScalar,Dim> hp1f = l0.template cast<OtherScalar>();
+VERIFY_IS_APPROX(hp1f.template cast<Scalar>(),l0);
+ParametrizedLine<Scalar,Dim> hp1d = l0.template cast<Scalar>();
+VERIFY_IS_APPROX(hp1d.template cast<Scalar>(),l0);
 
-  // intersections
-  VectorType p2 = VectorType::Random(dim);
-  VectorType n2 = VectorType::Random(dim).normalized();
-  HyperplaneType hp(p2,n2);
-  Scalar t = l0.intersectionParameter(hp);
-  VectorType pi = l0.pointAt(t);
-  VERIFY_IS_MUCH_SMALLER_THAN(hp.signedDistance(pi), RealScalar(1));
-  VERIFY_IS_MUCH_SMALLER_THAN(l0.distance(pi), RealScalar(1));
-  VERIFY_IS_APPROX(l0.intersectionPoint(hp), pi);
+// intersections
+VectorType p2 = VectorType::Random(dim);
+VectorType n2 = VectorType::Random(dim).normalized();
+HyperplaneType hp(p2,n2);
+Scalar t = l0.intersectionParameter(hp);
+VectorType pi = l0.pointAt(t);
+VERIFY_IS_MUCH_SMALLER_THAN(hp.signedDistance(pi), RealScalar(1));
+VERIFY_IS_MUCH_SMALLER_THAN(l0.distance(pi), RealScalar(1));
+VERIFY_IS_APPROX(l0.intersectionPoint(hp), pi);
 }
 
 template<typename Scalar> void parametrizedline_alignment()
 {
-  typedef ParametrizedLine<Scalar,4,AutoAlign> Line4a;
-  typedef ParametrizedLine<Scalar,4,DontAlign> Line4u;
+typedef ParametrizedLine<Scalar,4,AutoAlign> Line4a;
+typedef ParametrizedLine<Scalar,4,DontAlign> Line4u;
 
-  EIGEN_ALIGN16 Scalar array1[8];
-  EIGEN_ALIGN16 Scalar array2[8];
-  EIGEN_ALIGN16 Scalar array3[8+1];
-  Scalar* array3u = array3+1;
+EIGEN_ALIGN16 Scalar array1[8];
+EIGEN_ALIGN16 Scalar array2[8];
+EIGEN_ALIGN16 Scalar array3[8+1];
+Scalar* array3u = array3+1;
 
-  Line4a *p1 = ::new(reinterpret_cast<void*>(array1)) Line4a;
-  Line4u *p2 = ::new(reinterpret_cast<void*>(array2)) Line4u;
-  Line4u *p3 = ::new(reinterpret_cast<void*>(array3u)) Line4u;
-  
-  p1->origin().setRandom();
-  p1->direction().setRandom();
-  *p2 = *p1;
-  *p3 = *p1;
+Line4a *p1 = ::new(reinterpret_cast<void*>(array1)) Line4a;
+Line4u *p2 = ::new(reinterpret_cast<void*>(array2)) Line4u;
+Line4u *p3 = ::new(reinterpret_cast<void*>(array3u)) Line4u;
 
-  VERIFY_IS_APPROX(p1->origin(), p2->origin());
-  VERIFY_IS_APPROX(p1->origin(), p3->origin());
-  VERIFY_IS_APPROX(p1->direction(), p2->direction());
-  VERIFY_IS_APPROX(p1->direction(), p3->direction());
-  
-  #if defined(EIGEN_VECTORIZE) && EIGEN_ALIGN_STATICALLY
-  if(internal::packet_traits<Scalar>::Vectorizable)
-    VERIFY_RAISES_ASSERT((::new(reinterpret_cast<void*>(array3u)) Line4a));
-  #endif
+p1->origin().setRandom();
+p1->direction().setRandom();
+*p2 = *p1;
+*p3 = *p1;
+
+VERIFY_IS_APPROX(p1->origin(), p2->origin());
+VERIFY_IS_APPROX(p1->origin(), p3->origin());
+VERIFY_IS_APPROX(p1->direction(), p2->direction());
+VERIFY_IS_APPROX(p1->direction(), p3->direction());
+
+#if defined(EIGEN_VECTORIZE) && EIGEN_ALIGN_STATICALLY
+if(internal::packet_traits<Scalar>::Vectorizable)
+VERIFY_RAISES_ASSERT((::new(reinterpret_cast<void*>(array3u)) Line4a));
+#endif
 }
 
 void test_geo_parametrizedline()
 {
-  for(int i = 0; i < g_repeat; i++) {
-    CALL_SUBTEST_1( parametrizedline(ParametrizedLine<float,2>()) );
-    CALL_SUBTEST_2( parametrizedline(ParametrizedLine<float,3>()) );
-    CALL_SUBTEST_2( parametrizedline_alignment<float>() );
-    CALL_SUBTEST_3( parametrizedline(ParametrizedLine<double,4>()) );
-    CALL_SUBTEST_3( parametrizedline_alignment<double>() );
-    CALL_SUBTEST_4( parametrizedline(ParametrizedLine<std::complex<double>,5>()) );
-  }
+for(int i = 0; i < g_repeat; i++) {
+CALL_SUBTEST_1( parametrizedline(ParametrizedLine<float,2>()) );
+CALL_SUBTEST_2( parametrizedline(ParametrizedLine<float,3>()) );
+CALL_SUBTEST_2( parametrizedline_alignment<float>() );
+CALL_SUBTEST_3( parametrizedline(ParametrizedLine<double,4>()) );
+CALL_SUBTEST_3( parametrizedline_alignment<double>() );
+CALL_SUBTEST_4( parametrizedline(ParametrizedLine<std::complex<double>,5>()) );
+}
 }

@@ -39,36 +39,36 @@
 #define INVALID 0xff
 
 #define OP(X)   (   ((X)=='N' || (X)=='n') ? NOTR   \
-                  : ((X)=='T' || (X)=='t') ? TR     \
-                  : ((X)=='C' || (X)=='c') ? ADJ    \
-                  : INVALID)
+: ((X)=='T' || (X)=='t') ? TR     \
+: ((X)=='C' || (X)=='c') ? ADJ    \
+: INVALID)
 
 #define SIDE(X) (   ((X)=='L' || (X)=='l') ? LEFT   \
-                  : ((X)=='R' || (X)=='r') ? RIGHT  \
-                  : INVALID)
+: ((X)=='R' || (X)=='r') ? RIGHT  \
+: INVALID)
 
 #define UPLO(X) (   ((X)=='U' || (X)=='u') ? UP     \
-                  : ((X)=='L' || (X)=='l') ? LO     \
-                  : INVALID)
+: ((X)=='L' || (X)=='l') ? LO     \
+: INVALID)
 
 #define DIAG(X) (   ((X)=='N' || (X)=='n') ? NUNIT  \
-                  : ((X)=='U' || (X)=='u') ? UNIT   \
-                  : INVALID)
+: ((X)=='U' || (X)=='u') ? UNIT   \
+: INVALID)
 
 
 inline bool check_op(const char* op)
 {
-  return OP(*op)!=0xff;
+return OP(*op)!=0xff;
 }
 
 inline bool check_side(const char* side)
 {
-  return SIDE(*side)!=0xff;
+return SIDE(*side)!=0xff;
 }
 
 inline bool check_uplo(const char* uplo)
 {
-  return UPLO(*uplo)!=0xff;
+return UPLO(*uplo)!=0xff;
 }
 
 
@@ -89,8 +89,8 @@ typedef std::complex<RealScalar> Complex;
 
 enum
 {
-  IsComplex = Eigen::NumTraits<SCALAR>::IsComplex,
-  Conj = IsComplex
+IsComplex = Eigen::NumTraits<SCALAR>::IsComplex,
+Conj = IsComplex
 };
 
 typedef Matrix<Scalar,Dynamic,Dynamic,ColMajor> PlainMatrixType;
@@ -102,42 +102,42 @@ template<typename T>
 Map<Matrix<T,Dynamic,Dynamic,ColMajor>, 0, OuterStride<> >
 matrix(T* data, int rows, int cols, int stride)
 {
-  return Map<Matrix<T,Dynamic,Dynamic,ColMajor>, 0, OuterStride<> >(data, rows, cols, OuterStride<>(stride));
+return Map<Matrix<T,Dynamic,Dynamic,ColMajor>, 0, OuterStride<> >(data, rows, cols, OuterStride<>(stride));
 }
 
 template<typename T>
 Map<Matrix<T,Dynamic,1>, 0, InnerStride<Dynamic> > vector(T* data, int size, int incr)
 {
-  return Map<Matrix<T,Dynamic,1>, 0, InnerStride<Dynamic> >(data, size, InnerStride<Dynamic>(incr));
+return Map<Matrix<T,Dynamic,1>, 0, InnerStride<Dynamic> >(data, size, InnerStride<Dynamic>(incr));
 }
 
 template<typename T>
 Map<Matrix<T,Dynamic,1> > vector(T* data, int size)
 {
-  return Map<Matrix<T,Dynamic,1> >(data, size);
+return Map<Matrix<T,Dynamic,1> >(data, size);
 }
 
 template<typename T>
 T* get_compact_vector(T* x, int n, int incx)
 {
-  if(incx==1)
-    return x;
+if(incx==1)
+return x;
 
-  T* ret = new Scalar[n];
-  if(incx<0) vector(ret,n) = vector(x,n,-incx).reverse();
-  else       vector(ret,n) = vector(x,n, incx);
-  return ret;
+T* ret = new Scalar[n];
+if(incx<0) vector(ret,n) = vector(x,n,-incx).reverse();
+else       vector(ret,n) = vector(x,n, incx);
+return ret;
 }
 
 template<typename T>
 T* copy_back(T* x_cpy, T* x, int n, int incx)
 {
-  if(x_cpy==x)
-    return 0;
+if(x_cpy==x)
+return 0;
 
-  if(incx<0) vector(x,n,-incx).reverse() = vector(x_cpy,n);
-  else       vector(x,n, incx)           = vector(x_cpy,n);
-  return x_cpy;
+if(incx<0) vector(x,n,-incx).reverse() = vector(x_cpy,n);
+else       vector(x,n, incx)           = vector(x_cpy,n);
+return x_cpy;
 }
 
 #define EIGEN_BLAS_FUNC(X) EIGEN_CAT(SCALAR_SUFFIX,X##_)

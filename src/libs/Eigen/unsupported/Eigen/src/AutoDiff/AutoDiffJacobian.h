@@ -16,64 +16,64 @@ namespace Eigen
 template<typename Functor> class AutoDiffJacobian : public Functor
 {
 public:
-  AutoDiffJacobian() : Functor() {}
-  AutoDiffJacobian(const Functor& f) : Functor(f) {}
+AutoDiffJacobian() : Functor() {}
+AutoDiffJacobian(const Functor& f) : Functor(f) {}
 
-  // forward constructors
-  template<typename T0>
-  AutoDiffJacobian(const T0& a0) : Functor(a0) {}
-  template<typename T0, typename T1>
-  AutoDiffJacobian(const T0& a0, const T1& a1) : Functor(a0, a1) {}
-  template<typename T0, typename T1, typename T2>
-  AutoDiffJacobian(const T0& a0, const T1& a1, const T2& a2) : Functor(a0, a1, a2) {}
+// forward constructors
+template<typename T0>
+AutoDiffJacobian(const T0& a0) : Functor(a0) {}
+template<typename T0, typename T1>
+AutoDiffJacobian(const T0& a0, const T1& a1) : Functor(a0, a1) {}
+template<typename T0, typename T1, typename T2>
+AutoDiffJacobian(const T0& a0, const T1& a1, const T2& a2) : Functor(a0, a1, a2) {}
 
-  enum {
-    InputsAtCompileTime = Functor::InputsAtCompileTime,
-    ValuesAtCompileTime = Functor::ValuesAtCompileTime
-  };
+enum {
+InputsAtCompileTime = Functor::InputsAtCompileTime,
+ValuesAtCompileTime = Functor::ValuesAtCompileTime
+};
 
-  typedef typename Functor::InputType InputType;
-  typedef typename Functor::ValueType ValueType;
-  typedef typename Functor::JacobianType JacobianType;
-  typedef typename JacobianType::Scalar Scalar;
-  typedef typename JacobianType::Index Index;
+typedef typename Functor::InputType InputType;
+typedef typename Functor::ValueType ValueType;
+typedef typename Functor::JacobianType JacobianType;
+typedef typename JacobianType::Scalar Scalar;
+typedef typename JacobianType::Index Index;
 
-  typedef Matrix<Scalar,InputsAtCompileTime,1> DerivativeType;
-  typedef AutoDiffScalar<DerivativeType> ActiveScalar;
+typedef Matrix<Scalar,InputsAtCompileTime,1> DerivativeType;
+typedef AutoDiffScalar<DerivativeType> ActiveScalar;
 
 
-  typedef Matrix<ActiveScalar, InputsAtCompileTime, 1> ActiveInput;
-  typedef Matrix<ActiveScalar, ValuesAtCompileTime, 1> ActiveValue;
+typedef Matrix<ActiveScalar, InputsAtCompileTime, 1> ActiveInput;
+typedef Matrix<ActiveScalar, ValuesAtCompileTime, 1> ActiveValue;
 
-  void operator() (const InputType& x, ValueType* v, JacobianType* _jac=0) const
-  {
-    eigen_assert(v!=0);
-    if (!_jac)
-    {
-      Functor::operator()(x, v);
-      return;
-    }
+void operator() (const InputType& x, ValueType* v, JacobianType* _jac=0) const
+{
+eigen_assert(v!=0);
+if (!_jac)
+{
+Functor::operator()(x, v);
+return;
+}
 
-    JacobianType& jac = *_jac;
+JacobianType& jac = *_jac;
 
-    ActiveInput ax = x.template cast<ActiveScalar>();
-    ActiveValue av(jac.rows());
+ActiveInput ax = x.template cast<ActiveScalar>();
+ActiveValue av(jac.rows());
 
-    if(InputsAtCompileTime==Dynamic)
-      for (Index j=0; j<jac.rows(); j++)
-        av[j].derivatives().resize(this->inputs());
+if(InputsAtCompileTime==Dynamic)
+for (Index j=0; j<jac.rows(); j++)
+av[j].derivatives().resize(this->inputs());
 
-    for (Index i=0; i<jac.cols(); i++)
-      ax[i].derivatives() = DerivativeType::Unit(this->inputs(),i);
+for (Index i=0; i<jac.cols(); i++)
+ax[i].derivatives() = DerivativeType::Unit(this->inputs(),i);
 
-    Functor::operator()(ax, &av);
+Functor::operator()(ax, &av);
 
-    for (Index i=0; i<jac.rows(); i++)
-    {
-      (*v)[i] = av[i].value();
-      jac.row(i) = av[i].derivatives();
-    }
-  }
+for (Index i=0; i<jac.rows(); i++)
+{
+(*v)[i] = av[i].value();
+jac.row(i) = av[i].derivatives();
+}
+}
 protected:
 
 };

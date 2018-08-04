@@ -4,8 +4,8 @@ Matrix3d inverse;
 bool invertible;
 m.computeInverseWithCheck(inverse,invertible);
 if(invertible) {
-  cout << "It is invertible, and its inverse is:" << endl << inverse << endl;
+cout << "It is invertible, and its inverse is:" << endl << inverse << endl;
 }
 else {
-  cout << "It is not invertible." << endl;
+cout << "It is not invertible." << endl;
 }

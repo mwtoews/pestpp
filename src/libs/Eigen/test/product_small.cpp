@@ -13,38 +13,38 @@
 // regression test for bug 447
 void product1x1()
 {
-  Matrix<float,1,3> matAstatic;
-  Matrix<float,3,1> matBstatic;
-  matAstatic.setRandom();
-  matBstatic.setRandom();
-  VERIFY_IS_APPROX( (matAstatic * matBstatic).coeff(0,0), 
-                    matAstatic.cwiseProduct(matBstatic.transpose()).sum() );
+Matrix<float,1,3> matAstatic;
+Matrix<float,3,1> matBstatic;
+matAstatic.setRandom();
+matBstatic.setRandom();
+VERIFY_IS_APPROX( (matAstatic * matBstatic).coeff(0,0),
+matAstatic.cwiseProduct(matBstatic.transpose()).sum() );
 
-  MatrixXf matAdynamic(1,3);
-  MatrixXf matBdynamic(3,1);
-  matAdynamic.setRandom();
-  matBdynamic.setRandom();
-  VERIFY_IS_APPROX( (matAdynamic * matBdynamic).coeff(0,0), 
-                    matAdynamic.cwiseProduct(matBdynamic.transpose()).sum() );
+MatrixXf matAdynamic(1,3);
+MatrixXf matBdynamic(3,1);
+matAdynamic.setRandom();
+matBdynamic.setRandom();
+VERIFY_IS_APPROX( (matAdynamic * matBdynamic).coeff(0,0),
+matAdynamic.cwiseProduct(matBdynamic.transpose()).sum() );
 }
 
 
 void test_product_small()
 {
-  for(int i = 0; i < g_repeat; i++) {
-    CALL_SUBTEST_1( product(Matrix<float, 3, 2>()) );
-    CALL_SUBTEST_2( product(Matrix<int, 3, 5>()) );
-    CALL_SUBTEST_3( product(Matrix3d()) );
-    CALL_SUBTEST_4( product(Matrix4d()) );
-    CALL_SUBTEST_5( product(Matrix4f()) );
-    CALL_SUBTEST_6( product1x1() );
-  }
+for(int i = 0; i < g_repeat; i++) {
+CALL_SUBTEST_1( product(Matrix<float, 3, 2>()) );
+CALL_SUBTEST_2( product(Matrix<int, 3, 5>()) );
+CALL_SUBTEST_3( product(Matrix3d()) );
+CALL_SUBTEST_4( product(Matrix4d()) );
+CALL_SUBTEST_5( product(Matrix4f()) );
+CALL_SUBTEST_6( product1x1() );
+}
 
 #ifdef EIGEN_TEST_PART_6
-  {
-    // test compilation of (outer_product) * vector
-    Vector3f v = Vector3f::Random();
-    VERIFY_IS_APPROX( (v * v.transpose()) * v, (v * v.transpose()).eval() * v);
-  }
+{
+// test compilation of (outer_product) * vector
+Vector3f v = Vector3f::Random();
+VERIFY_IS_APPROX( (v * v.transpose()) * v, (v * v.transpose()).eval() * v);
+}
 #endif
 }

@@ -20,47 +20,47 @@
 // otherwise.
 bool CoinRational::nearestRational_(double val, double maxdelta, long maxdnom)
 {
-   double intpart;
-   double fracpart = fabs(modf(val, &intpart));
-   // Consider using remainder() instead?
-   
-   long a = 0, b = 1, c = 1, d = 1;
-   
-   while ( b <= maxdnom && d <= maxdnom) {
-      double mediant = (a + c)/(double(b + d));
-      
-      if ( fracpart == mediant ) {
-	 if ( b + d <= maxdnom ) {
-	    numerator_ = a + c;
-	    denominator_ = b + d;
-	 } else if ( d > b ) {
-	    numerator_ = c;
-	    denominator_ = d;
-	 } else {
-	    numerator_ = a;
-	    denominator_ = b;
-	 }
-      } else if ( val > mediant ) {
-	 a = a + c;
-	 b = b + d;
-      } else {
-	 c = a + c;
-	 d = b + d;
-      }
-      
-      if ( b > maxdnom ) {
-	 numerator_ = c;
-	 denominator_ = d;
-      } else {
-	 numerator_ = a;
-	 denominator_ = b;
-      }
-   }
-   
-   numerator_ += labs(intpart) * denominator_;
-   if ( val < 0 )
-      numerator_ *= -1;
-   
-   return fabs(val - numerator_/double(denominator_)) <= maxdelta;
+double intpart;
+double fracpart = fabs(modf(val, &intpart));
+// Consider using remainder() instead?
+
+long a = 0, b = 1, c = 1, d = 1;
+
+while ( b <= maxdnom && d <= maxdnom) {
+double mediant = (a + c)/(double(b + d));
+
+if ( fracpart == mediant ) {
+if ( b + d <= maxdnom ) {
+numerator_ = a + c;
+denominator_ = b + d;
+} else if ( d > b ) {
+numerator_ = c;
+denominator_ = d;
+} else {
+numerator_ = a;
+denominator_ = b;
+}
+} else if ( val > mediant ) {
+a = a + c;
+b = b + d;
+} else {
+c = a + c;
+d = b + d;
+}
+
+if ( b > maxdnom ) {
+numerator_ = c;
+denominator_ = d;
+} else {
+numerator_ = a;
+denominator_ = b;
+}
+}
+
+numerator_ += labs(intpart) * denominator_;
+if ( val < 0 )
+numerator_ *= -1;
+
+return fabs(val - numerator_/double(denominator_)) <= maxdelta;
 }
 

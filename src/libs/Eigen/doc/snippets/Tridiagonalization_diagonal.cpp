@@ -8,6 +8,6 @@ cout << "The tridiagonal matrix T is:" << endl << T << endl << endl;
 
 cout << "We can also extract the diagonals of T directly ..." << endl;
 VectorXd diag = triOfA.diagonal();
-cout << "The diagonal is:" << endl << diag << endl; 
+cout << "The diagonal is:" << endl << diag << endl;
 VectorXd subdiag = triOfA.subDiagonal();
 cout << "The subdiagonal is:" << endl << subdiag << endl;

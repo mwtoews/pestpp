@@ -1,20 +1,20 @@
 /* This is the header file for the Microsoft compiler, defining all
- * system and compiler dependent configuration macros */
+* system and compiler dependent configuration macros */
 
 /* Define to dummy `main' function (if any) required to link to the Fortran
-   libraries. */
+libraries. */
 /* #undef F77_DUMMY_MAIN */
 
 #ifndef COIN_USE_F2C
 /* Define to a macro mangling the given C identifier (in lower and upper
-   case), which must not contain underscores, for linking with Fortran. */
+case), which must not contain underscores, for linking with Fortran. */
 # define F77_FUNC(name,NAME) NAME
 
 /* As F77_FUNC, but for C identifiers containing underscores. */
 # define F77_FUNC_(name,NAME) NAME
 #else
 /* Define to a macro mangling the given C identifier (in lower and upper
-   case), which must not contain underscores, for linking with Fortran. */
+case), which must not contain underscores, for linking with Fortran. */
 # define F77_FUNC(name,NAME) name ## _
 
 /* As F77_FUNC, but for C identifiers containing underscores. */

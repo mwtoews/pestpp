@@ -10,8 +10,8 @@ cout << "Q:\n" << qz.matrixQ() << "\n" << "Z:\n" << qz.matrixZ() << "\n";
 
 // verify precision
 cout << "\nErrors:"
-  << "\n|A-QSZ|: " << (A-qz.matrixQ()*qz.matrixS()*qz.matrixZ()).norm()
-  << ", |B-QTZ|: " << (B-qz.matrixQ()*qz.matrixT()*qz.matrixZ()).norm()
-  << "\n|QQ* - I|: " << (qz.matrixQ()*qz.matrixQ().adjoint() - MatrixXf::Identity(4,4)).norm()
-  << ", |ZZ* - I|: " << (qz.matrixZ()*qz.matrixZ().adjoint() - MatrixXf::Identity(4,4)).norm()
-  << "\n";
+<< "\n|A-QSZ|: " << (A-qz.matrixQ()*qz.matrixS()*qz.matrixZ()).norm()
+<< ", |B-QTZ|: " << (B-qz.matrixQ()*qz.matrixT()*qz.matrixZ()).norm()
+<< "\n|QQ* - I|: " << (qz.matrixQ()*qz.matrixQ().adjoint() - MatrixXf::Identity(4,4)).norm()
+<< ", |ZZ* - I|: " << (qz.matrixZ()*qz.matrixZ().adjoint() - MatrixXf::Identity(4,4)).norm()
+<< "\n";

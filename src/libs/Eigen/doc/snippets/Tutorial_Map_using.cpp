@@ -2,7 +2,7 @@ typedef Matrix<float,1,Dynamic> MatrixType;
 typedef Map<MatrixType> MapType;
 typedef Map<const MatrixType> MapTypeConst;   // a read-only map
 const int n_dims = 5;
-  
+
 MatrixType m1(n_dims), m2(n_dims);
 m1.setRandom();
 m2.setRandom();
@@ -14,7 +14,7 @@ cout << "m1: " << m1 << endl;
 cout << "m2: " << m2 << endl;
 cout << "Squared euclidean distance: " << (m1-m2).squaredNorm() << endl;
 cout << "Squared euclidean distance, using map: " <<
-  (m1-m2map).squaredNorm() << endl;
+(m1-m2map).squaredNorm() << endl;
 m2map(3) = 7;   // this will change m2, since they share the same array
 cout << "Updated m2: " << m2 << endl;
 cout << "m2 coefficient 2, constant accessor: " << m2mapconst(2) << endl;

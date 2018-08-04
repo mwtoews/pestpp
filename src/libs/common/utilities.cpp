@@ -26,29 +26,29 @@ using namespace std;
 
 std::ostream& operator<< (std::ostream &os, const std::set<std::string> val)
 {
-	for (const auto &i : val)
-	{
-		os << i << endl;
-	}
-	return os;
+for (const auto &i : val)
+{
+os << i << endl;
+}
+return os;
 }
 
 std::ostream& operator<< (std::ostream &os, const std::vector<std::string> val)
 {
-	for (const auto &i : val)
-	{
-		os << i << endl;
-	}
-	return os;
+for (const auto &i : val)
+{
+os << i << endl;
+}
+return os;
 }
 
 void print(std::set<std::string> val, std::ostream &os, int indent)
 {
-	string space(indent, ' ');
-	for (const auto &i : val)
-	{
-		os << space << i << endl;
-	}
+string space(indent, ' ');
+for (const auto &i : val)
+{
+os << space << i << endl;
+}
 }
 
 
@@ -60,18 +60,18 @@ namespace pest_utils
 
 double get_duration_sec(std::chrono::system_clock::time_point start_time)
 {
-	chrono::system_clock::duration dt = chrono::system_clock::now() - start_time;
-	return (double)std::chrono::duration_cast<std::chrono::milliseconds>(dt).count() / 1000.0;
+chrono::system_clock::duration dt = chrono::system_clock::now() - start_time;
+return (double)std::chrono::duration_cast<std::chrono::milliseconds>(dt).count() / 1000.0;
 }
 
 template < class ContainerT >
 void tokenize(const std::string& str, ContainerT& tokens, const std::string& delimiters, const bool trimEmpty)
 {
 /*
- I usually choose to use std::vector<std::string> types as my second parameter
-  (ContainerT)... but list<> is way faster than vector<> for when direct access
-   is not needed, and you can even create your own string class and use something
-    like std::list<SubString> where SubString does not do any copies for incredible speed increases.
+I usually choose to use std::vector<std::string> types as my second parameter
+(ContainerT)... but list<> is way faster than vector<> for when direct access
+is not needed, and you can even create your own string class and use something
+like std::list<SubString> where SubString does not do any copies for incredible speed increases.
 It's more than double as fast as the fastest tokenize on this page and almost 5 times
 faster than some others. Also with the perfect parameter types you can eliminate all string and list copies.
 Additionally it does not do the (extremely inefficient) return of result, but rather
@@ -80,28 +80,28 @@ multiple calls if you so wished.Lastly it allows you to specify whether to trim 
 tokens from the results via a last optional parameter.All it needs is std::string...
 the rest are optional. It does not use streams or the boost library, but is flexible
 enough to be able to accept some of these foreign types naturally.
- */
-	std::string::size_type pos, lastPos = 0;
-	while(true)
-	{
-		pos = str.find_first_of(delimiters, lastPos);
-		if(pos == std::string::npos)
-		{
-			pos = str.length();
-			if(pos != lastPos || !trimEmpty)
-			{
-				tokens.push_back(typename ContainerT::value_type(str.data()+lastPos, typename ContainerT::value_type::size_type(pos-lastPos)));
-			}
-			break;
-		}
-		else
-		{
-			if(pos != lastPos || !trimEmpty)
-				tokens.push_back(typename ContainerT::value_type(str.data()+lastPos, typename ContainerT::value_type::size_type(pos-lastPos )));
-		}
+*/
+std::string::size_type pos, lastPos = 0;
+while(true)
+{
+pos = str.find_first_of(delimiters, lastPos);
+if(pos == std::string::npos)
+{
+pos = str.length();
+if(pos != lastPos || !trimEmpty)
+{
+tokens.push_back(typename ContainerT::value_type(str.data()+lastPos, typename ContainerT::value_type::size_type(pos-lastPos)));
+}
+break;
+}
+else
+{
+if(pos != lastPos || !trimEmpty)
+tokens.push_back(typename ContainerT::value_type(str.data()+lastPos, typename ContainerT::value_type::size_type(pos-lastPos )));
+}
 
-		lastPos = pos + 1;
-	}
+lastPos = pos + 1;
+}
 }
 
 // Instantiate tokenize for the explicitly specified vector<string> container
@@ -110,209 +110,209 @@ template void tokenize(const std::string& str, list<string>& tokens, const std::
 
 std::string& strip_ip(string &s, const string &op, const string &delimiters)
 {
-	size_t i;
+size_t i;
 
-	if (op == "both" || op == "front")
-	{
-		i = s.find_first_not_of(delimiters);
-		if (i>0) s.erase(0, i);
-	}
+if (op == "both" || op == "front")
+{
+i = s.find_first_not_of(delimiters);
+if (i>0) s.erase(0, i);
+}
 
-	if (op == "both" || op == "back")
-	{
-		i = s.find_last_not_of(delimiters);
-		if (i == string::npos) i=0;
-		else i+=1;
-		if (i<s.size()) s.erase(i);
-	}
-	return s;
+if (op == "both" || op == "back")
+{
+i = s.find_last_not_of(delimiters);
+if (i == string::npos) i=0;
+else i+=1;
+if (i<s.size()) s.erase(i);
+}
+return s;
 }
 
 string strip_cp(const string &s, const string &op, const string &delimiters)
 {
-	string s2(s);
-	strip_ip(s2, op, delimiters);
-	return s2;
+string s2(s);
+strip_ip(s2, op, delimiters);
+return s2;
 }
 
 void upper_ip(string &s)
 {
-	for(unsigned int i=0; i<s.length(); i++)
-	{
-      s[i] = toupper(s[i]);
-   }
+for(unsigned int i=0; i<s.length(); i++)
+{
+s[i] = toupper(s[i]);
+}
 }
 
 string upper_cp(const string &s)
 {
-	string s2(s);
-	upper_ip(s2);
-	return s2;
+string s2(s);
+upper_ip(s2);
+return s2;
 }
 
 string upper(char *txt)
 {
-	string tmp = txt;
-	upper_ip(tmp);
-	return tmp;
+string tmp = txt;
+upper_ip(tmp);
+return tmp;
 }
 void lower_ip(string &s)
 {
-	string new_s;
-	for(unsigned int i=0; i<s.length(); i++)
-	{
-		s[i] = tolower(s[i]);
-	}
+string new_s;
+for(unsigned int i=0; i<s.length(); i++)
+{
+s[i] = tolower(s[i]);
+}
 }
 
 string lower_cp(const string &s)
 {
-	string s2(s);
-	lower_ip(s2);
-	return s2;
+string s2(s);
+lower_ip(s2);
+return s2;
 }
 
 string get_base_filename(const string &s)
 {
-	string base_name;
-	size_t end;
-	end = s.find_last_of(".");
-	if (end == string::npos) {end = s.size();}
-	base_name = s.substr(0, end);
-	return base_name;
+string base_name;
+size_t end;
+end = s.find_last_of(".");
+if (end == string::npos) {end = s.size();}
+base_name = s.substr(0, end);
+return base_name;
 }
 
 void string_to_fortran_char(string in, char out[], int length, CASE_CONV conv_type)
 {
-	int str_len = in.size();
-	if (conv_type == TO_LOWER)
-	{
-		lower_ip(in);
-	}
-	else if (conv_type == TO_UPPER)
-	{
-		upper_ip(in);
-	}
-	str_len = min(str_len, length);
-	memset(out, ' ', length);
-	memcpy(out, in.data(), str_len);
+int str_len = in.size();
+if (conv_type == TO_LOWER)
+{
+lower_ip(in);
+}
+else if (conv_type == TO_UPPER)
+{
+upper_ip(in);
+}
+str_len = min(str_len, length);
+memset(out, ' ', length);
+memcpy(out, in.data(), str_len);
 }
 
 vector<char> string_as_fortran_char_ptr(string in, int _size)
 {
-	vector<char> out;
-	out.assign(_size, ' ');
-	string_to_fortran_char(in, out.data(), _size);
-	return out;
+vector<char> out;
+out.assign(_size, ' ');
+string_to_fortran_char(in, out.data(), _size);
+return out;
 }
 
 StringvecFortranCharArray::StringvecFortranCharArray(const vector<string> in, int length, CASE_CONV conv_type)
 {
-	fort_array = new char[in.size() * length];
-	for(int i=0, n_str=in.size(); i<n_str; ++i)
-	{
-		string_to_fortran_char(in[i], &fort_array[i*length], length, conv_type);
-	}
+fort_array = new char[in.size() * length];
+for(int i=0, n_str=in.size(); i<n_str; ++i)
+{
+string_to_fortran_char(in[i], &fort_array[i*length], length, conv_type);
+}
 }
 
-char *StringvecFortranCharArray::get_prt() 
+char *StringvecFortranCharArray::get_prt()
 {
-	return fort_array;
+return fort_array;
 }
 
 StringvecFortranCharArray::~StringvecFortranCharArray()
 {
-	delete [] fort_array;
+delete [] fort_array;
 }
 
 
 string get_filename_without_ext(const string &filename)
 {
-	// remove .pst or .PST from the end of the filename
-	string new_str = filename;
-	string filename_lower = lower_cp(filename);
-	//size_t found = filename_lower.find_last_of('.');
-	size_t found = filename_lower.find(".pst");
-	if (found != string::npos)	
-	{
-		new_str = new_str.substr(0, found);
-	}
-	return new_str;
+// remove .pst or .PST from the end of the filename
+string new_str = filename;
+string filename_lower = lower_cp(filename);
+//size_t found = filename_lower.find_last_of('.');
+size_t found = filename_lower.find(".pst");
+if (found != string::npos)
+{
+new_str = new_str.substr(0, found);
+}
+return new_str;
 }
 
 string get_filename_ext(const string &filename)
 {
-	// remove .pst or .PST from the end of the filename
-	string new_str = "";
-	size_t found = filename.find_last_of(".");
-	if (found != string::npos)
-	{
-		new_str = filename.substr(found + 1);
-	}
-	return new_str;
+// remove .pst or .PST from the end of the filename
+string new_str = "";
+size_t found = filename.find_last_of(".");
+if (found != string::npos)
+{
+new_str = filename.substr(found + 1);
+}
+return new_str;
 }
 
 string get_filename(const string &complete_path)
 {
-	vector<string> tokens;
-	tokenize(complete_path, tokens, OperSys::DIR_SEP);
-	string filename = tokens.back();
-	strip_ip(filename);
-	return filename;
+vector<string> tokens;
+tokenize(complete_path, tokens, OperSys::DIR_SEP);
+string filename = tokens.back();
+strip_ip(filename);
+return filename;
 }
 string get_pathname(const string &complete_path)
 {
-	vector<string> tokens;
-	stringstream ret_val;
-	int ntokens;
-	
-	tokenize(complete_path, tokens, OperSys::DIR_SEP);
-	ntokens = tokens.size();
+vector<string> tokens;
+stringstream ret_val;
+int ntokens;
 
-	if (complete_path.find(OperSys::DIR_SEP)==0){
-		ret_val << OperSys::DIR_SEP;
-	}
-	if (ntokens >1) {
-		int len = ntokens - 1;
-		for (int i=0; i<len; ++i) {
-			ret_val << tokens[i] << OperSys::DIR_SEP;
-		}
-	}
-	return ret_val.str();
+tokenize(complete_path, tokens, OperSys::DIR_SEP);
+ntokens = tokens.size();
+
+if (complete_path.find(OperSys::DIR_SEP)==0){
+ret_val << OperSys::DIR_SEP;
+}
+if (ntokens >1) {
+int len = ntokens - 1;
+for (int i=0; i<len; ++i) {
+ret_val << tokens[i] << OperSys::DIR_SEP;
+}
+}
+return ret_val.str();
 }
 
 String2CharPtr::String2CharPtr(const std::string &str)
 {
-	my_str.resize(str.size()+1);
-	std::copy(str.begin(), str.end(), my_str.begin());
-	my_str.back() = '\0';
+my_str.resize(str.size()+1);
+std::copy(str.begin(), str.end(), my_str.begin());
+my_str.back() = '\0';
 }
 
 char* String2CharPtr::get_char_ptr()
 {
-	return &(my_str[0]);
+return &(my_str[0]);
 }
 
 void copyfile(const string &from_file, const string &to_file)
 {
-	fstream source(from_file, ios::binary);
-    ofstream dest(to_file, ios::binary);
+fstream source(from_file, ios::binary);
+ofstream dest(to_file, ios::binary);
 
-    dest << source.rdbuf();
+dest << source.rdbuf();
 
-    source.close();
-    dest.close();
+source.close();
+dest.close();
 }
 
 template <class keyType, class dataType>
 vector<keyType> get_map_keys(const map<keyType,dataType> &my_map)
 {
-	vector<keyType> keys;
-	for(auto &i : my_map)
-	{
-		keys.push_back(i.first);
-	}
-	return keys;
+vector<keyType> keys;
+for(auto &i : my_map)
+{
+keys.push_back(i.first);
+}
+return keys;
 }
 
 template vector<string> get_map_keys(const map<string, map<string, double>> &my_map);
@@ -321,24 +321,24 @@ template vector<string> get_map_keys(const map<string, map<string, double>> &my_
 
 string fortran_str_2_string(char *fstr, int str_len)
 {
-    string new_str = string(fstr, str_len);
-    strip_ip(new_str);
-    return new_str;
+string new_str = string(fstr, str_len);
+strip_ip(new_str);
+return new_str;
 }
 
 
 vector<string> fortran_str_array_2_vec(char *fstr, int str_len, int array_len)
 {
-	vector<string> str_vec;
-	str_vec.reserve(array_len);
+vector<string> str_vec;
+str_vec.reserve(array_len);
 
-	for (int ia=0; ia < array_len; ++ia)
-	{
-	    string new_str(fstr+ia*str_len, str_len);
-            strip_ip(new_str);
-	    str_vec.push_back(new_str);
-	}
-	return str_vec;
+for (int ia=0; ia < array_len; ++ia)
+{
+string new_str(fstr+ia*str_len, str_len);
+strip_ip(new_str);
+str_vec.push_back(new_str);
+}
+return str_vec;
 }
 
 //template <class dataType>
@@ -371,185 +371,185 @@ vector<string> fortran_str_array_2_vec(char *fstr, int str_len, int array_len)
 
 map<string, double> read_twocol_ascii_to_map(string filename, int header_lines, int data_col)
 {
-	map<string, double> result;
-	ifstream fin(filename);
-	if (!fin.good())
-		throw runtime_error("could not open file " + filename + " for reading");
-	string line;
-	double value;
-	vector<string> tokens;
-	for (int i = 0; i < header_lines; i++)
-		getline(fin, line);
-	while (getline(fin, line))
-	{
-		strip_ip(line);
-		upper_ip(line);
-		if ((line.size() == 0) || (line.at(0) == '#'))
-			continue;
-		tokens.clear();
-		tokenize(line, tokens,"\t\r, ");
-		//only use the first two columns of file
-		if (tokens.size() < data_col + 1)
-			throw runtime_error("not enough entries on line :" + line);
-		convert_ip(tokens[data_col], value);
-		result[tokens[0]] = value;
-	}
-	fin.close();
-	return result;
+map<string, double> result;
+ifstream fin(filename);
+if (!fin.good())
+throw runtime_error("could not open file " + filename + " for reading");
+string line;
+double value;
+vector<string> tokens;
+for (int i = 0; i < header_lines; i++)
+getline(fin, line);
+while (getline(fin, line))
+{
+strip_ip(line);
+upper_ip(line);
+if ((line.size() == 0) || (line.at(0) == '#'))
+continue;
+tokens.clear();
+tokenize(line, tokens,"\t\r, ");
+//only use the first two columns of file
+if (tokens.size() < data_col + 1)
+throw runtime_error("not enough entries on line :" + line);
+convert_ip(tokens[data_col], value);
+result[tokens[0]] = value;
+}
+fin.close();
+return result;
 }
 
 void read_res(string &res_filename, Observations &obs)
 {
-	map<string, double> result;
-	ifstream fin(res_filename);
-	if (!fin.good())
-		throw runtime_error("could not open residuals file " + res_filename + " for reading");
-	vector<string> tokens;
-	string line,name;
-	double value;
-	bool found = false;
-	int mod_idx;
-	while (getline(fin, line))
-	{
-		strip_ip(line);
-		upper_ip(line);
-		if (line.find("MODELLED") != std::string::npos)
-		{
-			tokens.clear();
-			tokenize(line, tokens);
-			mod_idx = find(tokens.begin(), tokens.end(), "MODELLED") - tokens.begin();
-			found = true;
-			break;
-		}
-	}
+map<string, double> result;
+ifstream fin(res_filename);
+if (!fin.good())
+throw runtime_error("could not open residuals file " + res_filename + " for reading");
+vector<string> tokens;
+string line,name;
+double value;
+bool found = false;
+int mod_idx;
+while (getline(fin, line))
+{
+strip_ip(line);
+upper_ip(line);
+if (line.find("MODELLED") != std::string::npos)
+{
+tokens.clear();
+tokenize(line, tokens);
+mod_idx = find(tokens.begin(), tokens.end(), "MODELLED") - tokens.begin();
+found = true;
+break;
+}
+}
 
-	if (!found)
-		throw runtime_error("didn't find header line with 'modelled' in res file");
-	vector<string> extra;
-	vector<string> visited;
-	vector<string> obs_names = obs.get_keys();
-	while (getline(fin,line))
-	{
-		strip_ip(line);
-		tokens.clear();
-		tokenize(line, tokens);
-		name = upper_cp(tokens[0]);
-		convert_ip(tokens[mod_idx], value);
-		if (find(obs_names.begin(), obs_names.end(), name) == obs_names.end())
-			extra.push_back(name);
-		else
-		{
-			obs[name] = value;
-			visited.push_back(name);
-		}
+if (!found)
+throw runtime_error("didn't find header line with 'modelled' in res file");
+vector<string> extra;
+vector<string> visited;
+vector<string> obs_names = obs.get_keys();
+while (getline(fin,line))
+{
+strip_ip(line);
+tokens.clear();
+tokenize(line, tokens);
+name = upper_cp(tokens[0]);
+convert_ip(tokens[mod_idx], value);
+if (find(obs_names.begin(), obs_names.end(), name) == obs_names.end())
+extra.push_back(name);
+else
+{
+obs[name] = value;
+visited.push_back(name);
+}
 
-	}
-	stringstream missing;
-	missing << "the following obs were not found in the residual file: ";
-	int i = 0;
-	for (auto &oname : obs)
-	{
-		if (find(visited.begin(), visited.end(), oname.first) == visited.end())
-		{
-			missing << oname.first << ' ';
-			i++;
-			if (i % 5 == 0) missing << endl;
-		}
-	}
-	if (i > 0)
-		throw runtime_error(missing.str());
+}
+stringstream missing;
+missing << "the following obs were not found in the residual file: ";
+int i = 0;
+for (auto &oname : obs)
+{
+if (find(visited.begin(), visited.end(), oname.first) == visited.end())
+{
+missing << oname.first << ' ';
+i++;
+if (i % 5 == 0) missing << endl;
+}
+}
+if (i > 0)
+throw runtime_error(missing.str());
 
-	if (extra.size() > 0)
-	{
-		stringstream ss;
-		ss << "extra obs found res file...ignoring: ";
-		int i = 0;
-		for (auto &n : extra)
-		{
-			ss << n << ' ';
-			i++;
-			if (i % 5 == 0) ss << endl;
-		}
-		cout << ss.str();
-	}
+if (extra.size() > 0)
+{
+stringstream ss;
+ss << "extra obs found res file...ignoring: ";
+int i = 0;
+for (auto &n : extra)
+{
+ss << n << ' ';
+i++;
+if (i % 5 == 0) ss << endl;
+}
+cout << ss.str();
+}
 }
 
 
 void read_par(ifstream &fin, Parameters &pars)
 {
-	string line;
-	string name;
-	double value;
-	vector<string> tokens;
-	getline(fin, line);
-	while (getline(fin, line))
-	{
-		strip_ip(line);
-		tokens.clear();
-		tokenize(line, tokens);
-		name = tokens[0];
-		convert_ip(tokens[1], value);
-		pars[name] = value;
-	}
+string line;
+string name;
+double value;
+vector<string> tokens;
+getline(fin, line);
+while (getline(fin, line))
+{
+strip_ip(line);
+tokens.clear();
+tokenize(line, tokens);
+name = tokens[0];
+convert_ip(tokens[1], value);
+pars[name] = value;
+}
 }
 
 bool check_exist_in(std::string filename)
 {
-	std::ifstream f(filename.c_str());
-	if (f.good())
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
+std::ifstream f(filename.c_str());
+if (f.good())
+{
+return true;
+}
+else
+{
+return false;
+}
 }
 
 bool check_exist_out(std::string filename)
 {
-	std::ofstream f(filename.c_str());
-	if (f.good())
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
+std::ofstream f(filename.c_str());
+if (f.good())
+{
+return true;
+}
+else
+{
+return false;
+}
 }
 
 thread_flag::thread_flag(bool _flag)
 {
-	flag = _flag;
+flag = _flag;
 }
 
 bool thread_flag::set(bool f)
 {
-	std::lock_guard<std::mutex> lock(m);
-	flag = f;
-	return flag;
+std::lock_guard<std::mutex> lock(m);
+flag = f;
+return flag;
 }
 bool thread_flag::get()
 {
-	std::lock_guard<std::mutex> lock(m);
-	if (flag) return true;
-	else return false;
+std::lock_guard<std::mutex> lock(m);
+if (flag) return true;
+else return false;
 }
 
 void thread_exceptions::add(std::exception_ptr ex_ptr)
 {
-	std::lock_guard<std::mutex> lock(m);
-	shared_exception_vec.push_back(ex_ptr);
+std::lock_guard<std::mutex> lock(m);
+shared_exception_vec.push_back(ex_ptr);
 }
 
 void  thread_exceptions::rethrow()
 {
-	std::lock_guard<std::mutex> lock(m);
-	for (auto &iex : shared_exception_vec)
-	{
-		std::rethrow_exception(iex);
-	}
+std::lock_guard<std::mutex> lock(m);
+for (auto &iex : shared_exception_vec)
+{
+std::rethrow_exception(iex);
+}
 }
 
 

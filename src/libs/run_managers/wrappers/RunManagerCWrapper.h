@@ -10,41 +10,41 @@ extern "C"
 extern __declspec(dllexport)
 #endif
 RunManager* rmic_create_serial(char **comline, int comline_array_len,
-	char **tpl, int tpl_array_len,
-	char **inp, int inp_array_len,
-	char **ins, int ins_array_len,
-	char **out, int out_array_len,
-	char *storfile,
-	char *rundir,
-	int n_max_fail);
+char **tpl, int tpl_array_len,
+char **inp, int inp_array_len,
+char **ins, int ins_array_len,
+char **out, int out_array_len,
+char *storfile,
+char *rundir,
+int n_max_fail);
 
 #ifdef OS_WIN
 extern __declspec(dllexport)
 #endif
 RunManager* rmic_create_panther(char *storfile,
-	char *port,
-	char *info_filename,
-	int n_max_fail,
-	double overdue_reched_fac, double overdue_giveup_fac,
-	double overdue_giveup_minutes);
+char *port,
+char *info_filename,
+int n_max_fail,
+double overdue_reched_fac, double overdue_giveup_fac,
+double overdue_giveup_minutes);
 
 #ifdef OS_WIN
 extern __declspec(dllexport)
 #endif
 RunManager* rmic_create_genie(char **comline, int comline_array_len,
-	char **tpl, int tpl_array_len,
-	char **inp, int inp_array_len,
-	char **ins, int ins_array_len,
-	char **out, int out_array_len,
-	char *storfile,
-	char *genie_tag);
+char **tpl, int tpl_array_len,
+char **inp, int inp_array_len,
+char **ins, int ins_array_len,
+char **out, int out_array_len,
+char *storfile,
+char *genie_tag);
 
 #ifdef OS_WIN
 extern __declspec(dllexport)
 #endif
-int rmic_initialize(RunManager *run_manager_ptr, 
-	char **pname, int pname_array_len,
-	char **oname, int oname_array_len);
+int rmic_initialize(RunManager *run_manager_ptr,
+char **pname, int pname_array_len,
+char **oname, int oname_array_len);
 
 #ifdef OS_WIN
 extern __declspec(dllexport)
@@ -81,7 +81,7 @@ int rmic_get_num_failed_runs(RunManager *run_manager_ptr, int *nfail);
 
 //*************************************************************************************
 //******************************** IMPORTANT ******************************************
-//The calling program is resposible for freeing the memory associated with run_id_array 
+//The calling program is resposible for freeing the memory associated with run_id_array
 //after calling this function by involking delete[] run_id_array
 //*************************************************************************************
 #ifdef OS_WIN
@@ -109,6 +109,6 @@ extern __declspec(dllexport)
 #endif
 int rmic_delete(RunManager *run_manager_ptr);
 
-					 
+
 }
 #endif //RUNMANAGER_C_WRAP_H_

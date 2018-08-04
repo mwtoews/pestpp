@@ -9,7 +9,7 @@
 using namespace Eigen;
 
 void foo(CV_QUALIFIER Matrix3d &m){
-    Diagonal<Matrix3d> b(m.diagonal());
+Diagonal<Matrix3d> b(m.diagonal());
 }
 
 int main() {}

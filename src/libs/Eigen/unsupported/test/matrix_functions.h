@@ -17,31 +17,31 @@ struct generateTestMatrix;
 template <typename MatrixType>
 struct generateTestMatrix<MatrixType,0>
 {
-  static void run(MatrixType& result, typename MatrixType::Index size)
-  {
-    MatrixType mat = MatrixType::Random(size, size);
-    EigenSolver<MatrixType> es(mat);
-    typename EigenSolver<MatrixType>::EigenvalueType eivals = es.eigenvalues();
-    for (typename MatrixType::Index i = 0; i < size; ++i) {
-      if (eivals(i).imag() == 0 && eivals(i).real() < 0)
-	eivals(i) = -eivals(i);
-    }
-    result = (es.eigenvectors() * eivals.asDiagonal() * es.eigenvectors().inverse()).real();
-  }
+static void run(MatrixType& result, typename MatrixType::Index size)
+{
+MatrixType mat = MatrixType::Random(size, size);
+EigenSolver<MatrixType> es(mat);
+typename EigenSolver<MatrixType>::EigenvalueType eivals = es.eigenvalues();
+for (typename MatrixType::Index i = 0; i < size; ++i) {
+if (eivals(i).imag() == 0 && eivals(i).real() < 0)
+eivals(i) = -eivals(i);
+}
+result = (es.eigenvectors() * eivals.asDiagonal() * es.eigenvectors().inverse()).real();
+}
 };
 
 // for complex matrices, any matrix is fine
 template <typename MatrixType>
 struct generateTestMatrix<MatrixType,1>
 {
-  static void run(MatrixType& result, typename MatrixType::Index size)
-  {
-    result = MatrixType::Random(size, size);
-  }
+static void run(MatrixType& result, typename MatrixType::Index size)
+{
+result = MatrixType::Random(size, size);
+}
 };
 
 template <typename Derived, typename OtherDerived>
 double relerr(const MatrixBase<Derived>& A, const MatrixBase<OtherDerived>& B)
 {
-  return std::sqrt((A - B).cwiseAbs2().sum() / (std::min)(A.cwiseAbs2().sum(), B.cwiseAbs2().sum()));
+return std::sqrt((A - B).cwiseAbs2().sum() / (std::min)(A.cwiseAbs2().sum(), B.cwiseAbs2().sum()));
 }

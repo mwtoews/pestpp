@@ -15,48 +15,48 @@
 
 template<typename LineType> void parametrizedline(const LineType& _line)
 {
-  /* this test covers the following files:
-     ParametrizedLine.h
-  */
+/* this test covers the following files:
+ParametrizedLine.h
+*/
 
-  const int dim = _line.dim();
-  typedef typename LineType::Scalar Scalar;
-  typedef typename NumTraits<Scalar>::Real RealScalar;
-  typedef Matrix<Scalar, LineType::AmbientDimAtCompileTime, 1> VectorType;
-  typedef Matrix<Scalar, LineType::AmbientDimAtCompileTime,
-                         LineType::AmbientDimAtCompileTime> MatrixType;
+const int dim = _line.dim();
+typedef typename LineType::Scalar Scalar;
+typedef typename NumTraits<Scalar>::Real RealScalar;
+typedef Matrix<Scalar, LineType::AmbientDimAtCompileTime, 1> VectorType;
+typedef Matrix<Scalar, LineType::AmbientDimAtCompileTime,
+LineType::AmbientDimAtCompileTime> MatrixType;
 
-  VectorType p0 = VectorType::Random(dim);
-  VectorType p1 = VectorType::Random(dim);
+VectorType p0 = VectorType::Random(dim);
+VectorType p1 = VectorType::Random(dim);
 
-  VectorType d0 = VectorType::Random(dim).normalized();
+VectorType d0 = VectorType::Random(dim).normalized();
 
-  LineType l0(p0, d0);
+LineType l0(p0, d0);
 
-  Scalar s0 = ei_random<Scalar>();
-  Scalar s1 = ei_abs(ei_random<Scalar>());
+Scalar s0 = ei_random<Scalar>();
+Scalar s1 = ei_abs(ei_random<Scalar>());
 
-  VERIFY_IS_MUCH_SMALLER_THAN( l0.distance(p0), RealScalar(1) );
-  VERIFY_IS_MUCH_SMALLER_THAN( l0.distance(p0+s0*d0), RealScalar(1) );
-  VERIFY_IS_APPROX( (l0.projection(p1)-p1).norm(), l0.distance(p1) );
-  VERIFY_IS_MUCH_SMALLER_THAN( l0.distance(l0.projection(p1)), RealScalar(1) );
-  VERIFY_IS_APPROX( Scalar(l0.distance((p0+s0*d0) + d0.unitOrthogonal() * s1)), s1 );
+VERIFY_IS_MUCH_SMALLER_THAN( l0.distance(p0), RealScalar(1) );
+VERIFY_IS_MUCH_SMALLER_THAN( l0.distance(p0+s0*d0), RealScalar(1) );
+VERIFY_IS_APPROX( (l0.projection(p1)-p1).norm(), l0.distance(p1) );
+VERIFY_IS_MUCH_SMALLER_THAN( l0.distance(l0.projection(p1)), RealScalar(1) );
+VERIFY_IS_APPROX( Scalar(l0.distance((p0+s0*d0) + d0.unitOrthogonal() * s1)), s1 );
 
-  // casting
-  const int Dim = LineType::AmbientDimAtCompileTime;
-  typedef typename GetDifferentType<Scalar>::type OtherScalar;
-  ParametrizedLine<OtherScalar,Dim> hp1f = l0.template cast<OtherScalar>();
-  VERIFY_IS_APPROX(hp1f.template cast<Scalar>(),l0);
-  ParametrizedLine<Scalar,Dim> hp1d = l0.template cast<Scalar>();
-  VERIFY_IS_APPROX(hp1d.template cast<Scalar>(),l0);
+// casting
+const int Dim = LineType::AmbientDimAtCompileTime;
+typedef typename GetDifferentType<Scalar>::type OtherScalar;
+ParametrizedLine<OtherScalar,Dim> hp1f = l0.template cast<OtherScalar>();
+VERIFY_IS_APPROX(hp1f.template cast<Scalar>(),l0);
+ParametrizedLine<Scalar,Dim> hp1d = l0.template cast<Scalar>();
+VERIFY_IS_APPROX(hp1d.template cast<Scalar>(),l0);
 }
 
 void test_eigen2_parametrizedline()
 {
-  for(int i = 0; i < g_repeat; i++) {
-    CALL_SUBTEST_1( parametrizedline(ParametrizedLine<float,2>()) );
-    CALL_SUBTEST_2( parametrizedline(ParametrizedLine<float,3>()) );
-    CALL_SUBTEST_3( parametrizedline(ParametrizedLine<double,4>()) );
-    CALL_SUBTEST_4( parametrizedline(ParametrizedLine<std::complex<double>,5>()) );
-  }
+for(int i = 0; i < g_repeat; i++) {
+CALL_SUBTEST_1( parametrizedline(ParametrizedLine<float,2>()) );
+CALL_SUBTEST_2( parametrizedline(ParametrizedLine<float,3>()) );
+CALL_SUBTEST_3( parametrizedline(ParametrizedLine<double,4>()) );
+CALL_SUBTEST_4( parametrizedline(ParametrizedLine<std::complex<double>,5>()) );
+}
 }

@@ -10,7 +10,7 @@
 #ifndef EIGEN2_MATH_FUNCTIONS_H
 #define EIGEN2_MATH_FUNCTIONS_H
 
-namespace Eigen { 
+namespace Eigen {
 
 template<typename T> inline typename NumTraits<T>::Real ei_real(const T& x) { return numext::real(x); }
 template<typename T> inline typename NumTraits<T>::Real ei_imag(const T& x) { return numext::imag(x); }
@@ -33,23 +33,23 @@ template<typename T> inline T machine_epsilon () { return NumTraits<T>::epsilon(
 
 template<typename Scalar, typename OtherScalar>
 inline bool ei_isMuchSmallerThan(const Scalar& x, const OtherScalar& y,
-                                   typename NumTraits<Scalar>::Real precision = NumTraits<Scalar>::dummy_precision())
+typename NumTraits<Scalar>::Real precision = NumTraits<Scalar>::dummy_precision())
 {
-  return internal::isMuchSmallerThan(x, y, precision);
+return internal::isMuchSmallerThan(x, y, precision);
 }
 
 template<typename Scalar>
 inline bool ei_isApprox(const Scalar& x, const Scalar& y,
-                          typename NumTraits<Scalar>::Real precision = NumTraits<Scalar>::dummy_precision())
+typename NumTraits<Scalar>::Real precision = NumTraits<Scalar>::dummy_precision())
 {
-  return internal::isApprox(x, y, precision);
+return internal::isApprox(x, y, precision);
 }
 
 template<typename Scalar>
 inline bool ei_isApproxOrLessThan(const Scalar& x, const Scalar& y,
-                                    typename NumTraits<Scalar>::Real precision = NumTraits<Scalar>::dummy_precision())
+typename NumTraits<Scalar>::Real precision = NumTraits<Scalar>::dummy_precision())
 {
-  return internal::isApproxOrLessThan(x, y, precision);
+return internal::isApproxOrLessThan(x, y, precision);
 }
 
 } // end namespace Eigen

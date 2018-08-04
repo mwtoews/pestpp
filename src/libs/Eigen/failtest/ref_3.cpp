@@ -10,6 +10,6 @@ void call_ref(const Ref<const VectorXf> &a) { }
 
 int main()
 {
-  VectorXf a(10);
-  call_ref(a+a);
+VectorXf a(10);
+call_ref(a+a);
 }

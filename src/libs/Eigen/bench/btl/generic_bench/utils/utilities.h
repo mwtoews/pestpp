@@ -40,15 +40,15 @@
 # error INFOS_COMPILATION already defined
 # endif
 # define INFOS_COMPILATION	{\
-					cerr << flush;\
-					cout << __FILE__ ;\
-					cout << " [" << __LINE__ << "] : " ;\
-					cout << "COMPILED with " << COMPILER ;\
-					cout << ", " << __DATE__ ; \
-					cout << " at " << __TIME__ << endl ;\
-					cout << "\n\n" ;\
-					cout << flush ;\
-				}
+cerr << flush;\
+cout << __FILE__ ;\
+cout << " [" << __LINE__ << "] : " ;\
+cout << "COMPILED with " << COMPILER ;\
+cout << ", " << __DATE__ ; \
+cout << " at " << __TIME__ << endl ;\
+cout << "\n\n" ;\
+cout << flush ;\
+}
 
 # ifdef _DEBUG_
 

@@ -9,7 +9,7 @@
 using namespace Eigen;
 
 void foo(CV_QUALIFIER float *ptr){
-    Map<Matrix3f> m(ptr);
+Map<Matrix3f> m(ptr);
 }
 
 int main() {}

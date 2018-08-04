@@ -14,8 +14,8 @@ extern "C"
 
 EIGEN_WEAK_LINKING int xerbla_(const char * msg, int *info, int)
 {
-  std::cerr << "Eigen BLAS ERROR #" << *info << ": " << msg << "\n";
-  return 0;
+std::cerr << "Eigen BLAS ERROR #" << *info << ": " << msg << "\n";
+return 0;
 }
 
 #ifdef __cplusplus

@@ -24,16 +24,16 @@ template<typename T> struct traits<const T> : traits<T> {};
 
 template<typename Derived> struct has_direct_access
 {
-  enum { ret = (traits<Derived>::Flags & DirectAccessBit) ? 1 : 0 };
+enum { ret = (traits<Derived>::Flags & DirectAccessBit) ? 1 : 0 };
 };
 
 template<typename Derived> struct accessors_level
 {
-  enum { has_direct_access = (traits<Derived>::Flags & DirectAccessBit) ? 1 : 0,
-         has_write_access = (traits<Derived>::Flags & LvalueBit) ? 1 : 0,
-         value = has_direct_access ? (has_write_access ? DirectWriteAccessors : DirectAccessors)
-                                   : (has_write_access ? WriteAccessors       : ReadOnlyAccessors)
-  };
+enum { has_direct_access = (traits<Derived>::Flags & DirectAccessBit) ? 1 : 0,
+has_write_access = (traits<Derived>::Flags & LvalueBit) ? 1 : 0,
+value = has_direct_access ? (has_write_access ? DirectWriteAccessors : DirectAccessors)
+: (has_write_access ? WriteAccessors       : ReadOnlyAccessors)
+};
 };
 
 } // end namespace internal
@@ -46,27 +46,27 @@ template<typename Derived> class PlainObjectBase;
 
 
 template<typename Derived,
-         int Level = internal::accessors_level<Derived>::value >
+int Level = internal::accessors_level<Derived>::value >
 class DenseCoeffsBase;
 
 template<typename _Scalar, int _Rows, int _Cols,
-         int _Options = AutoAlign |
+int _Options = AutoAlign |
 #if defined(__GNUC__) && __GNUC__==3 && __GNUC_MINOR__==4
-    // workaround a bug in at least gcc 3.4.6
-    // the innermost ?: ternary operator is misparsed. We write it slightly
-    // differently and this makes gcc 3.4.6 happy, but it's ugly.
-    // The error would only show up with EIGEN_DEFAULT_TO_ROW_MAJOR is defined
-    // (when EIGEN_DEFAULT_MATRIX_STORAGE_ORDER_OPTION is RowMajor)
-                          ( (_Rows==1 && _Cols!=1) ? RowMajor
-                          : !(_Cols==1 && _Rows!=1) ?  EIGEN_DEFAULT_MATRIX_STORAGE_ORDER_OPTION
-                          : ColMajor ),
+// workaround a bug in at least gcc 3.4.6
+// the innermost ?: ternary operator is misparsed. We write it slightly
+// differently and this makes gcc 3.4.6 happy, but it's ugly.
+// The error would only show up with EIGEN_DEFAULT_TO_ROW_MAJOR is defined
+// (when EIGEN_DEFAULT_MATRIX_STORAGE_ORDER_OPTION is RowMajor)
+( (_Rows==1 && _Cols!=1) ? RowMajor
+: !(_Cols==1 && _Rows!=1) ?  EIGEN_DEFAULT_MATRIX_STORAGE_ORDER_OPTION
+: ColMajor ),
 #else
-                          ( (_Rows==1 && _Cols!=1) ? RowMajor
-                          : (_Cols==1 && _Rows!=1) ? ColMajor
-                          : EIGEN_DEFAULT_MATRIX_STORAGE_ORDER_OPTION ),
+( (_Rows==1 && _Cols!=1) ? RowMajor
+: (_Cols==1 && _Rows!=1) ? ColMajor
+: EIGEN_DEFAULT_MATRIX_STORAGE_ORDER_OPTION ),
 #endif
-         int _MaxRows = _Rows,
-         int _MaxCols = _Cols
+int _MaxRows = _Rows,
+int _MaxCols = _Cols
 > class Matrix;
 
 template<typename Derived> class MatrixBase;
@@ -105,7 +105,7 @@ template<typename _IndicesType> class PermutationWrapper;
 template<typename _IndicesType> class TranspositionsWrapper;
 
 template<typename Derived,
-         int Level = internal::accessors_level<Derived>::has_write_access ? WriteAccessors : ReadOnlyAccessors
+int Level = internal::accessors_level<Derived>::has_write_access ? WriteAccessors : ReadOnlyAccessors
 > class MapBase;
 template<int InnerStrideAtCompileTime, int OuterStrideAtCompileTime> class Stride;
 template<typename MatrixType, int MapOptions=Unaligned, typename StrideType = Stride<0,0> > class Map;
@@ -138,7 +138,7 @@ template<typename Lhs, typename Rhs> struct product_type;
 }
 
 template<typename Lhs, typename Rhs,
-         int ProductType = internal::product_type<Lhs,Rhs>::value>
+int ProductType = internal::product_type<Lhs,Rhs>::value>
 struct ProductReturnType;
 
 // this is a workaround for sun CC
@@ -191,22 +191,22 @@ struct IOFormat;
 
 // Array module
 template<typename _Scalar, int _Rows, int _Cols,
-         int _Options = AutoAlign |
+int _Options = AutoAlign |
 #if defined(__GNUC__) && __GNUC__==3 && __GNUC_MINOR__==4
-    // workaround a bug in at least gcc 3.4.6
-    // the innermost ?: ternary operator is misparsed. We write it slightly
-    // differently and this makes gcc 3.4.6 happy, but it's ugly.
-    // The error would only show up with EIGEN_DEFAULT_TO_ROW_MAJOR is defined
-    // (when EIGEN_DEFAULT_MATRIX_STORAGE_ORDER_OPTION is RowMajor)
-                          ( (_Rows==1 && _Cols!=1) ? RowMajor
-                          : !(_Cols==1 && _Rows!=1) ?  EIGEN_DEFAULT_MATRIX_STORAGE_ORDER_OPTION
-                          : ColMajor ),
+// workaround a bug in at least gcc 3.4.6
+// the innermost ?: ternary operator is misparsed. We write it slightly
+// differently and this makes gcc 3.4.6 happy, but it's ugly.
+// The error would only show up with EIGEN_DEFAULT_TO_ROW_MAJOR is defined
+// (when EIGEN_DEFAULT_MATRIX_STORAGE_ORDER_OPTION is RowMajor)
+( (_Rows==1 && _Cols!=1) ? RowMajor
+: !(_Cols==1 && _Rows!=1) ?  EIGEN_DEFAULT_MATRIX_STORAGE_ORDER_OPTION
+: ColMajor ),
 #else
-                          ( (_Rows==1 && _Cols!=1) ? RowMajor
-                          : (_Cols==1 && _Rows!=1) ? ColMajor
-                          : EIGEN_DEFAULT_MATRIX_STORAGE_ORDER_OPTION ),
+( (_Rows==1 && _Cols!=1) ? RowMajor
+: (_Cols==1 && _Rows!=1) ? ColMajor
+: EIGEN_DEFAULT_MATRIX_STORAGE_ORDER_OPTION ),
 #endif
-         int _MaxRows = _Rows, int _MaxCols = _Cols> class Array;
+int _MaxRows = _Rows, int _MaxCols = _Cols> class Array;
 template<typename ConditionMatrixType, typename ThenMatrixType, typename ElseMatrixType> class Select;
 template<typename MatrixType, typename BinaryOp, int Direction> class PartialReduxExpr;
 template<typename ExpressionType, int Direction> class VectorwiseOp;
@@ -280,8 +280,8 @@ namespace internal {
 template <typename Scalar>
 struct stem_function
 {
-  typedef std::complex<typename NumTraits<Scalar>::Real> ComplexScalar;
-  typedef ComplexScalar type(ComplexScalar, int);
+typedef std::complex<typename NumTraits<Scalar>::Real> ComplexScalar;
+typedef ComplexScalar type(ComplexScalar, int);
 };
 }
 

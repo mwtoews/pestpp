@@ -5,6 +5,6 @@
 // (EPL).
 
 /*
-  Code crammed into CoinWarmStartVector.hpp at r923, 080110.
-  -- lh, 110103 --
+Code crammed into CoinWarmStartVector.hpp at r923, 080110.
+-- lh, 110103 --
 */

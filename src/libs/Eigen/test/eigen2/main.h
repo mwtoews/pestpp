@@ -22,8 +22,8 @@
 
 namespace Eigen
 {
-  static std::vector<std::string> g_test_stack;
-  static int g_repeat;
+static std::vector<std::string> g_test_stack;
+static int g_repeat;
 }
 
 #define EI_PP_MAKE_STRING2(S) #S
@@ -34,90 +34,90 @@ namespace Eigen
 
 #ifndef EIGEN_NO_ASSERTION_CHECKING
 
-  namespace Eigen
-  {
-    static const bool should_raise_an_assert = false;
+namespace Eigen
+{
+static const bool should_raise_an_assert = false;
 
-    // Used to avoid to raise two exceptions at a time in which
-    // case the exception is not properly caught.
-    // This may happen when a second exceptions is raise in a destructor.
-    static bool no_more_assert = false;
+// Used to avoid to raise two exceptions at a time in which
+// case the exception is not properly caught.
+// This may happen when a second exceptions is raise in a destructor.
+static bool no_more_assert = false;
 
-    struct eigen_assert_exception
-    {
-      eigen_assert_exception(void) {}
-      ~eigen_assert_exception() { Eigen::no_more_assert = false; }
-    };
-  }
+struct eigen_assert_exception
+{
+eigen_assert_exception(void) {}
+~eigen_assert_exception() { Eigen::no_more_assert = false; }
+};
+}
 
-  // If EIGEN_DEBUG_ASSERTS is defined and if no assertion is raised while
-  // one should have been, then the list of excecuted assertions is printed out.
-  //
-  // EIGEN_DEBUG_ASSERTS is not enabled by default as it
-  // significantly increases the compilation time
-  // and might even introduce side effects that would hide
-  // some memory errors.
-  #ifdef EIGEN_DEBUG_ASSERTS
+// If EIGEN_DEBUG_ASSERTS is defined and if no assertion is raised while
+// one should have been, then the list of excecuted assertions is printed out.
+//
+// EIGEN_DEBUG_ASSERTS is not enabled by default as it
+// significantly increases the compilation time
+// and might even introduce side effects that would hide
+// some memory errors.
+#ifdef EIGEN_DEBUG_ASSERTS
 
-    namespace Eigen
-    {
-      static bool ei_push_assert = false;
-      static std::vector<std::string> eigen_assert_list;
-    }
+namespace Eigen
+{
+static bool ei_push_assert = false;
+static std::vector<std::string> eigen_assert_list;
+}
 
-    #define eigen_assert(a)                       \
-      if( (!(a)) && (!no_more_assert) )     \
-      {                                     \
-        Eigen::no_more_assert = true;       \
-        throw Eigen::eigen_assert_exception(); \
-      }                                     \
-      else if (Eigen::ei_push_assert)       \
-      {                                     \
-        eigen_assert_list.push_back(std::string(EI_PP_MAKE_STRING(__FILE__)" ("EI_PP_MAKE_STRING(__LINE__)") : "#a) ); \
-      }
+#define eigen_assert(a)                       \
+if( (!(a)) && (!no_more_assert) )     \
+{                                     \
+Eigen::no_more_assert = true;       \
+throw Eigen::eigen_assert_exception(); \
+}                                     \
+else if (Eigen::ei_push_assert)       \
+{                                     \
+eigen_assert_list.push_back(std::string(EI_PP_MAKE_STRING(__FILE__)" ("EI_PP_MAKE_STRING(__LINE__)") : "#a) ); \
+}
 
-    #define VERIFY_RAISES_ASSERT(a)                                               \
-      {                                                                           \
-        Eigen::no_more_assert = false;                                            \
-        try {                                                                     \
-          Eigen::eigen_assert_list.clear();                                          \
-          Eigen::ei_push_assert = true;                                           \
-          a;                                                                      \
-          Eigen::ei_push_assert = false;                                          \
-          std::cerr << "One of the following asserts should have been raised:\n"; \
-          for (uint ai=0 ; ai<eigen_assert_list.size() ; ++ai)                       \
-            std::cerr << "  " << eigen_assert_list[ai] << "\n";                      \
-          VERIFY(Eigen::should_raise_an_assert && # a);                           \
-        } catch (Eigen::eigen_assert_exception e) {                                  \
-          Eigen::ei_push_assert = false; VERIFY(true);                            \
-        }                                                                         \
-      }
+#define VERIFY_RAISES_ASSERT(a)                                               \
+{                                                                           \
+Eigen::no_more_assert = false;                                            \
+try {                                                                     \
+Eigen::eigen_assert_list.clear();                                          \
+Eigen::ei_push_assert = true;                                           \
+a;                                                                      \
+Eigen::ei_push_assert = false;                                          \
+std::cerr << "One of the following asserts should have been raised:\n"; \
+for (uint ai=0 ; ai<eigen_assert_list.size() ; ++ai)                       \
+std::cerr << "  " << eigen_assert_list[ai] << "\n";                      \
+VERIFY(Eigen::should_raise_an_assert && # a);                           \
+} catch (Eigen::eigen_assert_exception e) {                                  \
+Eigen::ei_push_assert = false; VERIFY(true);                            \
+}                                                                         \
+}
 
-  #else // EIGEN_DEBUG_ASSERTS
+#else // EIGEN_DEBUG_ASSERTS
 
-    #undef eigen_assert
+#undef eigen_assert
 
-    // see bug 89. The copy_bool here is working around a bug in gcc <= 4.3
-    #define eigen_assert(a) \
-      if( (!Eigen::internal::copy_bool(a)) && (!no_more_assert) )	\
-      {                                     \
-        Eigen::no_more_assert = true;       \
-        throw Eigen::eigen_assert_exception(); \
-      }
+// see bug 89. The copy_bool here is working around a bug in gcc <= 4.3
+#define eigen_assert(a) \
+if( (!Eigen::internal::copy_bool(a)) && (!no_more_assert) )	\
+{                                     \
+Eigen::no_more_assert = true;       \
+throw Eigen::eigen_assert_exception(); \
+}
 
-    #define VERIFY_RAISES_ASSERT(a) {                             \
-        Eigen::no_more_assert = false;                            \
-        try { a; VERIFY(Eigen::should_raise_an_assert && # a); }  \
-        catch (Eigen::eigen_assert_exception e) { VERIFY(true); }    \
-      }
+#define VERIFY_RAISES_ASSERT(a) {                             \
+Eigen::no_more_assert = false;                            \
+try { a; VERIFY(Eigen::should_raise_an_assert && # a); }  \
+catch (Eigen::eigen_assert_exception e) { VERIFY(true); }    \
+}
 
-  #endif // EIGEN_DEBUG_ASSERTS
+#endif // EIGEN_DEBUG_ASSERTS
 
-  #define EIGEN_USE_CUSTOM_ASSERT
+#define EIGEN_USE_CUSTOM_ASSERT
 
 #else // EIGEN_NO_ASSERTION_CHECKING
 
-  #define VERIFY_RAISES_ASSERT(a) {}
+#define VERIFY_RAISES_ASSERT(a) {}
 
 #endif // EIGEN_NO_ASSERTION_CHECKING
 
@@ -128,10 +128,10 @@ namespace Eigen
 
 
 #define VERIFY(a) do { if (!(a)) { \
-    std::cerr << "Test " << g_test_stack.back() << " failed in "EI_PP_MAKE_STRING(__FILE__) << " (" << EI_PP_MAKE_STRING(__LINE__) << ")" \
-      << std::endl << "    " << EI_PP_MAKE_STRING(a) << std::endl << std::endl; \
-    abort(); \
-  } } while (0)
+std::cerr << "Test " << g_test_stack.back() << " failed in "EI_PP_MAKE_STRING(__FILE__) << " (" << EI_PP_MAKE_STRING(__LINE__) << ")" \
+<< std::endl << "    " << EI_PP_MAKE_STRING(a) << std::endl << std::endl; \
+abort(); \
+} } while (0)
 
 #define VERIFY_IS_APPROX(a, b) VERIFY(test_ei_isApprox(a, b))
 #define VERIFY_IS_NOT_APPROX(a, b) VERIFY(!test_ei_isApprox(a, b))
@@ -141,10 +141,10 @@ namespace Eigen
 #define VERIFY_IS_NOT_APPROX_OR_LESS_THAN(a, b) VERIFY(!test_ei_isApproxOrLessThan(a, b))
 
 #define CALL_SUBTEST(FUNC) do { \
-    g_test_stack.push_back(EI_PP_MAKE_STRING(FUNC)); \
-    FUNC; \
-    g_test_stack.pop_back(); \
-  } while (0)
+g_test_stack.push_back(EI_PP_MAKE_STRING(FUNC)); \
+FUNC; \
+g_test_stack.pop_back(); \
+} while (0)
 
 namespace Eigen {
 
@@ -197,21 +197,21 @@ inline bool test_ei_isApproxOrLessThan(const long double& a, const long double& 
 template<typename Type1, typename Type2>
 inline bool test_ei_isApprox(const Type1& a, const Type2& b)
 {
-  return a.isApprox(b, test_precision<typename Type1::Scalar>());
+return a.isApprox(b, test_precision<typename Type1::Scalar>());
 }
 
 template<typename Derived1, typename Derived2>
 inline bool test_ei_isMuchSmallerThan(const MatrixBase<Derived1>& m1,
-                                   const MatrixBase<Derived2>& m2)
+const MatrixBase<Derived2>& m2)
 {
-  return m1.isMuchSmallerThan(m2, test_precision<typename ei_traits<Derived1>::Scalar>());
+return m1.isMuchSmallerThan(m2, test_precision<typename ei_traits<Derived1>::Scalar>());
 }
 
 template<typename Derived>
 inline bool test_ei_isMuchSmallerThan(const MatrixBase<Derived>& m,
-                                   const typename NumTraits<typename ei_traits<Derived>::Scalar>::Real& s)
+const typename NumTraits<typename ei_traits<Derived>::Scalar>::Real& s)
 {
-  return m.isMuchSmallerThan(s, test_precision<typename ei_traits<Derived>::Scalar>());
+return m.isMuchSmallerThan(s, test_precision<typename ei_traits<Derived>::Scalar>());
 }
 
 } // end namespace Eigen
@@ -328,71 +328,71 @@ using namespace Eigen;
 
 int main(int argc, char *argv[])
 {
-    bool has_set_repeat = false;
-    bool has_set_seed = false;
-    bool need_help = false;
-    unsigned int seed = 0;
-    int repeat = DEFAULT_REPEAT;
+bool has_set_repeat = false;
+bool has_set_seed = false;
+bool need_help = false;
+unsigned int seed = 0;
+int repeat = DEFAULT_REPEAT;
 
-    for(int i = 1; i < argc; i++)
-    {
-      if(argv[i][0] == 'r')
-      {
-        if(has_set_repeat)
-        {
-          std::cout << "Argument " << argv[i] << " conflicting with a former argument" << std::endl;
-          return 1;
-        }
-        repeat = std::atoi(argv[i]+1);
-        has_set_repeat = true;
-        if(repeat <= 0)
-        {
-          std::cout << "Invalid \'repeat\' value " << argv[i]+1 << std::endl;
-          return 1;
-        }
-      }
-      else if(argv[i][0] == 's')
-      {
-        if(has_set_seed)
-        {
-          std::cout << "Argument " << argv[i] << " conflicting with a former argument" << std::endl;
-          return 1;
-        }
-        seed = int(std::strtoul(argv[i]+1, 0, 10));
-        has_set_seed = true;
-        bool ok = seed!=0;
-        if(!ok)
-        {
-          std::cout << "Invalid \'seed\' value " << argv[i]+1 << std::endl;
-          return 1;
-        }
-      }
-      else
-      {
-        need_help = true;
-      }
-    }
+for(int i = 1; i < argc; i++)
+{
+if(argv[i][0] == 'r')
+{
+if(has_set_repeat)
+{
+std::cout << "Argument " << argv[i] << " conflicting with a former argument" << std::endl;
+return 1;
+}
+repeat = std::atoi(argv[i]+1);
+has_set_repeat = true;
+if(repeat <= 0)
+{
+std::cout << "Invalid \'repeat\' value " << argv[i]+1 << std::endl;
+return 1;
+}
+}
+else if(argv[i][0] == 's')
+{
+if(has_set_seed)
+{
+std::cout << "Argument " << argv[i] << " conflicting with a former argument" << std::endl;
+return 1;
+}
+seed = int(std::strtoul(argv[i]+1, 0, 10));
+has_set_seed = true;
+bool ok = seed!=0;
+if(!ok)
+{
+std::cout << "Invalid \'seed\' value " << argv[i]+1 << std::endl;
+return 1;
+}
+}
+else
+{
+need_help = true;
+}
+}
 
-    if(need_help)
-    {
-      std::cout << "This test application takes the following optional arguments:" << std::endl;
-      std::cout << "  rN     Repeat each test N times (default: " << DEFAULT_REPEAT << ")" << std::endl;
-      std::cout << "  sN     Use N as seed for random numbers (default: based on current time)" << std::endl;
-      return 1;
-    }
+if(need_help)
+{
+std::cout << "This test application takes the following optional arguments:" << std::endl;
+std::cout << "  rN     Repeat each test N times (default: " << DEFAULT_REPEAT << ")" << std::endl;
+std::cout << "  sN     Use N as seed for random numbers (default: based on current time)" << std::endl;
+return 1;
+}
 
-    if(!has_set_seed) seed = (unsigned int) std::time(NULL);
-    if(!has_set_repeat) repeat = DEFAULT_REPEAT;
+if(!has_set_seed) seed = (unsigned int) std::time(NULL);
+if(!has_set_repeat) repeat = DEFAULT_REPEAT;
 
-    std::cout << "Initializing random number generator with seed " << seed << std::endl;
-	std::srand(seed);
-    std::cout << "Repeating each test " << repeat << " times" << std::endl;
+std::cout << "Initializing random number generator with seed " << seed << std::endl;
+std::srand(seed);
+std::cout << "Repeating each test " << repeat << " times" << std::endl;
 
-    Eigen::g_repeat = repeat;
-    Eigen::g_test_stack.push_back(EI_PP_MAKE_STRING(EIGEN_TEST_FUNC));
+Eigen::g_repeat = repeat;
+Eigen::g_test_stack.push_back(EI_PP_MAKE_STRING(EIGEN_TEST_FUNC));
 
-    EI_PP_CAT(test_,EIGEN_TEST_FUNC)();
-    return 0;
+EI_PP_CAT(test_,EIGEN_TEST_FUNC)();
+return 0;
 }
 
 

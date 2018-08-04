@@ -16,11 +16,11 @@ namespace Eigen {
 namespace internal {
 
 /** \internal
-  * \file Meta.h
-  * This file contains generic metaprogramming classes which are not specifically related to Eigen.
-  * \note In case you wonder, yes we're aware that Boost already provides all these features,
-  * we however don't want to add a dependency to Boost.
-  */
+* \file Meta.h
+* This file contains generic metaprogramming classes which are not specifically related to Eigen.
+* \note In case you wonder, yes we're aware that Boost already provides all these features,
+* we however don't want to add a dependency to Boost.
+*/
 
 struct true_type {  enum { value = 1 }; };
 struct false_type { enum { value = 0 }; };
@@ -81,8 +81,8 @@ template<typename T> struct add_const_on_value_type<T* const>  { typedef T const
 template<typename T> struct add_const_on_value_type<T const* const>  { typedef T const* const type; };
 
 /** \internal Allows to enable/disable an overload
-  * according to a compile time condition.
-  */
+* according to a compile time condition.
+*/
 template<bool Condition, typename T> struct enable_if;
 
 template<typename T> struct enable_if<true,T>
@@ -91,25 +91,25 @@ template<typename T> struct enable_if<true,T>
 
 
 /** \internal
-  * A base class do disable default copy ctor and copy assignement operator.
-  */
+* A base class do disable default copy ctor and copy assignement operator.
+*/
 class noncopyable
 {
-  noncopyable(const noncopyable&);
-  const noncopyable& operator=(const noncopyable&);
+noncopyable(const noncopyable&);
+const noncopyable& operator=(const noncopyable&);
 protected:
-  noncopyable() {}
-  ~noncopyable() {}
+noncopyable() {}
+~noncopyable() {}
 };
 
 
 /** \internal
-  * Convenient struct to get the result type of a unary or binary functor.
-  *
-  * It supports both the current STL mechanism (using the result_type member) as well as
-  * upcoming next STL generation (using a templated result member).
-  * If none of these members is provided, then the type of the first argument is returned. FIXME, that behavior is a pretty bad hack.
-  */
+* Convenient struct to get the result type of a unary or binary functor.
+*
+* It supports both the current STL mechanism (using the result_type member) as well as
+* upcoming next STL generation (using a templated result member).
+* If none of these members is provided, then the type of the first argument is returned. FIXME, that behavior is a pretty bad hack.
+*/
 template<typename T> struct result_of {};
 
 struct has_none {int a[1];};
@@ -127,15 +127,15 @@ struct unary_result_of_select<Func, ArgType, sizeof(has_tr1_result)> {typedef ty
 
 template<typename Func, typename ArgType>
 struct result_of<Func(ArgType)> {
-    template<typename T>
-    static has_std_result_type testFunctor(T const *, typename T::result_type const * = 0);
-    template<typename T>
-    static has_tr1_result      testFunctor(T const *, typename T::template result<T(ArgType)>::type const * = 0);
-    static has_none            testFunctor(...);
+template<typename T>
+static has_std_result_type testFunctor(T const *, typename T::result_type const * = 0);
+template<typename T>
+static has_tr1_result      testFunctor(T const *, typename T::template result<T(ArgType)>::type const * = 0);
+static has_none            testFunctor(...);
 
-    // note that the following indirection is needed for gcc-3.3
-    enum {FunctorType = sizeof(testFunctor(static_cast<Func*>(0)))};
-    typedef typename unary_result_of_select<Func, ArgType, FunctorType>::type type;
+// note that the following indirection is needed for gcc-3.3
+enum {FunctorType = sizeof(testFunctor(static_cast<Func*>(0)))};
+typedef typename unary_result_of_select<Func, ArgType, FunctorType>::type type;
 };
 
 template<typename Func, typename ArgType0, typename ArgType1, int SizeOf=sizeof(has_none)>
@@ -151,35 +151,35 @@ struct binary_result_of_select<Func, ArgType0, ArgType1, sizeof(has_tr1_result)>
 
 template<typename Func, typename ArgType0, typename ArgType1>
 struct result_of<Func(ArgType0,ArgType1)> {
-    template<typename T>
-    static has_std_result_type testFunctor(T const *, typename T::result_type const * = 0);
-    template<typename T>
-    static has_tr1_result      testFunctor(T const *, typename T::template result<T(ArgType0,ArgType1)>::type const * = 0);
-    static has_none            testFunctor(...);
+template<typename T>
+static has_std_result_type testFunctor(T const *, typename T::result_type const * = 0);
+template<typename T>
+static has_tr1_result      testFunctor(T const *, typename T::template result<T(ArgType0,ArgType1)>::type const * = 0);
+static has_none            testFunctor(...);
 
-    // note that the following indirection is needed for gcc-3.3
-    enum {FunctorType = sizeof(testFunctor(static_cast<Func*>(0)))};
-    typedef typename binary_result_of_select<Func, ArgType0, ArgType1, FunctorType>::type type;
+// note that the following indirection is needed for gcc-3.3
+enum {FunctorType = sizeof(testFunctor(static_cast<Func*>(0)))};
+typedef typename binary_result_of_select<Func, ArgType0, ArgType1, FunctorType>::type type;
 };
 
 /** \internal In short, it computes int(sqrt(\a Y)) with \a Y an integer.
-  * Usage example: \code meta_sqrt<1023>::ret \endcode
-  */
+* Usage example: \code meta_sqrt<1023>::ret \endcode
+*/
 template<int Y,
-         int InfX = 0,
-         int SupX = ((Y==1) ? 1 : Y/2),
-         bool Done = ((SupX-InfX)<=1 ? true : ((SupX*SupX <= Y) && ((SupX+1)*(SupX+1) > Y))) >
-                                // use ?: instead of || just to shut up a stupid gcc 4.3 warning
+int InfX = 0,
+int SupX = ((Y==1) ? 1 : Y/2),
+bool Done = ((SupX-InfX)<=1 ? true : ((SupX*SupX <= Y) && ((SupX+1)*(SupX+1) > Y))) >
+// use ?: instead of || just to shut up a stupid gcc 4.3 warning
 class meta_sqrt
 {
-    enum {
-      MidX = (InfX+SupX)/2,
-      TakeInf = MidX*MidX > Y ? 1 : 0,
-      NewInf = int(TakeInf) ? InfX : int(MidX),
-      NewSup = int(TakeInf) ? int(MidX) : SupX
-    };
-  public:
-    enum { ret = meta_sqrt<Y,NewInf,NewSup>::ret };
+enum {
+MidX = (InfX+SupX)/2,
+TakeInf = MidX*MidX > Y ? 1 : 0,
+NewInf = int(TakeInf) ? InfX : int(MidX),
+NewSup = int(TakeInf) ? int(MidX) : SupX
+};
+public:
+enum { ret = meta_sqrt<Y,NewInf,NewSup>::ret };
 };
 
 template<int Y, int InfX, int SupX>
@@ -188,34 +188,34 @@ class meta_sqrt<Y, InfX, SupX, true> { public:  enum { ret = (SupX*SupX <= Y) ? 
 /** \internal determines whether the product of two numeric types is allowed and what the return type is */
 template<typename T, typename U> struct scalar_product_traits
 {
-  enum { Defined = 0 };
+enum { Defined = 0 };
 };
 
 template<typename T> struct scalar_product_traits<T,T>
 {
-  enum {
-    // Cost = NumTraits<T>::MulCost,
-    Defined = 1
-  };
-  typedef T ReturnType;
+enum {
+// Cost = NumTraits<T>::MulCost,
+Defined = 1
+};
+typedef T ReturnType;
 };
 
 template<typename T> struct scalar_product_traits<T,std::complex<T> >
 {
-  enum {
-    // Cost = 2*NumTraits<T>::MulCost,
-    Defined = 1
-  };
-  typedef std::complex<T> ReturnType;
+enum {
+// Cost = 2*NumTraits<T>::MulCost,
+Defined = 1
+};
+typedef std::complex<T> ReturnType;
 };
 
 template<typename T> struct scalar_product_traits<std::complex<T>, T>
 {
-  enum {
-    // Cost = 2*NumTraits<T>::MulCost,
-    Defined = 1
-  };
-  typedef std::complex<T> ReturnType;
+enum {
+// Cost = 2*NumTraits<T>::MulCost,
+Defined = 1
+};
+typedef std::complex<T> ReturnType;
 };
 
 // FIXME quick workaround around current limitation of result_of

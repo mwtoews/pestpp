@@ -29,16 +29,16 @@ BTL_MAIN;
 
 int main()
 {
-  bench<Action_trisolve<eigen3_interface<REAL_TYPE> > >(MIN_MM,MAX_MM,NB_POINT);
-  bench<Action_trisolve_matrix<eigen3_interface<REAL_TYPE> > >(MIN_MM,MAX_MM,NB_POINT);
-  bench<Action_cholesky<eigen3_interface<REAL_TYPE> > >(MIN_MM,MAX_MM,NB_POINT);
-  bench<Action_lu_decomp<eigen3_interface<REAL_TYPE> > >(MIN_MM,MAX_MM,NB_POINT);
-  bench<Action_partial_lu<eigen3_interface<REAL_TYPE> > >(MIN_MM,MAX_MM,NB_POINT);
+bench<Action_trisolve<eigen3_interface<REAL_TYPE> > >(MIN_MM,MAX_MM,NB_POINT);
+bench<Action_trisolve_matrix<eigen3_interface<REAL_TYPE> > >(MIN_MM,MAX_MM,NB_POINT);
+bench<Action_cholesky<eigen3_interface<REAL_TYPE> > >(MIN_MM,MAX_MM,NB_POINT);
+bench<Action_lu_decomp<eigen3_interface<REAL_TYPE> > >(MIN_MM,MAX_MM,NB_POINT);
+bench<Action_partial_lu<eigen3_interface<REAL_TYPE> > >(MIN_MM,MAX_MM,NB_POINT);
 
-  bench<Action_hessenberg<eigen3_interface<REAL_TYPE> > >(MIN_MM,MAX_MM,NB_POINT);
-  bench<Action_tridiagonalization<eigen3_interface<REAL_TYPE> > >(MIN_MM,MAX_MM,NB_POINT);
+bench<Action_hessenberg<eigen3_interface<REAL_TYPE> > >(MIN_MM,MAX_MM,NB_POINT);
+bench<Action_tridiagonalization<eigen3_interface<REAL_TYPE> > >(MIN_MM,MAX_MM,NB_POINT);
 
-  return 0;
+return 0;
 }
 
 

@@ -8,11 +8,11 @@
 class PooledVariance
 {
 public:
-	PooledVariance();
-	void process_pva_file(std::ifstream &fin);
-	~PooledVariance();
+PooledVariance();
+void process_pva_file(std::ifstream &fin);
+~PooledVariance();
 private:
-	std::map< std::string, std::string> obs_to_pool_grp;
+std::map< std::string, std::string> obs_to_pool_grp;
 };
 
 #endif /* POOLED_VAR_H_ */

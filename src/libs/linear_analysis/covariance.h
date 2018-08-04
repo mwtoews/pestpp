@@ -15,129 +15,129 @@ using namespace std;
 class Mat
 {
 public:
-	enum class MatType{ DIAGONAL, SPARSE, DENSE };
-	Mat(){ autoalign = true; };
-	Mat(string filename);
+enum class MatType{ DIAGONAL, SPARSE, DENSE };
+Mat(){ autoalign = true; };
+Mat(string filename);
 
-	Mat(vector<string> _row_names, vector<string> _col_names, 
-		Eigen::SparseMatrix<double> _matrix);
-	
-	Mat(vector<string> _row_names, vector<string> _col_names,
-		Eigen::SparseMatrix<double>* _matrix);
+Mat(vector<string> _row_names, vector<string> _col_names,
+Eigen::SparseMatrix<double> _matrix);
 
-	Mat(vector<string> _row_names, vector<string> _col_names,
-		Eigen::SparseMatrix<double> _matrix, MatType _matttype);
+Mat(vector<string> _row_names, vector<string> _col_names,
+Eigen::SparseMatrix<double>* _matrix);
 
-	vector<string> get_row_names(){ return row_names; }
-	vector<string> get_col_names(){ return col_names; }
-	const vector<string>* rn_ptr();
-	const vector<string>* cn_ptr();
-	Eigen::SparseMatrix<double> get_matrix(){ return matrix; }
-	
-	const Eigen::SparseMatrix<double>* e_ptr();
-	const Eigen::SparseMatrix<double>* U_ptr();
-	const Eigen::SparseMatrix<double>* V_ptr();
-	const Eigen::VectorXd* s_ptr();
+Mat(vector<string> _row_names, vector<string> _col_names,
+Eigen::SparseMatrix<double> _matrix, MatType _matttype);
 
-	Mat get_U();
-	Mat get_V();
-	Mat get_s();
+vector<string> get_row_names(){ return row_names; }
+vector<string> get_col_names(){ return col_names; }
+const vector<string>* rn_ptr();
+const vector<string>* cn_ptr();
+Eigen::SparseMatrix<double> get_matrix(){ return matrix; }
 
-	MatType get_mattype(){ return mattype; }
+const Eigen::SparseMatrix<double>* e_ptr();
+const Eigen::SparseMatrix<double>* U_ptr();
+const Eigen::SparseMatrix<double>* V_ptr();
+const Eigen::VectorXd* s_ptr();
 
-	void to_ascii(const string &filename);
-	void from_ascii(const string &filename);
-	void to_binary(const string &filename);
-	void from_binary(const string &filename);
+Mat get_U();
+Mat get_V();
+Mat get_s();
 
-	void from_csv(const string &filename);
-	//void to_csv(const string filename);
+MatType get_mattype(){ return mattype; }
 
-	void from_file(const string &filename);
+void to_ascii(const string &filename);
+void from_ascii(const string &filename);
+void to_binary(const string &filename);
+void from_binary(const string &filename);
+
+void from_csv(const string &filename);
+//void to_csv(const string filename);
+
+void from_file(const string &filename);
 
 
-	void transpose_ip();
-	Mat transpose();
-	Mat T();
-	Mat inv(Logger* log);
-	Mat inv(bool echo=false);
-	void inv_ip(Logger *log);
-	void inv_ip(bool echo=false);
-	void pseudo_inv_ip(double eigthresh, int maxsing);
-	void SVD();
+void transpose_ip();
+Mat transpose();
+Mat T();
+Mat inv(Logger* log);
+Mat inv(bool echo=false);
+void inv_ip(Logger *log);
+void inv_ip(bool echo=false);
+void pseudo_inv_ip(double eigthresh, int maxsing);
+void SVD();
 
-	Mat identity();
-	Mat zero();
-	
+Mat identity();
+Mat zero();
 
-	Mat get(const vector<string> &other_row_names, const vector<string> &other_col_names);
-	Mat leftCols(const int idx);
-	Mat rightCols(const int idx);
-	Mat extract(const vector<string> &extract_row_names, const vector<string> &extract_col_names);
-	Mat extract(const string &extract_row_name, const vector<string> &extract_col_names);
-	Mat extract(const vector<string> &extract_row_names, const string &extract_col_name);
-	void drop_rows(const vector<string> &drop_row_names);
-	void drop_cols(const vector<string> &drop_col_names);
 
-	int nrow(){ return row_names.size(); }
-	int ncol(){ return col_names.size(); }	
+Mat get(const vector<string> &other_row_names, const vector<string> &other_col_names);
+Mat leftCols(const int idx);
+Mat rightCols(const int idx);
+Mat extract(const vector<string> &extract_row_names, const vector<string> &extract_col_names);
+Mat extract(const string &extract_row_name, const vector<string> &extract_col_names);
+Mat extract(const vector<string> &extract_row_names, const string &extract_col_name);
+void drop_rows(const vector<string> &drop_row_names);
+void drop_cols(const vector<string> &drop_col_names);
 
-	bool isdiagonal();
+int nrow(){ return row_names.size(); }
+int ncol(){ return col_names.size(); }
+
+bool isdiagonal();
 
 
 protected:
-	bool autoalign;
-	Eigen::SparseMatrix<double> matrix;
-	Eigen::SparseMatrix<double> U;
-	Eigen::SparseMatrix<double> V;
-	Eigen::VectorXd s;
-	Eigen::SparseMatrix<double> lower_chol;
-	vector<string> row_names;
-	vector<string> col_names;
-	int icode = 2;
-	MatType mattype;
+bool autoalign;
+Eigen::SparseMatrix<double> matrix;
+Eigen::SparseMatrix<double> U;
+Eigen::SparseMatrix<double> V;
+Eigen::VectorXd s;
+Eigen::SparseMatrix<double> lower_chol;
+vector<string> row_names;
+vector<string> col_names;
+int icode = 2;
+MatType mattype;
 
-	vector<string> read_namelist(ifstream &in, int &nitems);
+vector<string> read_namelist(ifstream &in, int &nitems);
 };
 
 
 class Covariance : public Mat
 {
 public:
-	Covariance(vector<string> &names);
-	Covariance();
-	Covariance(string filename);
-	Covariance(Mat _mat);
-	Covariance(vector<string> _row_names, Eigen::SparseMatrix<double> _matrix, Mat::MatType _mattype = Mat::MatType::SPARSE);
-	
-	Covariance get(const vector<string> &other_names);
-	Mat get(vector<string> &other_row_names, vector<string> &other_col_names){ return Mat::get(other_row_names, other_col_names); }
-	void drop(vector<string> &drop_names);
-	Covariance extract(vector<string> &extract_names);
+Covariance(vector<string> &names);
+Covariance();
+Covariance(string filename);
+Covariance(Mat _mat);
+Covariance(vector<string> _row_names, Eigen::SparseMatrix<double> _matrix, Mat::MatType _mattype = Mat::MatType::SPARSE);
 
-	Covariance diagonal(double val);
-	void from_diagonal(Covariance &other);
+Covariance get(const vector<string> &other_names);
+Mat get(vector<string> &other_row_names, vector<string> &other_col_names){ return Mat::get(other_row_names, other_col_names); }
+void drop(vector<string> &drop_names);
+Covariance extract(vector<string> &extract_names);
 
-	string try_from(Pest &pest_scenario, FileManager &file_manager,bool is_parcov=true);
-	void from_uncertainty_file(const string &filename);
-	void from_parameter_bounds(Pest &pest_scenario);
-	void from_parameter_bounds(const vector<string> &par_names, const ParameterInfo &par_info, double sigma_range=4.0);
+Covariance diagonal(double val);
+void from_diagonal(Covariance &other);
 
-	void from_observation_weights(Pest &pest_scenario);
-	void from_observation_weights(vector<string> obs_names, ObservationInfo obs_info,
-		vector<string> pi_names, const PriorInformation* pi);
-	void from_parameter_bounds(const string &pst_filename);
-	void from_observation_weights(const string &pst_filename);
+string try_from(Pest &pest_scenario, FileManager &file_manager,bool is_parcov=true);
+void from_uncertainty_file(const string &filename);
+void from_parameter_bounds(Pest &pest_scenario);
+void from_parameter_bounds(const vector<string> &par_names, const ParameterInfo &par_info, double sigma_range=4.0);
 
-	void to_uncertainty_file(const string &filename);
+void from_observation_weights(Pest &pest_scenario);
+void from_observation_weights(vector<string> obs_names, ObservationInfo obs_info,
+vector<string> pi_names, const PriorInformation* pi);
+void from_parameter_bounds(const string &pst_filename);
+void from_observation_weights(const string &pst_filename);
 
-	vector<Eigen::VectorXd> draw(int ndraws);
-	vector<double> standard_normal(default_random_engine gen);
-	void cholesky();
+void to_uncertainty_file(const string &filename);
 
-	
+vector<Eigen::VectorXd> draw(int ndraws);
+vector<double> standard_normal(default_random_engine gen);
+void cholesky();
+
+
 private:
-	Eigen::SparseMatrix<double> lower_cholesky;
+Eigen::SparseMatrix<double> lower_cholesky;
 };
 
 ostream& operator<< (std::ostream &os, Mat mat);

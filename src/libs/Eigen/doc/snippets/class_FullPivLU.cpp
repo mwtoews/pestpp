@@ -4,7 +4,7 @@ Matrix5x3 m = Matrix5x3::Random();
 cout << "Here is the matrix m:" << endl << m << endl;
 Eigen::FullPivLU<Matrix5x3> lu(m);
 cout << "Here is, up to permutations, its LU decomposition matrix:"
-     << endl << lu.matrixLU() << endl;
+<< endl << lu.matrixLU() << endl;
 cout << "Here is the L part:" << endl;
 Matrix5x5 l = Matrix5x5::Identity();
 l.block<5,3>(0,0).triangularView<StrictlyLower>() = lu.matrixLU();

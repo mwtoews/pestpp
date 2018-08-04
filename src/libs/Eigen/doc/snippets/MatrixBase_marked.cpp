@@ -1,5 +1,5 @@
 #ifndef _MSC_VER
-  #warning deprecated
+#warning deprecated
 #endif
 /*
 Matrix3d m = Matrix3d::Zero();
@@ -9,6 +9,6 @@ Matrix3d n = Matrix3d::Ones();
 n.part<Eigen::LowerTriangular>() *= 2;
 cout << "Here is the matrix n:" << endl << n << endl;
 cout << "And now here is m.inverse()*n, taking advantage of the fact that"
-        " m is upper-triangular:" << endl
-     << m.marked<Eigen::UpperTriangular>().solveTriangular(n);
+" m is upper-triangular:" << endl
+<< m.marked<Eigen::UpperTriangular>().solveTriangular(n);
 */

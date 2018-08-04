@@ -6,8 +6,8 @@ double determinant;
 m.computeInverseAndDetWithCheck(inverse,determinant,invertible);
 cout << "Its determinant is " << determinant << endl;
 if(invertible) {
-  cout << "It is invertible, and its inverse is:" << endl << inverse << endl;
+cout << "It is invertible, and its inverse is:" << endl << inverse << endl;
 }
 else {
-  cout << "It is not invertible." << endl;
+cout << "It is not invertible." << endl;
 }
