@@ -1417,15 +1417,15 @@ def tenpar_localizer_test2():
         diff = np.abs(par_df1.loc[:,par] - par_df2.loc[:,par])
         print(diff)
         print(diff.sum())
-        assert diff.sum() < 1.0e-4, diff.sum()
+        assert diff.sum() < 1.0e-3, diff.sum()
         if par in use_pars:
             continue
         diff = np.abs(par_df1.loc[:,par] - pe.loc[:,par])
         print(diff.sum())
-        assert diff.sum() < 1.0e-4, diff.sum()
+        assert diff.sum() < 1.0e-3, diff.sum()
     diff = (phi_df1 - phi_df2).apply(np.abs)
     print(diff.max().max())
-    assert diff.max().max() <  1.0e-4, diff.max().max()
+    assert diff.max().max() <  1.0e-3, diff.max().max()
 
 def prep_for_travis(model_d):
     assert os.path.exists(os.path.join(model_d,"test_template"))
@@ -2326,7 +2326,7 @@ if __name__ == "__main__":
     # tenpar_fixed_test2()
     # tenpar_subset_how_test()
     # tenpar_localizer_test1()
-    # tenpar_localizer_test2()
+    tenpar_localizer_test2()
     # tenpar_localizer_test3()
     # freyberg_localizer_eval1()
     # freyberg_localizer_eval2()
