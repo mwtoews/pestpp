@@ -1906,6 +1906,7 @@ Eigen::MatrixXd IterEnsembleSmoother::get_Am(const vector<string> &real_names, c
 
 	Eigen::MatrixXd ivec, upgrade_1, s, V, U, st;
 	SVD_REDSVD rsvd;
+	//SVD_EIGEN rsvd;
 	rsvd.set_performance_log(performance_log);
 
 	rsvd.solve_ip(par_diff, s, U, V, pest_scenario.get_svd_info().eigthresh, pest_scenario.get_svd_info().maxsing);
@@ -2335,7 +2336,8 @@ ParameterEnsemble IterEnsembleSmoother::calc_upgrade(vector<string> &obs_names, 
 	Eigen::MatrixXd ivec, upgrade_1, s, V, Ut;
 
 
-	SVD_REDSVD rsvd;
+	//SVD_REDSVD rsvd;
+	SVD_EIGEN rsvd;
 	rsvd.set_performance_log(performance_log);
 	rsvd.solve_ip(obs_diff, s, Ut, V, pest_scenario.get_svd_info().eigthresh, pest_scenario.get_svd_info().maxsing);
 
@@ -2582,13 +2584,21 @@ bool IterEnsembleSmoother::solve_new()
 		{
 			int i = 0;
 			int lsize = localizer.get_localizer_map().size();
-			
 			for (auto local_pair : localizer.get_localizer_map())
 			{
 				ss.str("");
 				ss << "localized upgrade part " << i + 1 << " of " << lsize;
 				message(2, ss.str());
-				ParameterEnsemble pe_local = calc_upgrade(local_pair.second.first, local_pair.second.second, cur_lam, pe.shape().first,local_pair.first);
+				ParameterEnsemble pe_local;
+				if (localizer.get_how() == Localizer::How::PARAMETERS)
+				{
+					pe_local = calc_upgrade(local_pair.second.first, local_pair.second.second, cur_lam, pe.shape().first, local_pair.first);
+				}
+				else
+				{
+					pe_local = calc_upgrade(local_pair.second.first, local_pair.second.second, cur_lam, pe.shape().first);
+				}
+				
 				pe_upgrade.add_2_cols_ip(pe_local);
 				i++;
 			}

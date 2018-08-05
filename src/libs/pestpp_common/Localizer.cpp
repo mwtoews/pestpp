@@ -16,34 +16,26 @@
 bool Localizer::initialize(PerformanceLog *performance_log)
 {
 	stringstream ss;
+	how == How::OBSERVATIONS; //set this for the case with no localization
 	string filename = pest_scenario_ptr->get_pestpp_options().get_ies_localizer();
 	if (filename.size() == 0)
 		return false;
-	/*string ext = filename.substr(filename.size() - 3, 3);
-	pest_utils::upper_ip(ext);
-	if ((ext == "JCB") || (ext == "JCO"))
+	
+	mat.from_file(filename);
+	
+	string how_str = pest_scenario_ptr->get_pestpp_options().get_ies_localize_how();
+	if (how_str[0] == 'P')
 	{
-		performance_log->log_event("loading localizer from binary file");
-		mat.from_binary(filename);
+		how = How::PARAMETERS;
 	}
-	else if (ext == "MAT")
+	else if (how_str[0] == 'O')
 	{
-		performance_log->log_event("loading localizer from binary file");
-		mat.from_ascii(filename);
-	}
-	else if (ext == "CSV")
-	{
-		performance_log->log_event("loading localizer from csv file");
-		mat.from_csv(filename);
+		how = How::OBSERVATIONS;
 	}
 	else
 	{
-		ss << "unrecognnized localizer extension '" << ext << "', should be JCB, JCO, or MAT";
-		performance_log->log_event("error: "+ss.str());
-		throw runtime_error(ss.str());
-	}*/
-	mat.from_file(filename);
-
+		throw runtime_error("Localizer.initialize(): 'ies_localize_how' must start with 'P' (pars) or 'O' (obs) not " + how_str[0]);
+	}
 
 	//error checking and building up container of names
 	vector<string> names = pest_scenario_ptr->get_ctl_ordered_adj_par_names();
@@ -171,38 +163,73 @@ bool Localizer::initialize(PerformanceLog *performance_log)
 
 	//map all the nz locations in the matrix
 	map<int, vector<int>> idx_map;
-	int i, j;
-	for (int k = 0; k < mat.e_ptr()->outerSize(); ++k)
-	{
-		for (Eigen::SparseMatrix<double>::InnerIterator it(*mat.e_ptr(), k); it; ++it)
-		{
-			if (idx_map.find(it.col()) == idx_map.end())
-				idx_map[it.col()] = vector<int>{ it.row() };
-			else
-				idx_map[it.col()].push_back(it.row());
-			//std::cout << "(" << it.row() << ","; // row index
-			//std::cout << it.col() << ")\t"; // col index (here it is equal to k)
-
-		}
-	}
-
-	//populate the localizer map
 	vector<string> vobs, vpar;
-	vector<string> col_names = mat.get_col_names();
-
-	for (auto &idx : idx_map)
+	
+	//int i, j;
+	if (how == How::PARAMETERS)
 	{
-		vpar = par_map[idx.first];
-		vobs.clear();
-		for (auto &i : idx.second)
+		vector<string> col_names = mat.get_col_names();
+		for (int k = 0; k < mat.e_ptr()->outerSize(); ++k)
 		{
-			vobs.insert(vobs.end(), obs_map[i].begin(), obs_map[i].end());
+			for (Eigen::SparseMatrix<double>::InnerIterator it(*mat.e_ptr(), k); it; ++it)
+			{
+				if (idx_map.find(it.col()) == idx_map.end())
+					idx_map[it.col()] = vector<int>{ it.row() };
+				else
+					idx_map[it.col()].push_back(it.row());
+				//std::cout << "(" << it.row() << ","; // row index
+				//std::cout << it.col() << ")\t"; // col index (here it is equal to k)
+
+			}
 		}
-		pair<vector<string>, vector<string>> p(vobs,vpar);
-		//localizer_map.push_back(p);
-		localizer_map[col_names[idx.first]] = p;
+		//populate the localizer map
+		for (auto &idx : idx_map)
+		{
+			vpar = par_map[idx.first];
+			vobs.clear();
+			for (auto &i : idx.second)
+			{
+				vobs.insert(vobs.end(), obs_map[i].begin(), obs_map[i].end());
+			}
+			pair<vector<string>, vector<string>> p(vobs, vpar);
+			//localizer_map.push_back(p);
+			localizer_map[col_names[idx.first]] = p;
+		}
+
+	}
+	else
+	{
+		vector<string> row_names = mat.get_row_names();
+		for (int k = 0; k < mat.e_ptr()->outerSize(); ++k)
+		{
+			for (Eigen::SparseMatrix<double>::InnerIterator it(*mat.e_ptr(), k); it; ++it)
+			{
+				if (idx_map.find(it.row()) == idx_map.end())
+					idx_map[it.row()] = vector<int>{ it.col() };
+				else
+					idx_map[it.row()].push_back(it.col());
+				//std::cout << "(" << it.row() << ","; // row index
+				//std::cout << it.col() << ")\t"; // col index (here it is equal to k)
+
+			}
+		}
+		//populate the localizer map
+		for (auto &idx : idx_map)
+		{
+			vobs = obs_map[idx.first];
+			vpar.clear();
+			for (auto &i : idx.second)
+			{
+				vpar.insert(vpar.end(), par_map[i].begin(), par_map[i].end());
+			}
+			pair<vector<string>, vector<string>> p(vobs, vpar);
+			//localizer_map.push_back(p);
+			localizer_map[row_names[idx.first]] = p;
+		}
+
 	}
 
+	
 	//cout << "done" << endl;
 }
 

@@ -2295,12 +2295,73 @@ def freyberg_dist_local_invest():
     plt.savefig(os.path.join(test_d,"phi.pdf"))
 
 
+def tenpar_localize_how_test():
+    """tenpar local 1"""
+    model_d = "ies_10par_xsec"
+    test_d = os.path.join(model_d, "master_localize_how_test")
+    template_d = os.path.join(model_d, "test_template")
+    if not os.path.exists(template_d):
+        raise Exception("template_d {0} not found".format(template_d))
+    if os.path.exists(test_d):
+        shutil.rmtree(test_d)
+    # shutil.copytree(template_d, test_d)
+    pst_name = os.path.join(template_d, "pest.pst")
+    pst = pyemu.Pst(pst_name)
+
+    # mat = pyemu.Matrix.from_names(pst.nnz_obs_names,pst.adj_par_names).to_dataframe()
+    mat = pyemu.Matrix.from_names(["head"], ["k"]).to_dataframe()
+    mat.loc[:, :] = 1.0
+    # mat.iloc[0,:] = 1
+    mat = pyemu.Matrix.from_dataframe(mat)
+    mat.to_ascii(os.path.join(template_d, "localizer.mat"))
+
+    cov = pyemu.Cov.from_parameter_data(pst)
+    pe = pyemu.ParameterEnsemble.from_gaussian_draw(pst=pst, cov=cov, num_reals=10)
+    pe.enforce()
+    pe.to_csv(os.path.join(template_d, "par_local.csv"))
+
+    oe = pyemu.ObservationEnsemble.from_id_gaussian_draw(pst, num_reals=10)
+    oe.to_csv(os.path.join(template_d, "obs_local.csv"))
+
+    pst.pestpp_options = {}
+    pst.pestpp_options["ies_num_reals"] = 10
+    pst.pestpp_options["ies_localizer"] = "localizer.mat"
+    pst.pestpp_options["ies_lambda_mults"] = 1.0
+    pst.pestpp_options["lambda_scale_fac"] = 1.0
+    pst.pestpp_options["ies_subset_size"] = 11
+    pst.pestpp_options["ies_par_en"] = "par_local.csv"
+    pst.pestpp_options["ies_obs_en"] = "obs_local.csv"
+    pst.pestpp_options["ies_localize_how"] = "o"
+    #pst.pestpp_options["ies_verbose_level"] = 3
+    pst.control_data.noptmax = 3
+
+    # pst.pestpp_options["ies_verbose_level"] = 3
+    pst_name = os.path.join(template_d, "pest_local_o.pst")
+    pst.write(pst_name)
+    pyemu.os_utils.start_slaves(template_d, exe_path, "pest_local_o.pst", num_slaves=10,
+                                master_dir=test_d+"_o", verbose=True, slave_root=model_d,
+                                port=port)
+    phi_df1 = pd.read_csv(os.path.join(test_d+"_o", "pest_local_o.phi.meas.csv"))
+
+    pst.pestpp_options["ies_localize_how"] = "p"
+    pst.write(os.path.join(template_d, "pest_local_p.pst"))
+    pyemu.os_utils.start_slaves(template_d, exe_path, "pest_local_p.pst", num_slaves=10,
+                                master_dir=test_d + "_p", verbose=True, slave_root=model_d,
+                                port=port)
+    phi_df2 = pd.read_csv(os.path.join(test_d + "_p", "pest_local_p.phi.meas.csv"))
+    diff = phi_df1 - phi_df2
+    print(diff.max().max())
+
+    plt.plot(phi_df1.total_runs, phi_df1.loc[:, "mean"], label="local")
+    plt.plot(phi_df2.total_runs, phi_df2.loc[:, "mean"], label="full")
+    plt.legend()
+    plt.savefig(os.path.join(test_d+"_p", "local_test.pdf"))
+    assert diff.max().max() == 0
 
 if __name__ == "__main__":
     # write_empty_test_matrix()
 
-    #prep_10par_for_travis("ies_10par_xsec")
-    #setup_suite_dir("ies_10par_xsec")
+    # setup_suite_dir("ies_10par_xsec")
     # setup_suite_dir("ies_freyberg")
     # run_suite("ies_10par_xsec")
     # run_suite("ies_freyberg")
@@ -2308,33 +2369,32 @@ if __name__ == "__main__":
     # rebase("ies_10par_xsec")
     # compare_suite("ies_10par_xsec")
     # compare_suite("ies_freyberg")
-    # # test_10par_xsec(silent_master=False)
-    # # test_freyberg()
 
     # # full list of tests
-    # tenpar_subset_test()
-    # tenpar_full_cov_test()
-    # test_freyberg_full_cov_reorder()
-    # test_freyberg_full_cov_reorder_run()
-    # test_freyberg_full_cov_reorder_run()
-    # eval_freyberg_full_cov()
-    # tenpar_tight_tol_test()
-    # test_chenoliver()
-    # tenpar_narrow_range_test()
-    # test_freyberg_ineq()
-    # tenpar_fixed_test()
-    # tenpar_fixed_test2()
-    # tenpar_subset_how_test()
-    # tenpar_localizer_test1()
+    tenpar_subset_test()
+    tenpar_full_cov_test()
+    test_freyberg_full_cov_reorder()
+    test_freyberg_full_cov_reorder_run()
+    test_freyberg_full_cov_reorder_run()
+    eval_freyberg_full_cov()
+    tenpar_tight_tol_test()
+    test_chenoliver()
+    tenpar_narrow_range_test()
+    test_freyberg_ineq()
+    tenpar_fixed_test()
+    tenpar_fixed_test2()
+    tenpar_subset_how_test()
+    tenpar_localizer_test1()
     tenpar_localizer_test2()
-    # tenpar_localizer_test3()
-    # freyberg_localizer_eval1()
-    # freyberg_localizer_eval2()
-    # freyberg_localizer_test3()
+    tenpar_localizer_test3()
+    freyberg_localizer_eval1()
+    freyberg_localizer_eval2()
+    freyberg_localizer_test3()
     freyberg_dist_local_test()
     tenpar_restart_test()
     csv_tests()
     tenpar_rns_test()
     clues_longnames_test()
+    tenpar_localize_how_test()
 
     # freyberg_dist_local_invest()
