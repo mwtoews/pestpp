@@ -47,7 +47,7 @@ int main(int argc, char* argv[])
 		string version = PESTPP_VERSION;
 		cout << endl << endl;
 		cout << "             pestpp-opt - a tool for chance-constrainted linear programming, version " << version << endl << endl;
-		cout << "                 by the PEST++ development team" << endl;
+		cout << "                                 by the PEST++ development team" << endl;
 		// build commandline
 		string commandline = "";
 		for (int i = 0; i < argc; ++i)

@@ -271,7 +271,7 @@ int main(int argc, char* argv[])
 		if (pp_args.find("OVERDUE_GIVEUP_FAC") == pp_args.end())
 			ppo->set_overdue_giveup_fac(2.0);
 		if (pp_args.find("OVERDUE_resched_FAC") == pp_args.end())
-			ppo->set_overdue_giveup_fac(1.15);
+			ppo->set_overdue_reched_fac(1.15);
 		RunManagerAbstract *run_manager_ptr;
 
 
