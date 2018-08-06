@@ -917,7 +917,8 @@ void Ensemble::from_binary(string file_name, vector<string> &names, bool transpo
 	real_names.clear();
 	ifstream in;
 	in.open(file_name.c_str(), ifstream::binary);
-
+	if (!in.good())
+		throw_ensemble_error("Ensemble::from_binary(): error opening binary matrix file: " + file_name);
 	int n_col;
 	int n_nonzero;
 	int n_row;
