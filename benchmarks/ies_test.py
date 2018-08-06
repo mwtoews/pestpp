@@ -229,45 +229,6 @@ def compare_suite(model_d):
         raise Exception("errors in {0}: ".format(model_d) + '\n'.join(errors))
 
 
-def compare_pyemu():
-    df = pd.read_csv("ies_test.csv")
-   # df = df.loc[df.text.apply(lambda x: model_d in x), :]
-    df = df.loc[df.pyemu_compare==1,:]
-    df.fillna('', inplace=True)
-    for i in range(df.shape[0]):
-        args = df.iloc[i,:].to_dict()
-        model_d = args["text"].split()[1]
-        test_d = "master_test_"+args["text"].split()[0].replace(')','')
-        print(model_d)
-        pyemu_d = os.path.join(model_d,"master_pyemu")
-        assert os.path.exists(pyemu_d),pyemu_d
-        test_d = os.path.join(model_d,test_d)
-        assert os.path.exists(test_d),test_d
-        print(test_d)
-        pp_phi_file = os.path.join(test_d,"pest.phi.actual.csv")
-        py_phi_file = os.path.join(pyemu_d,"pest.pst.iobj.actual.csv")
-        try:
-            pp_phi = pd.read_csv(pp_phi_file)
-        except Exception as e:
-            raise Exception("error loading pp_phi {0}: {1}".format(pp_phi_file,str(e)))
-        try:
-            py_phi = pd.read_csv(py_phi_file)
-        except Exception as e:
-            raise Exception("error loading py_phi {0}: {1}".format(py_phi_file, str(e)))
-
-        m_diff = pp_phi.loc[:,"mean"] - py_phi.loc[:,"mean"]
-        print(m_diff)
-        m_diff.dropna(inplace=True)
-        assert m_diff.shape[0] == noptmax + 1
-        assert m_diff.apply(np.abs).max() < 0.035
-        s_diff = pp_phi.loc[:,"standard_deviation"] - py_phi.loc[:,"std"]
-        print(s_diff)
-        s_diff.dropna(inplace=True)
-        assert s_diff.shape[0] == noptmax + 1
-        assert s_diff.apply(np.abs).max() < 0.035,s_diff
-
-
-
 def eval_10par_xsec(silent_master=False):
     run_suite("ies_10par_xsec",silent_master=silent_master)
     compare_suite("ies_10par_xsec")
@@ -935,7 +896,7 @@ def eval_kirishima():
 def test_freyberg_ineq():
     """freyberg ineq test"""
     model_d = "ies_freyberg"
-    test_d = os.path.join(model_d, "test_ineq")
+    test_d = os.path.join(model_d, "master_ineq")
     template_d = os.path.join(model_d, "template")
 
     if os.path.exists(test_d):
@@ -974,7 +935,7 @@ def test_freyberg_ineq():
 def tenpar_fixed_test2():
     """tenpar fixed test 2"""
     model_d = "ies_10par_xsec"
-    test_d = os.path.join(model_d, "test_fixed21")
+    test_d = os.path.join(model_d, "master_fixed2")
     template_d = os.path.join(model_d, "template")
     pst = pyemu.Pst(os.path.join(template_d,"pest.pst"))
     pst.control_data.noptmax = 1
@@ -1025,7 +986,7 @@ def tenpar_fixed_test2():
 def tenpar_fixed_test():
     """tenpar fixed test"""
     model_d = "ies_10par_xsec"
-    test_d = os.path.join(model_d, "test_fixed")
+    test_d = os.path.join(model_d, "master_fixed")
     template_d = os.path.join(model_d, "template")
     pst = pyemu.Pst(os.path.join(template_d,"pest.pst"))
     pst.parameter_data.loc[:, "partrans"] = "log"
@@ -1087,7 +1048,7 @@ def tenpar_fixed_test():
 def tenpar_weights_test():
     """tenpar weights test"""
     model_d = "ies_10par_xsec"
-    test_d = os.path.join(model_d, "test_weights")
+    test_d = os.path.join(model_d, "master_weights")
     template_d = os.path.join(model_d, "template")
     pst = pyemu.Pst(os.path.join(template_d,"pest.pst"))
     
@@ -1134,7 +1095,7 @@ def tenpar_weights_test():
 def tenpar_tight_tol_test():
     """tenpar tight tol test"""
     model_d = "ies_10par_xsec"
-    test_d = os.path.join(model_d, "test_tighttol")
+    test_d = os.path.join(model_d, "master_tighttol")
     template_d = os.path.join(model_d, "template")
     pst = pyemu.Pst(os.path.join(template_d,"pest.pst"))
     
@@ -1159,7 +1120,7 @@ def tenpar_tight_tol_test():
 def tenpar_weight_pareto():
 
     model_d = "ies_10par_xsec"
-    test_d = os.path.join(model_d, "test_weight_pareto")
+    test_d = os.path.join(model_d, "master_weight_pareto")
     template_d = os.path.join(model_d, "template")
     pst = pyemu.Pst(os.path.join(template_d,"pest.pst"))
     
@@ -1447,7 +1408,7 @@ def prep_for_travis(model_d):
 def tenpar_incr_num_reals_test():
     """tenpar incr num reals test"""
     model_d = "ies_10par_xsec"
-    test_d = os.path.join(model_d, "test_incr_num_reals1")
+    test_d = os.path.join(model_d, "master_incr_num_reals1")
     template_d = os.path.join(model_d, "template")
     pst = pyemu.Pst(os.path.join(template_d, "pest.pst"))
     num_reals = 10
@@ -1480,7 +1441,7 @@ def tenpar_incr_num_reals_test():
 def tenpar_subset_how_test():
     """tenpar subet how"""
     model_d = "ies_10par_xsec"
-    test_d = os.path.join(model_d, "test_subset_how")
+    test_d = os.path.join(model_d, "master_subset_how")
     template_d = os.path.join(model_d, "template")
     pst = pyemu.Pst(os.path.join(template_d, "pest.pst"))
     num_reals = 10
@@ -1633,7 +1594,7 @@ def tenpar_localizer_test3():
 def freyberg_localizer_eval1():
 
     model_d = "ies_freyberg"
-    test_d = os.path.join(model_d, "test_local11")
+    test_d = os.path.join(model_d, "master_local1")
     template_d = os.path.join(model_d, "template")
 
     if os.path.exists(test_d):
@@ -1698,7 +1659,7 @@ def freyberg_localizer_eval1():
 
 def freyberg_localizer_eval2():
     model_d = "ies_freyberg"
-    test_d = os.path.join(model_d, "test_local2")
+    test_d = os.path.join(model_d, "master_local2")
     template_d = os.path.join(model_d, "template")
 
     if os.path.exists(test_d):
@@ -1760,7 +1721,7 @@ def freyberg_localizer_eval2():
 def freyberg_localizer_test3():
     """freyberg local 3"""
     model_d = "ies_freyberg"
-    test_d = os.path.join(model_d, "test_local3")
+    test_d = os.path.join(model_d, "master_local3")
     template_d = os.path.join(model_d, "template")
 
     if os.path.exists(test_d):
@@ -1817,8 +1778,8 @@ def freyberg_localizer_test3():
     plt.savefig(os.path.join(test_d, "local_test.pdf"))
 
 def compare_freyberg_local3():
-    df_l = pd.read_csv(os.path.join("ies_freyberg","test_local3","pest_local.6.par.csv"))
-    df_f = pd.read_csv(os.path.join("ies_freyberg","test_local3_base","pest_base.6.par.csv"))
+    df_l = pd.read_csv(os.path.join("ies_freyberg","master_local3","pest_local.6.par.csv"))
+    df_f = pd.read_csv(os.path.join("ies_freyberg","master_local3_base","pest_base.6.par.csv"))
 
     pst = pyemu.Pst(os.path.join("ies_freyberg","template","pest.pst"))
     df_l.columns = df_l.columns.str.lower()
@@ -1912,7 +1873,7 @@ def csv_tests():
 def tenpar_restart_test():
     """tenpar restart tests"""
     model_d = "ies_10par_xsec"
-    test_d = os.path.join(model_d, "test_restart")
+    test_d = os.path.join(model_d, "master_restart")
     template_d = os.path.join(model_d, "template")
     pst = pyemu.Pst(os.path.join(template_d, "pest.pst"))
     num_reals = 20
@@ -1952,7 +1913,7 @@ def tenpar_restart_test():
 def tenpar_rns_test():
     """tenpar rns test"""
     model_d = "ies_10par_xsec"
-    test_d = os.path.join(model_d, "test_rns2")
+    test_d = os.path.join(model_d, "master_rns")
     template_d = os.path.join(model_d, "template")
     pst = pyemu.Pst(os.path.join(template_d, "pest.pst"))
 
@@ -1979,7 +1940,7 @@ def tenpar_rns_test():
 def clues_longnames_test():
     """clue long names tests"""
     model_d = "ies_clues"
-    test_d = os.path.join(model_d, "test_longnames")
+    test_d = os.path.join(model_d, "master_longnames")
     template_d = os.path.join(model_d, "template")
     pst = pyemu.Pst(os.path.join(template_d, "pest.pst"))
     num_reals = 10
@@ -2047,7 +2008,7 @@ def clues_longnames_test():
 def freyberg_dist_local_test():
     import flopy
     model_d = "ies_freyberg"
-    test_d = os.path.join(model_d, "test_dist_local")
+    test_d = os.path.join(model_d, "master_dist_local")
     template_d = os.path.join(model_d, "template")
     m = flopy.modflow.Modflow.load("freyberg.nam",model_ws=template_d,load_only=[],check=False)
     if os.path.exists(test_d):
@@ -2141,7 +2102,7 @@ def freyberg_dist_local_test():
 def freyberg_dist_local_invest():
     import flopy
     model_d = "ies_freyberg"
-    test_d = os.path.join(model_d, "test_dist_local")
+    test_d = os.path.join(model_d, "master_dist_local")
     template_d = os.path.join(model_d, "template")
     m = flopy.modflow.Modflow.load("freyberg.nam", model_ws=template_d, load_only=[], check=False)
     if os.path.exists(test_d):
