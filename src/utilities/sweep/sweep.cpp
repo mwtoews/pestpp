@@ -269,7 +269,7 @@ int main(int argc, char* argv[])
 	{
 #endif
 		cout << endl << endl;
-		cout << "             sweep.exe - a parameteric sweep utility" << endl;
+		cout << "             pestpp-swp - a parameteric sweep utility" << endl;
 		cout << "                     for PEST(++) datasets " << endl << endl;
 		cout << "                 by the PEST++ development team" << endl << endl << endl;
 		// build commandline
@@ -297,11 +297,11 @@ int main(int argc, char* argv[])
 			cerr << "--------------------------------------------------------" << endl;
 			cerr << "usage:" << endl << endl;
 			cerr << "    serial run manager:" << endl;
-			cerr << "        sweep control_file.pst" << endl << endl;
+			cerr << "        pestpp-swp control_file.pst" << endl << endl;
 			cerr << "    PANTHER master:" << endl;
-			cerr << "        sweep control_file.pst /H :port" << endl << endl;
+			cerr << "        pestpp-swp control_file.pst /H :port" << endl << endl;
 			cerr << "    PANTHER worker:" << endl;
-			cerr << "        sweep control_file.pst /H hostname:port " << endl << endl;
+			cerr << "        pestpp-swp control_file.pst /H hostname:port " << endl << endl;
 			cerr << "control file pest++ options:" << endl;
 			cerr << "    ++sweep_parameter_csv_file(pars_file.csv)" << endl;
 			cerr << "        - csv file with each row as a par set" << endl;
@@ -311,8 +311,6 @@ int main(int argc, char* argv[])
 			cerr << "        - the csv to save run results to" << endl;
 			cerr << "    ++sweep_chunk(500)" << endl;
 			cerr << "        - number of runs to process in a single batch" << endl;
-			cerr << "    ++sweep_base_run(true)" << endl;
-			cerr << "        - run the parameter values in control file" << endl;
 			cerr << "--------------------------------------------------------" << endl;
 			exit(0);
 		}
