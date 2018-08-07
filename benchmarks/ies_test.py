@@ -1549,9 +1549,10 @@ def tenpar_localizer_test3():
     pst.pestpp_options["ies_include_base"] = False
     pst.pestpp_options["ies_accept_phi_fac"] = 1.1
     pst.pestpp_options["ies_obs_en"] = "obs_local.csv"
+    pst.pestpp_options["ies_localize_how"] = "pars"
     pst.control_data.nphistp = 10
     pst.control_data.nphinored = 10
-    pst.control_data.noptmax = 10
+    pst.control_data.noptmax = 4
 
     # pst.pestpp_options["ies_verbose_level"] = 3
     pst_name = os.path.join(template_d, "pest_local.pst")
@@ -1573,8 +1574,7 @@ def tenpar_localizer_test3():
     phi_df2 = pd.read_csv(os.path.join(test_d + "_base", "pest_base.phi.composite.csv"))
     par_df2 = pd.read_csv(os.path.join(test_d + "_base", "pest_base.{0}.par.csv".format(pst.control_data.noptmax)),
                           index_col=0)
-    par_df2.columns = par_df1.columns.st
-    r.lower()
+    par_df2.columns = par_df2.columns.str.lower()
     plt.plot(phi_df1.total_runs, phi_df1.loc[:, "mean"], label="local")
     plt.plot(phi_df2.total_runs, phi_df2.loc[:, "mean"], label="full")
     plt.legend()
@@ -2323,8 +2323,7 @@ def tenpar_localize_how_test():
 if __name__ == "__main__":
     # write_empty_test_matrix()
 
-
-    # setup_suite_dir("ies_10par_xsec")
+    setup_suite_dir("ies_10par_xsec")
     # setup_suite_dir("ies_freyberg")
     # run_suite("ies_10par_xsec")
     # run_suite("ies_freyberg")
@@ -2350,15 +2349,14 @@ if __name__ == "__main__":
     # tenpar_localizer_test1()
     # tenpar_localizer_test2()
     tenpar_localizer_test3()
-    freyberg_localizer_eval1()
-    freyberg_localizer_eval2()
-    freyberg_localizer_test3()
-    freyberg_dist_local_test()
-    tenpar_restart_test()
-    csv_tests()
-    tenpar_rns_test()
-    clues_longnames_test()
-    tenpar_localize_how_test()
-
+    # freyberg_localizer_eval1()
+    # freyberg_localizer_eval2()
+    # freyberg_localizer_test3()
+    # freyberg_dist_local_test()
+    # tenpar_restart_test()
+    # csv_tests()
+    # tenpar_rns_test()
+    # clues_longnames_test()
+    # tenpar_localize_how_test()
 
     # freyberg_dist_local_invest()
