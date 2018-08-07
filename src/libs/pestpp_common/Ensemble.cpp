@@ -501,7 +501,7 @@ void Ensemble::keep_rows(const vector<string> &keep_names)
 }
 
 
-Eigen::MatrixXd Ensemble::get_eigen(vector<string> row_names, vector<string> col_names)
+Eigen::MatrixXd Ensemble::get_eigen(vector<string> row_names, vector<string> col_names, bool update_vmap)
 {
 	//get a dense eigen matrix from reals by row and col names
 	vector<string> missing_rows,missing_cols;
@@ -529,14 +529,17 @@ Eigen::MatrixXd Ensemble::get_eigen(vector<string> row_names, vector<string> col
 	}
 	if (col_names.size() > 0)
 	{
-		map<string, int> var_map;
-		for (int i = 0; i < var_names.size(); i++)
-			var_map[var_names[i]] = i;
-		set<string> var_set(var_names.begin(), var_names.end());
-		set<string>::iterator end = var_set.end();
+		//map<string, int> var_map;
+		//for (int i = 0; i < var_names.size(); i++)
+		//	var_map[var_names[i]] = i;
+		if (update_vmap)
+			update_var_map();
+
+		//set<string> var_set(var_names.begin(), var_names.end());
+		map<string,int>::iterator end = var_map.end();
 		for (auto &name : col_names)
 		{
-			if (var_set.find(name) == end)
+			if (var_map.find(name) == end)
 				missing.push_back(name);
 			col_idxs.push_back(var_map[name]);
 		}
@@ -658,6 +661,13 @@ Eigen::VectorXd Ensemble::get_real_vector(const string &real_name)
 		throw_ensemble_error(ss.str());
 	}
 	return get_real_vector(idx);
+}
+
+void Ensemble::update_var_map()
+{
+	var_map.clear();
+	for (int i = 0; i < var_names.size(); i++)
+		var_map[var_names[i]] = i;
 }
 
 void Ensemble::throw_ensemble_error(string message, vector<string> vec)
@@ -907,7 +917,8 @@ void Ensemble::from_binary(string file_name, vector<string> &names, bool transpo
 	real_names.clear();
 	ifstream in;
 	in.open(file_name.c_str(), ifstream::binary);
-
+	if (!in.good())
+		throw_ensemble_error("Ensemble::from_binary(): error opening binary matrix file: " + file_name);
 	int n_col;
 	int n_nonzero;
 	int n_row;
@@ -1058,6 +1069,21 @@ ParameterEnsemble::ParameterEnsemble(Pest *_pest_scenario_ptr):Ensemble(_pest_sc
 	par_transform = pest_scenario_ptr->get_base_par_tran_seq();
 }
 
+ParameterEnsemble::ParameterEnsemble(Pest *_pest_scenario_ptr, Eigen::MatrixXd _reals, 
+	vector<string> _real_names, vector<string> _var_names):Ensemble(_pest_scenario_ptr)
+{
+	par_transform = pest_scenario_ptr->get_base_par_tran_seq();
+	if (_reals.rows() != _real_names.size())
+		throw_ensemble_error("ParameterEnsemble() _reals.rows() != _real_names.size()");
+	if (_reals.cols() != _var_names.size())
+		throw_ensemble_error("ParameterEnsemble() _reals.cols() != _var_names.size()");
+	reals = _reals;
+	var_names = _var_names;
+	real_names = _real_names;
+}
+
+
+
 void ParameterEnsemble::draw(int num_reals, Covariance &cov, PerformanceLog *plog, int level)
 {
 	///draw a parameter ensemble
@@ -1129,6 +1155,7 @@ ParameterEnsemble ParameterEnsemble::zeros_like()
 {
 
 	Eigen::MatrixXd new_reals = Eigen::MatrixXd::Zero(real_names.size(), var_names.size());
+	
 	ParameterEnsemble new_en(pest_scenario_ptr);
 	new_en.from_eigen_mat(new_reals, real_names, var_names);
 	return new_en;
@@ -1203,6 +1230,16 @@ void ParameterEnsemble::from_binary(string file_name)
 	tstat = transStatus::CTL;
 }
 
+//ParameterEnsemble ParameterEnsemble::get_new(const vector<string> &_real_names, const vector<string> &_var_names)
+//{
+//	
+//	ParameterEnsemble new_pe(pest_scenario_ptr);
+//	new_pe.set_var_names(_var_names);
+//	new_pe.set_real_names(_real_names);
+//	new_pe.set_eigen(get_eigen(_real_names, _var_names))
+//
+//	//return ParameterEnsmeble(get_eigen(_real_names,_var_names),)
+//}
 
 void ParameterEnsemble::from_csv(string file_name)
 {
@@ -1518,6 +1555,19 @@ Covariance ParameterEnsemble::get_diagonal_cov_matrix()
 ObservationEnsemble::ObservationEnsemble(Pest *_pest_scenario_ptr): Ensemble(_pest_scenario_ptr)
 {
 }
+
+ObservationEnsemble::ObservationEnsemble(Pest *_pest_scenario_ptr, Eigen::MatrixXd _reals,
+	vector<string> _real_names, vector<string> _var_names) : Ensemble(_pest_scenario_ptr)
+{
+	if (_reals.rows() != _real_names.size())
+		throw_ensemble_error("ParameterEnsemble() _reals.rows() != _real_names.size()");
+	if (_reals.cols() != _var_names.size())
+		throw_ensemble_error("ParameterEnsemble() _reals.cols() != _var_names.size()");
+	reals = _reals;
+	var_names = _var_names;
+	real_names = _real_names;
+}
+
 
 void ObservationEnsemble::draw(int num_reals, Covariance &cov, PerformanceLog *plog, int level)
 {

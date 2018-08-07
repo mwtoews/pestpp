@@ -429,6 +429,11 @@ RunManagerAbstract::RUN_UNTIL_COND RunManagerPanther::run_until(RUN_UNTIL_COND c
 		cout << endl << "      waiting for slaves to appear..." << endl << endl;
 		f_rmr << endl << "    waiting for slaves to appear..." << endl << endl;
 	}
+	else
+	{
+		for (auto &si : slave_info_set)
+			si.reset_runtime();
+	}
 	cout << endl;
 	f_rmr << endl;
 
@@ -660,7 +665,7 @@ void RunManagerPanther::close_slave(list<SlaveInfoRec>::iterator slave_info_iter
 	socket_to_iter_map.erase(i_sock);
 
 	stringstream ss;
-	ss << "closed connection to slave: " << socket_name << "; number of slaves: " << socket_to_iter_map.size();
+	ss << "closed connection to slave: " << socket_name << ", number of slaves: " << socket_to_iter_map.size();
 	report(ss.str(), false);
 }
 
@@ -715,8 +720,12 @@ void RunManagerPanther::schedule_runs()
 					if (failure_map.count(run_id) + overdue_kill_runs_vec.size() >= max_n_failure)
 					{
 						// kill the overdue runs
-						kill_runs(run_id, true, "overdue");
+						//kill_runs(run_id, true, "overdue");
+						stringstream ss;
+						ss << "overdue. duration:" << duration << ", avg:" << avg_runtime;
+						kill_run(it_slave, ss.str());
 						should_schedule = false;
+						update_run_failed(run_id, it_slave->get_socket_fd());
 						model_runs_timed_out += overdue_kill_runs_vec.size();
 					}
 					else if (overdue_kill_runs_vec.size() >= max_concurrent_runs)
@@ -733,7 +742,9 @@ void RunManagerPanther::schedule_runs()
 					{
 						// If there are no free slaves kill the overdue ones
 						// This is necessary to keep runs with small numbers of slaves behaving
-						kill_run(it_slave, "overdue");
+						stringstream ss;
+						ss << "overdue. duration:" << duration << ", avg:" << avg_runtime;
+						kill_run(it_slave, ss.str());
 						update_run_failed(run_id, it_slave->get_socket_fd());
 
 						if (failure_map.count(run_id) + overdue_kill_runs_vec.size() < max_n_failure)
@@ -762,13 +773,13 @@ void RunManagerPanther::schedule_runs()
 						if (success >= 0)
 						{
 							stringstream ss;
-							ss << n_concur << " concurrent runs for run id = " << run_id;
+							ss << n_concur << " concurrent runs for run id:" << run_id;
 							report(ss.str(), false);
 						}
 						else
 						{
 							stringstream ss;
-							ss << "failed to schedule concurrent run for run id = " << run_id;
+							ss << "failed to schedule concurrent run for run id:" << run_id;
 							report(ss.str(), false);
 						}
 					}
@@ -853,7 +864,7 @@ int RunManagerPanther::schedule_run(int run_id, std::list<list<SlaveInfoRec>::it
 			active_runid_to_iterset_map.insert(make_pair(run_id, *it_slave));
 			stringstream ss;
 			ss << "Sending run " << run_id << " to: " << host_name << "$" << (*it_slave)->get_work_dir() <<
-				"  (group id = " << cur_group_id << ", run id = " << run_id << ", concurrent runs = " << get_n_concurrent(run_id) << ")";
+				"  (group id:" << cur_group_id << ", run id:" << run_id << ", concurrent runs:" << get_n_concurrent(run_id) << ")";
 			report(ss.str(), false);
 			free_slave_list.erase(it_slave);
 			scheduled = 1;
@@ -945,7 +956,7 @@ void RunManagerPanther::process_message(int i_sock)
 		{
 			string work_dir = NetPackage::extract_string(net_pack.get_data(), 0, net_pack.get_data().size());
 			stringstream ss;
-			ss << "initializing new slave connection from: " << socket_name << "; number of slaves: " << socket_to_iter_map.size() << "; working dir: " << work_dir;
+			ss << "initializing new slave connection from: " << socket_name << ", number of slaves: " << socket_to_iter_map.size() << ", working dir: " << work_dir;
 			report(ss.str(), false);
 			slave_info_iter->set_work_dir(work_dir);
 			slave_info_iter->set_state(SlaveInfoRec::State::CWD_RCV);
@@ -992,9 +1003,9 @@ void RunManagerPanther::process_message(int i_sock)
 		if (run_finished(run_id))
 		{
 			stringstream ss;
-			ss << "Prevoiusly completed run: " << run_id << " finished on: " << host_name << "$" << slave_info_iter->get_work_dir() <<
-				"  (run time = " << slave_info_iter->get_runtime_minute() << " min, group id = " << group_id <<
-				", run id = " << run_id << " concurrent = " << get_n_concurrent(run_id) << ")";
+			ss << "Prevoiusly completed run:" << run_id << ", finished on:" << host_name << "$" << slave_info_iter->get_work_dir() <<
+				"  (run time:" << slave_info_iter->get_runtime_minute() << " min, group id:" << group_id <<
+				", run id:" << run_id << " concurrent:" << get_n_concurrent(run_id) << ")";
 			report(ss.str(), false);
 		}
 		else
@@ -1003,8 +1014,8 @@ void RunManagerPanther::process_message(int i_sock)
 			slave_info_iter->end_run();
 			stringstream ss;
 			ss << "run " << run_id << " received from: " << host_name << "$" << slave_info_iter->get_work_dir() <<
-				"  (run time = " << slave_info_iter->get_runtime_minute() << " min, group id = " << group_id <<
-				", run id = " << run_id << " concurrent = " << get_n_concurrent(run_id) << ")";
+				"  (run time:" << slave_info_iter->get_runtime_minute() << " min, avg run time:" << get_global_runtime_minute() << " min, group id:" << group_id <<
+				", run id = " << run_id << " concurrent:" << get_n_concurrent(run_id) << ")";
 			report(ss.str(), false);
 			process_model_run(i_sock, net_pack);
 		}
@@ -1021,7 +1032,7 @@ void RunManagerPanther::process_message(int i_sock)
 
 		if (!run_finished(run_id))
 		{
-			ss << "Run " << run_id << " failed on slave:" << host_name << "$" << slave_info_iter->get_work_dir() << "  (group id = " << group_id << ", run id = " << run_id << ", concurrent = " << n_concur << ") ";
+			ss << "Run " << run_id << " failed on slave:" << host_name << "$" << slave_info_iter->get_work_dir() << "  (group id: " << group_id << ", run id: " << run_id << ", concurrent: " << n_concur << ") ";
 			report(ss.str(), false);
 			model_runs_failed++;
 			update_run_failed(run_id, i_sock);
@@ -1043,7 +1054,7 @@ void RunManagerPanther::process_message(int i_sock)
 		auto it = get_active_run_iter(i_sock);
 		unschedule_run(it);
 		stringstream ss;
-		ss << "Run " << run_id << " killed on slave: " << host_name << "$" << slave_info_iter->get_work_dir() << ", run id = " << run_id << " concurrent = " << n_concur;
+		ss << "Run " << run_id << " killed on slave: " << host_name << "$" << slave_info_iter->get_work_dir() << ", run id:" << run_id << " concurrent: " << n_concur;
 		report(ss.str(), false);
 	}
 	else if (net_pack.get_type() == NetPackage::PackType::PING)
@@ -1105,7 +1116,7 @@ void RunManagerPanther::kill_run(list<SlaveInfoRec>::iterator slave_info_iter, c
 		//schedule run to be killed
 		string host_name = slave_info_iter->get_hostname();
 		stringstream ss;
-		ss << "sending kill request; reason: " << reason << "; run id:" << run_id << "; slave: " << host_name << "$" << slave_info_iter->get_work_dir();
+		ss << "sending kill request. reason: " << reason << ", run id:" << run_id << ", slave: " << host_name << "$" << slave_info_iter->get_work_dir();
 		report(ss.str(), false);
 		NetPackage net_pack(NetPackage::PackType::REQ_KILL, 0, 0, "");
 		char data = '\0';
