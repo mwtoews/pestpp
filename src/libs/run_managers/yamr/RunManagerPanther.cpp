@@ -725,6 +725,7 @@ void RunManagerPanther::schedule_runs()
 						ss << "overdue. duration:" << duration << ", avg:" << avg_runtime;
 						kill_run(it_slave, ss.str());
 						should_schedule = false;
+						update_run_failed(run_id, it_slave->get_socket_fd());
 						model_runs_timed_out += overdue_kill_runs_vec.size();
 					}
 					else if (overdue_kill_runs_vec.size() >= max_concurrent_runs)
