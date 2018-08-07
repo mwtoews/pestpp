@@ -47,7 +47,7 @@ public:
 	Eigen::VectorXd get_real_vector(int ireal);
 	Eigen::VectorXd get_real_vector(const string &real_name);
 
-	Eigen::MatrixXd get_eigen(vector<string> row_names, vector<string> col_names);
+	Eigen::MatrixXd get_eigen(vector<string> row_names, vector<string> col_names, bool update_vmap=true);
 	const Eigen::MatrixXd get_eigen() const { return reals; }
 	const Eigen::MatrixXd* get_eigen_ptr() const { return &reals; }
 	void set_eigen(Eigen::MatrixXd _reals);
@@ -72,10 +72,10 @@ public:
 	Pest get_pest_scenario() { return *pest_scenario_ptr; }
 	void set_pest_scenario(Pest *_pest_scenario) { pest_scenario_ptr = _pest_scenario; }
 	void set_real_names(vector<string> &_real_names);
-
 	void check_for_dups();
 
 	void draw(int num_reals, Covariance cov, Transformable &tran, const vector<string> &draw_names, const map<string,vector<string>> &grouper, PerformanceLog *plog, int level);
+	void update_var_map();
 	~Ensemble();
 protected:
 	Pest* pest_scenario_ptr;
@@ -86,7 +86,8 @@ protected:
 
 	Eigen::MatrixXd reals;
 	vector<string> var_names;
-	vector<string> real_names;
+	vector<string> real_names;	
+	map<string, int> var_map;
 	void read_csv(int num_reals,ifstream &csv, map<string,int> header_info);
 	void from_binary(string file_name, vector<string> &names,  bool transposed);
 	map<string,int> prepare_csv(const vector<string> &names, ifstream &csv, bool forgive);
@@ -102,6 +103,8 @@ public:
 		PerformanceLog *_performance_log, unsigned int seed = 1);
 	*/
 	ParameterEnsemble(Pest *_pest_scenario_ptr);
+	ParameterEnsemble(Pest *_pest_scenario_ptr, Eigen::MatrixXd _reals, vector<string> _real_names, vector<string> _var_names);
+
 	ParameterEnsemble() { ; }
 	ParameterEnsemble zeros_like();
 	//ParameterEnsemble get_new(const vector<string> &_real_names, const vector<string> &_var_names);
@@ -143,6 +146,8 @@ public:
     OutputFileWriter &_output_file_writer, PerformanceLog *_performance_log, unsigned int seed = 1);
 	*/
 	ObservationEnsemble(Pest *_pest_scenario_ptr);
+	ObservationEnsemble(Pest *_pest_scenario_ptr, Eigen::MatrixXd _reals, vector<string> _real_names, vector<string> _var_names);
+
 	ObservationEnsemble() { ; }
 	void update_from_obs(int row_idx, Observations &obs);
 	void update_from_obs(string real_name, Observations &obs);

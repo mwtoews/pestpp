@@ -386,15 +386,13 @@ public:
 	void set_ies_weight_csv(string _ies_weight_csv) { ies_weight_csv = _ies_weight_csv; }
 	string get_ies_subset_how() const { return ies_subset_how; }
 	void set_ies_subset_how(string _ies_subset_how) { ies_subset_how = _ies_subset_how; }
-
+	void set_ies_localize_how(string _how) { ies_localize_how = _how; }
+	string get_ies_localize_how() const { return ies_localize_how; }
 
 	double get_overdue_giveup_minutes() const { return overdue_giveup_minutes; }
 	void set_overdue_giveup_minutes(double overdue_minutes) { overdue_giveup_minutes = overdue_minutes; }
 
-
 	set<string> get_passed_args() const { return passed_args; }
-
-
 
 private:
 	int n_iter_base;
@@ -483,6 +481,7 @@ private:
 	set<string> passed_args;
 	string ies_weight_csv;
 	string ies_subset_how;
+	string ies_localize_how;
 };
 
 ostream& operator<< (ostream &os, const PestppOptions& val);
