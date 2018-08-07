@@ -384,7 +384,7 @@ int PANTHERSlave::send_message(NetPackage &net_pack, const void *data, unsigned 
 	}
 	if (n >= max_send_fails)
 	{
-		cerr << "send to master failed " << max_send_fails << " times, giving..." << endl;
+		cerr << "send to master failed " << max_send_fails << " times, giving up..." << endl;
 	}
 	return err;
 }
@@ -622,6 +622,7 @@ void PANTHERSlave::start(const string &host, const string &port)
 			// run model
 			int group_id = net_pack.get_group_id();
 			int run_id = net_pack.get_run_id();
+			
 			cout << "received parameters (group id = " << group_id << ", run id = " << run_id << ")" << endl;
 			cout << "starting model run..." << endl;
 

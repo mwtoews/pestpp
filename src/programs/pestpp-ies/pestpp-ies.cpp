@@ -40,7 +40,7 @@ int main(int argc, char* argv[])
 	{
 #endif
 		cout << endl << endl;
-		cout << "             pestpp-ies.exe - a GLM iterative ensemble smoother" << endl;
+		cout << "             pestpp-ies: a GLM iterative ensemble smoother" << endl;
 		cout << "                     for PEST(++) datasets " << endl << endl;
 		cout << "                 by the PEST++ development team" << endl << endl << endl;
 		// build commandline
@@ -271,7 +271,7 @@ int main(int argc, char* argv[])
 		if (pp_args.find("OVERDUE_GIVEUP_FAC") == pp_args.end())
 			ppo->set_overdue_giveup_fac(2.0);
 		if (pp_args.find("OVERDUE_resched_FAC") == pp_args.end())
-			ppo->set_overdue_giveup_fac(1.15);
+			ppo->set_overdue_reched_fac(1.15);
 		RunManagerAbstract *run_manager_ptr;
 
 

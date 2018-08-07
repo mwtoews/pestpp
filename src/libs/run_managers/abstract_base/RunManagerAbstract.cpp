@@ -37,8 +37,8 @@ RunManagerAbstract::RunManagerAbstract(const vector<string> _comline_vec,
 {
 	cout << endl;
 	cout << "             Generalized Run Manager Interface" << endl;
-	cout << "                       developed by:" << endl << endl;
-	cout << "                        The PEST++ Development Team" << endl;
+	cout << "                             by:" << endl << endl;
+	cout << "               The PEST++ Development Team" << endl;
 
 	cout << endl << endl;
 	cur_group_id = -1;

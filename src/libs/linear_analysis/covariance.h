@@ -70,7 +70,7 @@ public:
 	Mat zero();
 
 
-	Mat get(const vector<string> &other_row_names, const vector<string> &other_col_names);
+	Mat get(const vector<string> &other_row_names, const vector<string> &other_col_names,bool update=true);
 	Mat leftCols(const int idx);
 	Mat rightCols(const int idx);
 	Mat extract(const vector<string> &extract_row_names, const vector<string> &extract_col_names);
@@ -84,6 +84,7 @@ public:
 
 	bool isdiagonal();
 
+	void update_sets();
 
 protected:
 	bool autoalign;
@@ -94,6 +95,8 @@ protected:
 	Eigen::SparseMatrix<double> lower_chol;
 	vector<string> row_names;
 	vector<string> col_names;
+	set<string> row_set;
+	set<string> col_set;
 	int icode = 2;
 	MatType mattype;
 
@@ -109,8 +112,8 @@ public:
 	Covariance(string filename);
 	Covariance(Mat _mat);
 	Covariance(vector<string> _row_names, Eigen::SparseMatrix<double> _matrix, Mat::MatType _mattype = Mat::MatType::SPARSE);
-
-	Covariance get(const vector<string> &other_names);
+	
+	Covariance get(const vector<string> &other_names, bool update=true);
 	Mat get(vector<string> &other_row_names, vector<string> &other_col_names){ return Mat::get(other_row_names, other_col_names); }
 	void drop(vector<string> &drop_names);
 	Covariance extract(vector<string> &extract_names);

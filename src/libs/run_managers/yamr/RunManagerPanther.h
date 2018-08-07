@@ -64,6 +64,7 @@ public:
 	int get_failed_pings() const;
 	void reset_failed_pings();
 	void reset_last_ping_time();
+	void reset_runtime() { run_time = std::chrono::system_clock::duration::zero(); }
 	int seconds_since_last_ping_time() const;
 	~SlaveInfoRec(){}
 private:
