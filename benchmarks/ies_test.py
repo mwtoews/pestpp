@@ -1870,6 +1870,60 @@ def csv_tests():
 
 #def tenpar_include_base_test():
 
+def tenpar_restart_binary_test():
+    """tenpar restart tests"""
+    model_d = "ies_10par_xsec"
+    test_d = os.path.join(model_d, "master_binary_restart")
+    template_d = os.path.join(model_d, "template")
+    pst = pyemu.Pst(os.path.join(template_d, "pest.pst"))
+    num_reals = 10
+    if os.path.exists(test_d):
+        shutil.rmtree(test_d)
+    # shutil.copytree(template_d, test_d)
+    pst.pestpp_options = {"ies_num_reals": num_reals}
+    pst.pestpp_options["ies_save_binary"] = True
+    pst.pestpp_options["ies_lambda_mults"] = 1.0
+    pst.pestpp_options["lambda_scale_fac"] = 1.0
+    pst.control_data.noptmax = -1
+    pst.write(os.path.join(template_d, "pest_restart.pst"))
+    pyemu.os_utils.start_slaves(template_d, exe_path, "pest_restart.pst", num_slaves=10,
+                                slave_root=model_d, master_dir=test_d, port=port)
+    # pyemu.os_utils.run("{0} {1}".format(exe_path, "pest_restart.pst"), cwd=test_d)
+    for f in ["pest_restart.0.par.jcb","pest_restart.base.obs.jcb","pest_restart.0.obs.jcb"]:
+        shutil.copy2(os.path.join(test_d,f),os.path.join(template_d,f))
+    oe = pyemu.ObservationEnsemble.from_binary(pst,os.path.join(test_d,"pest_restart.0.obs.jcb"))
+    pe = pyemu.ParameterEnsemble.from_binary(pst, os.path.join(test_d, "pest_restart.0.par.jcb"))
+    df1 = pd.read_csv(os.path.join(test_d,"pest_restart.phi.actual.csv"),index_col=0)
+    assert oe.shape == (num_reals,pst.nobs)
+    assert pe.shape == (num_reals,pst.npar)
+
+    pst.pestpp_options["ies_par_en"] = "pest_restart.0.par.jcb"
+    pst.pestpp_options["ies_obs_en"] = "pest_restart.base.obs.jcb"
+    pst.pestpp_options["ies_restart_obs_en"] = "pest_restart.0.obs.jcb"
+    pst.write(os.path.join(template_d, "pest_restart_2.pst"))
+    pyemu.os_utils.start_slaves(template_d, exe_path, "pest_restart_2.pst", num_slaves=10,
+                                slave_root=model_d, master_dir=test_d+"_2", port=port)
+    pe = pyemu.ParameterEnsemble.from_binary(pst, os.path.join(test_d+"_2", "pest_restart_2.0.par.jcb"))
+    df2 = pd.read_csv(os.path.join(test_d+"_2", "pest_restart_2.phi.actual.csv"), index_col=0)
+    assert oe.shape == (num_reals, pst.nobs)
+    assert pe.shape == (num_reals, pst.npar)
+    diff = df1.loc[0,"mean"] - df2.loc[0,"mean"]
+    assert diff == 0.0,diff
+    #
+    # shutil.copy2(os.path.join(test_d, "pest_restart.base.obs.csv"), os.path.join(template_d, "base.csv"))
+    #
+    # pst.pestpp_options = {}
+    # pst.pestpp_options["ies_par_en"] = "par1.csv"
+    # pst.pestpp_options["ies_lambda_mults"] = 1.0
+    # pst.pestpp_options["lambda_scale_fac"] = 1.0
+    # # pst.pestpp_options["ies_num_reals"] = num_reals
+    # pst.pestpp_options["ies_restart_obs_en"] = "restart1.csv"
+    # pst.pestpp_options["ies_obs_en"] = "base.csv"
+    # pst.control_data.noptmax = 3
+    # pst.write(os.path.join(template_d, "pest_restart.pst"))
+    # pyemu.os_utils.start_slaves(template_d, exe_path, "pest_restart.pst", num_slaves=10,
+    #                             slave_root=model_d, master_dir=test_d, port=port)
+    # assert os.path.exists(os.path.join(test_d, "pest_restart.3.par.csv"))
 
 def tenpar_restart_test():
     """tenpar restart tests"""
@@ -2324,39 +2378,39 @@ if __name__ == "__main__":
     # write_empty_test_matrix()
 
     setup_suite_dir("ies_10par_xsec")
-    # setup_suite_dir("ies_freyberg")
-    # run_suite("ies_10par_xsec")
-    # run_suite("ies_freyberg")
-    # rebase("ies_freyberg")
-    # rebase("ies_10par_xsec")
-    # compare_suite("ies_10par_xsec")
-    # compare_suite("ies_freyberg")
+    setup_suite_dir("ies_freyberg")
+    run_suite("ies_10par_xsec")
+    run_suite("ies_freyberg")
+    rebase("ies_freyberg")
+    rebase("ies_10par_xsec")
+    compare_suite("ies_10par_xsec")
+    compare_suite("ies_freyberg")
 
     # # full list of tests
-    # tenpar_subset_test()
-    # tenpar_full_cov_test()
-    # test_freyberg_full_cov_reorder()
-    # test_freyberg_full_cov_reorder_run()
-    # test_freyberg_full_cov_reorder_run()
-    # eval_freyberg_full_cov()
-    # tenpar_tight_tol_test()
-    # test_chenoliver()
-    # tenpar_narrow_range_test()
-    # test_freyberg_ineq()
-    # tenpar_fixed_test()
-    # tenpar_fixed_test2()
-    # tenpar_subset_how_test()
-    # tenpar_localizer_test1()
-    # tenpar_localizer_test2()
+    tenpar_subset_test()
+    tenpar_full_cov_test()
+    test_freyberg_full_cov_reorder()
+    test_freyberg_full_cov_reorder_run()
+    test_freyberg_full_cov_reorder_run()
+    eval_freyberg_full_cov()
+    tenpar_tight_tol_test()
+    test_chenoliver()
+    tenpar_narrow_range_test()
+    test_freyberg_ineq()
+    tenpar_fixed_test()
+    tenpar_fixed_test2()
+    tenpar_subset_how_test()
+    tenpar_localizer_test1()
+    tenpar_localizer_test2()
     tenpar_localizer_test3()
-    # freyberg_localizer_eval1()
-    # freyberg_localizer_eval2()
-    # freyberg_localizer_test3()
-    # freyberg_dist_local_test()
-    # tenpar_restart_test()
-    # csv_tests()
-    # tenpar_rns_test()
-    # clues_longnames_test()
-    # tenpar_localize_how_test()
+    freyberg_localizer_eval1()
+    freyberg_localizer_eval2()
+    freyberg_localizer_test3()
+    freyberg_dist_local_test()
+    tenpar_restart_binary_test()
+    csv_tests()
+    tenpar_rns_test()
+    clues_longnames_test()
+    tenpar_localize_how_test()
 
     # freyberg_dist_local_invest()

@@ -849,7 +849,7 @@ void Ensemble::append(string real_name, const Transformable &trans)
 	real_names.push_back(real_name);
 }
 
-void Ensemble::to_binary(string file_name)
+void Ensemble::to_binary(string file_name,bool transposed)
 {
 	ofstream fout(file_name, ios::binary);
 	if (!fout.good())
@@ -865,10 +865,22 @@ void Ensemble::to_binary(string file_name)
 	char obs_name[20];
 
 	// write header
-	tmp = -n_var;
-	fout.write((char*)&tmp, sizeof(tmp));
-	tmp = -n_real;
-	fout.write((char*)&tmp, sizeof(tmp));
+	if (transposed)
+	{
+		tmp = -n_real;
+		fout.write((char*)&tmp, sizeof(tmp));
+		tmp = -n_var;
+		fout.write((char*)&tmp, sizeof(tmp));
+
+	}
+	else
+	{
+		tmp = -n_var;
+		fout.write((char*)&tmp, sizeof(tmp));
+		tmp = -n_real;
+		fout.write((char*)&tmp, sizeof(tmp));
+	}
+	
 
 	//write number nonzero elements in jacobian (includes prior information)
 	n = reals.size();
@@ -876,40 +888,78 @@ void Ensemble::to_binary(string file_name)
 
 	//write matrix
 	n = 0;
-	map<string, double>::const_iterator found_pi_par;
-	map<string, double>::const_iterator not_found_pi_par;
+	//map<string, double>::const_iterator found_pi_par;
+	//map<string, double>::const_iterator not_found_pi_par;
 	//icount = row_idxs + 1 + col_idxs * self.shape[0]
-	for (int irow = 0; irow<n_real; ++irow)
+	if (transposed)
 	{
-		for (int jcol=0;jcol<n_var;++jcol)
+		for (int irow = 0; irow < n_var; ++irow)
 		{
-			n = irow + 1 + (jcol * n_real);
-			data = reals(irow, jcol);
-			fout.write((char*) &(n), sizeof(n));
-			fout.write((char*) &(data), sizeof(data));
+			for (int jcol = 0; jcol < n_real; ++jcol)
+			{
+				n = irow + 1 + (jcol * n_var);
+				data = reals(jcol, irow);
+				fout.write((char*) &(n), sizeof(n));
+				fout.write((char*) &(data), sizeof(data));
+			}
+		}
+	}
+	else
+	{ 
+		for (int irow = 0; irow < n_real; ++irow)
+		{
+			for (int jcol = 0; jcol < n_var; ++jcol)
+			{
+				n = irow + 1 + (jcol * n_real);
+				data = reals(irow, jcol);
+				fout.write((char*) &(n), sizeof(n));
+				fout.write((char*) &(data), sizeof(data));
+			}
 		}
 	}
 	//save parameter names
-	for (vector<string>::const_iterator b = var_names.begin(), e = var_names.end();
-		b != e; ++b) {
-		string l = pest_utils::lower_cp(*b);
-		pest_utils::string_to_fortran_char(l, par_name, 12);
-		fout.write(par_name, 12);
-	}
 
-	//save observation and Prior information names
-	for (vector<string>::const_iterator b = real_names.begin(), e = real_names.end();
-		b != e; ++b) {
-		string l = pest_utils::lower_cp(*b);
-		pest_utils::string_to_fortran_char(l, obs_name, 20);
-		fout.write(obs_name, 20);
+	if (transposed)
+	{
+		//save observation and Prior information names
+		for (vector<string>::const_iterator b = real_names.begin(), e = real_names.end();
+			b != e; ++b) {
+			string l = pest_utils::lower_cp(*b);
+			pest_utils::string_to_fortran_char(l, par_name, 12);
+			fout.write(par_name, 12);
+		}
+		
+		for (vector<string>::const_iterator b = var_names.begin(), e = var_names.end();
+			b != e; ++b) {
+			string l = pest_utils::lower_cp(*b);
+			pest_utils::string_to_fortran_char(l, obs_name, 20);
+			fout.write(obs_name, 20);
+		}
+
+	}
+	else
+	{
+		for (vector<string>::const_iterator b = var_names.begin(), e = var_names.end();
+			b != e; ++b) {
+			string l = pest_utils::lower_cp(*b);
+			pest_utils::string_to_fortran_char(l, par_name, 12);
+			fout.write(par_name, 12);
+		}
+
+		//save observation and Prior information names
+		for (vector<string>::const_iterator b = real_names.begin(), e = real_names.end();
+			b != e; ++b) {
+			string l = pest_utils::lower_cp(*b);
+			pest_utils::string_to_fortran_char(l, obs_name, 20);
+			fout.write(obs_name, 20);
+		}
 	}
 	//save observation names (part 2 prior information)
 	fout.close();
 }
 
 
-void Ensemble::from_binary(string file_name, vector<string> &names, bool transposed)
+map<string,int> Ensemble::from_binary(string file_name, vector<string> &names, bool transposed)
 {
 	//load an ensemble from a binary jco-type file.  if transposed=true, reals is transposed and row/col names are swapped for var/real names.
 	//needed to store observation ensembles in binary since obs names are 20 chars and par names are 12 chars
@@ -998,6 +1048,12 @@ void Ensemble::from_binary(string file_name, vector<string> &names, bool transpo
 	if (transposed)
 		reals.transposeInPlace();
 	in.close();
+
+	map<string, int> header_info;
+	for (int i = 0; i < col_names->size(); i++)
+		header_info[col_names->at(i)] = i;
+	return header_info;
+
 }
 
 
@@ -1225,7 +1281,17 @@ void ParameterEnsemble::from_binary(string file_name)
 {
 	//overload for ensemble::from_binary - just need to set tstat
 	vector<string> names = pest_scenario_ptr->get_ctl_ordered_par_names();
-	Ensemble::from_binary(file_name, names, false);
+	map<string,int> header_info = Ensemble::from_binary(file_name, names, false);
+	ParameterInfo pi = pest_scenario_ptr->get_ctl_parameter_info();
+	ParameterRec::TRAN_TYPE ft = ParameterRec::TRAN_TYPE::FIXED;
+	for (auto &name : var_names)
+	{
+		if (pi.get_parameter_rec_ptr(name)->tranform_type == ft)
+		{
+			fixed_names.push_back(name);
+		}
+	}
+	fill_fixed(header_info);
 	save_fixed();
 	tstat = transStatus::CTL;
 }
@@ -1269,15 +1335,6 @@ void ParameterEnsemble::from_csv(string file_name)
 		throw runtime_error("error re-opening parameter csv " + file_name + " for reading");
 	getline(csv, line);
 	Ensemble::read_csv(num_reals, csv, header_info);
-	fill_fixed(header_info);
-	save_fixed();
-
-	tstat = transStatus::CTL;
-
-}
-
-void ParameterEnsemble::fill_fixed(const map<string, int> &header_info)
-{
 	ParameterInfo pi = pest_scenario_ptr->get_ctl_parameter_info();
 	ParameterRec::TRAN_TYPE ft = ParameterRec::TRAN_TYPE::FIXED;
 	for (auto &name : var_names)
@@ -1287,6 +1344,15 @@ void ParameterEnsemble::fill_fixed(const map<string, int> &header_info)
 			fixed_names.push_back(name);
 		}
 	}
+	fill_fixed(header_info);
+	save_fixed();
+
+	tstat = transStatus::CTL;
+
+}
+
+void ParameterEnsemble::fill_fixed(const map<string, int> &header_info)
+{
 	if (fixed_names.size() == 0)
 		return;
 	map<string, int> var_map;
@@ -1306,49 +1372,37 @@ void ParameterEnsemble::fill_fixed(const map<string, int> &header_info)
 		}
 	}
 	if (c > 0)
-		cout << "filled " << c << " fixed pars not listed in user-supplied par csv with `parval1` values from control file" << endl;
+		cout << "filled " << c << " fixed pars not listed in user-supplied par ensemble with `parval1` values from control file" << endl;
 
 
 }
 
 void ParameterEnsemble::save_fixed()
 {
-	ParameterInfo pi = pest_scenario_ptr->get_ctl_parameter_info();
-	ParameterRec::TRAN_TYPE ft = ParameterRec::TRAN_TYPE::FIXED;
-	for (auto &name : var_names)
+	
+	if (fixed_names.size() == 0)
+		return;
+	
+	Eigen::MatrixXd fixed_reals = get_eigen(vector<string>(), fixed_names);
+
+	for (int i = 0; i < real_names.size(); i++)
 	{
-		if (pi.get_parameter_rec_ptr(name)->tranform_type == ft)
+		for (int j = 0; j < fixed_names.size(); j++)
 		{
-			fixed_names.push_back(name);
+			pair<string, string> key(real_names[i], fixed_names[j]);
+			fixed_map[key] = fixed_reals(i, j);
+
 		}
 	}
-	if (fixed_names.size() > 0)
+	// add the "base" if its not in the real names already
+	if (find(real_names.begin(), real_names.end(), "base") == real_names.end())
 	{
-		cout << "fixed parameters found in user-supplied parameter ensemble..." << endl;
-		cout << "these values will be used during forward model runs instead of 'parval1'" << endl;
-
-		Eigen::MatrixXd fixed_reals = get_eigen(vector<string>(), fixed_names);
-
-		for (int i = 0; i < real_names.size(); i++)
+		Parameters pars = pest_scenario_ptr->get_ctl_parameters();
+		for (auto fname : fixed_names)
 		{
-			for (int j = 0; j < fixed_names.size(); j++)
-			{
-				pair<string, string> key(real_names[i], fixed_names[j]);
-				fixed_map[key] = fixed_reals(i, j);
-
-			}
+			pair<string, string> key("base", fname);
+			fixed_map[key] = pars[fname];
 		}
-		// add the "base" if its not in the real names already
-		if (find(real_names.begin(), real_names.end(), "base") == real_names.end())
-		{
-			Parameters pars = pest_scenario_ptr->get_ctl_parameters();
-			for (auto fname : fixed_names)
-			{
-				pair<string, string> key("base", fname);
-				fixed_map[key] = pars[fname];
-			}
-		}
-
 	}
 }
 
@@ -1393,7 +1447,19 @@ void ParameterEnsemble::to_binary(string file_name)
 	}
 
 	vector<string> vnames = var_names;
-	vnames.insert(vnames.end(), fixed_names.begin(), fixed_names.end());
+	//vnames.insert(vnames.end(), fixed_names.begin(), fixed_names.end());
+	ParameterInfo pi = pest_scenario_ptr->get_ctl_parameter_info();
+	ParameterRec::TRAN_TYPE ft = ParameterRec::TRAN_TYPE::FIXED;
+	vector<string> f_names;
+	for (auto &name : pest_scenario_ptr->get_ctl_ordered_par_names())
+	{
+		if (pi.get_parameter_rec_ptr(name)->tranform_type == ft)
+		{
+			f_names.push_back(name);
+		}
+	}
+	vnames.insert(vnames.end(),f_names.begin(),f_names.end());
+	
 
 	int n_var = vnames.size();
 	int n_real = real_names.size();
@@ -1411,7 +1477,7 @@ void ParameterEnsemble::to_binary(string file_name)
 
 	//write number nonzero elements in jacobian (includes prior information)
 
-	n = reals.size() + (fixed_names.size() * shape().first);
+	n = reals.size() + (f_names.size() * shape().first);
 	fout.write((char*)&n, sizeof(n));
 
 	//write matrix
