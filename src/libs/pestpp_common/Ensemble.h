@@ -28,7 +28,7 @@ public:
 	//Ensemble get(vector<string> &_real_names, vector<string> &_var_names);
 
 	void to_csv(string file_name);
-	void to_binary(string file_name);
+	void to_binary(string file_name, bool transposed=false);
 	void from_eigen_mat(Eigen::MatrixXd mat, const vector<string> &_real_names, const vector<string> &_var_names);
 	pair<int, int> shape() { return pair<int, int>(reals.rows(), reals.cols()); }
 	void throw_ensemble_error(string message);
@@ -89,7 +89,7 @@ protected:
 	vector<string> real_names;	
 	map<string, int> var_map;
 	void read_csv(int num_reals,ifstream &csv, map<string,int> header_info);
-	void from_binary(string file_name, vector<string> &names,  bool transposed);
+	map<string,int> from_binary(string file_name, vector<string> &names,  bool transposed);
 	map<string,int> prepare_csv(const vector<string> &names, ifstream &csv, bool forgive);
 };
 
@@ -149,6 +149,7 @@ public:
 	ObservationEnsemble(Pest *_pest_scenario_ptr, Eigen::MatrixXd _reals, vector<string> _real_names, vector<string> _var_names);
 
 	ObservationEnsemble() { ; }
+	void to_binary(string filename) { Ensemble::to_binary(filename, true); }
 	void update_from_obs(int row_idx, Observations &obs);
 	void update_from_obs(string real_name, Observations &obs);
 	//void from_csv(string &file_name, const vector<string> &ordered_names);
