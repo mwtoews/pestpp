@@ -3,6 +3,8 @@
 
 #include <map>
 #include <random>
+#include <mutex>
+#include <thread>
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
 #include "FileManager.h"
@@ -93,6 +95,42 @@ private:
 
 };
 
+
+class LocalUpgradeThread
+{
+public:
+
+	LocalUpgradeThread(ParameterEnsemble _pe, ObservationEnsemble _oe,
+		PhiHandler &_ph, Localizer &_localizer, map<string,double> _parcov_inv_map, map<string,double> _weight_map);
+
+	ParameterEnsemble calc_upgrade(string par_name, vector<string> obs_names, double cur_lam, int num_reals);
+
+private:
+	double eigthresh;
+	int maxsing;
+	bool use_approx, use_prior_scaling;
+
+
+	ParameterEnsemble pe;
+	ObservationEnsemble oe;
+	PhiHandler &ph;
+	Localizer &localizer;
+	map<string, double> parcov_inv_map;
+	map<string, double> weight_map;
+
+
+	//these need mutex guards
+	void set_controls();
+	Eigen::DiagonalMatrix<double, Eigen::Dynamic> get_weight_matrix(vector<string> &obs_names);
+	Eigen::MatrixXd get_localizer_matrix(int num_reals, string par_name, vector<string> obs_names);
+	Eigen::MatrixXd get_obs_resid_matrix();
+	Eigen::MatrixXd get_par_resid_matrix();
+	Eigen::MatrixXd get_Am();
+	
+
+
+
+};
 
 class IterEnsembleSmoother
 {

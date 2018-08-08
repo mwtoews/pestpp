@@ -1,5 +1,7 @@
 #include <random>
 #include <iomanip>
+#include <mutex>
+#include <thread>
 #include "Ensemble.h"
 #include "RestartController.h"
 #include "utilities.h"
@@ -1844,38 +1846,7 @@ void IterEnsembleSmoother::initialize()
 	if (!pest_scenario.get_pestpp_options().get_ies_use_approx())
 	{
 		message(1, "using full (MAP) update solution");
-		/*performance_log->log_event("calculating 'Am' matrix for full solution");
-		message(1, "forming Am matrix");
-		double scale = (1.0 / (sqrt(double(pe.shape().first - 1))));
-		Eigen::MatrixXd par_diff = scale * pe.get_eigen_mean_diff();
-		par_diff.transposeInPlace();
-		if (verbose_level > 1)
-		{
-			cout << "prior_par_diff: " << par_diff.rows() << ',' << par_diff.cols() << endl;
-			if (verbose_level > 2)
-				save_mat("prior_par_diff.dat", par_diff);
-		}
-
-		Eigen::MatrixXd ivec, upgrade_1, s, V, U, st;
-		SVD_REDSVD rsvd;
-		rsvd.set_performance_log(performance_log);
-
-		rsvd.solve_ip(par_diff, s, U, V, pest_scenario.get_svd_info().eigthresh, pest_scenario.get_svd_info().maxsing);
-		par_diff.resize(0, 0);
-		Eigen::MatrixXd temp = s.asDiagonal();
-		Eigen::MatrixXd temp2 = temp.inverse();
-		Am = U * temp;
-		if (verbose_level > 1)
-		{
-			cout << "Am:" << Am.rows() << ',' << Am.cols() << endl;
-			if (verbose_level > 2)
-			{
-				save_mat("am.dat", Am);
-				save_mat("am_u.dat", U);
-				save_mat("am_v.dat", V);
-				save_mat("am_s_inv.dat", temp2);
-			}
-		}*/
+	
 	}
 
 	last_best_mean = ph.get_mean(PhiHandler::phiType::COMPOSITE);
@@ -2529,6 +2500,20 @@ ParameterEnsemble IterEnsembleSmoother::calc_upgrade(vector<string> &obs_names, 
 	pe_upgrade.set_eigen(upgrade_1);
 	return pe_upgrade;
 }
+
+LocalUpgradeThread::LocalUpgradeThread(ParameterEnsemble _pe,  ObservationEnsemble _oe,
+	PhiHandler &_ph, Localizer &_localizer, map<string, double> _parcov_inv_map, map<string, double> _weight_map):
+	localizer(_localizer), ph(_ph)
+{
+	pe = _pe;
+	oe = _oe;
+	ph = _ph;
+	localizer = _localizer;
+	parcov_inv_map = _parcov_inv_map;
+	weight_map = _weight_map;
+
+}
+
 
 
 ParameterEnsemble IterEnsembleSmoother::calc_localized_upgrade(double cur_lam)
