@@ -2531,6 +2531,34 @@ ParameterEnsemble IterEnsembleSmoother::calc_upgrade(vector<string> &obs_names, 
 }
 
 
+ParameterEnsemble IterEnsembleSmoother::calc_localized_upgrade(double cur_lam)
+{
+	stringstream ss;
+	int i = 0;
+	int lsize = localizer.get_localizer_map().size();
+	ParameterEnsemble pe_upgrade = pe.zeros_like();
+	for (auto local_pair : localizer.get_localizer_map())
+	{
+		ss.str("");
+		ss << "localized upgrade part " << i + 1 << " of " << lsize;
+		message(2, ss.str());
+		ParameterEnsemble pe_local;
+		if (localizer.get_how() == Localizer::How::PARAMETERS)
+		{
+			pe_local = calc_upgrade(local_pair.second.first, local_pair.second.second, cur_lam, pe.shape().first, local_pair.first);
+		}
+		else
+		{
+			pe_local = calc_upgrade(local_pair.second.first, local_pair.second.second, cur_lam, pe.shape().first);
+		}
+
+		pe_upgrade.add_2_cols_ip(pe_local);
+		i++;
+	}
+	return pe_upgrade;
+
+}
+
 bool IterEnsembleSmoother::solve_new()
 {
 	stringstream ss;
@@ -2575,31 +2603,12 @@ bool IterEnsembleSmoother::solve_new()
 		double cur_lam = last_best_lam * lam_mult;
 		ss << "starting calcs for lambda" << cur_lam;
 		message(1, "starting lambda calcs for lambda", cur_lam);
-		ParameterEnsemble pe_upgrade = pe.zeros_like();
+		ParameterEnsemble pe_upgrade;
 		//pe_upgrade.to_csv("test.csv");
 		if (use_localizer)
 		{
-			int i = 0;
-			int lsize = localizer.get_localizer_map().size();
-			for (auto local_pair : localizer.get_localizer_map())
-			{
-				ss.str("");
-				ss << "localized upgrade part " << i + 1 << " of " << lsize;
-				message(2, ss.str());
-				ParameterEnsemble pe_local;
-				if (localizer.get_how() == Localizer::How::PARAMETERS)
-				{
-					pe_local = calc_upgrade(local_pair.second.first, local_pair.second.second, cur_lam, pe.shape().first, local_pair.first);
-				}
-				else
-				{
-					pe_local = calc_upgrade(local_pair.second.first, local_pair.second.second, cur_lam, pe.shape().first);
-				}
-				
-				pe_upgrade.add_2_cols_ip(pe_local);
-				i++;
-			}
 			
+			pe_upgrade = calc_localized_upgrade(cur_lam);
 		}
 		else
 			pe_upgrade = calc_upgrade(act_obs_names, act_par_names, cur_lam, pe.shape().first);
