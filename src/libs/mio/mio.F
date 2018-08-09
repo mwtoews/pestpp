@@ -683,7 +683,7 @@ subroutine mio_write_model_input_files(ifail,npar,apar,pval)
         integer, intent(out)                             :: ifail  ! error condition indicator
         integer, intent(in)                              :: npar   ! number of parameters
         !character (len=*), intent(in), dimension(npar)   :: apar   ! parameter names
-        character*50  :: apar(npar)
+        character*200  :: apar(npar)
         double precision, intent(inout), dimension(npar) :: pval   ! parameter values
         !character (len=*), intent(in), optional          :: asldir ! slave directory - jwhite
         character (len=1)                                :: asldir ! slave directory - jwhite
@@ -694,10 +694,10 @@ subroutine mio_write_model_input_files(ifail,npar,apar,pval)
         integer tpar_len
         double precision                 :: tval
         character (len=1)                :: aa
-        character (len=50)               :: tpar
-        character (len=200)              :: mifile
+        character (len=name_len)               :: tpar
+        character (len=name_len)              :: mifile
         type(c_ptr) cptr
-        tpar_len = 50
+        tpar_len = name_len
         errsub='Error writing parameters to model input file(s):'
         ifail=0
         idir=0
