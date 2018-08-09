@@ -276,7 +276,7 @@ void ModelInterface::run(pest_utils::thread_flag* terminate, pest_utils::thread_
 		try
 		{
 			mio_write_model_input_files_w_(&ifail, &npar,
-				pest_utils::StringvecFortranCharArray(par_name_vec, 50, pest_utils::TO_LOWER).get_prt(),
+				pest_utils::StringvecFortranCharArray(par_name_vec, 200, pest_utils::TO_LOWER).get_prt(),
 				&par_vals[0]);
 		}
 		catch (exception &e)
