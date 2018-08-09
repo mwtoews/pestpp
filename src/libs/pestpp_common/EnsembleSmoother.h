@@ -101,22 +101,10 @@ class LocalUpgradeThread
 public:
 
 	LocalUpgradeThread(ParameterEnsemble _pe, ObservationEnsemble _oe,
-		PhiHandler &_ph, Localizer &_localizer, map<string,double> _parcov_inv_map, map<string,double> _weight_map);
+		PhiHandler &_ph, Localizer &_localizer, map<string,double> _parcov_inv_map,
+		map<string,double> _weight_map, ParameterEnsemble &_pe_upgrade);
 
 	ParameterEnsemble calc_upgrade(string par_name, vector<string> obs_names, double cur_lam, int num_reals);
-
-private:
-	double eigthresh;
-	int maxsing;
-	bool use_approx, use_prior_scaling;
-
-	ParameterEnsemble pe;
-	ObservationEnsemble oe;
-	PhiHandler &ph;
-	Localizer &localizer;
-	map<string, double> parcov_inv_map;
-	map<string, double> weight_map;
-
 
 	//these need mutex guards
 	void set_controls();
@@ -125,6 +113,24 @@ private:
 	Eigen::MatrixXd get_obs_resid_matrix();
 	Eigen::MatrixXd get_par_resid_matrix();
 	Eigen::MatrixXd get_Am();
+	void put_results(ParameterEnsemble &pe);
+
+private:
+	double eigthresh;
+	int maxsing;
+	bool use_approx, use_prior_scaling;
+
+	ParameterEnsemble pe;
+	ParameterEnsemble &pe_upgrade;
+	ObservationEnsemble oe;
+	PhiHandler &ph;
+	Localizer &localizer;
+	map<string, double> parcov_inv_map;
+	map<string, double> weight_map;
+
+	mutex ctrl_lock, weight_lock, loc_lock, obs_lock, par_lock, am_lock, put_lock;
+
+	
 	
 };
 
@@ -190,6 +196,7 @@ private:
 	ParameterEnsemble calc_upgrade(vector<string> &obs_names, vector<string> &par_names,double lamb, int num_reals,string local_col_name=string());
 
 	ParameterEnsemble calc_localized_upgrade(double cur_lam);
+	ParameterEnsemble calc_localized_upgrade_threaded(double cur_lam);
 
 	//EnsemblePair run_ensemble(ParameterEnsemble &_pe, ObservationEnsemble &_oe);
 	vector<int> run_ensemble(ParameterEnsemble &_pe, ObservationEnsemble &_oe, const vector<int> &real_idxs=vector<int>());
