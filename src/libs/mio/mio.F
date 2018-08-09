@@ -2173,7 +2173,7 @@ end module model_input_output_interface
         integer, intent(out)                             :: ifail  ! error condition indicator
         integer, intent(in)                              :: npar   ! number of parameters
         !character (len=*), intent(in), dimension(npar)   :: apar   ! parameter names
-        character*50  :: apar(npar)
+        character*200  :: apar(npar)
         double precision, intent(inout), dimension(npar) :: pval   ! parameter values
         call mio_write_model_input_files(ifail,npar,apar,pval)
         return 
@@ -2185,7 +2185,7 @@ end module model_input_output_interface
         integer, intent(out)                            :: ifail   ! error indicator
         integer, intent(in)                             :: nobs    ! number of observations
         !character (len=*), intent(in), dimension(nobs)  :: aobs    ! observation names
-        character*50 :: aobs(nobs)
+        character*200 :: aobs(nobs)
         double precision, intent(out), dimension(nobs)  :: obs     ! observation values
         !character (len=*), intent(out)                  :: instruction ! instruction of error
         character (len=20000)  :: instruction
