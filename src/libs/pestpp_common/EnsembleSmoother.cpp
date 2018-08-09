@@ -103,7 +103,6 @@ Eigen::MatrixXd PhiHandler::get_obs_resid(ObservationEnsemble &oe)
 {
 	Eigen::MatrixXd resid = oe.get_eigen(vector<string>(), oe_base->get_var_names()) -
 		oe_base->get_eigen(oe.get_real_names(), vector<string>());
-
 	apply_ineq_constraints(resid);
 	return resid;
 }
@@ -111,8 +110,8 @@ Eigen::MatrixXd PhiHandler::get_obs_resid(ObservationEnsemble &oe)
 
 Eigen::MatrixXd PhiHandler::get_obs_resid_subset(ObservationEnsemble &oe)
 {
-
 	Eigen::MatrixXd resid = oe.get_eigen() - oe_base->get_eigen(oe.get_real_names(), oe.get_var_names());
+	apply_ineq_constraints(resid);
 	return resid;
 }
 
@@ -552,15 +551,16 @@ map<string, Eigen::VectorXd> PhiHandler::calc_regul(ParameterEnsemble & pe)
 void PhiHandler::apply_ineq_constraints(Eigen::MatrixXd &resid)
 {
 	vector<string> names = oe_base->get_var_names();
-	vector<string> lt_names = get_lt_obs_names(), gt_names = get_gt_obs_names();
-	vector<string> act_obs_names = pest_scenario->get_ctl_ordered_nz_obs_names();
+	//vector<string> lt_names = get_lt_obs_names(), gt_names = get_gt_obs_names();
+	//vector<string> act_obs_names = pest_scenario->get_ctl_ordered_nz_obs_names();
+	
 	assert(names.size() == resid.cols());
 
 	map<string, double> lt_vals,gt_vals;
 	Observations obs = pest_scenario->get_ctl_observations();
-	for (auto &n : lt_names)
+	for (auto &n : lt_obs_names)
 		lt_vals[n] = obs.get_rec(n);
-	for (auto &n : gt_names)
+	for (auto &n : gt_obs_names)
 		gt_vals[n] = obs.get_rec(n);
 	if ((lt_vals.size() == 0) && (gt_vals.size() == 0))
 		return;

@@ -110,7 +110,6 @@ private:
 	int maxsing;
 	bool use_approx, use_prior_scaling;
 
-
 	ParameterEnsemble pe;
 	ObservationEnsemble oe;
 	PhiHandler &ph;
@@ -127,9 +126,6 @@ private:
 	Eigen::MatrixXd get_par_resid_matrix();
 	Eigen::MatrixXd get_Am();
 	
-
-
-
 };
 
 class IterEnsembleSmoother
