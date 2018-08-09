@@ -231,6 +231,7 @@ bool Localizer::initialize(PerformanceLog *performance_log)
 
 	
 	//cout << "done" << endl;
+	return true;
 }
 
 Eigen::MatrixXd Localizer::get_localizing_hadamard_matrix(int num_reals, string col_name, vector<string> &obs_names)
