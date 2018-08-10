@@ -110,8 +110,9 @@ public:
 		map<string, double> _weight_map, ParameterEnsemble &_pe_upgrade);
 
 	ParameterEnsemble calc_upgrade(vector<string> par_names, vector<string> obs_names, double cur_lam, int num_reals);
+	Eigen::DiagonalMatrix<double, Eigen::Dynamic> LocalUpgradeThread::get_matrix_from_map(vector<string> &names, map<string, double> &dmap);	
+	Eigen::MatrixXd LocalUpgradeThread::get_matrix_from_map(int num_reals, vector<string> &names, map<string, Eigen::VectorXd> &emap);
 
-	Eigen::MatrixXd LocalUpgradeThread::get_matrix_from_map(int num_reals, vector<string> &names, map<string, Eigen::VectorXd> emap);
 
 	//these need mutex guards
 	void set_controls();
@@ -139,10 +140,12 @@ private:
 	map<string, Eigen::VectorXd> par_resid_map, par_diff_map;
 	map<string, Eigen::VectorXd> obs_resid_map, obs_diff_map;
 
-	Eigen::MatrixXd par_resid, par_diff;
-	Eigen::MatrixXd obs_resid, obs_diff;
+	Eigen::MatrixXd par_resid, par_diff, Am;
+	Eigen::MatrixXd obs_resid, obs_diff, loc;
 
-	mutex ctrl_lock, weight_lock, loc_lock;
+	Eigen::DiagonalMatrix<double, Eigen::Dynamic> weights, parcov_inv;
+
+	mutex ctrl_lock, weight_lock, loc_lock, parcov_lock;
 	mutex obs_resid_lock, obs_diff_lock, par_resid_lock;
 	mutex par_diff_lock, am_lock, put_lock;
 	

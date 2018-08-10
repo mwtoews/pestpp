@@ -2545,35 +2545,90 @@ void LocalUpgradeThread::set_components(int num_reals, vector<string> &par_names
 	par_diff.resize(0, 0);
 	obs_resid.resize(0, 0);
 	obs_diff.resize(0, 0);
-	unique_lock<mutex> obs_diff_guard(obs_diff_lock);
-	unique_lock<mutex> obs_resid_guard(obs_resid_lock);
-	unique_lock<mutex> par_diff_guard(par_diff_lock);
-	unique_lock<mutex> par_resid_guard(par_resid_lock);
+	loc.resize(0, 0);
+	Am.resize(0, 0);
+	weights.resize(0);
+	parcov_inv.resize(0);
 
+
+	unique_lock<mutex> obs_diff_guard(obs_diff_lock, defer_lock);
+	unique_lock<mutex> obs_resid_guard(obs_resid_lock, defer_lock);
+	unique_lock<mutex> par_diff_guard(par_diff_lock, defer_lock);
+	unique_lock<mutex> par_resid_guard(par_resid_lock, defer_lock);
+	unique_lock<mutex> loc_guard(loc_lock, defer_lock);
+	unique_lock<mutex> weight_guard(weight_lock, defer_lock);
+	unique_lock<mutex> parcov_guard(parcov_lock, defer_lock);
+	lock_guard<mutex> am_guard(am_lock);
 
 	while (true)
 	{
-		if ((par_resid.rows() > 0) &&
+		if (((use_approx) || (par_resid.rows() > 0)) &&
+			(weights.size() > 0) &&
+			(parcov_inv.size() > 0) &&
 			(par_diff.rows() > 0) &&
 			(obs_resid.rows() > 0) &&
-			(obs_diff.rows() > 0))
+			(obs_diff.rows() > 0) && 
+			((par_names.size() > 1) || (loc.rows() > 0)))
 			break;
-		if (obs_diff_guard.try_lock())
+		if ((par_names.size() > 1) && (loc.rows() == 0) && (loc_guard.try_lock()))
+		{
+			loc = localizer.get_localizing_hadamard_matrix(num_reals, par_names[0], obs_names);
+			loc_guard.unlock();
+		}
+		if ((obs_diff.rows() == 0) && (obs_diff_guard.try_lock()))
 		{
 			obs_diff = get_matrix_from_map(num_reals, obs_names, obs_diff_map);
 			obs_diff_guard.unlock();
 		}
-
-		
+		if ((obs_resid.rows() == 0) && (obs_resid_guard.try_lock()))
+		{
+			obs_resid = get_matrix_from_map(num_reals, obs_names, obs_resid_map);
+			obs_resid_guard.unlock();
+		}
+		if ((par_diff.rows() == 0) && (par_diff_guard.try_lock()))
+		{
+			par_diff = get_matrix_from_map(num_reals, par_names, par_diff_map);
+			par_diff_guard.unlock();
+		}
+		if ((par_resid.rows() == 0) && (par_resid_guard.try_lock()))
+		{
+			par_resid = get_matrix_from_map(num_reals, par_names, par_resid_map);
+			par_resid_guard.unlock();
+		}
+		if ((weights.rows() == 0) && (weight_guard.try_lock()))
+		{
+			weights = get_matrix_from_map(obs_names, weight_map);
+			weight_lock.unlock();
+		}
+		if ((parcov_inv.rows() == 0) && (parcov_guard.try_lock()))
+		{
+			parcov_inv = get_matrix_from_map(par_names, parcov_inv_map);
+			parcov_guard.unlock();
+		}
 	}
+	//todo: get Am here if needed
 }
 
 
-Eigen::MatrixXd LocalUpgradeThread::get_matrix_from_map(int num_reals,vector<string> &names, map<string, Eigen::VectorXd> emap)
+Eigen::MatrixXd LocalUpgradeThread::get_matrix_from_map(int num_reals,vector<string> &names, map<string, Eigen::VectorXd> &emap)
 {
 	Eigen::MatrixXd mat(num_reals, names.size());
 	return mat;
 }
+
+Eigen::DiagonalMatrix<double, Eigen::Dynamic> LocalUpgradeThread::get_matrix_from_map(vector<string> &names, map<string, double> &dmap)
+{
+	Eigen::VectorXd vec(names.size());
+	int i = 0;
+	for (auto name : names)
+	{
+		vec[i] = dmap.at(name);
+		++i;
+	}
+	Eigen::DiagonalMatrix<double, Eigen::Dynamic> m = vec.asDiagonal();
+	return m;
+}
+
 
 Eigen::DiagonalMatrix<double, Eigen::Dynamic> LocalUpgradeThread::get_weight_matrix(vector<string> &obs_names)
 {
@@ -2591,11 +2646,11 @@ Eigen::DiagonalMatrix<double, Eigen::Dynamic> LocalUpgradeThread::get_weight_mat
 }
 
 
-Eigen::MatrixXd LocalUpgradeThread::get_localizer_matrix(int num_reals, string par_name, vector<string> obs_names)
-{
-	lock_guard<mutex> g(loc_lock);
-	return localizer.get_localizing_hadamard_matrix(num_reals,par_name, obs_names);
-}
+//Eigen::MatrixXd LocalUpgradeThread::get_localizer_matrix(int num_reals, string par_name, vector<string> obs_names)
+//{
+//	lock_guard<mutex> g(loc_lock);
+//	return localizer.get_localizing_hadamard_matrix(num_reals,par_name, obs_names);
+//}
 
 //Eigen::MatrixXd LocalUpgradeThread::get_obs_resid_matrix()
 //{
@@ -2703,8 +2758,9 @@ ParameterEnsemble IterEnsembleSmoother::calc_localized_upgrade_threaded(double c
 		localizer, parcov_inv_map, weight_map, pe_upgrade);
 	vector<string> nz_names = pest_scenario.get_ctl_ordered_nz_obs_names();
 	worker.set_controls();
-	worker.get_localizer_matrix(10,"K_01", nz_names);
-	worker.get_weight_matrix(nz_names);
+	worker.set_components(pe_upgrade.shape().first, par_names, obs_names);
+	//worker.get_localizer_matrix(10,"K_01", nz_names);
+	//worker.get_weight_matrix(nz_names);
 	//worker.set_components();
 	//worker.get_obs_resid_matrix(obs_names);
 	//worker.get_par_resid_matrix(par_names);
