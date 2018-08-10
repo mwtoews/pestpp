@@ -1042,7 +1042,21 @@ void IterEnsembleSmoother::sanity_checks()
 	string obs_csv = ppo->get_ies_obs_csv();
 	string restart = ppo->get_ies_obs_restart_csv();
 
+	if (pest_scenario.get_control_info().pestmode == ControlInfo::PestMode::REGUL)
+	{
+		warnings.push_back("'pestmode' == 'regularization', in pestpp-ies, this is controlled with the ++ies_reg_factor argument, resetting to 'estimation'");
+		//throw_ies_error("'pestmode' == 'regularization', please reset to 'estimation'");
+	}
+	else if (pest_scenario.get_control_info().pestmode == ControlInfo::PestMode::UNKNOWN)
+	{
+		warnings.push_back("unrecognized 'pestmode', using 'estimation'");
+	}
 
+
+	if (pest_scenario.get_ctl_ordered_pi_names().size() > 0)
+	{
+		warnings.push_back("prior information equations not supported in pestpp-ies, ignoring...");
+	}
 	double acc_phi = ppo->get_ies_accept_phi_fac();
 	if (acc_phi < 1.0)
 		errors.push_back("ies_accept_phi_fac < 1.0, not good!");
@@ -1115,6 +1129,7 @@ void IterEnsembleSmoother::sanity_checks()
 		message(0, "sanity_check warnings");
 		for (auto &w : warnings)
 			message(1, w);
+		message(1, "continuing initialization...");
 	}
 	if (errors.size() > 0)
 	{
@@ -1441,16 +1456,8 @@ void IterEnsembleSmoother::initialize()
 	act_obs_names = pest_scenario.get_ctl_ordered_nz_obs_names();
 	act_par_names = pest_scenario.get_ctl_ordered_adj_par_names();
 
-	if (pest_scenario.get_control_info().pestmode == ControlInfo::PestMode::REGUL)
-	{
-		message(1, "WARNING: 'pestmode' == 'regularization', in pestpp-ies, this is controlled with the ++ies_reg_factor argument, resetting to 'estimation'");
-		//throw_ies_error("'pestmode' == 'regularization', please reset to 'estimation'");
-	}
-	else if (pest_scenario.get_control_info().pestmode == ControlInfo::PestMode::UNKNOWN)
-	{
-		message(1,"WARNING: unrecognized 'pestmode', using 'estimation'");
-	}
-	else if ((pest_scenario.get_control_info().pestmode == ControlInfo::PestMode::PARETO))
+	
+	if ((pest_scenario.get_control_info().pestmode == ControlInfo::PestMode::PARETO))
 	{
 		message(1, "using pestpp-ies 'pareto' mode");
 		string pobs_group = pest_scenario.get_pareto_info().obsgroup;
@@ -1493,10 +1500,7 @@ void IterEnsembleSmoother::initialize()
 		//throw_ies_error("pareto mode not finished");
 	}
 
-	if (pest_scenario.get_ctl_ordered_pi_names().size() > 0)
-	{
-		message(1, "WARNING: prior information equations not supported in pestpp-ies, ignoring...");
-	}
+	
 
 	lam_mults = pest_scenario.get_pestpp_options().get_ies_lam_mults();
 	if (lam_mults.size() == 0)
