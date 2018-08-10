@@ -100,19 +100,27 @@ class LocalUpgradeThread
 {
 public:
 
-	LocalUpgradeThread(ParameterEnsemble _pe, ObservationEnsemble _oe,
+	/*LocalUpgradeThread(ParameterEnsemble _pe, ObservationEnsemble _oe,
 		PhiHandler &_ph, Localizer &_localizer, map<string,double> _parcov_inv_map,
-		map<string,double> _weight_map, ParameterEnsemble &_pe_upgrade);
+		map<string,double> _weight_map, ParameterEnsemble &_pe_upgrade);*/
 
-	ParameterEnsemble calc_upgrade(string par_name, vector<string> obs_names, double cur_lam, int num_reals);
+	LocalUpgradeThread(map<string, Eigen::VectorXd> &_par_resid_map, map<string, Eigen::VectorXd> &_par_diff_map,
+		map<string, Eigen::VectorXd> &_obs_resid_map, map<string, Eigen::VectorXd> &_obs_diff_map, 
+		Localizer &_localizer, map<string, double> _parcov_inv_map,
+		map<string, double> _weight_map, ParameterEnsemble &_pe_upgrade);
+
+	ParameterEnsemble calc_upgrade(vector<string> par_names, vector<string> obs_names, double cur_lam, int num_reals);
+
+	Eigen::MatrixXd LocalUpgradeThread::get_matrix_from_map(int num_reals, vector<string> &names, map<string, Eigen::VectorXd> emap);
 
 	//these need mutex guards
 	void set_controls();
 	Eigen::DiagonalMatrix<double, Eigen::Dynamic> get_weight_matrix(vector<string> &obs_names);
 	Eigen::MatrixXd get_localizer_matrix(int num_reals, string par_name, vector<string> obs_names);
-	Eigen::MatrixXd get_obs_resid_matrix();
-	Eigen::MatrixXd get_par_resid_matrix();
-	Eigen::MatrixXd get_Am();
+	//Eigen::MatrixXd get_obs_resid_matrix();
+	//Eigen::MatrixXd get_par_resid_matrix();
+	//Eigen::MatrixXd get_Am();
+	void set_components(int num_reals, vector<string> &par_names, vector<string> &obs_names);
 	void put_results(ParameterEnsemble &pe);
 
 private:
@@ -123,14 +131,20 @@ private:
 	ParameterEnsemble pe;
 	ParameterEnsemble &pe_upgrade;
 	ObservationEnsemble oe;
-	PhiHandler &ph;
+	//PhiHandler &ph;
 	Localizer &localizer;
 	map<string, double> parcov_inv_map;
 	map<string, double> weight_map;
 
-	mutex ctrl_lock, weight_lock, loc_lock, obs_lock, par_lock, am_lock, put_lock;
+	map<string, Eigen::VectorXd> par_resid_map, par_diff_map;
+	map<string, Eigen::VectorXd> obs_resid_map, obs_diff_map;
 
-	
+	Eigen::MatrixXd par_resid, par_diff;
+	Eigen::MatrixXd obs_resid, obs_diff;
+
+	mutex ctrl_lock, weight_lock, loc_lock;
+	mutex obs_resid_lock, obs_diff_lock, par_resid_lock;
+	mutex par_diff_lock, am_lock, put_lock;
 	
 };
 

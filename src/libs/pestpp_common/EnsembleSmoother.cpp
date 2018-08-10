@@ -2502,18 +2502,32 @@ ParameterEnsemble IterEnsembleSmoother::calc_upgrade(vector<string> &obs_names, 
 	return pe_upgrade;
 }
 
-LocalUpgradeThread::LocalUpgradeThread(ParameterEnsemble _pe,  ObservationEnsemble _oe,
-	PhiHandler &_ph, Localizer &_localizer, map<string, 
-	double> _parcov_inv_map, map<string, double> _weight_map,
-	ParameterEnsemble &_pe_upgrade):
-	localizer(_localizer), ph(_ph), pe_upgrade(_pe_upgrade)
+//LocalUpgradeThread::LocalUpgradeThread(ParameterEnsemble _pe,  ObservationEnsemble _oe,
+//	PhiHandler &_ph, Localizer &_localizer, map<string, 
+//	double> _parcov_inv_map, map<string, double> _weight_map,
+//	ParameterEnsemble &_pe_upgrade):
+//	localizer(_localizer), ph(_ph), pe_upgrade(_pe_upgrade)
+//{
+//	pe = _pe;
+//	oe = _oe;
+//	parcov_inv_map = _parcov_inv_map;
+//	weight_map = _weight_map;
+//
+//}
+
+LocalUpgradeThread::LocalUpgradeThread(map<string, Eigen::VectorXd> &_par_resid_map, map<string, Eigen::VectorXd> &_par_diff_map,
+	map<string, Eigen::VectorXd> &_obs_resid_map, map<string, Eigen::VectorXd> &_obs_diff_map,
+	Localizer &_localizer, map<string, double> _parcov_inv_map,
+	map<string, double> _weight_map, ParameterEnsemble &_pe_upgrade): par_resid_map(_par_resid_map),
+	par_diff_map(_par_diff_map), obs_resid_map(_obs_resid_map),obs_diff_map(_obs_diff_map),localizer(_localizer),
+	pe_upgrade(_pe_upgrade)
 {
-	pe = _pe;
-	oe = _oe;
 	parcov_inv_map = _parcov_inv_map;
 	weight_map = _weight_map;
-
+	set_controls();
 }
+
+
 
 void LocalUpgradeThread::set_controls()
 {
@@ -2525,6 +2539,41 @@ void LocalUpgradeThread::set_controls()
 	return;
 }
 
+void LocalUpgradeThread::set_components(int num_reals, vector<string> &par_names, vector<string> &obs_names)
+{
+	par_resid.resize(0, 0);
+	par_diff.resize(0, 0);
+	obs_resid.resize(0, 0);
+	obs_diff.resize(0, 0);
+	unique_lock<mutex> obs_diff_guard(obs_diff_lock);
+	unique_lock<mutex> obs_resid_guard(obs_resid_lock);
+	unique_lock<mutex> par_diff_guard(par_diff_lock);
+	unique_lock<mutex> par_resid_guard(par_resid_lock);
+
+
+	while (true)
+	{
+		if ((par_resid.rows() > 0) &&
+			(par_diff.rows() > 0) &&
+			(obs_resid.rows() > 0) &&
+			(obs_diff.rows() > 0))
+			break;
+		if (obs_diff_guard.try_lock())
+		{
+			obs_diff = get_matrix_from_map(num_reals, obs_names, obs_diff_map);
+			obs_diff_guard.unlock();
+		}
+
+		
+	}
+}
+
+
+Eigen::MatrixXd LocalUpgradeThread::get_matrix_from_map(int num_reals,vector<string> &names, map<string, Eigen::VectorXd> emap)
+{
+	Eigen::MatrixXd mat(num_reals, names.size());
+	return mat;
+}
 
 Eigen::DiagonalMatrix<double, Eigen::Dynamic> LocalUpgradeThread::get_weight_matrix(vector<string> &obs_names)
 {
@@ -2548,19 +2597,19 @@ Eigen::MatrixXd LocalUpgradeThread::get_localizer_matrix(int num_reals, string p
 	return localizer.get_localizing_hadamard_matrix(num_reals,par_name, obs_names);
 }
 
-Eigen::MatrixXd LocalUpgradeThread::get_obs_resid_matrix()
-{
-	lock_guard<mutex> g(obs_lock);
-	return ph.get_obs_resid_subset(oe);
-
-}
-
-Eigen::MatrixXd LocalUpgradeThread::get_par_resid_matrix()
-{
-	lock_guard<mutex> g(par_lock);
-	return ph.get_par_resid_subset(pe);
-
-}
+//Eigen::MatrixXd LocalUpgradeThread::get_obs_resid_matrix()
+//{
+//	lock_guard<mutex> g(obs_lock);
+//	return ph.get_obs_resid_subset(oe);
+//
+//}
+//
+//Eigen::MatrixXd LocalUpgradeThread::get_par_resid_matrix()
+//{
+//	lock_guard<mutex> g(par_lock);
+//	return ph.get_par_resid_subset(pe);
+//
+//}
 
 
 
@@ -2581,7 +2630,12 @@ ParameterEnsemble IterEnsembleSmoother::calc_localized_upgrade_threaded(double c
 	stringstream ss;
 	int i = 0;
 	int lsize = localizer.get_localizer_map().size();
-	ParameterEnsemble pe_upgrade = pe.zeros_like();
+	
+	ObservationEnsemble oe_upgrade(oe.get_pest_scenario_ptr(), oe.get_eigen(vector<string>(), act_obs_names, false), oe.get_real_names(), act_obs_names);
+	ParameterEnsemble pe_upgrade(pe.get_pest_scenario_ptr(), pe.get_eigen(vector<string>(), act_par_names, false), pe.get_real_names(), act_par_names);
+	pe_upgrade.set_zeros();
+
+	//ParameterEnsemble pe_upgrade = pe.zeros_like();
 	map<string, pair<vector<string>, vector<string>>> loc_map = localizer.get_localizer_map();
 	
 	//prep the fast look par cov info
@@ -2596,32 +2650,64 @@ ParameterEnsemble IterEnsembleSmoother::calc_localized_upgrade_threaded(double c
 		parcov_diag.from_diagonal(parcov);
 		parcov_inv = parcov_diag.inv().get_matrix().diagonal().cwiseSqrt();
 	}
-	vector<string> par_names = pe.get_var_names();
+	vector<string> par_names = pe_upgrade.get_var_names();
 	for (int i = 0; i < parcov_inv.size(); i++)
 		parcov_inv_map[par_names[i]] = parcov_inv[i];
 
+
 	//prep the fast lookup weights info
 	map<string, double> weight_map;
-	vector<string> obs_names = oe.get_var_names();
+	vector<string> obs_names = oe_upgrade.get_var_names();
 	double w;
 	for (int i = 0; i < obs_names.size(); i++)
 	{
 		w = pest_scenario.get_observation_info_ptr()->get_weight(obs_names[i]);
-		if (w == 0.0)
-			continue;
+		//don't want to filter on weight here - might be changing weights, etc...
+		//if (w == 0.0)
+		//	continue;
 		weight_map[obs_names[i]] = w;
 	}
 	
-	LocalUpgradeThread worker(pe, oe, ph, localizer, parcov_inv_map, weight_map, pe_upgrade);
+
+	//prep a fast look for obs, par and resid matrices - stored as column vectors in a map
+	map<string, Eigen::VectorXd> par_resid_map, obs_resid_map;
+	map<string, Eigen::VectorXd> par_diff_map, obs_diff_map;
+	Eigen::MatrixXd mat = ph.get_obs_resid_subset(oe_upgrade);
+	for (int i = 0; i < obs_names.size(); i++)
+	{
+		obs_resid_map[obs_names[i]] = mat.col(i);
+	}
+	mat = oe_upgrade.get_eigen_mean_diff();
+	for (int i = 0; i < obs_names.size(); i++)
+	{
+		obs_diff_map[obs_names[i]] = mat.col(i);
+	}
+	mat = ph.get_par_resid_subset(pe_upgrade);
+	for (int i = 0; i <par_names.size(); i++)
+	{
+		par_resid_map[par_names[i]] = mat.col(i);
+	}	
+	mat = pe_upgrade.get_eigen_mean_diff();
+	for (int i = 0; i <par_names.size(); i++)
+	{
+		par_diff_map[par_names[i]] = mat.col(i);
+	}
+	mat.resize(0, 0);
+
+	//LocalUpgradeThread worker(pe, oe, ph, localizer, parcov_inv_map, weight_map, pe_upgrade);
+	/*LocalUpgradeThread(map<string, Eigen::VectorXd> &_par_resid_map, map<string, Eigen::VectorXd> &_par_diff_map,
+		map<string, Eigen::VectorXd> &_obs_resid_map, map<string, Eigen::VectorXd> &_obs_diff_map,
+		Localizer &_localizer, map<string, double> _parcov_inv_map,
+		map<string, double> _weight_map, ParameterEnsemble &_pe_upgrade);*/
+	LocalUpgradeThread worker(par_resid_map, par_diff_map, obs_resid_map, obs_diff_map,
+		localizer, parcov_inv_map, weight_map, pe_upgrade);
 	vector<string> nz_names = pest_scenario.get_ctl_ordered_nz_obs_names();
 	worker.set_controls();
 	worker.get_localizer_matrix(10,"K_01", nz_names);
 	worker.get_weight_matrix(nz_names);
-	worker.get_obs_resid_matrix();
-	worker.get_par_resid_matrix();
-
-
-
+	//worker.set_components();
+	//worker.get_obs_resid_matrix(obs_names);
+	//worker.get_par_resid_matrix(par_names);
 
 	for (auto local_pair : localizer.get_localizer_map())
 	{

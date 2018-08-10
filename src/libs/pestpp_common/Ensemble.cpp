@@ -1207,6 +1207,11 @@ void ParameterEnsemble::set_pest_scenario(Pest *_pest_scenario)
 }
 
 
+void ParameterEnsemble::set_zeros()
+{
+	reals.setZero();
+}
+
 ParameterEnsemble ParameterEnsemble::zeros_like()
 {
 
