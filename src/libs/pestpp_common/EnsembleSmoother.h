@@ -107,7 +107,7 @@ public:
 	LocalUpgradeThread(map<string, Eigen::VectorXd> &_par_resid_map, map<string, Eigen::VectorXd> &_par_diff_map,
 		map<string, Eigen::VectorXd> &_obs_resid_map, map<string, Eigen::VectorXd> &_obs_diff_map, 
 		Localizer &_localizer, map<string, double> _parcov_inv_map,
-		map<string, double> _weight_map, ParameterEnsemble &_pe_upgrade);
+		map<string, double> _weight_map, ParameterEnsemble &_pe_upgrade, map<string, pair<vector<string>, vector<string>>> &_cases);
 
 	ParameterEnsemble calc_upgrade(vector<string> par_names, vector<string> obs_names, double cur_lam, int num_reals);
 	Eigen::DiagonalMatrix<double, Eigen::Dynamic> LocalUpgradeThread::get_matrix_from_map(vector<string> &names, map<string, double> &dmap);	
@@ -123,15 +123,17 @@ public:
 	//Eigen::MatrixXd get_Am();
 	void set_components(int num_reals, vector<string> &par_names, vector<string> &obs_names);
 	void put_results(ParameterEnsemble &pe);
+	pair<string, pair<vector<string>, vector<string>>> get_next();
+	string get_done() { return done; }
 
 private:
 	double eigthresh;
 	int maxsing;
 	bool use_approx, use_prior_scaling;
 
-	ParameterEnsemble pe;
+	map<string, pair<vector<string>, vector<string>>> &cases;
+
 	ParameterEnsemble &pe_upgrade;
-	ObservationEnsemble oe;
 	//PhiHandler &ph;
 	Localizer &localizer;
 	map<string, double> parcov_inv_map;
@@ -148,8 +150,13 @@ private:
 	mutex ctrl_lock, weight_lock, loc_lock, parcov_lock;
 	mutex obs_resid_lock, obs_diff_lock, par_resid_lock;
 	mutex par_diff_lock, am_lock, put_lock;
+	mutex next_lock;
 	
+	pair<vector<string>, vector<string>> empty_vecs = pair<vector<string>,vector<string>>(vector<string>(), vector<string>());
+	string done = "***";
+	pair<string, pair<vector<string>, vector<string>>> empty = pair<string, pair<vector<string>, vector<string>>>(done,empty_vecs);
 };
+
 
 class IterEnsembleSmoother
 {
