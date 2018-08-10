@@ -104,12 +104,12 @@ public:
 		PhiHandler &_ph, Localizer &_localizer, map<string,double> _parcov_inv_map,
 		map<string,double> _weight_map, ParameterEnsemble &_pe_upgrade);*/
 
-	LocalUpgradeThread(map<string, Eigen::VectorXd> &_par_resid_map, map<string, Eigen::VectorXd> &_par_diff_map,
+	LocalUpgradeThread(int tid, int iter, map<string, Eigen::VectorXd> &_par_resid_map, map<string, Eigen::VectorXd> &_par_diff_map,
 		map<string, Eigen::VectorXd> &_obs_resid_map, map<string, Eigen::VectorXd> &_obs_diff_map, 
 		Localizer &_localizer, map<string, double> _parcov_inv_map,
 		map<string, double> _weight_map, ParameterEnsemble &_pe_upgrade, map<string, pair<vector<string>, vector<string>>> &_cases);
 
-	ParameterEnsemble calc_upgrade(vector<string> par_names, vector<string> obs_names, double cur_lam, int num_reals);
+    void calc_upgrade(vector<string> par_names, vector<string> obs_names, double cur_lam, int num_reals);
 	Eigen::DiagonalMatrix<double, Eigen::Dynamic> LocalUpgradeThread::get_matrix_from_map(vector<string> &names, map<string, double> &dmap);	
 	Eigen::MatrixXd LocalUpgradeThread::get_matrix_from_map(int num_reals, vector<string> &names, map<string, Eigen::VectorXd> &emap);
 
@@ -121,14 +121,19 @@ public:
 	//Eigen::MatrixXd get_obs_resid_matrix();
 	//Eigen::MatrixXd get_par_resid_matrix();
 	//Eigen::MatrixXd get_Am();
-	void set_components(int num_reals, vector<string> &par_names, vector<string> &obs_names);
-	void put_results(ParameterEnsemble &pe);
+	void set_components(vector<string> &par_names, vector<string> &obs_names);
+	
+	//need to put the results at the end of the calc function so 
+	//don't have to pass around worker-attached refs (seems to be trouble)
+	//void put_results(ParameterEnsemble &pe);
+	
 	pair<string, pair<vector<string>, vector<string>>> get_next();
 	string get_done() { return done; }
 
 private:
+	PerformanceLog *performance_log;
 	double eigthresh;
-	int maxsing;
+	int maxsing, num_reals,iter, thread_id;
 	bool use_approx, use_prior_scaling;
 
 	map<string, pair<vector<string>, vector<string>>> &cases;
