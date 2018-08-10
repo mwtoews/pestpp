@@ -1552,7 +1552,7 @@ def tenpar_localizer_test3():
     pst.pestpp_options["ies_localize_how"] = "pars"
     pst.control_data.nphistp = 10
     pst.control_data.nphinored = 10
-    pst.control_data.noptmax = 4
+    pst.control_data.noptmax = 3
 
     # pst.pestpp_options["ies_verbose_level"] = 3
     pst_name = os.path.join(template_d, "pest_local.pst")
@@ -1693,7 +1693,7 @@ def freyberg_localizer_eval2():
     pst.pestpp_options["ies_verbose_level"] = 3
     pst.control_data.nphistp = 10
     pst.control_data.nphinored = 10
-    pst.control_data.noptmax = 6
+    pst.control_data.noptmax = 3
     print("writing pst")
     pst.write(os.path.join(template_d, "pest_local.pst"))
     print("starting slaves")
@@ -1753,7 +1753,7 @@ def freyberg_localizer_test3():
     pst.pestpp_options["ies_par_en"] = "par_local.csv"
     pst.pestpp_options["ies_localizer"] = "localizer.mat"
     pst.pestpp_options["ies_verbose_level"] = 1
-    pst.control_data.noptmax = 6
+    pst.control_data.noptmax = 3
     print("writing pst")
     pst.write(os.path.join(template_d, "pest_local.pst"))
     print("starting slaves")
