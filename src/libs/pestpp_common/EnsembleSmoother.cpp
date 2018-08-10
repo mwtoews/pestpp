@@ -2307,7 +2307,7 @@ ParameterEnsemble IterEnsembleSmoother::calc_upgrade(vector<string> &obs_names, 
 
 	performance_log->log_event("calculate scaled par diff");
 	message(2, "calculating par diff matrix");
-	pe.transform_ip(ParameterEnsemble::transStatus::NUM);
+	pe_upgrade.transform_ip(ParameterEnsemble::transStatus::NUM);
 	diff = pe_upgrade.get_eigen_mean_diff().transpose();
 	Eigen::MatrixXd par_diff;
 	if (pest_scenario.get_pestpp_options().get_ies_use_prior_scaling())
@@ -2502,18 +2502,6 @@ ParameterEnsemble IterEnsembleSmoother::calc_upgrade(vector<string> &obs_names, 
 	return pe_upgrade;
 }
 
-//LocalUpgradeThread::LocalUpgradeThread(ParameterEnsemble _pe,  ObservationEnsemble _oe,
-//	PhiHandler &_ph, Localizer &_localizer, map<string, 
-//	double> _parcov_inv_map, map<string, double> _weight_map,
-//	ParameterEnsemble &_pe_upgrade):
-//	localizer(_localizer), ph(_ph), pe_upgrade(_pe_upgrade)
-//{
-//	pe = _pe;
-//	oe = _oe;
-//	parcov_inv_map = _parcov_inv_map;
-//	weight_map = _weight_map;
-//
-//}
 
 LocalUpgradeThread::LocalUpgradeThread(int _thread_id, int _iter, map<string, Eigen::VectorXd> &_par_resid_map, map<string, Eigen::VectorXd> &_par_diff_map,
 	map<string, Eigen::VectorXd> &_obs_resid_map, map<string, Eigen::VectorXd> &_obs_diff_map,
@@ -2544,6 +2532,7 @@ void LocalUpgradeThread::set_controls()
 
 void LocalUpgradeThread::set_components(vector<string> &par_names, vector<string> &obs_names)
 {
+	//todo move these to method
 	par_resid.resize(0, 0);
 	par_diff.resize(0, 0);
 	obs_resid.resize(0, 0);
@@ -2553,6 +2542,7 @@ void LocalUpgradeThread::set_components(vector<string> &par_names, vector<string
 	weights.resize(0);
 	parcov_inv.resize(0);
 
+	//todo make these attributes
 	unique_lock<mutex> obs_diff_guard(obs_diff_lock, defer_lock);
 	unique_lock<mutex> obs_resid_guard(obs_resid_lock, defer_lock);
 	unique_lock<mutex> par_diff_guard(par_diff_lock, defer_lock);
@@ -2564,6 +2554,7 @@ void LocalUpgradeThread::set_components(vector<string> &par_names, vector<string
 
 	while (true)
 	{
+		//todo switch to components_set() method;
 		if (((use_approx) || (par_resid.rows() > 0)) &&
 			(weights.size() > 0) &&
 			(parcov_inv.size() > 0) &&

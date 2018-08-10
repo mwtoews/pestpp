@@ -160,6 +160,8 @@ private:
 	pair<vector<string>, vector<string>> empty_vecs = pair<vector<string>,vector<string>>(vector<string>(), vector<string>());
 	string done = "***";
 	pair<string, pair<vector<string>, vector<string>>> empty = pair<string, pair<vector<string>, vector<string>>>(done,empty_vecs);
+
+	bool components_set();
 };
 
 
