@@ -534,7 +534,7 @@ def eval_freyberg_full_cov():
     assert diff.mean().mean() < 0.01
 
 
-def test_freyberg_full_cov_reorder():
+def eval_freyberg_full_cov_reorder():
     """freyberg full cov reorder test"""
     model_d = "ies_freyberg"
     test_d = os.path.join(model_d, "master_draw_test")
@@ -657,7 +657,7 @@ def test_freyberg_full_cov_reorder_run():
     par.loc[:,"partrans"] = "log"
     #par.loc[pst.par_names[:5],"pargp"] = pst.par_groups[-1]
 
-    pst.control_data.noptmax = 3
+    pst.control_data.noptmax = 1
     pst.pestpp_options = {}
     num_reals = 30
 
