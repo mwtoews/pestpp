@@ -2,11 +2,6 @@ sudo: false
 dist: trusty
 language: cpp
 
-#compiler:
-#  - gcc
-python:
-  - "3.6"
-  
 ache:
   pip: true
   apt: true
@@ -22,6 +17,7 @@ addons:
       - g++-6
       - gfortran-6
       - liblapack-dev
+      - python3.6
 
 git:
   depth: 1
@@ -46,6 +42,7 @@ script:
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
   - #conda install --yes python=$TRAVIS_PYTHON_VERSION pip numpy scipy pandas matplotlib nose
+  - pip install --upgrade pip
   - pip install -r requirements.travis.txt
   - #pip install https://github.com/modflowpy/pymake/zipball/master
   - pip install --upgrade jupyter
