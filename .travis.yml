@@ -23,7 +23,6 @@ addons:
 
 git:
   depth: 1
-
 env:
   global:
     - MAKEFLAGS="-j 20"
