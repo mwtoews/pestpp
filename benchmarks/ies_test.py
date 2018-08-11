@@ -31,11 +31,11 @@ ies_vars = ["ies_par_csv", "ies_obs_csv", "ies_restart_obs_csv",
             "ies_lambda_mults", "ies_initial_lambda","ies_include_base","ies_subset_size"]
 
 if "windows" in platform.platform().lower():
-    exe_path = os.path.join("..", "..", "..", "exe", "windows", "x64", "Release", "pestpp-ies.exe")
+    exe_path = os.path.join("..", "..", "..", "bin", "win", "pestpp-ies.exe")
 elif "darwin" in platform.platform().lower():
-    exe_path = os.path.join("..", "..", "..", "exe", "mac", "pestpp-ies")
+    exe_path = os.path.join("..", "..", "..", "bin", "mac", "pestpp-ies")
 else:
-    exe_path = os.path.join("..", "..", "..", "exe", "linux", "pestpp-ies")
+    exe_path = os.path.join("..", "..", "..", "bin", "linux", "pestpp-ies")
 
 noptmax = 3
 
