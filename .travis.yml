@@ -17,7 +17,7 @@ addons:
       - g++-6
       - gfortran-6
       - liblapack-dev
-      - python3.6
+      - python3
 
 git:
   depth: 1
