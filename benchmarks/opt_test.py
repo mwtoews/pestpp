@@ -5,11 +5,11 @@ import numpy as np
 import pyemu
 
 if "windows" in platform.platform().lower():
-    exe_path = os.path.join("..", "..", "..", "exe", "windows", "x64", "Release", "pestpp-opt.exe")
+    exe_path = os.path.join("..", "..", "..", "bin", "win", "pestpp-opt.exe")
 elif "darwin" in platform.platform().lower():
-    exe_path = os.path.join("..", "..", "..", "exe", "mac", "pestpp-opt")
+    exe_path = os.path.join("..", "..", "..", "bin", "mac", "pestpp-opt")
 else:
-    exe_path = os.path.join("..", "..", "..", "exe", "linux", "pestpp-opt")
+    exe_path = os.path.join("..", "..", "..", "bin", "linux", "pestpp-opt")
 
 
 def std_weights_test():
