@@ -7,7 +7,7 @@ Object Oriented Inverse Modeling Software
 ## links to latest binaries
 
 * [windows (users with current visual studio installed)](https://github.com/jtwhite79/pestpp/tree/develop/bin/win).  Direct zip download [here](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/jtwhite79/pestpp/tree/develop/bin/win)
-* [windows compiled with intel C++ (the 'i' prefix)](https://github.com/jtwhite79/pestpp/tree/intel_c_windows/bin/win).  Direct zip download [here](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/jtwhite79/pestpp/tree/intel_c_windows/bin/win)
+* [windows compiled with intel C++ (the 'i' prefix)](https://github.com/jtwhite79/pestpp/tree/develop/bin/iwin).  Direct zip download [here](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/jtwhite79/pestpp/tree/develop/bin/iwin)
 * [mac OS](https://github.com/jtwhite79/pestpp/tree/develop/bin/mac).  Direct zip download [here](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/jtwhite79/pestpp/tree/develop/bin/mac)
 * [linux static compiled with intel C++](https://github.com/jtwhite79/pestpp/tree/develop/bin/linux). Direct zip download [here](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/jtwhite79/pestpp/tree/develop/bin/linux). (makefiles for GCC provides in src/ directory)
 
