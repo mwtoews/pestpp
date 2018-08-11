@@ -994,7 +994,7 @@ bool IterEnsembleSmoother::initialize_oe(Covariance &cov)
 //}
 
 template<typename T, typename A>
-void IterEnsembleSmoother::message(int level, string _message, vector<T, A> _extras)
+void IterEnsembleSmoother::message(int level, const string &_message, vector<T, A> _extras)
 {
 	stringstream ss;
 	if (level == 0)
@@ -1018,13 +1018,13 @@ void IterEnsembleSmoother::message(int level, string _message, vector<T, A> _ext
 
 }
 
-void IterEnsembleSmoother::message(int level, string _message)
+void IterEnsembleSmoother::message(int level, const string &_message)
 {
 	message(level, _message, vector<string>());
 }
 
 template<typename T>
-void IterEnsembleSmoother::message(int level, string _message, T extra)
+void IterEnsembleSmoother::message(int level, const string &_message, T extra)
 {
 	stringstream ss;
 	ss << _message << " " << extra;
