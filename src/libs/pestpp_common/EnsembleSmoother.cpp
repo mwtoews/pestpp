@@ -972,26 +972,26 @@ bool IterEnsembleSmoother::initialize_oe(Covariance &cov)
 
 }
 
-template<typename T, typename A>
-void IterEnsembleSmoother::message(int level, char* _message, vector<T, A> _extras)
-{
-	string s(_message);
-	message(level, s, _extras);
-}
+//template<typename T, typename A>
+//void IterEnsembleSmoother::message(int level, char* _message, vector<T, A> _extras)
+//{
+//	string s(_message);
+//	message(level, s, _extras);
+//}
 
-void IterEnsembleSmoother::message(int level, char* _message)
-{
-	string s(_message);
-	message(level, s);
-}
+//void IterEnsembleSmoother::message(int level, char* _message)
+//{
+//	string s(_message);
+//	message(level, s);
+//}
 
-template<typename T>
-void IterEnsembleSmoother::message(int level, char* _message, T extra)
-{
-	string s(_message);
-	message(level, s, extra);
-
-}
+//template<typename T>
+//void IterEnsembleSmoother::message(int level, char* _message, T extra)
+//{
+//	string s(_message);
+//	message(level, s, extra);
+//
+//}
 
 template<typename T, typename A>
 void IterEnsembleSmoother::message(int level, string _message, vector<T, A> _extras)

@@ -174,15 +174,15 @@ private:
 	void message(int level, string _message, vector<T, A> _extras);
 	void message(int level, string _message);
 
-	template<typename T, typename A>
-	void message(int level, char* _message, vector<T, A> _extras);// { message(level, string(_message), _extras); }
-	void message(int level, char* _message);// { message(level, string(_message)); }
+	//template<typename T, typename A>
+	//void message(int level, char* _message, vector<T, A> _extras);// { message(level, string(_message), _extras); }
+	//void message(int level, char* _message);// { message(level, string(_message)); }
 
 	template<typename T>
 	void message(int level, string _message, T extra);
 
-	template<typename T>
-	void message(int level, char* _message, T extra);
+	//template<typename T>
+	//void message(int level, char* _message, T extra);
 
 	void sanity_checks();
 
