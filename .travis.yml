@@ -1,6 +1,9 @@
 sudo: false
 dist: trusty
-language: cpp
+language: python
+
+python:
+  - "3.6"
 
 ache:
   pip: true
@@ -17,7 +20,6 @@ addons:
       - g++-6
       - gfortran-6
       - liblapack-dev
-      - python3
 
 git:
   depth: 1
