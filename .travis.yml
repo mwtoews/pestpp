@@ -32,7 +32,7 @@ before_script:
 
 script:
   - cd src
-  - rm -r -f ../exe/linux/
+  - rm -r -f ../bin/linux/
   - make clean
   - COMPILER=gcc6 CXX=g++-6 FC=gfortran-6 STATIC=no make -j 20 install
   - cd ..

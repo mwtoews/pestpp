@@ -31,15 +31,15 @@ COMPILER ?= intel
 
 ifeq ($(SYSTEM),mac)
 # macOS
-bindir ?= $(top_builddir)/../exe/mac/
+bindir ?= $(top_builddir)/../bin/mac/
 else ifeq ($(SYSTEM),linux)
 # GNU Linux
-bindir ?= $(top_builddir)/../exe/linux/
+bindir ?= $(top_builddir)/../bin/linux/
 MKLROOT ?= /opt/intel/compilers_and_libraries/linux/mkl
 
 else ifeq ($(SYSTEM),win)
 # Microsoft Windows
-bindir ?= $(top_builddir)/../exe/windows/
+bindir ?= $(top_builddir)/../bin/windows/
 else
 $(error SYSTEM not understood: $(SYSTEM). Use one of mac, linux or win.)
 endif
