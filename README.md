@@ -6,10 +6,10 @@ Object Oriented Inverse Modeling Software
 
 ## links to latest binaries
 
-* [windows (users with current visual studio installed)](https://github.com/jtwhite79/pestpp/tree/develop/exe/windows/x64/Release).  Direct zip download [here](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/jtwhite79/pestpp/tree/develop/exe/windows/x64/Release)
-* [windows compiled with intel C++ (the 'i' prefix)](https://github.com/jtwhite79/pestpp/tree/intel_c_windows/exe/windows/x64/Release).  Direct zip download [here](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/jtwhite79/pestpp/tree/intel_c_windows/exe/windows/x64/Release)
-* [mac OS](https://github.com/jtwhite79/pestpp/tree/develop/exe/mac).  Direct zip download [here](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/jtwhite79/pestpp/tree/develop/exe/mac)
-* [linux static compiled with intel C++](https://github.com/jtwhite79/pestpp/tree/develop/exe/linux). Direct zip download [here](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/jtwhite79/pestpp/tree/develop/exe/linux). (makefiles for GCC provides in src/ directory)
+* [windows (users with current visual studio installed)](https://github.com/jtwhite79/pestpp/tree/develop/bin/win).  Direct zip download [here](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/jtwhite79/pestpp/tree/develop/bin/win)
+* [windows compiled with intel C++ (the 'i' prefix)](https://github.com/jtwhite79/pestpp/tree/intel_c_windows/bin/win).  Direct zip download [here](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/jtwhite79/pestpp/tree/intel_c_windows/bin/win)
+* [mac OS](https://github.com/jtwhite79/pestpp/tree/develop/bin/mac).  Direct zip download [here](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/jtwhite79/pestpp/tree/develop/bin/mac)
+* [linux static compiled with intel C++](https://github.com/jtwhite79/pestpp/tree/develop/bin/linux). Direct zip download [here](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/jtwhite79/pestpp/tree/develop/bin/linux). (makefiles for GCC provides in src/ directory)
 
 ## Overview
 The PEST++ software suite includes several stand-alone tools for model-independent (non-intrusive) computer model parameter estimation and uncertainty analysis.  Codes include:
