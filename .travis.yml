@@ -1,9 +1,16 @@
 sudo: false
 dist: trusty
-language: cpp
+language: python
 
-#compiler:
-#  - gcc
+python:
+  - "3.6"
+
+ache:
+  pip: true
+  apt: true
+  directories:
+    - $HOME/.cache/pip
+    - $HOME/.local
 
 addons:
   apt:
@@ -16,7 +23,6 @@ addons:
 
 git:
   depth: 1
-
 env:
   global:
     - MAKEFLAGS="-j 20"
@@ -26,17 +32,25 @@ before_script:
 
 script:
   - cd src
-  - rm -r -f ../exe/linux/
+  - rm -r -f ../bin/linux/
   - make clean
   - COMPILER=gcc6 CXX=g++-6 FC=gfortran-6 STATIC=no make -j 20 install
   - cd ..
-  - wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
-  - bash miniconda.sh -b -p $HOME/miniconda
-  - export PATH="$HOME/miniconda/bin:$PATH"
-  - conda update --yes conda
+  - #wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
+  - #bash miniconda.sh -b -p $HOME/miniconda
+  - #export PATH="$HOME/miniconda/bin:$PATH"
+  - #conda update --yes conda
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
-  - conda install --yes python=$TRAVIS_PYTHON_VERSION pip numpy scipy pandas matplotlib nose
+  - #conda install --yes python=$TRAVIS_PYTHON_VERSION pip numpy scipy pandas matplotlib nose
+  - pip install --upgrade pip
+  - pip install -r requirements.travis.txt
+  - #pip install https://github.com/modflowpy/pymake/zipball/master
+  - pip install --upgrade jupyter
+  - pip install scipy 
+  - pip install nbconvert
+  - pip install nose-timer
+  - pip install coveralls
   - pip install git+https://github.com/modflowpy/flopy.git@develop
   - pip install git+https://github.com/jtwhite79/pyemu.git@develop
   - export PYTHONPATH=$PYTHONPATH:.
