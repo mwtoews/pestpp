@@ -111,6 +111,9 @@
       <FloatingPointModel>Strict</FloatingPointModel>
       <FloatingPointExceptions>true</FloatingPointExceptions>
       <OpenMPSupport>false</OpenMPSupport>
+      <CheckPointers>None</CheckPointers>
+      <CheckDanglingPointers>None</CheckDanglingPointers>
+      <Cpp0xSupport>false</Cpp0xSupport>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
