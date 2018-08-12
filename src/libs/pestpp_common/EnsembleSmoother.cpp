@@ -2989,6 +2989,7 @@ bool IterEnsembleSmoother::solve_new()
 		{
 			
 			pe_upgrade = calc_localized_upgrade_threaded(cur_lam);
+			pe_upgrade = calc_localized_upgrade(cur_lam);
 		}
 		else
 			pe_upgrade = calc_upgrade(act_obs_names, act_par_names, cur_lam, pe.shape().first);
