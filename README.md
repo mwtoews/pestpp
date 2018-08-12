@@ -6,10 +6,10 @@ Object Oriented Inverse Modeling Software
 
 ## links to latest binaries
 
-* [windows (users with current visual studio installed)](https://github.com/jtwhite79/pestpp/tree/develop/bin/win).  Direct zip download [here](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/jtwhite79/pestpp/tree/develop/bin/win)
-* [windows compiled with intel C++ (the 'i' prefix)](https://github.com/jtwhite79/pestpp/tree/develop/bin/iwin).  Direct zip download [here](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/jtwhite79/pestpp/tree/develop/bin/iwin)
-* [mac OS](https://github.com/jtwhite79/pestpp/tree/develop/bin/mac).  Direct zip download [here](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/jtwhite79/pestpp/tree/develop/bin/mac)
-* [linux static compiled with intel C++](https://github.com/jtwhite79/pestpp/tree/develop/bin/linux). Direct zip download [here](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/jtwhite79/pestpp/tree/develop/bin/linux). (makefiles for GCC provides in src/ directory)
+* [windows (users with current visual studio installed)](https://github.com/jtwhite79/pestpp/tree/master/bin/win).  Direct zip download [here](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/jtwhite79/pestpp/tree/master/bin/win)
+* [windows compiled with intel C++ (the 'i' prefix)](https://github.com/jtwhite79/pestpp/tree/master/bin/iwin).  Direct zip download [here](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/jtwhite79/pestpp/tree/master/bin/iwin)
+* [mac OS](https://github.com/jtwhite79/pestpp/tree/master/bin/mac).  Direct zip download [here](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/jtwhite79/pestpp/tree/master/bin/mac)
+* [linux static compiled with intel C++](https://github.com/jtwhite79/pestpp/tree/master/bin/linux). Direct zip download [here](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/jtwhite79/pestpp/tree/master/bin/linux). (makefiles for GCC provides in src/ directory)
 
 ## Overview
 The PEST++ software suite includes several stand-alone tools for model-independent (non-intrusive) computer model parameter estimation and uncertainty analysis.  Codes include:
@@ -40,7 +40,7 @@ All members of the software suite can be compiled for PC, MAC, or Linux and have
 
 <b> update 09/20/2017</b>: the new optimization under uncertainty tool is ready!  A supporting publication is in the works and should be available soon (a link will be posted once it is accepted).  This new tool uses the same control file/template file/instruction file approach as other PEST(++) applications, so applying this tool to your problem should be seamless.  Optional "++" args for tool are available further done this page.
 
-<b>update 01/25/2017</b>: intel C++ builds are avaiable for mac and for windows.  For mac users, these are statically-linked so they do not require compilers to be installed.  For windows users, the intel build circumvents the "missing VCOMP140.DLL" error.  Note the intel windows builds are currently in the ``intel_c_windows`` branch.
+<b>update 01/25/2017</b>: intel C++ builds are avaiable for mac and for windows.  For mac users, these are statically-linked so they do not require compilers to be installed.  For windows users, the intel build circumvents the "missing VCOMP140.DLL" error.  Note the intel windows builds are currently in the ~~``intel_c_windows`` branch~~ ``bin/iwin/`` folder.
 
 <b>update 11/25/2016</b>: PEST++ version 3.6 is now available. Some of the many enhancements available in 3.6 include:
 
