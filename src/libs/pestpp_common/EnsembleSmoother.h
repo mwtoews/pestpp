@@ -110,8 +110,8 @@ public:
 		map<string, double> _weight_map, ParameterEnsemble &_pe_upgrade, map<string, pair<vector<string>, vector<string>>> &_cases);
 
     void calc_upgrade(vector<string> par_names, vector<string> obs_names, double cur_lam, int num_reals);
-	Eigen::DiagonalMatrix<double, Eigen::Dynamic> LocalUpgradeThread::get_matrix_from_map(vector<string> &names, map<string, double> &dmap);	
-	Eigen::MatrixXd LocalUpgradeThread::get_matrix_from_map(int num_reals, vector<string> &names, map<string, Eigen::VectorXd> &emap);
+	Eigen::DiagonalMatrix<double, Eigen::Dynamic> get_matrix_from_map(vector<string> &names, map<string, double> &dmap);	
+	Eigen::MatrixXd get_matrix_from_map(int num_reals, vector<string> &names, map<string, Eigen::VectorXd> &emap);
 
 
 	//these need mutex guards
