@@ -2681,8 +2681,12 @@ void LocalUpgradeThread::calc_upgrade(vector<string> par_names, vector<string> o
 	//---------
 	//not thread safe section
 	//---------
-
-	Eigen::MatrixXd scaled_residual = weights * obs_resid.transpose();
+	set_components(par_names,obs_names);
+	par_diff.transposeInPlace();
+	obs_diff.transposeInPlace();
+	obs_resid.transposeInPlace();
+	par_resid.transposeInPlace();
+	Eigen::MatrixXd scaled_residual = weights * obs_resid;
 	
 	Eigen::MatrixXd scaled_par_resid;
 	if ((!use_approx) && (iter > 1))
@@ -2690,11 +2694,11 @@ void LocalUpgradeThread::calc_upgrade(vector<string> par_names, vector<string> o
 	
 		if (use_prior_scaling)
 		{
-			scaled_par_resid = parcov_inv *par_resid.transpose();
+			scaled_par_resid = parcov_inv *par_resid;
 		}
 		else
 		{
-			scaled_par_resid = par_resid.transpose();
+			scaled_par_resid = par_resid;
 		}
 	}
 
@@ -2708,7 +2712,8 @@ void LocalUpgradeThread::calc_upgrade(vector<string> par_names, vector<string> o
 
 	obs_diff = scale * (weights * obs_diff);
 	
-	par_diff = par_diff.transpose().eval();
+
+	
 	if (use_prior_scaling)
 	{
 		//throw runtime_error("parcov scale not implemented for localization");
@@ -2807,8 +2812,16 @@ void LocalUpgradeThread::calc_upgrade(vector<string> par_names, vector<string> o
 
 
 
-void upgrade_thread_function(int id, LocalUpgradeThread &worker)
+void upgrade_thread_function(int id, int iter,double cur_lam, map<string, Eigen::VectorXd> &par_resid_map, map<string, Eigen::VectorXd> &par_diff_map,
+	map<string,Eigen::VectorXd> &obs_resid_map, map<string, Eigen::VectorXd> &obs_diff_map, Localizer &localizer, map<string,double> &parcov_inv_map,
+	map<string,double> &weight_map, ParameterEnsemble &pe_upgrade, map<string, pair<vector<string>, vector<string>>>& cases)
 {
+	/*LocalUpgradeThread(int tid, int iter, double _cur_lam, map<string, Eigen::VectorXd> &_par_resid_map, map<string, Eigen::VectorXd> &_par_diff_map,
+		map<string, Eigen::VectorXd> &_obs_resid_map, map<string, Eigen::VectorXd> &_obs_diff_map,
+		Localizer &_localizer, map<string, double> _parcov_inv_map,
+		map<string, double> _weight_map, ParameterEnsemble &_pe_upgrade, map<string, pair<vector<string>, vector<string>>> &_cases);*/
+	LocalUpgradeThread worker(id, iter, cur_lam, par_resid_map, par_diff_map, obs_resid_map, obs_diff_map, localizer, parcov_inv_map, weight_map, pe_upgrade, cases);
+
 	worker.set_controls();
 	while (true)
 	{
@@ -2816,9 +2829,8 @@ void upgrade_thread_function(int id, LocalUpgradeThread &worker)
 
 		if (case_info.first == worker.get_done())
 			break;
-		worker.set_components(case_info.second.second, case_info.second.first);
+		//worker.set_components(case_info.second.second, case_info.second.first);
 		worker.calc_upgrade(case_info.second.second, case_info.second.first);
-
 
 	}
 	return;
@@ -2901,12 +2913,21 @@ ParameterEnsemble IterEnsembleSmoother::calc_localized_upgrade_threaded(double c
 		map<string, double> _weight_map, ParameterEnsemble &_pe_upgrade);*/
 	
 	
-	LocalUpgradeThread worker(0,iter, cur_lam, par_resid_map, par_diff_map, obs_resid_map, obs_diff_map,
+	/*LocalUpgradeThread worker(0,iter, cur_lam, par_resid_map, par_diff_map, obs_resid_map, obs_diff_map,
 		localizer, parcov_inv_map, weight_map, pe_upgrade, loc_map);
-	int num_threads = 10;
+	*/
+
+
+	upgrade_thread_function(0, iter, cur_lam, par_resid_map, par_diff_map, obs_resid_map, obs_diff_map, localizer, parcov_inv_map, weight_map, pe_upgrade, loc_map);
+	int num_threads = 3;
 	vector<thread> threads;
+	/*void upgrade_thread_function(int id, int iter, double cur_lam, map<string, Eigen::VectorXd> &par_resid_map, map<string, Eigen::VectorXd> &par_diff_map,
+		map<string, Eigen::VectorXd> &obs_resid_map, map<string, Eigen::VectorXd> &obs_diff_map, Localizer &localizer, map<string, double> &parcov_inv_map,
+		map<string, double> &weight_map, ParameterEnsemble &pe_upgrade, map<string, pair<vector<string>, vector<string>>>& cases)
+	*/
 	for (int i = 0; i < num_threads; i++)
-		threads.push_back(thread(upgrade_thread_function, i, std::ref(worker)));
+		threads.push_back(thread(upgrade_thread_function, i, iter,cur_lam,std::ref(par_resid_map),
+			std::ref(par_diff_map),std::ref(obs_resid_map),std::ref(obs_diff_map),std::ref(localizer),parcov_inv_map,weight_map,std::ref(pe_upgrade),std::ref(loc_map)));
 
 	/*thread t1(upgrade_thread_function, 0, std::ref(worker));
 	thread t2(upgrade_thread_function, 0, std::ref(worker));
