@@ -100,39 +100,22 @@ class LocalUpgradeThread
 {
 public:
 
-	/*LocalUpgradeThread(ParameterEnsemble _pe, ObservationEnsemble _oe,
-		PhiHandler &_ph, Localizer &_localizer, map<string,double> _parcov_inv_map,
-		map<string,double> _weight_map, ParameterEnsemble &_pe_upgrade);*/
-
 	LocalUpgradeThread(int tid, int iter, double _cur_lam, map<string, Eigen::VectorXd> &_par_resid_map, map<string, Eigen::VectorXd> &_par_diff_map,
 		map<string, Eigen::VectorXd> &_obs_resid_map, map<string, Eigen::VectorXd> &_obs_diff_map, 
-		Localizer &_localizer, map<string, double> _parcov_inv_map,
-		map<string, double> _weight_map, ParameterEnsemble &_pe_upgrade, map<string, pair<vector<string>, vector<string>>> &_cases);
+		Localizer &_localizer, map<string, double> &_parcov_inv_map,
+		map<string, double> &_weight_map, ParameterEnsemble &_pe_upgrade, map<string, pair<vector<string>, vector<string>>> &_cases);
 
-    void calc_upgrade(vector<string> par_names, vector<string> obs_names);
 	Eigen::DiagonalMatrix<double, Eigen::Dynamic> get_matrix_from_map(vector<string> &names, map<string, double> &dmap);	
 	Eigen::MatrixXd get_matrix_from_map(int num_reals, vector<string> &names, map<string, Eigen::VectorXd> &emap);
 
-
-	//these need mutex guards
 	void set_controls();
-	Eigen::DiagonalMatrix<double, Eigen::Dynamic> get_weight_matrix(vector<string> &obs_names);
-	//Eigen::MatrixXd get_localizer_matrix(int num_reals, string par_name, vector<string> obs_names);
-	//Eigen::MatrixXd get_obs_resid_matrix();
-	//Eigen::MatrixXd get_par_resid_matrix();
-	//Eigen::MatrixXd get_Am();
-	void set_components(vector<string> &par_names, vector<string> &obs_names);
-	
-	//need to put the results at the end of the calc function so 
-	//don't have to pass around worker-attached refs (seems to be trouble)
-	//void put_results(ParameterEnsemble &pe);
-	
-	pair<string, pair<vector<string>, vector<string>>> get_next();
-	string get_done() { return done; }
+
+	void work();
+
 
 private:
-	ofstream plog;
-	PerformanceLog *performance_log;
+	vector<string> keys;
+	int count;
 	double eigthresh, cur_lam;
 	int maxsing, num_reals,iter, thread_id;
 	bool use_approx, use_prior_scaling;
@@ -142,16 +125,13 @@ private:
 	ParameterEnsemble &pe_upgrade;
 	//PhiHandler &ph;
 	Localizer &localizer;
-	map<string, double> parcov_inv_map;
-	map<string, double> weight_map;
+	map<string, double> &parcov_inv_map;
+	map<string, double> &weight_map;
 
-	map<string, Eigen::VectorXd> par_resid_map, par_diff_map;
-	map<string, Eigen::VectorXd> obs_resid_map, obs_diff_map;
+	map<string, Eigen::VectorXd> &par_resid_map, &par_diff_map;
+	map<string, Eigen::VectorXd> &obs_resid_map, &obs_diff_map;
 
-	Eigen::MatrixXd par_resid, par_diff, Am;
-	Eigen::MatrixXd obs_resid, obs_diff, loc;
-
-	Eigen::DiagonalMatrix<double, Eigen::Dynamic> weights, parcov_inv;
+	
 
 	mutex ctrl_lock, weight_lock, loc_lock, parcov_lock;
 	mutex obs_resid_lock, obs_diff_lock, par_resid_lock;
