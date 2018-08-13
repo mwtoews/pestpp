@@ -2598,10 +2598,13 @@ void LocalUpgradeThread::work(int thread_id, int iter, double cur_lam)
 				}
 				string k = keys[count];
 				pair<vector<string>, vector<string>> p = cases.at(k);
-				par_names = p.first;
-				obs_names = p.second;
+				par_names = p.second;
+				obs_names = p.first;
+
+				cout << "tid:" << thread_id << ", parname:" << par_names[0] << endl;
 				count++;
 				next_guard.unlock();
+				break;
 			}
 
 		}
@@ -2638,7 +2641,7 @@ void LocalUpgradeThread::work(int thread_id, int iter, double cur_lam)
 				break;
 			if ((par_names.size() == 1) && (loc.rows() == 0) && (loc_guard.try_lock()))
 			{
-				cout << thread_id << ", " << obs_names << endl;
+				
 				loc = localizer.get_localizing_hadamard_matrix(num_reals, par_names[0], obs_names);
 				loc_guard.unlock();
 			}
@@ -2700,8 +2703,6 @@ void LocalUpgradeThread::work(int thread_id, int iter, double cur_lam)
 
 		double scale = (1.0 / (sqrt(double(num_reals - 1))));
 
-		obs_diff = obs_diff.transpose().eval();
-		cout << thread_id << ", " << obs_names << ", " << loc.rows() << endl;
 		obs_diff = obs_diff.cwiseProduct(loc);
 
 		obs_diff = scale * (weights * obs_diff);
@@ -2773,14 +2774,15 @@ void LocalUpgradeThread::work(int thread_id, int iter, double cur_lam)
 			upgrade_1 = upgrade_1 + upgrade_2.transpose();
 
 		}
-		lock_guard<mutex> guard(put_lock);
-		unique_lock<mutex> put_guard(put_lock);
+		
+		unique_lock<mutex> put_guard(put_lock, defer_lock);
 		while (true)
 		{
 			if (put_guard.try_lock())
 			{
 				pe_upgrade.add_2_cols_ip(par_names, upgrade_1);
 				put_guard.unlock();
+				break;
 			}
 		}
 	}
@@ -2877,17 +2879,17 @@ ParameterEnsemble IterEnsembleSmoother::calc_localized_upgrade_threaded(double c
 	LocalUpgradeThread worker(0,iter, cur_lam, par_resid_map, par_diff_map, obs_resid_map, obs_diff_map,
 		localizer, parcov_inv_map, weight_map, pe_upgrade, loc_map);
 	
-
-
-	//upgrade_thread_function(0, iter, cur_lam, worker);
-	int num_threads = 3;
+	upgrade_thread_function(0, iter, cur_lam, worker);
+	int num_threads = 20;
 	vector<thread> threads;
+	LocalUpgradeThread worker1(0, iter, cur_lam, par_resid_map, par_diff_map, obs_resid_map, obs_diff_map,
+		localizer, parcov_inv_map, weight_map, pe_upgrade, loc_map);
 	/*void upgrade_thread_function(int id, int iter, double cur_lam, map<string, Eigen::VectorXd> &par_resid_map, map<string, Eigen::VectorXd> &par_diff_map,
 		map<string, Eigen::VectorXd> &obs_resid_map, map<string, Eigen::VectorXd> &obs_diff_map, Localizer &localizer, map<string, double> &parcov_inv_map,
 		map<string, double> &weight_map, ParameterEnsemble &pe_upgrade, map<string, pair<vector<string>, vector<string>>>& cases)
 	*/
 	for (int i = 0; i < num_threads; i++)
-		threads.push_back(thread(upgrade_thread_function, i, iter, cur_lam, std::ref(worker)));
+		threads.push_back(thread(upgrade_thread_function, i, iter, cur_lam, std::ref(worker1)));
 
 	/*thread t1(upgrade_thread_function, 0, std::ref(worker));
 	thread t2(upgrade_thread_function, 0, std::ref(worker));
