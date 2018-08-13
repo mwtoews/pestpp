@@ -40,6 +40,7 @@ public:
 
 	void extend_cols(Eigen::MatrixXd &_reals, const vector<string> &_var_names);
 	void add_2_cols_ip(Ensemble &other);
+	void add_2_cols_ip(const vector<string> &_var_names, const Eigen::MatrixXd &mat);
 	Ensemble zero_like();
 
 	void reserve(vector<string> _real_names, vector<string> _var_names);

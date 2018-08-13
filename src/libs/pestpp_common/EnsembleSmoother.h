@@ -104,12 +104,12 @@ public:
 		PhiHandler &_ph, Localizer &_localizer, map<string,double> _parcov_inv_map,
 		map<string,double> _weight_map, ParameterEnsemble &_pe_upgrade);*/
 
-	LocalUpgradeThread(int tid, int iter, map<string, Eigen::VectorXd> &_par_resid_map, map<string, Eigen::VectorXd> &_par_diff_map,
+	LocalUpgradeThread(int tid, int iter, double _cur_lam, map<string, Eigen::VectorXd> &_par_resid_map, map<string, Eigen::VectorXd> &_par_diff_map,
 		map<string, Eigen::VectorXd> &_obs_resid_map, map<string, Eigen::VectorXd> &_obs_diff_map, 
 		Localizer &_localizer, map<string, double> _parcov_inv_map,
 		map<string, double> _weight_map, ParameterEnsemble &_pe_upgrade, map<string, pair<vector<string>, vector<string>>> &_cases);
 
-    void calc_upgrade(vector<string> par_names, vector<string> obs_names, double cur_lam, int num_reals);
+    void calc_upgrade(vector<string> par_names, vector<string> obs_names);
 	Eigen::DiagonalMatrix<double, Eigen::Dynamic> get_matrix_from_map(vector<string> &names, map<string, double> &dmap);	
 	Eigen::MatrixXd get_matrix_from_map(int num_reals, vector<string> &names, map<string, Eigen::VectorXd> &emap);
 
@@ -117,7 +117,7 @@ public:
 	//these need mutex guards
 	void set_controls();
 	Eigen::DiagonalMatrix<double, Eigen::Dynamic> get_weight_matrix(vector<string> &obs_names);
-	Eigen::MatrixXd get_localizer_matrix(int num_reals, string par_name, vector<string> obs_names);
+	//Eigen::MatrixXd get_localizer_matrix(int num_reals, string par_name, vector<string> obs_names);
 	//Eigen::MatrixXd get_obs_resid_matrix();
 	//Eigen::MatrixXd get_par_resid_matrix();
 	//Eigen::MatrixXd get_Am();
@@ -131,8 +131,9 @@ public:
 	string get_done() { return done; }
 
 private:
+	ofstream plog;
 	PerformanceLog *performance_log;
-	double eigthresh;
+	double eigthresh, cur_lam;
 	int maxsing, num_reals,iter, thread_id;
 	bool use_approx, use_prior_scaling;
 
@@ -161,7 +162,7 @@ private:
 	string done = "***";
 	pair<string, pair<vector<string>, vector<string>>> empty = pair<string, pair<vector<string>, vector<string>>>(done,empty_vecs);
 
-	bool components_set();
+	//bool components_set();
 };
 
 

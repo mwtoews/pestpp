@@ -65,10 +65,11 @@ void SVD_REDSVD::solve_ip(Eigen::SparseMatrix<double>& A, Eigen::VectorXd &Sigma
 void SVD_REDSVD::solve_ip(Eigen::MatrixXd& A, Eigen::MatrixXd &Sigma, Eigen::MatrixXd& U,
 	Eigen::MatrixXd& V, double _eigen_thres, int _max_sing)
 {
-	performance_log->log_event("starting REDSVD");
+	if (performance_log)
+		performance_log->log_event("starting REDSVD");
 
 	RedSVD::RedSVD<MatrixXd> red_svd(A);
-	performance_log->log_event("retrieving REDSVD components");
+	
 	U = red_svd.matrixU();
 	V = red_svd.matrixV();
 	VectorXd Sigma_full = red_svd.singularValues();
@@ -90,7 +91,8 @@ void SVD_REDSVD::solve_ip(Eigen::MatrixXd& A, Eigen::MatrixXd &Sigma, Eigen::Mat
 	}
 	std::stringstream ss;
 	ss << "triming REDSVD components to " << num_sing_used << "elements";
-	performance_log->log_event(ss.str());
+	if (performance_log)
+		performance_log->log_event(ss.str());
 	//std::cout << Sigma_full << std::endl;
 	Sigma = Sigma_full.head(num_sing_used);
 	//std::cout << Sigma << std::endl;
@@ -115,21 +117,25 @@ void SVD_REDSVD::solve_ip(Eigen::MatrixXd& A, Eigen::MatrixXd &Sigma, Eigen::Mat
 
 
 	}
-	performance_log->log_event("done REDSVD");
+	if (performance_log)
+		performance_log->log_event("done REDSVD");
 	return;
 }
 
 void SVD_REDSVD::solve_ip(Eigen::MatrixXd& A, Eigen::MatrixXd &Sigma, Eigen::MatrixXd& U,
 	Eigen::MatrixXd& V)
 {
-	performance_log->log_event("starting REDSVD");
+	if (performance_log)
+		performance_log->log_event("starting REDSVD");
 
 	RedSVD::RedSVD<MatrixXd> red_svd(A);
-	performance_log->log_event("retrieving REDSVD components");
+	if (performance_log)
+		performance_log->log_event("retrieving REDSVD components");
 	U = red_svd.matrixU();
 	V = red_svd.matrixV();
 	Sigma = red_svd.singularValues();
-	performance_log->log_event("done REDSVD");
+	if (performance_log)
+		performance_log->log_event("done REDSVD");
 	return;
 }
 
@@ -137,10 +143,13 @@ void SVD_REDSVD::solve_ip(Eigen::MatrixXd& A, Eigen::MatrixXd &Sigma, Eigen::Mat
 void SVD_REDSVD::solve_ip(Eigen::SparseMatrix<double>& A, Eigen::VectorXd &Sigma, Eigen::SparseMatrix<double>& U,
 	Eigen::SparseMatrix<double>& VT, Eigen::VectorXd &Sigma_trunc, double _eigen_thres)
 {
-	performance_log->log_event("starting REDSVD");
+	if (performance_log)
+		performance_log->log_event("starting REDSVD");
 
+	
 	RedSVD::RedSVD<MatrixXd> red_svd(A,n_max_sing);
-	performance_log->log_event("retrieving REDSVD components");
+	if (performance_log)
+		performance_log->log_event("retrieving REDSVD components");
 	U = red_svd.matrixU().sparseView();
 	VT = red_svd.matrixV().transpose().sparseView();
 	VectorXd Sigma_full = red_svd.singularValues();
@@ -162,14 +171,16 @@ void SVD_REDSVD::solve_ip(Eigen::SparseMatrix<double>& A, Eigen::VectorXd &Sigma
 	}
 	std::stringstream ss;
 	ss << "triming REDSVD components to " << num_sing_used << "elements";
-	performance_log->log_event(ss.str());
+	if (performance_log)
+		performance_log->log_event(ss.str());
 
 	Sigma = Sigma_full.head(num_sing_used);
 	Sigma_trunc = Sigma_full.tail(Sigma_full.size() - num_sing_used);
 
 	VT = Eigen::SparseMatrix<double>(VT.topRows(num_sing_used));
 	U = Eigen::SparseMatrix<double>(U.leftCols(num_sing_used));
-	performance_log->log_event("done REDSVD");
+	if (performance_log)
+		performance_log->log_event("done REDSVD");
 	return;
 
 }
