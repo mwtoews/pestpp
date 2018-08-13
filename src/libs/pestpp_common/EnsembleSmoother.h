@@ -110,7 +110,7 @@ public:
 
 	void set_controls();
 
-	void work();
+	void work(int thread_id, int iter, double cur_lam);
 
 
 private:
@@ -131,18 +131,11 @@ private:
 	map<string, Eigen::VectorXd> &par_resid_map, &par_diff_map;
 	map<string, Eigen::VectorXd> &obs_resid_map, &obs_diff_map;
 
-	
-
 	mutex ctrl_lock, weight_lock, loc_lock, parcov_lock;
 	mutex obs_resid_lock, obs_diff_lock, par_resid_lock;
 	mutex par_diff_lock, am_lock, put_lock;
 	mutex next_lock;
 	
-	pair<vector<string>, vector<string>> empty_vecs = pair<vector<string>,vector<string>>(vector<string>(), vector<string>());
-	string done = "***";
-	pair<string, pair<vector<string>, vector<string>>> empty = pair<string, pair<vector<string>, vector<string>>>(done,empty_vecs);
-
-	//bool components_set();
 };
 
 

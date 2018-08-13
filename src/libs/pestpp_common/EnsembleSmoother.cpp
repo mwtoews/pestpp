@@ -2514,10 +2514,10 @@ ParameterEnsemble IterEnsembleSmoother::calc_upgrade(vector<string> &obs_names, 
 
 LocalUpgradeThread::LocalUpgradeThread(int _thread_id, int _iter, double _cur_lam,  map<string, Eigen::VectorXd> &_par_resid_map, map<string, Eigen::VectorXd> &_par_diff_map,
 	map<string, Eigen::VectorXd> &_obs_resid_map, map<string, Eigen::VectorXd> &_obs_diff_map,
-	Localizer &_localizer, map<string, double> _parcov_inv_map,map<string, double> _weight_map, 
+	Localizer &_localizer, map<string, double> &_parcov_inv_map,map<string, double> &_weight_map, 
 	ParameterEnsemble &_pe_upgrade, map<string,pair<vector<string>,vector<string>>> &_cases): par_resid_map(_par_resid_map),
 	par_diff_map(_par_diff_map), obs_resid_map(_obs_resid_map),obs_diff_map(_obs_diff_map),localizer(_localizer),
-	pe_upgrade(_pe_upgrade),cases(_cases)
+	pe_upgrade(_pe_upgrade),cases(_cases), parcov_inv_map(_parcov_inv_map), weight_map(_weight_map)
 {
 	thread_id = _thread_id;
 	iter = _iter;
@@ -2525,6 +2525,11 @@ LocalUpgradeThread::LocalUpgradeThread(int _thread_id, int _iter, double _cur_la
 	weight_map = _weight_map;
 	cur_lam = _cur_lam;
 	set_controls();
+	count = 0;
+	for (auto &c : cases)
+	{
+		keys.push_back(c.first);
+	}
 
 }
 
@@ -2540,80 +2545,6 @@ void LocalUpgradeThread::set_controls()
 	return;
 }
 
-
-void LocalUpgradeThread::set_components(vector<string> &par_names, vector<string> &obs_names)
-{
-	//todo move these to method
-	par_resid.resize(0, 0);
-	par_diff.resize(0, 0);
-	obs_resid.resize(0, 0);
-	obs_diff.resize(0, 0);
-	loc.resize(0, 0);
-	Am.resize(0, 0);
-	weights.resize(0);
-	parcov_inv.resize(0);
-
-	//todo make these attributes
-	unique_lock<mutex> obs_diff_guard(obs_diff_lock, defer_lock);
-	unique_lock<mutex> obs_resid_guard(obs_resid_lock, defer_lock);
-	unique_lock<mutex> par_diff_guard(par_diff_lock, defer_lock);
-	unique_lock<mutex> par_resid_guard(par_resid_lock, defer_lock);
-	unique_lock<mutex> loc_guard(loc_lock, defer_lock);
-	unique_lock<mutex> weight_guard(weight_lock, defer_lock);
-	unique_lock<mutex> parcov_guard(parcov_lock, defer_lock);
-	
-
-	while (true)
-	{
-		//todo switch to components_set() method;
-		if (((use_approx) || (par_resid.rows() > 0)) &&
-			(weights.size() > 0) &&
-			(parcov_inv.size() > 0) &&
-			(par_diff.rows() > 0) &&
-			(obs_resid.rows() > 0) &&
-			(obs_diff.rows() > 0) && 
-			((par_names.size() > 1) || (loc.rows() > 0)))
-			break;
-		if ((par_names.size() == 1) && (loc.rows() == 0) && (loc_guard.try_lock()))
-		{
-			cout << thread_id << ", " << obs_names << endl;
-			loc = localizer.get_localizing_hadamard_matrix(num_reals, par_names[0], obs_names);
-			loc_guard.unlock();
-		}
-		if ((obs_diff.rows() == 0) && (obs_diff_guard.try_lock()))
-		{
-			obs_diff = get_matrix_from_map(num_reals, obs_names, obs_diff_map);
-			obs_diff_guard.unlock();
-		}
-		if ((obs_resid.rows() == 0) && (obs_resid_guard.try_lock()))
-		{
-			obs_resid = get_matrix_from_map(num_reals, obs_names, obs_resid_map);
-			obs_resid_guard.unlock();
-		}
-		if ((par_diff.rows() == 0) && (par_diff_guard.try_lock()))
-		{
-			par_diff = get_matrix_from_map(num_reals, par_names, par_diff_map);
-			par_diff_guard.unlock();
-		}
-		if ((par_resid.rows() == 0) && (par_resid_guard.try_lock()))
-		{
-			par_resid = get_matrix_from_map(num_reals, par_names, par_resid_map);
-			par_resid_guard.unlock();
-		}
-		if ((weights.rows() == 0) && (weight_guard.try_lock()))
-		{
-			weights = get_matrix_from_map(obs_names, weight_map);
-			weight_guard.unlock();
-		}
-		if ((parcov_inv.rows() == 0) && (parcov_guard.try_lock()))
-		{
-			parcov_inv = get_matrix_from_map(par_names, parcov_inv_map);
-			parcov_guard.unlock();
-		}
-	}
-	//todo: get Am here if needed
-	//lock_guard<mutex> am_guard(am_lock);
-}
 
 
 Eigen::MatrixXd LocalUpgradeThread::get_matrix_from_map(int num_reals,vector<string> &names, map<string, Eigen::VectorXd> &emap)
@@ -2643,196 +2574,226 @@ Eigen::DiagonalMatrix<double, Eigen::Dynamic> LocalUpgradeThread::get_matrix_fro
 }
 
 
-Eigen::DiagonalMatrix<double, Eigen::Dynamic> LocalUpgradeThread::get_weight_matrix(vector<string> &obs_names)
+
+
+void LocalUpgradeThread::work(int thread_id, int iter, double cur_lam)
 {
-	lock_guard<mutex> g(weight_lock);
-	Eigen::VectorXd vec(obs_names.size());
-	//vector<double> vweights;
-	int i = 0;
-	for (auto on : obs_names)
-	{
-		vec[i] = weight_map.at(on);
-		i++;
-	}
-	Eigen::DiagonalMatrix<double, Eigen::Dynamic> w = vec.asDiagonal();
-	return w;
-}
-
-pair<string, pair<vector<string>, vector<string>>> LocalUpgradeThread::get_next()
-{
-	lock_guard<mutex> lock(next_lock);
-	//the end condition
-	if (cases.size() == 0)
-	{	
-		return empty;
-	}
-	else
-	{
-		map<string,pair<vector<string>,vector<string>>>::iterator it = cases.begin();
-		pair<string,pair<vector<string>, vector<string>>> p(it->first, it->second);
-		cases.erase(it);
-		return p;
-	}
-}
-
-
-void LocalUpgradeThread::calc_upgrade(vector<string> par_names, vector<string> obs_names)
-{
-	//---------
-	//not thread safe section
-	//---------
-	set_components(par_names,obs_names);
-	par_diff.transposeInPlace();
-	obs_diff.transposeInPlace();
-	obs_resid.transposeInPlace();
-	par_resid.transposeInPlace();
-	Eigen::MatrixXd scaled_residual = weights * obs_resid;
-	
-	Eigen::MatrixXd scaled_par_resid;
-	if ((!use_approx) && (iter > 1))
-	{
-	
-		if (use_prior_scaling)
-		{
-			scaled_par_resid = parcov_inv *par_resid;
-		}
-		else
-		{
-			scaled_par_resid = par_resid;
-		}
-	}
-
-	stringstream ss;
-
-	double scale = (1.0 / (sqrt(double(num_reals - 1))));
-
-	obs_diff = obs_diff.transpose().eval();
-	cout << thread_id << ", " << obs_names << ", " << loc.rows() << endl;
-	obs_diff = obs_diff.cwiseProduct(loc);
-
-	obs_diff = scale * (weights * obs_diff);
-	
-
-	
-	if (use_prior_scaling)
-	{
-		//throw runtime_error("parcov scale not implemented for localization");
-		cout << "...applying prior par cov scaling to par diff matrix" << endl;
-		par_diff = scale * parcov_inv * par_diff;
-	}
-	else
-		par_diff = scale * par_diff;
-
-
-	//performance_log->log_event("SVD of obs diff");
-	Eigen::MatrixXd ivec, upgrade_1, s, V, Ut;
-
-	//SVD_REDSVD rsvd;
-	SVD_REDSVD rsvd;
-	//rsvd.set_performance_log(performance_log);
-	rsvd.solve_ip(obs_diff, s, Ut, V, eigthresh, maxsing);
-
-
-	Ut.transposeInPlace();
-	obs_diff.resize(0, 0);
-
-	Eigen::MatrixXd s2 = s.cwiseProduct(s);
-	
-	ivec = ((Eigen::VectorXd::Ones(s2.size()) * (cur_lam + 1.0)) + s2).asDiagonal().inverse();
-	
-	Eigen::MatrixXd X1 = Ut * scaled_residual;
-	
-	Eigen::MatrixXd X2 = ivec * X1;
-	X1.resize(0, 0);
-
-	Eigen::MatrixXd X3 = V * s.asDiagonal() * X2;
-	X2.resize(0, 0);
-
-	if (use_prior_scaling)
-	{
-		upgrade_1 = -1.0 * parcov_inv * par_diff * X3;
-	}
-	else
-	{
-		upgrade_1 = -1.0 * par_diff * X3;
-	}
-	upgrade_1.transposeInPlace();
-	X3.resize(0, 0);
-
-
-	Eigen::MatrixXd upgrade_2;
-	if ((use_approx) && (iter > 1))
-	{
-		Eigen::MatrixXd x4 = Am.transpose() * scaled_par_resid;
-		Eigen::MatrixXd x5 = Am * x4;
-	
-		Eigen::MatrixXd x6 = par_diff.transpose() * x5;
-		Eigen::MatrixXd x7 = V * ivec *V.transpose() * x6;
-	
-		if (use_prior_scaling)
-		{
-			upgrade_2 = -1.0 * parcov_inv * par_diff * x7;
-		}
-		else
-		{
-			upgrade_2 = -1.0 * (par_diff * x7);
-		}
-
-		upgrade_1 = upgrade_1 + upgrade_2.transpose();
-		//pe_lam.set_eigen(*pe_lam.get_eigen_ptr() + upgrade_2.transpose());
-
-	}
-	//ParameterEnsemble upgrade_pe(&pest_scenario);
-	//upgrade_pe.from_eigen_mat(upgrade_1,pe.get_real_names(), par_names);
-	lock_guard<mutex> guard(put_lock);
-	
-	pe_upgrade.add_2_cols_ip(par_names, upgrade_1);
-	return;
-}
-
-//Eigen::MatrixXd LocalUpgradeThread::get_localizer_matrix(int num_reals, string par_name, vector<string> obs_names)
-//{
-//	lock_guard<mutex> g(loc_lock);
-//	return localizer.get_localizing_hadamard_matrix(num_reals,par_name, obs_names);
-//}
-
-//Eigen::MatrixXd LocalUpgradeThread::get_obs_resid_matrix()
-//{
-//	lock_guard<mutex> g(obs_lock);
-//	return ph.get_obs_resid_subset(oe);
-//
-//}
-//
-//Eigen::MatrixXd LocalUpgradeThread::get_par_resid_matrix()
-//{
-//	lock_guard<mutex> g(par_lock);
-//	return ph.get_par_resid_subset(pe);
-//
-//}
-
-
-
-void upgrade_thread_function(int id, int iter,double cur_lam, map<string, Eigen::VectorXd> &par_resid_map, map<string, Eigen::VectorXd> &par_diff_map,
-	map<string,Eigen::VectorXd> &obs_resid_map, map<string, Eigen::VectorXd> &obs_diff_map, Localizer &localizer, map<string,double> &parcov_inv_map,
-	map<string,double> &weight_map, ParameterEnsemble &pe_upgrade, map<string, pair<vector<string>, vector<string>>>& cases)
-{
-	/*LocalUpgradeThread(int tid, int iter, double _cur_lam, map<string, Eigen::VectorXd> &_par_resid_map, map<string, Eigen::VectorXd> &_par_diff_map,
-		map<string, Eigen::VectorXd> &_obs_resid_map, map<string, Eigen::VectorXd> &_obs_diff_map,
-		Localizer &_localizer, map<string, double> _parcov_inv_map,
-		map<string, double> _weight_map, ParameterEnsemble &_pe_upgrade, map<string, pair<vector<string>, vector<string>>> &_cases);*/
-	LocalUpgradeThread worker(id, iter, cur_lam, par_resid_map, par_diff_map, obs_resid_map, obs_diff_map, localizer, parcov_inv_map, weight_map, pe_upgrade, cases);
-
-	worker.set_controls();
+	Eigen::MatrixXd par_resid, par_diff, Am;
+	Eigen::MatrixXd obs_resid, obs_diff, loc;
+	Eigen::DiagonalMatrix<double, Eigen::Dynamic> weights, parcov_inv;
+	vector<string> par_names, obs_names;
 	while (true)
 	{
-		pair<string, pair<vector<string>, vector<string>>> case_info = worker.get_next();
+		unique_lock<mutex> next_guard(next_lock, defer_lock);
+		par_names.clear();
+		obs_names.clear();
+		//the end condition
+		while (true)
+		{	
+			if (next_guard.try_lock())
+			{
+				if (count == keys.size())
+				{
+					return;
+				}
+				string k = keys[count];
+				pair<vector<string>, vector<string>> p = cases.at(k);
+				par_names = p.first;
+				obs_names = p.second;
+				count++;
+				next_guard.unlock();
+			}
 
-		if (case_info.first == worker.get_done())
-			break;
-		//worker.set_components(case_info.second.second, case_info.second.first);
-		worker.calc_upgrade(case_info.second.second, case_info.second.first);
+		}
+		
+		par_resid.resize(0, 0);
+		par_diff.resize(0, 0);
+		obs_resid.resize(0, 0);
+		obs_diff.resize(0, 0);
+		loc.resize(0, 0);
+		Am.resize(0, 0);
+		weights.resize(0);
+		parcov_inv.resize(0);
 
+		//todo make these attributes
+		unique_lock<mutex> obs_diff_guard(obs_diff_lock, defer_lock);
+		unique_lock<mutex> obs_resid_guard(obs_resid_lock, defer_lock);
+		unique_lock<mutex> par_diff_guard(par_diff_lock, defer_lock);
+		unique_lock<mutex> par_resid_guard(par_resid_lock, defer_lock);
+		unique_lock<mutex> loc_guard(loc_lock, defer_lock);
+		unique_lock<mutex> weight_guard(weight_lock, defer_lock);
+		unique_lock<mutex> parcov_guard(parcov_lock, defer_lock);
+
+
+		while (true)
+		{
+			//todo switch to components_set() method;
+			if (((use_approx) || (par_resid.rows() > 0)) &&
+				(weights.size() > 0) &&
+				(parcov_inv.size() > 0) &&
+				(par_diff.rows() > 0) &&
+				(obs_resid.rows() > 0) &&
+				(obs_diff.rows() > 0) &&
+				((par_names.size() > 1) || (loc.rows() > 0)))
+				break;
+			if ((par_names.size() == 1) && (loc.rows() == 0) && (loc_guard.try_lock()))
+			{
+				cout << thread_id << ", " << obs_names << endl;
+				loc = localizer.get_localizing_hadamard_matrix(num_reals, par_names[0], obs_names);
+				loc_guard.unlock();
+			}
+			if ((obs_diff.rows() == 0) && (obs_diff_guard.try_lock()))
+			{
+				obs_diff = get_matrix_from_map(num_reals, obs_names, obs_diff_map);
+				obs_diff_guard.unlock();
+			}
+			if ((obs_resid.rows() == 0) && (obs_resid_guard.try_lock()))
+			{
+				obs_resid = get_matrix_from_map(num_reals, obs_names, obs_resid_map);
+				obs_resid_guard.unlock();
+			}
+			if ((par_diff.rows() == 0) && (par_diff_guard.try_lock()))
+			{
+				par_diff = get_matrix_from_map(num_reals, par_names, par_diff_map);
+				par_diff_guard.unlock();
+			}
+			if ((par_resid.rows() == 0) && (par_resid_guard.try_lock()))
+			{
+				par_resid = get_matrix_from_map(num_reals, par_names, par_resid_map);
+				par_resid_guard.unlock();
+			}
+			if ((weights.rows() == 0) && (weight_guard.try_lock()))
+			{
+				weights = get_matrix_from_map(obs_names, weight_map);
+				weight_guard.unlock();
+			}
+			if ((parcov_inv.rows() == 0) && (parcov_guard.try_lock()))
+			{
+				parcov_inv = get_matrix_from_map(par_names, parcov_inv_map);
+				parcov_guard.unlock();
+			}
+		}
+		//todo: get Am here if needed
+		//lock_guard<mutex> am_guard(am_lock);
+		
+		par_diff.transposeInPlace();
+		obs_diff.transposeInPlace();
+		obs_resid.transposeInPlace();
+		par_resid.transposeInPlace();
+		Eigen::MatrixXd scaled_residual = weights * obs_resid;
+
+		Eigen::MatrixXd scaled_par_resid;
+		if ((!use_approx) && (iter > 1))
+		{
+
+			if (use_prior_scaling)
+			{
+				scaled_par_resid = parcov_inv * par_resid;
+			}
+			else
+			{
+				scaled_par_resid = par_resid;
+			}
+		}
+
+		stringstream ss;
+
+		double scale = (1.0 / (sqrt(double(num_reals - 1))));
+
+		obs_diff = obs_diff.transpose().eval();
+		cout << thread_id << ", " << obs_names << ", " << loc.rows() << endl;
+		obs_diff = obs_diff.cwiseProduct(loc);
+
+		obs_diff = scale * (weights * obs_diff);
+
+		if (use_prior_scaling)
+		{
+			//throw runtime_error("parcov scale not implemented for localization");
+			cout << "...applying prior par cov scaling to par diff matrix" << endl;
+			par_diff = scale * parcov_inv * par_diff;
+		}
+		else
+			par_diff = scale * par_diff;
+
+
+		//performance_log->log_event("SVD of obs diff");
+		Eigen::MatrixXd ivec, upgrade_1, s, V, Ut;
+
+		//SVD_REDSVD rsvd;
+		SVD_REDSVD rsvd;
+		//rsvd.set_performance_log(performance_log);
+		rsvd.solve_ip(obs_diff, s, Ut, V, eigthresh, maxsing);
+
+
+		Ut.transposeInPlace();
+		obs_diff.resize(0, 0);
+
+		Eigen::MatrixXd s2 = s.cwiseProduct(s);
+
+		ivec = ((Eigen::VectorXd::Ones(s2.size()) * (cur_lam + 1.0)) + s2).asDiagonal().inverse();
+
+		Eigen::MatrixXd X1 = Ut * scaled_residual;
+
+		Eigen::MatrixXd X2 = ivec * X1;
+		X1.resize(0, 0);
+
+		Eigen::MatrixXd X3 = V * s.asDiagonal() * X2;
+		X2.resize(0, 0);
+
+		if (use_prior_scaling)
+		{
+			upgrade_1 = -1.0 * parcov_inv * par_diff * X3;
+		}
+		else
+		{
+			upgrade_1 = -1.0 * par_diff * X3;
+		}
+		upgrade_1.transposeInPlace();
+		X3.resize(0, 0);
+
+
+		Eigen::MatrixXd upgrade_2;
+		if ((use_approx) && (iter > 1))
+		{
+			Eigen::MatrixXd x4 = Am.transpose() * scaled_par_resid;
+			Eigen::MatrixXd x5 = Am * x4;
+
+			Eigen::MatrixXd x6 = par_diff.transpose() * x5;
+			Eigen::MatrixXd x7 = V * ivec *V.transpose() * x6;
+
+			if (use_prior_scaling)
+			{
+				upgrade_2 = -1.0 * parcov_inv * par_diff * x7;
+			}
+			else
+			{
+				upgrade_2 = -1.0 * (par_diff * x7);
+			}
+
+			upgrade_1 = upgrade_1 + upgrade_2.transpose();
+
+		}
+		lock_guard<mutex> guard(put_lock);
+		unique_lock<mutex> put_guard(put_lock);
+		while (true)
+		{
+			if (put_guard.try_lock())
+			{
+				pe_upgrade.add_2_cols_ip(par_names, upgrade_1);
+				put_guard.unlock();
+			}
+		}
 	}
+
+}
+
+
+
+void upgrade_thread_function(int id, int iter,double cur_lam, LocalUpgradeThread &worker)
+{
+	
+	worker.work(id,iter,cur_lam);
+	
 	return;
 }
 
@@ -2913,12 +2874,12 @@ ParameterEnsemble IterEnsembleSmoother::calc_localized_upgrade_threaded(double c
 		map<string, double> _weight_map, ParameterEnsemble &_pe_upgrade);*/
 	
 	
-	/*LocalUpgradeThread worker(0,iter, cur_lam, par_resid_map, par_diff_map, obs_resid_map, obs_diff_map,
+	LocalUpgradeThread worker(0,iter, cur_lam, par_resid_map, par_diff_map, obs_resid_map, obs_diff_map,
 		localizer, parcov_inv_map, weight_map, pe_upgrade, loc_map);
-	*/
+	
 
 
-	upgrade_thread_function(0, iter, cur_lam, par_resid_map, par_diff_map, obs_resid_map, obs_diff_map, localizer, parcov_inv_map, weight_map, pe_upgrade, loc_map);
+	//upgrade_thread_function(0, iter, cur_lam, worker);
 	int num_threads = 3;
 	vector<thread> threads;
 	/*void upgrade_thread_function(int id, int iter, double cur_lam, map<string, Eigen::VectorXd> &par_resid_map, map<string, Eigen::VectorXd> &par_diff_map,
@@ -2926,8 +2887,7 @@ ParameterEnsemble IterEnsembleSmoother::calc_localized_upgrade_threaded(double c
 		map<string, double> &weight_map, ParameterEnsemble &pe_upgrade, map<string, pair<vector<string>, vector<string>>>& cases)
 	*/
 	for (int i = 0; i < num_threads; i++)
-		threads.push_back(thread(upgrade_thread_function, i, iter,cur_lam,std::ref(par_resid_map),
-			std::ref(par_diff_map),std::ref(obs_resid_map),std::ref(obs_diff_map),std::ref(localizer),parcov_inv_map,weight_map,std::ref(pe_upgrade),std::ref(loc_map)));
+		threads.push_back(thread(upgrade_thread_function, i, iter, cur_lam, std::ref(worker)));
 
 	/*thread t1(upgrade_thread_function, 0, std::ref(worker));
 	thread t2(upgrade_thread_function, 0, std::ref(worker));
