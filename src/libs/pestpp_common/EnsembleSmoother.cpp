@@ -102,17 +102,21 @@ PhiHandler::PhiHandler(Pest *_pest_scenario, FileManager *_file_manager,
 
 Eigen::MatrixXd PhiHandler::get_obs_resid(ObservationEnsemble &oe)
 {
-	Eigen::MatrixXd resid = oe.get_eigen(vector<string>(), oe_base->get_var_names()) -
+	vector<string> names = oe_base->get_var_names();
+	Eigen::MatrixXd resid = oe.get_eigen(vector<string>(),names) -
 		oe_base->get_eigen(oe.get_real_names(), vector<string>());
-	apply_ineq_constraints(resid);
+	
+
+	apply_ineq_constraints(resid,names);
 	return resid;
 }
 
 
 Eigen::MatrixXd PhiHandler::get_obs_resid_subset(ObservationEnsemble &oe)
 {
-	Eigen::MatrixXd resid = oe.get_eigen() - oe_base->get_eigen(oe.get_real_names(), oe.get_var_names());
-	apply_ineq_constraints(resid);
+	vector<string> names = oe.get_var_names();
+	Eigen::MatrixXd resid = oe.get_eigen() - oe_base->get_eigen(oe.get_real_names(), names);
+	apply_ineq_constraints(resid, names);
 	return resid;
 }
 
@@ -141,7 +145,7 @@ Eigen::MatrixXd PhiHandler::get_actual_obs_resid(ObservationEnsemble &oe)
 	ovals.transposeInPlace();
 	for (int i = 0; i < resid.rows(); i++)
 		resid.row(i) = oe_vals.row(i) - ovals;
-	apply_ineq_constraints(resid);
+	apply_ineq_constraints(resid, act_obs_names);
 	return resid;
 }
 
@@ -549,9 +553,10 @@ map<string, Eigen::VectorXd> PhiHandler::calc_regul(ParameterEnsemble & pe)
 }
 
 
-void PhiHandler::apply_ineq_constraints(Eigen::MatrixXd &resid)
+void PhiHandler::apply_ineq_constraints(Eigen::MatrixXd &resid, vector<string> &names)
 {
-	vector<string> names = oe_base->get_var_names();
+	
+	//vector<string> names = oe_base->get_var_names();
 	//vector<string> lt_names = get_lt_obs_names(), gt_names = get_gt_obs_names();
 	//vector<string> act_obs_names = pest_scenario->get_ctl_ordered_nz_obs_names();
 	
@@ -2212,7 +2217,7 @@ ParameterEnsemble IterEnsembleSmoother::calc_upgrade(vector<string> &obs_names, 
 
 	ObservationEnsemble oe_upgrade(oe.get_pest_scenario_ptr(), oe.get_eigen(vector<string>(), obs_names, false), oe.get_real_names(), obs_names);
 	ParameterEnsemble pe_upgrade(pe.get_pest_scenario_ptr(), pe.get_eigen(vector<string>(), par_names, false), pe.get_real_names(), par_names);
-
+	pe_upgrade.set_trans_status(ParameterEnsemble::transStatus::NUM);
 	//todo: pre-extract the diagonal of the prior, invert and store in faster lookup container
 	Eigen::DiagonalMatrix<double, Eigen::Dynamic> parcov_inv;// = parcov.get(par_names).inv().e_ptr()->toDense().cwiseSqrt().asDiagonal();
 	if (parcov.isdiagonal())
@@ -2311,7 +2316,7 @@ ParameterEnsemble IterEnsembleSmoother::calc_upgrade(vector<string> &obs_names, 
 
 	performance_log->log_event("calculate scaled par diff");
 	message(2, "calculating par diff matrix");
-	pe_upgrade.transform_ip(ParameterEnsemble::transStatus::NUM);
+	//pe_upgrade.transform_ip(ParameterEnsemble::transStatus::NUM);
 	diff = pe_upgrade.get_eigen_mean_diff().transpose();
 	Eigen::MatrixXd par_diff;
 	if (pest_scenario.get_pestpp_options().get_ies_use_prior_scaling())
