@@ -847,6 +847,10 @@ void PestppOptions::parce_line(const string &line)
 		{
 			convert_ip(value, ies_localize_how);
 		}
+		else if (key == "IES_NUM_THREADS")
+		{
+			convert_ip(value, ies_num_threads);
+		}
 		else {
 
 			throw PestParsingError(line, "Invalid key word \"" + key +"\"");

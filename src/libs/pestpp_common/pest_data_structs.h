@@ -392,6 +392,9 @@ public:
 	double get_overdue_giveup_minutes() const { return overdue_giveup_minutes; }
 	void set_overdue_giveup_minutes(double overdue_minutes) { overdue_giveup_minutes = overdue_minutes; }
 
+	int get_ies_num_threads() const { return ies_num_threads; }
+	void set_ies_num_threads(int _threads) { ies_num_threads = _threads; }
+
 	set<string> get_passed_args() const { return passed_args; }
 
 private:
@@ -482,6 +485,7 @@ private:
 	string ies_weight_csv;
 	string ies_subset_how;
 	string ies_localize_how;
+	int ies_num_threads;
 };
 
 ostream& operator<< (ostream &os, const PestppOptions& val);

@@ -166,6 +166,8 @@ private:
 	bool use_localizer;
 	Localizer localizer;
 
+	int num_threads;
+
 	set<string> pp_args;
 
 	int iter,subset_size;

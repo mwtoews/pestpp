@@ -1444,12 +1444,20 @@ void IterEnsembleSmoother::initialize()
 	}
 
 	use_localizer = localizer.initialize(performance_log);
+	num_threads = pest_scenario.get_pestpp_options().get_ies_num_threads();
 	if (use_localizer)
 	{
 		ss.str("");
 		ss << "using localized solution with " << localizer.get_localizer_map().size() << " sequential upgrade steps";
 		message(1, ss.str());
 		ss.str("");
+		if (num_threads > 0)
+		{
+			ss.str("");
+			ss << "using multithreaded localization calculation with " << num_threads << " threads";
+			message(1, ss.str());
+
+		}
 	}
 	iter = 0;
 	//ofstream &frec = file_manager.rec_ofstream();
@@ -2601,7 +2609,7 @@ void LocalUpgradeThread::work(int thread_id, int iter, double cur_lam)
 				par_names = p.second;
 				obs_names = p.first;
 
-				cout << "tid:" << thread_id << ", parname:" << par_names[0] << endl;
+				//cout << "tid:" << thread_id << ", parname:" << par_names[0] << endl;
 				count++;
 				next_guard.unlock();
 				break;
@@ -2879,15 +2887,10 @@ ParameterEnsemble IterEnsembleSmoother::calc_localized_upgrade_threaded(double c
 	LocalUpgradeThread worker(0,iter, cur_lam, par_resid_map, par_diff_map, obs_resid_map, obs_diff_map,
 		localizer, parcov_inv_map, weight_map, pe_upgrade, loc_map);
 	
-	upgrade_thread_function(0, iter, cur_lam, worker);
-	int num_threads = 20;
+
 	vector<thread> threads;
 	LocalUpgradeThread worker1(0, iter, cur_lam, par_resid_map, par_diff_map, obs_resid_map, obs_diff_map,
 		localizer, parcov_inv_map, weight_map, pe_upgrade, loc_map);
-	/*void upgrade_thread_function(int id, int iter, double cur_lam, map<string, Eigen::VectorXd> &par_resid_map, map<string, Eigen::VectorXd> &par_diff_map,
-		map<string, Eigen::VectorXd> &obs_resid_map, map<string, Eigen::VectorXd> &obs_diff_map, Localizer &localizer, map<string, double> &parcov_inv_map,
-		map<string, double> &weight_map, ParameterEnsemble &pe_upgrade, map<string, pair<vector<string>, vector<string>>>& cases)
-	*/
 	for (int i = 0; i < num_threads; i++)
 		threads.push_back(thread(upgrade_thread_function, i, iter, cur_lam, std::ref(worker1)));
 
@@ -2900,26 +2903,7 @@ ParameterEnsemble IterEnsembleSmoother::calc_localized_upgrade_threaded(double c
 	for (auto &t : threads)
 		t.join();
 
-	int lsize = localizer.get_localizer_map().size();
-	int i = 0;
-	for (auto local_pair : localizer.get_localizer_map())
-	{
-		ss.str("");
-		ss << "localized upgrade part " << i + 1 << " of " << lsize;
-		message(2, ss.str());
-		ParameterEnsemble pe_local;
-		if (localizer.get_how() == Localizer::How::PARAMETERS)
-		{
-			pe_local = calc_upgrade(local_pair.second.first, local_pair.second.second, cur_lam, pe.shape().first, local_pair.first);
-		}
-		else
-		{
-			pe_local = calc_upgrade(local_pair.second.first, local_pair.second.second, cur_lam, pe.shape().first);
-		}
-
-		pe_upgrade.add_2_cols_ip(pe_local);
-		i++;
-	}
+	
 	return pe_upgrade;
 }
 
@@ -3000,9 +2984,10 @@ bool IterEnsembleSmoother::solve_new()
 		//pe_upgrade.to_csv("test.csv");
 		if (use_localizer)
 		{
-			
-			pe_upgrade = calc_localized_upgrade_threaded(cur_lam);
-			pe_upgrade = calc_localized_upgrade(cur_lam);
+			if (num_threads > 0)
+				pe_upgrade = calc_localized_upgrade_threaded(cur_lam);
+			else
+				pe_upgrade = calc_localized_upgrade(cur_lam);
 		}
 		else
 			pe_upgrade = calc_upgrade(act_obs_names, act_par_names, cur_lam, pe.shape().first);
