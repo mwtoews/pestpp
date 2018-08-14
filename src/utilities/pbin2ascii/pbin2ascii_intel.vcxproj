@@ -219,6 +219,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)\..\exe\windows\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>i$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='debug2_dll|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -249,6 +250,7 @@
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)\..\bin\iwin\</OutDir>
     <TargetName>ipbin2ascii</TargetName>
+    <IntDir>i$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='pbin2par-Release|x64'">
     <LinkIncremental>false</LinkIncremental>
