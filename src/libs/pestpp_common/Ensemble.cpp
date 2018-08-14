@@ -1189,6 +1189,21 @@ void ParameterEnsemble::draw(int num_reals, Covariance &cov, PerformanceLog *plo
 	}
 
 	Ensemble::draw(num_reals, cov, par, var_names, grouper, plog, level);
+	/*map<string, int> header_info;
+	for (int i = 0; i < var_names.size(); i++)
+		header_info[var_names[i]] = i;
+	
+	ParameterInfo pi = pest_scenario_ptr->get_ctl_parameter_info();
+	ParameterRec::TRAN_TYPE ft = ParameterRec::TRAN_TYPE::FIXED;
+	for (auto name : pest_scenario_ptr->get_ctl_ordered_par_names() )
+	{
+		if (pi.get_parameter_rec_ptr(name)->tranform_type == ft)
+		{
+			fixed_names.push_back(name);
+		}
+	}*/
+	//fill_fixed(header_info);
+	//save_fixed();
 	if (!same)
 	{
 
@@ -1223,7 +1238,18 @@ map<int,int> ParameterEnsemble::add_runs(RunManagerAbstract *run_mgr_ptr,const v
 {
 	//add runs to the run manager using int indices
 	map<int,int> real_run_ids;
-	Parameters pars = get_pest_scenario_ptr()->get_ctl_parameters();
+
+	//get the pars and transform to be in sync with ensemble trans status
+	Parameters pars = pest_scenario_ptr->get_ctl_parameters();
+	if (tstat == transStatus::NUM)
+	{
+		par_transform.active_ctl2numeric_ip(pars);
+	}
+	else if (tstat == transStatus::MODEL)
+	{
+		par_transform.active_ctl2model_ip(pars);
+	}
+	Parameters pars_real = pars;
 	Eigen::VectorXd evec;
 	vector<double> svec;
 	int run_id;
@@ -1237,14 +1263,15 @@ map<int,int> ParameterEnsemble::add_runs(RunManagerAbstract *run_mgr_ptr,const v
 	for (auto &rname : run_real_names)
 	{
 		Eigen::VectorXd rvector = get_real_vector(rname);
-		pars.update_without_clear(var_names, get_real_vector(rname));
+		pars_real = pars;
+		pars_real.update_without_clear(var_names, get_real_vector(rname));
 		//make sure the pars are in the right trans status
 		if (tstat == ParameterEnsemble::transStatus::CTL)
-			par_transform.active_ctl2model_ip(pars);
+			par_transform.active_ctl2model_ip(pars_real);
 		else if (tstat == ParameterEnsemble::transStatus::NUM)
-			par_transform.numeric2model_ip(pars);
-		replace_fixed(rname, pars);
-		run_id = run_mgr_ptr->add_run(pars);
+			par_transform.numeric2model_ip(pars_real);
+		replace_fixed(rname, pars_real);
+		run_id = run_mgr_ptr->add_run(pars_real);
 		real_run_ids[find(real_names.begin(), real_names.end(), rname) - real_names.begin()]  = run_id;
 	}
 	return real_run_ids;
@@ -1550,10 +1577,19 @@ void ParameterEnsemble::to_csv(string file_name)
 	for (auto &vname : names)
 		csv << ',' << vname;
 	csv << endl;
+
+	//get the pars and transform to be in sync with ensemble trans status
 	Parameters pars = pest_scenario_ptr->get_ctl_parameters();
-	vector<double> svec;
-	Eigen::VectorXd evec;
-	svec.resize(reals.cols());
+	if (tstat == transStatus::NUM)
+	{
+		par_transform.active_ctl2numeric_ip(pars);
+	}
+	else if (tstat == transStatus::MODEL)
+	{
+		par_transform.active_ctl2model_ip(pars);
+	}
+
+
 	for (int ireal = 0; ireal < reals.rows(); ireal++)
 	{
 		csv << real_names[ireal];

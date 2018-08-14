@@ -2376,6 +2376,70 @@ def tenpar_localize_how_test():
     plt.savefig(os.path.join(test_d+"_p", "local_test.pdf"))
     assert diff.max().max() == 0
 
+def tenpar_fixed_test3():
+    """tenpar fixed test 3"""
+    model_d = "ies_10par_xsec"
+    test_d = os.path.join(model_d, "master_fixed3")
+    template_d = os.path.join(model_d, "template")
+    pst = pyemu.Pst(os.path.join(template_d,"pest.pst"))
+    pst.control_data.noptmax = 1
+    if os.path.exists(test_d):
+        shutil.rmtree(test_d)
+    shutil.copytree(template_d,test_d)
+    offset = 1
+    pst.parameter_data.loc[:,"offset"] = offset
+    pst.parameter_data.loc[:,"partrans"] = "log"
+    pst.parameter_data.loc["k_01","partrans"] = "fixed"
+    cov = pyemu.Cov.from_parameter_data(pst)
+    pe = pyemu.ParameterEnsemble.from_gaussian_draw(pst=pst,cov=cov,num_reals=10)
+    #pe = pe.loc[:,pst.adj_par_names[3:5]]
+    pe.loc[:,"stage"] = np.linspace(0.0,1.0,pe.shape[0])
+    pe.to_csv(os.path.join(template_d,"par_fixed.csv"))
+    fixed_pars = ["stage","k_01"]
+    pst.parameter_data.loc[fixed_pars,"partrans"] = "fixed"
+    pst.pestpp_options["ies_par_en"] = "par_fixed.csv"
+    pst.pestpp_options["ies_lambda_mults"] = 1.0
+    pst.pestpp_options["lambda_scale_fac"] = 1.0
+    pst.pestpp_options["ies_save_binary"] = False
+    pst.pestpp_options["ies_include_base"] = False
+
+    pst.write(os.path.join(template_d, "pest_fixed.pst"))
+
+    # pyemu.helpers.run("{0} pest.pst".format(exe_path), cwd=test_d)
+    pyemu.os_utils.start_slaves(template_d, exe_path, "pest_fixed.pst", num_slaves=5, master_dir=test_d,
+                                slave_root=model_d, port=port)
+    df_phi1 = pd.read_csv(os.path.join(test_d,"pest_fixed.phi.meas.csv"),index_col=0)
+    df1 = pd.read_csv(os.path.join(test_d,"pest_fixed.{0}.par.csv".format(pst.control_data.noptmax)),index_col=0)
+    df1.columns = df1.columns.map(str.lower)
+    #df = df.iloc[:-1, :]
+    #df.index = pe.index
+    print(df1.loc[:,"k_01"])
+    print(df1.loc[:,"stage"] - pe.loc[:,"stage"])
+    assert df1.loc[:,"k_01"].mean() == pst.parameter_data.loc["k_01","parval1"]
+    assert np.abs(df1.loc[:,"stage"] - pe.loc[:,"stage"]).max() < 1.0e-4
+
+    pe.loc[:,pst.adj_par_names] += offset
+
+    pe.to_csv(os.path.join(template_d,"par_fixed_offset.csv"))
+    pst.pestpp_options["ies_par_en"] = "par_fixed_offset.csv"
+    pst.parameter_data.loc[:,"offset"] = 0.0
+    pst.parameter_data.loc[pst.adj_par_names,"parval1"] += offset
+    pst.write(os.path.join(template_d,"pest_fixed_offset.pst"))
+    pyemu.os_utils.start_slaves(template_d, exe_path, "pest_fixed_offset.pst", num_slaves=5, master_dir=test_d+"_offset",
+                                slave_root=model_d, port=port)
+    df_phi2 = pd.read_csv(os.path.join(test_d+"_offset", "pest_fixed_offset.phi.meas.csv"), index_col=0)
+    df2 = pd.read_csv(os.path.join(test_d+"_offset", "pest_fixed_offset.{0}.par.csv".format(pst.control_data.noptmax)), index_col=0)
+    df2.columns = df2.columns.map(str.lower)
+    # df = df.iloc[:-1, :]
+    # df.index = pe.index
+    print(df2.loc[:, "k_01"])
+    print(df2.loc[:, "stage"] - pe.loc[:, "stage"])
+    assert df2.loc[:, "k_01"].mean() == pst.parameter_data.loc["k_01", "parval1"], df2.loc[:, "k_01"].mean()
+    assert np.abs(df2.loc[:, "stage"] - pe.loc[:, "stage"]).max() < 1.0e-5
+
+    diff = np.abs(df_phi1.loc[:,"mean"] - df_phi2.loc[:,"mean"]).max()
+    assert diff == 0.0,diff
+
 if __name__ == "__main__":
     # write_empty_test_matrix()
 
@@ -2391,8 +2455,7 @@ if __name__ == "__main__":
     # # full list of tests
     # tenpar_subset_test()
     # tenpar_full_cov_test()
-    # test_freyberg_full_cov_reorder()
-    # test_freyberg_full_cov_reorder_run()
+    # eval_freyberg_full_cov_reorder()
     # test_freyberg_full_cov_reorder_run()
     # eval_freyberg_full_cov()
     # tenpar_tight_tol_test()
@@ -2401,6 +2464,7 @@ if __name__ == "__main__":
     # test_freyberg_ineq()
     # tenpar_fixed_test()
     # tenpar_fixed_test2()
+    tenpar_fixed_test3()
     # tenpar_subset_how_test()
     # tenpar_localizer_test1()
     # tenpar_localizer_test2()
@@ -2408,7 +2472,7 @@ if __name__ == "__main__":
     # freyberg_localizer_eval1()
     # freyberg_localizer_eval2()
     # freyberg_localizer_test3()
-    freyberg_dist_local_test()
+    # freyberg_dist_local_test()
     # tenpar_restart_binary_test()
     # csv_tests()
     # tenpar_rns_test()
