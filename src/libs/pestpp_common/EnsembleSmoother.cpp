@@ -2538,19 +2538,16 @@ ParameterEnsemble IterEnsembleSmoother::calc_upgrade(vector<string> &obs_names, 
 }
 
 
-LocalUpgradeThread::LocalUpgradeThread(int _thread_id, int _iter, double _cur_lam,  map<string, Eigen::VectorXd> &_par_resid_map, map<string, Eigen::VectorXd> &_par_diff_map,
+LocalUpgradeThread::LocalUpgradeThread(map<string, Eigen::VectorXd> &_par_resid_map, map<string, Eigen::VectorXd> &_par_diff_map,
 	map<string, Eigen::VectorXd> &_obs_resid_map, map<string, Eigen::VectorXd> &_obs_diff_map,
 	Localizer &_localizer, map<string, double> &_parcov_inv_map,map<string, double> &_weight_map, 
 	ParameterEnsemble &_pe_upgrade, map<string,pair<vector<string>,vector<string>>> &_cases): par_resid_map(_par_resid_map),
 	par_diff_map(_par_diff_map), obs_resid_map(_obs_resid_map),obs_diff_map(_obs_diff_map),localizer(_localizer),
 	pe_upgrade(_pe_upgrade),cases(_cases), parcov_inv_map(_parcov_inv_map), weight_map(_weight_map)
 {
-	thread_id = _thread_id;
-	iter = _iter;
+	
 	parcov_inv_map = _parcov_inv_map;
 	weight_map = _weight_map;
-	cur_lam = _cur_lam;
-	set_controls();
 	count = 0;
 	for (auto &c : cases)
 	{
@@ -2560,46 +2557,16 @@ LocalUpgradeThread::LocalUpgradeThread(int _thread_id, int _iter, double _cur_la
 }
 
 
-void LocalUpgradeThread::set_controls()
-{
-	lock_guard<mutex> g(ctrl_lock);
-	maxsing = pe_upgrade.get_pest_scenario_ptr()->get_svd_info().maxsing;
-	eigthresh = pe_upgrade.get_pest_scenario_ptr()->get_svd_info().eigthresh;
-	use_approx = pe_upgrade.get_pest_scenario_ptr()->get_pestpp_options().get_ies_use_approx();
-	use_prior_scaling = pe_upgrade.get_pest_scenario_ptr()->get_pestpp_options().get_ies_use_prior_scaling();
-	num_reals = pe_upgrade.shape().first;
-	return;
-}
-
-
-
-//Eigen::MatrixXd LocalUpgradeThread::get_matrix_from_map(int num_reals,vector<string> &names, map<string, Eigen::VectorXd> &emap)
+//void LocalUpgradeThread::set_controls()
 //{
-//	Eigen::MatrixXd mat(num_reals, names.size());
-//	mat.setZero();
-//	
-//	for (int j = 0; j < names.size(); j++)
-//	{
-//		mat.col(j) = emap[names[j]];
-//	}
-//	
-//	return mat;
+//	lock_guard<mutex> g(ctrl_lock);
+//	maxsing = pe_upgrade.get_pest_scenario_ptr()->get_svd_info().maxsing;
+//	eigthresh = pe_upgrade.get_pest_scenario_ptr()->get_svd_info().eigthresh;
+//	use_approx = pe_upgrade.get_pest_scenario_ptr()->get_pestpp_options().get_ies_use_approx();
+//	use_prior_scaling = pe_upgrade.get_pest_scenario_ptr()->get_pestpp_options().get_ies_use_prior_scaling();
+//	num_reals = pe_upgrade.shape().first;
+//	return;
 //}
-//
-//Eigen::DiagonalMatrix<double, Eigen::Dynamic> LocalUpgradeThread::get_matrix_from_map(vector<string> &names, map<string, double> &dmap)
-//{
-//	Eigen::VectorXd vec(names.size());
-//	int i = 0;
-//	for (auto name : names)
-//	{
-//		vec[i] = dmap.at(name);
-//		++i;
-//	}
-//	Eigen::DiagonalMatrix<double, Eigen::Dynamic> m = vec.asDiagonal();
-//	return m;
-//}
-//
-
 
 
 void LocalUpgradeThread::work(int thread_id, int iter, double cur_lam)
@@ -2632,6 +2599,26 @@ void LocalUpgradeThread::work(int thread_id, int iter, double cur_lam)
 			return mat;
 		}
 	};
+
+	unique_lock<mutex> ctrl_guard(ctrl_lock, defer_lock);
+	int maxsing, num_reals;
+	double eigthresh;
+	bool use_approx;
+	bool use_prior_scaling;
+
+	while (true)
+	{
+		if (ctrl_guard.try_lock())
+		{
+			maxsing = pe_upgrade.get_pest_scenario_ptr()->get_svd_info().maxsing;
+			eigthresh = pe_upgrade.get_pest_scenario_ptr()->get_svd_info().eigthresh;
+			use_approx = pe_upgrade.get_pest_scenario_ptr()->get_pestpp_options().get_ies_use_approx();
+			use_prior_scaling = pe_upgrade.get_pest_scenario_ptr()->get_pestpp_options().get_ies_use_prior_scaling();
+			num_reals = pe_upgrade.shape().first;
+			ctrl_guard.unlock();
+			break;
+		}
+	}
 
 	Eigen::MatrixXd par_resid, par_diff, Am;
 	Eigen::MatrixXd obs_resid, obs_diff, loc;
@@ -2933,33 +2920,16 @@ ParameterEnsemble IterEnsembleSmoother::calc_localized_upgrade_threaded(double c
 	}
 	mat.resize(0, 0);
 
-	//LocalUpgradeThread worker(pe, oe, ph, localizer, parcov_inv_map, weight_map, pe_upgrade);
-	/*LocalUpgradeThread(map<string, Eigen::VectorXd> &_par_resid_map, map<string, Eigen::VectorXd> &_par_diff_map,
-		map<string, Eigen::VectorXd> &_obs_resid_map, map<string, Eigen::VectorXd> &_obs_diff_map,
-		Localizer &_localizer, map<string, double> _parcov_inv_map,
-		map<string, double> _weight_map, ParameterEnsemble &_pe_upgrade);*/
 	
-	
-	/*LocalUpgradeThread worker(0,iter, cur_lam, par_resid_map, par_diff_map, obs_resid_map, obs_diff_map,
-		localizer, parcov_inv_map, weight_map, pe_upgrade, loc_map);
-	*/
-	//Eigen::initParallel();
 	Eigen::setNbThreads(1);
 	vector<thread> threads;
-	LocalUpgradeThread worker1(0, iter, cur_lam, par_resid_map, par_diff_map, obs_resid_map, obs_diff_map,
+	LocalUpgradeThread worker1(par_resid_map, par_diff_map, obs_resid_map, obs_diff_map,
 		localizer, parcov_inv_map, weight_map, pe_upgrade, loc_map);
 	for (int i = 0; i < num_threads; i++)
-		threads.push_back(thread(upgrade_thread_function, i, iter, cur_lam, std::ref(worker1)));
-
-	/*thread t1(upgrade_thread_function, 0, std::ref(worker));
-	thread t2(upgrade_thread_function, 0, std::ref(worker));
-	t1.join();
-	t2.join();
-	*/
+		threads.push_back(thread(&LocalUpgradeThread::work, &worker1, i, iter, cur_lam));
 
 	for (auto &t : threads)
 		t.join();
-
 	
 	return pe_upgrade;
 }

@@ -100,7 +100,7 @@ class LocalUpgradeThread
 {
 public:
 
-	LocalUpgradeThread(int tid, int iter, double _cur_lam, map<string, Eigen::VectorXd> &_par_resid_map, map<string, Eigen::VectorXd> &_par_diff_map,
+	LocalUpgradeThread(map<string, Eigen::VectorXd> &_par_resid_map, map<string, Eigen::VectorXd> &_par_diff_map,
 		map<string, Eigen::VectorXd> &_obs_resid_map, map<string, Eigen::VectorXd> &_obs_diff_map, 
 		Localizer &_localizer, map<string, double> &_parcov_inv_map,
 		map<string, double> &_weight_map, ParameterEnsemble &_pe_upgrade, map<string, pair<vector<string>, vector<string>>> &_cases);
@@ -108,7 +108,6 @@ public:
 	//Eigen::DiagonalMatrix<double, Eigen::Dynamic> get_matrix_from_map(vector<string> &names, map<string, double> &dmap);	
 	//Eigen::MatrixXd get_matrix_from_map(int num_reals, vector<string> &names, map<string, Eigen::VectorXd> &emap);
 
-	void set_controls();
 
 	void work(int thread_id, int iter, double cur_lam);
 
@@ -116,9 +115,9 @@ public:
 private:
 	vector<string> keys;
 	int count;
-	double eigthresh, cur_lam;
-	int maxsing, num_reals,iter, thread_id;
-	bool use_approx, use_prior_scaling;
+	//double eigthresh, cur_lam;
+	//int maxsing, num_reals,iter, thread_id;
+	//bool use_approx, use_prior_scaling;
 
 	map<string, pair<vector<string>, vector<string>>> &cases;
 
