@@ -217,46 +217,167 @@ void SVD_PROPACK::solve_ip(Eigen::SparseMatrix<double>& A, VectorXd &Sigma, Eige
 }
 
 
-void SVD_PROPACK::test()
+void SVD_PROPACK::solve_ip(Eigen::MatrixXd& A, Eigen::MatrixXd &Sigma, Eigen::MatrixXd& U, Eigen::MatrixXd& V, double _eigen_thres, int _max_sing)
 {
-	Eigen::SparseMatrix<double> A(3,3);
-	VectorXd Sigma;
-	VectorXd Sigma_trunc;
-	Eigen::SparseMatrix<double> U(3,3);
-	Eigen::SparseMatrix<double> Vt(3,3);
+	class local_utils {
+	public:
+		static void init_array(double data[], int len, double value = 0.0)
+		{
+			for (int i = 0; i<len; ++i)
+			{
+				data[i] = value;
+			}
+		}
+	};
+	int m_rows = A.rows();
+	int n_cols = A.cols();
+	int n_nonzero;
+	int k = min(m_rows, n_cols);
+	k = min(n_max_sing, k);
+	int kmax = k;
+	int ioption[] = { 0, 1 };
+	char eps_char = 'e';
+	double eps = DEF_DLAMCH(&eps_char);
+	double doption[] = { 0.0, sqrt(eps), pow(eps, 3.0 / 4.0), 0.0 };
+	int ierr = 0;
 
-	A.setZero();
-	A.insert(0,0) = 20;
-	A.insert(1,1) = 30;
-	A.insert(2,2) = 50;
+	//count number of nonzero entries
+	//n_nonzero = A.nonZeros();
+	n_nonzero = m_rows * n_cols;
 
-	set_max_sing(3);
-	set_eign_thres(1e-7);
+	// Allocate and initialize arrays
+	double *dparm = new double[n_nonzero];
+	int *iparm = new int[2 * n_nonzero + 1];
+	double *tmp_u = new double[m_rows*(kmax + 1)];
+	double *tmp_sigma = new double[k];
+	double *tmp_bnd = new double[k];
+	double *tmp_v = new double[n_cols*kmax];
+	int nb = 1;
+	int lwork = m_rows + n_cols + 9 * kmax + 5 * kmax*kmax + 4 + max(3 * kmax*kmax + 4 * kmax + 4, nb*max(m_rows, n_cols));
+	if (performance_log)
+	{
+		stringstream info_str;
+		info_str << "allocating lwork; size = " << lwork << endl;
+		performance_log->log_event(info_str.str());
+	}
+	double *tmp_work = new double[lwork];
+	//cerr << "lwork allocated" << endl;
+	int liwork = 8 * kmax;
+	if (performance_log)
+	{
+		stringstream info_str;
+		info_str << "allocating tmp_iwork; size = " << liwork << endl;
+		performance_log->log_event(info_str.str());
+	}
+	int *tmp_iwork = new int[liwork];
+	iparm[0] = n_nonzero;
+	int n = 0;
+	double data;
+	//for (int icol = 0; icol<A.outerSize(); ++icol)
+	for (int icol = 0; icol < n_cols; ++icol)
+	{
+		//for (SparseMatrix<double>::InnerIterator it(A, icol); it; ++it)
+		for (int jrow=0;jrow< m_rows;++jrow)
+		{
+			dparm[n] = A(icol,jrow);
+			++n;
+			iparm[n] = jrow + 1;
+			iparm[n_nonzero + n] = icol + 1;
+		}
+	}
+	local_utils::init_array(tmp_u, m_rows*(kmax + 1), 0.0);
+	local_utils::init_array(tmp_sigma, k, 0.0);
+	local_utils::init_array(tmp_bnd, k, 0.0);;
+	local_utils::init_array(tmp_v, n_cols*kmax, 0.0);
+	local_utils::init_array(tmp_work, lwork, 0.0);
+	char jobu = 'Y';
+	char jobv = 'Y';
+	long jobu_len = 1;
+	long jobv_len = 1;
+	int ld_tmpu = m_rows;
+	int ld_tmpv = n_cols;
+	int ld_tmpb = kmax;
 
+	// Compute singluar values and vectors
+	int info = 0;
+	double tolin = 1.0E-4;
+	if (performance_log)
+	{
+		performance_log->log_event("calling DEF_DLANSVD");
+	}
+	DEF_DLANSVD(&jobu, &jobv, &m_rows, &n_cols, &k, &kmax, tmp_u, &ld_tmpu, tmp_sigma, tmp_bnd,
+		tmp_v, &ld_tmpv, &tolin, tmp_work, &lwork, tmp_iwork, &liwork, doption, ioption, &info,
+		dparm, iparm, &jobu_len, &jobv_len);
 
-	solve_ip(A, Sigma, U, Vt, Sigma_trunc);
-	std::cout << "////////// PROPACK results /////////" << endl;
-	std::cout << "A  = " << endl;
-	std::cout << A << endl << endl;
-	std::cout << "Sigma = " << endl;
-	std::cout << Sigma << endl;
-	std::cout << "U = " << endl;
-	std::cout << U << endl << endl;
-	std::cout << "Vt = " << endl;
-	std::cout << Vt << endl << endl;
+	if (performance_log)
+	{
+		performance_log->log_event("updating Vt, S and U matricies");
+	}
+	//Compute number of singular values to be used in the solution
+	int n_sing_used = 0;
+	int actual_sing = kmax;
+	if (info > 0)
+		actual_sing = info;
+	for (int i_sing = 0; i_sing < actual_sing; ++i_sing)
+	{
+		double eig_ratio = tmp_sigma[i_sing] / tmp_sigma[0];
+		if (eig_ratio > _eigen_thres)
+		{
+			++n_sing_used;
+		}
+		else
+		{
+			break;
+		}
+	}
+	// Update Sigma
+	Sigma.resize(n_sing_used, n_sing_used);
+	Sigma.setConstant(0.0);
+	for (int i_sing = 0; i_sing<n_sing_used; ++i_sing)
+	{
+		Sigma(i_sing,i_sing) = tmp_sigma[i_sing];
+	}
 
-	JacobiSVD<MatrixXd> svd_fac(A,  ComputeFullU |  ComputeFullV);
-	std::cout << "////////// LAPACK results /////////" << endl;
-	std::cout << "A  = " << endl;
-	std::cout << A << endl << endl;
-	std::cout << "Sigma = " << endl;
-	std::cout << svd_fac.singularValues() << endl;
-	std::cout << "U = " << endl;
-	std::cout << svd_fac.matrixU() << endl << endl;
-	std::cout << "Vt = " << endl;
-	std::cout << svd_fac.matrixV().transpose() << endl << endl;
+	/*Sigma_trunc.resize(kmax - n_sing_used);
+	Sigma_trunc.setConstant(0.0);
+	for (int i_sing = n_sing_used; i_sing<kmax; ++i_sing)
+	{
+		Sigma_trunc(i_sing - n_sing_used) = tmp_sigma[i_sing];
+	}*/
+	
+	// Update U
+	U.resize(m_rows, n_sing_used);
+	U.setZero();
+	for (int i_sing = 0; i_sing<n_sing_used; ++i_sing)
+	{
+		for (int irow = 0; irow<m_rows; ++irow)
+		{
+			U(irow, i_sing) = tmp_u[i_sing*m_rows + irow];
+		}
+	}
+	
+	// Update Vt
+	V.resize(n_sing_used, n_cols);
+	V.setZero();
+	for (int i_sing = 0; i_sing<n_sing_used; ++i_sing)
+	{
+		for (int icol = 0; icol<n_cols; ++icol)
+		{
+			V(i_sing, icol) = tmp_v[i_sing*n_cols + icol];
+		}
+	}
+	V.transposeInPlace();
 
+	delete[] dparm;
+	delete[] iparm;
+	delete[] tmp_u;
+	delete[] tmp_sigma;
+	delete[] tmp_bnd;
+	delete[] tmp_v;
+	delete[] tmp_work;
+	delete[] tmp_iwork;
 }
+
 
 SVD_PROPACK::~SVD_PROPACK(void)
 {
