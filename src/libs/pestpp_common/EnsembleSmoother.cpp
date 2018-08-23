@@ -1132,6 +1132,15 @@ void IterEnsembleSmoother::sanity_checks()
 		warnings.push_back("not using prior scaling - this is really a dev option, you should always use prior scaling...");
 	}*/
 
+	if ((ppo->get_ies_num_threads() > 0) && (!use_localizer))
+	{
+		warnings.push_back("'ies_num_threads > 0 but no localization, resetting 'ies_num_threads' = 0");
+		ppo->set_ies_num_threads(-1);
+		num_threads = -1;
+	}
+
+
+
 	if (warnings.size() > 0)
 	{
 		message(0, "sanity_check warnings");
@@ -1457,20 +1466,7 @@ void IterEnsembleSmoother::initialize()
 
 	use_localizer = localizer.initialize(performance_log);
 	num_threads = pest_scenario.get_pestpp_options().get_ies_num_threads();
-	if (use_localizer)
-	{
-		ss.str("");
-		ss << "using localized solution with " << localizer.get_localizer_map().size() << " sequential upgrade steps";
-		message(1, ss.str());
-		ss.str("");
-		if (num_threads > 0)
-		{
-			ss.str("");
-			ss << "using multithreaded localization calculation with " << num_threads << " threads";
-			message(1, ss.str());
-
-		}
-	}
+	
 	iter = 0;
 	//ofstream &frec = file_manager.rec_ofstream();
 	last_best_mean = 1.0E+30;
@@ -1545,6 +1541,21 @@ void IterEnsembleSmoother::initialize()
 	message(1, "max run fail: ", ppo->get_max_run_fail());
 
 	sanity_checks();
+
+	if (use_localizer)
+	{
+		ss.str("");
+		ss << "using localized solution with " << localizer.get_localizer_map().size() << " sequential upgrade steps";
+		message(1, ss.str());
+		ss.str("");
+		if (num_threads > 0)
+		{
+			ss.str("");
+			ss << "using multithreaded localization calculation with " << num_threads << " threads";
+			message(1, ss.str());
+
+		}
+	}
 
 	bool echo = false;
 	if (verbose_level > 1)
@@ -2228,10 +2239,6 @@ bool IterEnsembleSmoother::should_terminate()
 ParameterEnsemble IterEnsembleSmoother::calc_upgrade(vector<string> &obs_names, vector<string> &par_names,double cur_lam, int num_reals, string local_col_name)
 {
 
-	//---------
-	//not thread safe section
-	//---------
-
 	int maxsing = pest_scenario.get_svd_info().maxsing;
 	double eigthresh = pest_scenario.get_svd_info().eigthresh;
 
@@ -2311,11 +2318,6 @@ ParameterEnsemble IterEnsembleSmoother::calc_upgrade(vector<string> &obs_names, 
 		}
 	}
 
-	//----------
-	// threads safe
-	//----------
-
-
 	stringstream ss;
 
 	double scale = (1.0 / (sqrt(double(oe_upgrade.shape().first - 1))));
@@ -2374,11 +2376,6 @@ ParameterEnsemble IterEnsembleSmoother::calc_upgrade(vector<string> &obs_names, 
 		rsvd.set_performance_log(performance_log);
 		rsvd.solve_ip(obs_diff, s, Ut, V, eigthresh, maxsing);
 	}
-	
-
-	//SVD_EIGEN esvd;
-	//esvd.set_performance_log(performance_log);
-	//esvd.solve_ip(obs_diff, s, Ut, V, pest_scenario.get_svd_info().eigthresh, pest_scenario.get_svd_info().maxsing);
 
 	Ut.transposeInPlace();
 	obs_diff.resize(0, 0);
