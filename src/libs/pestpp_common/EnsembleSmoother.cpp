@@ -2727,12 +2727,14 @@ void LocalUpgradeThread::work(int thread_id, int iter, double cur_lam)
 
 		//performance_log->log_event("SVD of obs diff");
 		Eigen::MatrixXd ivec, upgrade_1, s, V, Ut;
-
+		Eigen::MatrixXd s1, V1, Ut1;
 		//SVD_REDSVD rsvd;
 		SVD_REDSVD rsvd;
 		//rsvd.set_performance_log(performance_log);
 		rsvd.solve_ip(obs_diff, s, Ut, V, eigthresh, maxsing);
 
+		SVD_PROPACK psvd;
+		psvd.solve_ip(obs_diff, s1, Ut1, V1, eigthresh, maxsing);
 
 		Ut.transposeInPlace();
 		obs_diff.resize(0, 0);

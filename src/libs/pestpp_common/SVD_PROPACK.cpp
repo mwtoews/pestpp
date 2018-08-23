@@ -279,7 +279,7 @@ void SVD_PROPACK::solve_ip(Eigen::MatrixXd& A, Eigen::MatrixXd &Sigma, Eigen::Ma
 		//for (SparseMatrix<double>::InnerIterator it(A, icol); it; ++it)
 		for (int jrow=0;jrow< m_rows;++jrow)
 		{
-			dparm[n] = A(icol,jrow);
+			dparm[n] = A(jrow,icol);
 			++n;
 			iparm[n] = jrow + 1;
 			iparm[n_nonzero + n] = icol + 1;
