@@ -1247,12 +1247,12 @@ def tenpar_localizer_test1():
         raise Exception("template_d {0} not found".format(template_d))
     if os.path.exists(test_d):
         shutil.rmtree(test_d)
-    #shutil.copytree(template_d, test_d)
+    shutil.copytree(template_d, test_d)
     pst_name = os.path.join(template_d, "pest.pst")
     pst = pyemu.Pst(pst_name)
-    
+
     #mat = pyemu.Matrix.from_names(pst.nnz_obs_names,pst.adj_par_names).to_dataframe()
-    mat = pyemu.Matrix.from_names(["head"],["k"]).to_dataframe()
+    mat = pyemu.Matrix.from_names(pst.obs_names,pst.par_names).to_dataframe()
     mat.loc[:,:] = 1.0
     #mat.iloc[0,:] = 1
     mat = pyemu.Matrix.from_dataframe(mat)
@@ -1275,8 +1275,42 @@ def tenpar_localizer_test1():
     pst.pestpp_options["ies_par_en"] = "par_local.csv"
     pst.pestpp_options["ies_obs_en"] = "obs_local.csv"
     pst.pestpp_options["ies_verbose_level"] = 3
+    pst.control_data.noptmax = 0
+    pst_name = os.path.join(template_d, "pest_local.pst")
+    pst.write(pst_name)
+    pyemu.os_utils.run("{0} {1}".format(exe_path,"pest_local.pst"),cwd=test_d)
+    return
+
+    shutil.rmtree(test_d)
+    pst_name = os.path.join(template_d, "pest.pst")
+    pst = pyemu.Pst(pst_name)
+
+    # mat = pyemu.Matrix.from_names(pst.nnz_obs_names,pst.adj_par_names).to_dataframe()
+    mat = pyemu.Matrix.from_names(["head"], ["k"]).to_dataframe()
+    mat.loc[:, :] = 1.0
+    # mat.iloc[0,:] = 1
+    mat = pyemu.Matrix.from_dataframe(mat)
+    mat.to_ascii(os.path.join(template_d, "localizer.mat"))
+
+    cov = pyemu.Cov.from_parameter_data(pst)
+    pe = pyemu.ParameterEnsemble.from_gaussian_draw(pst=pst, cov=cov, num_reals=10)
+    pe.enforce()
+    pe.to_csv(os.path.join(template_d, "par_local.csv"))
+
+    oe = pyemu.ObservationEnsemble.from_id_gaussian_draw(pst, num_reals=10)
+    oe.to_csv(os.path.join(template_d, "obs_local.csv"))
+
+    pst.pestpp_options = {}
+    pst.pestpp_options["ies_num_reals"] = 10
+    pst.pestpp_options["ies_localizer"] = "localizer.mat"
+    pst.pestpp_options["ies_lambda_mults"] = 1.0
+    pst.pestpp_options["lambda_scale_fac"] = 1.0
+    pst.pestpp_options["ies_subset_size"] = 11
+    pst.pestpp_options["ies_par_en"] = "par_local.csv"
+    pst.pestpp_options["ies_obs_en"] = "obs_local.csv"
+    pst.pestpp_options["ies_verbose_level"] = 3
     pst.control_data.noptmax = 3
-    
+
     #pst.pestpp_options["ies_verbose_level"] = 3
     pst_name = os.path.join(template_d,"pest_local.pst")
     pst.write(pst_name)
@@ -2464,9 +2498,9 @@ if __name__ == "__main__":
     # test_freyberg_ineq()
     # tenpar_fixed_test()
     # tenpar_fixed_test2()
-    tenpar_fixed_test3()
+    #tenpar_fixed_test3()
     # tenpar_subset_how_test()
-    # tenpar_localizer_test1()
+    tenpar_localizer_test1()
     # tenpar_localizer_test2()
     # tenpar_localizer_test3()
     # freyberg_localizer_eval1()

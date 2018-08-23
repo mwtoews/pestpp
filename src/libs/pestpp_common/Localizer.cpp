@@ -67,9 +67,10 @@ bool Localizer::initialize(PerformanceLog *performance_log)
 		obgnme_map[og] = names;
 	}
 
-	vector<string> missing, dups;
+	vector<string> missing, dups, not_allowed;
 	vector<vector<string>> obs_map;
 	set<string> dup_check;
+
 	//for (auto &o : mat.get_row_names())
 	string o;
 	vector<string> row_names = mat.get_row_names();
@@ -94,12 +95,23 @@ bool Localizer::initialize(PerformanceLog *performance_log)
 				if (dup_check.find(oo) != dup_check.end())
 					dups.push_back(oo);
 				dup_check.emplace(oo);
+				if (obs_names.find(oo) == obs_names.end())
+					not_allowed.push_back(oo);
 
 			}
 		}
 		else
 			missing.push_back(o);
 	}
+	if (not_allowed.size() > 0)
+	{
+		ss.str("");
+		ss << " the following obs names were identified through obs groups but are not in the non-zero weight obs names: ";
+		for (auto &oo : not_allowed)
+			ss << oo << ",";
+		throw runtime_error(ss.str());
+	}
+		
 	if (missing.size() > 0)
 	{
 		ss << " the following rows in " << filename << " were not found in the non-zero-weight observation names or observation group names: ";
@@ -137,11 +149,22 @@ bool Localizer::initialize(PerformanceLog *performance_log)
 				if (dup_check.find(pp) != dup_check.end())
 					dups.push_back(pp);
 				dup_check.emplace(pp);
+				if (par_names.find(pp) == par_names.end())
+					not_allowed.push_back(pp);
 
 			}
 		}
 		else
 			missing.push_back(p);
+	}
+	if (not_allowed.size() > 0)
+	{
+		ss.str("");
+		ss << "the following par names were identified through par groups but are not in the adj par names: ";
+		for (auto &pp : not_allowed)
+			ss << pp << ",";
+		throw runtime_error(ss.str());
+
 	}
 	if (missing.size() > 0)
 	{
