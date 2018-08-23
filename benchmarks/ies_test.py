@@ -333,7 +333,7 @@ def tenpar_narrow_range_test():
 def tenpar_full_cov_test():
     """tenpar full cov test"""
     model_d = "ies_10par_xsec"
-    test_d = os.path.join(model_d, "master_full_cov_test")
+    test_d = os.path.join(model_d, "master_full_cov_test3")
     template_d = os.path.join(model_d, "test_template")
     if not os.path.exists(template_d):
         raise Exception("template_d {0} not found".format(template_d))
@@ -361,6 +361,7 @@ def tenpar_full_cov_test():
     pst.pestpp_options = {}
     pst.pestpp_options["ies_num_reals"] = num_reals
     pst.pestpp_options["parcov_filename"] = "prior.cov"
+    pst.pestpp_options["ies_verbose_level"] = 3
     pst.write(pst_name)
     pyemu.helpers.run(exe_path+" pest.pst",cwd=test_d)
 
@@ -2396,7 +2397,7 @@ if __name__ == "__main__":
     # test_freyberg_full_cov_reorder_run()
     # eval_freyberg_full_cov()
     # tenpar_tight_tol_test()
-    # test_chenoliver()
+    test_chenoliver()
     # tenpar_narrow_range_test()
     # test_freyberg_ineq()
     # tenpar_fixed_test()
@@ -2408,7 +2409,7 @@ if __name__ == "__main__":
     # freyberg_localizer_eval1()
     # freyberg_localizer_eval2()
     # freyberg_localizer_test3()
-    freyberg_dist_local_test()
+    #freyberg_dist_local_test()
     # tenpar_restart_binary_test()
     # csv_tests()
     # tenpar_rns_test()

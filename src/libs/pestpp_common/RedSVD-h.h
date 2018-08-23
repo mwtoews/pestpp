@@ -46,15 +46,9 @@ namespace RedSVD
 		
 		const Scalar PI(3.1415926535897932384626433832795028841971693993751);
 
-		//jwhite AUg 23 2018 - hacking for thread safety
-		//Scalar v1 = (Scalar)(std::rand() + Scalar(1)) / ((Scalar)RAND_MAX+Scalar(2));
-		//Scalar v2 = (Scalar)(std::rand() + Scalar(1)) / ((Scalar)RAND_MAX+Scalar(2));
-		std::random_device rd;
-		std::default_random_engine e(rd());
-		std::uniform_int_distribution<int> dist(0, RAND_MAX);
-		Scalar v1 = (Scalar)(dist(e) + Scalar(1)) / ((Scalar)RAND_MAX + Scalar(2));
-		Scalar v2 = (Scalar)(dist(e) + Scalar(1)) / ((Scalar)RAND_MAX + Scalar(2));
-
+		Scalar v1 = (Scalar)(std::rand() + Scalar(1)) / ((Scalar)RAND_MAX+Scalar(2));
+		Scalar v2 = (Scalar)(std::rand() + Scalar(1)) / ((Scalar)RAND_MAX+Scalar(2));
+		
 		Scalar len = sqrt(Scalar(-2) * log(v1));
 		x = len * cos(Scalar(2) * PI * v2);
 		y = len * sin(Scalar(2) * PI * v2);
@@ -82,7 +76,7 @@ namespace RedSVD
 		std::normal_distribution<double> distribution(0.0, 1.0);
 		for (Index i = 0; i < mat.rows(); ++i)
 		{
-			for (Index j = 0; j + 1 < mat.cols(); j += 2)
+			for (Index j = 0; j < mat.cols(); ++j )
 				mat(i,j) = distribution(generator);
 		}
 	}
