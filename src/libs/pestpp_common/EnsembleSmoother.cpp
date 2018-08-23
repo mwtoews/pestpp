@@ -2946,7 +2946,8 @@ ParameterEnsemble IterEnsembleSmoother::calc_localized_upgrade_threaded(double c
 	/*LocalUpgradeThread worker(0,iter, cur_lam, par_resid_map, par_diff_map, obs_resid_map, obs_diff_map,
 		localizer, parcov_inv_map, weight_map, pe_upgrade, loc_map);
 	*/
-	Eigen::initParallel();
+	//Eigen::initParallel();
+	Eigen::setNbThreads(1);
 	vector<thread> threads;
 	LocalUpgradeThread worker1(0, iter, cur_lam, par_resid_map, par_diff_map, obs_resid_map, obs_diff_map,
 		localizer, parcov_inv_map, weight_map, pe_upgrade, loc_map);

@@ -61,7 +61,7 @@ namespace RedSVD
 	}
 
 	template<typename MatrixType>
-	inline void sample_gaussian(MatrixType& mat)
+	inline void sample_gaussian_precpp11(MatrixType& mat)
 	{
 		typedef typename MatrixType::Index Index;
 
@@ -73,6 +73,20 @@ namespace RedSVD
 				sample_gaussian(mat(i, mat.cols()-1), mat(i, mat.cols()-1));
 		}
 	}
+
+	template<typename MatrixType>
+	inline void sample_gaussian(MatrixType& mat)
+	{
+		typedef typename MatrixType::Index Index;
+		std::default_random_engine generator;
+		std::normal_distribution<double> distribution(0.0, 1.0);
+		for (Index i = 0; i < mat.rows(); ++i)
+		{
+			for (Index j = 0; j + 1 < mat.cols(); j += 2)
+				mat(i,j) = distribution(generator);
+		}
+	}
+
 
 	template<typename MatrixType>
 	inline void gram_schmidt(MatrixType& mat)
