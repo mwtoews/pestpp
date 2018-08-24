@@ -103,7 +103,9 @@ public:
 	LocalUpgradeThread(map<string, Eigen::VectorXd> &_par_resid_map, map<string, Eigen::VectorXd> &_par_diff_map,
 		map<string, Eigen::VectorXd> &_obs_resid_map, map<string, Eigen::VectorXd> &_obs_diff_map, 
 		Localizer &_localizer, map<string, double> &_parcov_inv_map,
-		map<string, double> &_weight_map, ParameterEnsemble &_pe_upgrade, map<string, pair<vector<string>, vector<string>>> &_cases);
+		map<string, double> &_weight_map, ParameterEnsemble &_pe_upgrade, 
+		map<string, pair<vector<string>, vector<string>>> &_cases,
+		map<string, Eigen::VectorXd> &_Am_map);
 
 	//Eigen::DiagonalMatrix<double, Eigen::Dynamic> get_matrix_from_map(vector<string> &names, map<string, double> &dmap);	
 	//Eigen::MatrixXd get_matrix_from_map(int num_reals, vector<string> &names, map<string, Eigen::VectorXd> &emap);
@@ -127,7 +129,7 @@ private:
 	map<string, double> &parcov_inv_map;
 	map<string, double> &weight_map;
 
-	map<string, Eigen::VectorXd> &par_resid_map, &par_diff_map;
+	map<string, Eigen::VectorXd> &par_resid_map, &par_diff_map, &Am_map;
 	map<string, Eigen::VectorXd> &obs_resid_map, &obs_diff_map;
 
 	mutex ctrl_lock, weight_lock, loc_lock, parcov_lock;

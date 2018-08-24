@@ -2115,15 +2115,12 @@ def freyberg_dist_local_test():
     zero_cond_pars = list(par_sum.loc[par_sum==0.0].index)
     print(zero_cond_pars)
 
-
-
     cov = pyemu.Cov.from_parameter_data(pst)
     num_reals = 10
     pe = pyemu.ParameterEnsemble.from_gaussian_draw(pst=pst,cov=cov,num_reals=num_reals)
     pe.enforce()
     pe.to_csv(os.path.join(template_d,"par_local.csv"))
 
-    
     pst.pestpp_options = {}
     pst.pestpp_options["ies_num_reals"] = num_reals
     pst.pestpp_options["ies_subset_size"] = num_reals
@@ -2146,11 +2143,15 @@ def freyberg_dist_local_test():
     par_df_org.columns = par_df_org.columns.str.lower()
     for i in range(0,pst.control_data.noptmax):
         f = os.path.join(test_d, "pest_local.{0}.par.csv".format(i+1))
-        try:
-            par_df = pd.read_csv(f,index_col=0)
-        except:
-            break
+        if not os.path.exists(f):
+            continue
+        # try:
+        #     par_df = pd.read_csv(f,index_col=0)
+        # except:
+        #     break
         # par_df.index = pe.index
+        par_df = pd.read_csv(f, index_col=0)
+        par_df.index = pe.index
         par_df.columns = par_df.columns.str.lower()
         diff = par_df_org - par_df
         print(f)
@@ -2377,6 +2378,124 @@ def tenpar_localize_how_test():
     plt.savefig(os.path.join(test_d+"_p", "local_test.pdf"))
     assert diff.max().max() == 0
 
+def freyberg_local_threads_test():
+    import flopy
+    model_d = "ies_freyberg"
+    test_d = os.path.join(model_d, "master_local_threads")
+    template_d = os.path.join(model_d, "template")
+    m = flopy.modflow.Modflow.load("freyberg.nam",model_ws=template_d,load_only=[],check=False)
+    if os.path.exists(test_d):
+       shutil.rmtree(test_d)
+    # print("loading pst")
+    pst = pyemu.Pst(os.path.join(template_d, "pest.pst"))
+
+    par = pst.parameter_data
+    par.loc[:,"partrans"] = "fixed"
+    par.loc[par.pargp=="hk","partrans"] = "log"
+
+    par_adj = par.loc[pst.adj_par_names,:].copy()
+    par_adj.loc[:,"i"] = par_adj.parnme.apply(lambda x: int(x.split('_')[1][1:]))
+    par_adj.loc[:,"j"] = par_adj.parnme.apply(lambda x: int(x.split('_')[2][1:]))
+    par_adj.loc[:,"x"] = par_adj.apply(lambda x: m.sr.xcentergrid[x.i,x.j],axis=1)
+    par_adj.loc[:,"y"] = par_adj.apply(lambda x: m.sr.ycentergrid[x.i,x.j],axis=1)
+
+    pst.observation_data.loc["flx_river_l_19700102","weight"] = 0.0
+    obs_nz = pst.observation_data.loc[pst.nnz_obs_names,:].copy()
+    obs_nz.loc[:,"i"] = obs_nz.obsnme.apply(lambda x: int(x[6:8]))
+    obs_nz.loc[:,"j"] = obs_nz.obsnme.apply(lambda x: int(x[9:11]))
+    obs_nz.loc[:,'x'] = obs_nz.apply(lambda x: m.sr.xcentergrid[x.i,x.j],axis=1)
+    obs_nz.loc[:,'y'] = obs_nz.apply(lambda x: m.sr.ycentergrid[x.i,x.j],axis=1)
+
+    dfs = []
+    v = pyemu.geostats.ExpVario(contribution=1.0, a=1000)
+    for name in pst.nnz_obs_names:
+        x,y = obs_nz.loc[name,['x','y']].values
+        #print(name,x,y)
+        p = par_adj.copy()
+        #p.loc[:,"dist"] = p.apply(lambda xx: np.sqrt((xx.x - x)**2 + (xx.y - y)**2),axis=1)
+        #print(p.dist.max(),p.dist.min())
+        cc = v.covariance_points(x,y,p.x,p.y)
+        #print(cc.min(),cc.max())
+        dfs.append(cc)
+
+    df = pd.concat(dfs,axis=1)
+    df.columns = pst.nnz_obs_names
+
+    mat = pyemu.Matrix.from_dataframe(df.T)
+    tol = 0.35
+
+    mat.x[mat.x<tol] = 0.0
+    mat.to_ascii(os.path.join(template_d,"localizer.mat"))
+    df_tol = mat.to_dataframe()
+    par_sum = df_tol.sum(axis=0)
+
+    zero_cond_pars = list(par_sum.loc[par_sum==0.0].index)
+    print(zero_cond_pars)
+
+    cov = pyemu.Cov.from_parameter_data(pst)
+    num_reals = 10
+    pe = pyemu.ParameterEnsemble.from_gaussian_draw(pst=pst,cov=cov,num_reals=num_reals)
+    pe.enforce()
+    pe.to_csv(os.path.join(template_d,"par_local.csv"))
+
+    pst.pestpp_options = {}
+    pst.pestpp_options["ies_num_reals"] = num_reals
+    pst.pestpp_options["ies_subset_size"] = num_reals
+    pst.pestpp_options["ies_lambda_mults"] = [0.5,1.0]
+    pst.pestpp_options["lambda_scale_fac"] = 1.0
+    pst.pestpp_options["ies_include_base"] = False
+    pst.pestpp_options["ies_par_en"] = "par_local.csv"
+    pst.pestpp_options["ies_localizer"] = "localizer.mat"
+    pst.pestpp_options["ies_localize_how"] = "pars"
+    pst.pestpp_options["ies_verbose_level"] = 1
+    pst.pestpp_options["ies_save_lambda_en"] = True
+    pst.pestpp_options["ies_subset_how"] = "random"
+    pst.pestpp_options["ies_accept_phi_fac"] = 1000.0
+    pst.control_data.noptmax = 2
+    pst.write(os.path.join(template_d, "pest_local.pst"))
+    d = test_d+"_base"
+    pyemu.os_utils.start_slaves(template_d, exe_path, "pest_local.pst", num_slaves=20, master_dir=d,
+                               slave_root=model_d,port=port)
+
+    def get_results(dd):
+
+        phi_df = pd.read_csv(os.path.join(dd,"pest_local.phi.actual.csv"),index_col=0)
+        upgrade_dfs = {}
+        for f in os.listdir(dd):
+            if f.endswith(".scale.par.csv"):
+                df = pd.read_csv(os.path.join(dd,f),index_col=0)
+                upgrade_dfs[f] = df
+        return phi_df,upgrade_dfs
+
+    base_phi,base_dfs = get_results(d)
+
+    pst.pestpp_options["ies_num_threads"] = 1
+    pst.write(os.path.join(template_d, "pest_local.pst"))
+    d = test_d + "_1thread"
+    pyemu.os_utils.start_slaves(template_d, exe_path, "pest_local.pst", num_slaves=20, master_dir=d,
+                                slave_root=model_d, port=port)
+    phi,dfs = get_results(d)
+    phi_diff = (base_phi - phi).apply(np.abs)
+    assert phi_diff.max().max() == 0.0, phi_diff.max()
+    for f,df in base_dfs.items():
+        assert f in dfs,f
+        diff = (df - dfs[f]).apply(np.abs)
+        assert diff.max().max() == 0.0,diff.max()
+
+    pst.pestpp_options["ies_num_threads"] = 10
+    pst.write(os.path.join(template_d, "pest_local.pst"))
+    d = test_d + "_10thread"
+    pyemu.os_utils.start_slaves(template_d, exe_path, "pest_local.pst", num_slaves=20, master_dir=d,
+                                slave_root=model_d, port=port)
+    phi, dfs = get_results(d)
+    phi_diff = (base_phi - phi).apply(np.abs)
+    assert phi_diff.max().max() == 0.0, phi_diff.max()
+    for f, df in base_dfs.items():
+        assert f in dfs, f
+        diff = (df - dfs[f]).apply(np.abs)
+        assert diff.max().max() == 0.0, diff.max()
+
+
 if __name__ == "__main__":
     # write_empty_test_matrix()
 
@@ -2397,7 +2516,7 @@ if __name__ == "__main__":
     # test_freyberg_full_cov_reorder_run()
     # eval_freyberg_full_cov()
     # tenpar_tight_tol_test()
-    test_chenoliver()
+    # test_chenoliver()
     # tenpar_narrow_range_test()
     # test_freyberg_ineq()
     # tenpar_fixed_test()
@@ -2409,7 +2528,8 @@ if __name__ == "__main__":
     # freyberg_localizer_eval1()
     # freyberg_localizer_eval2()
     # freyberg_localizer_test3()
-    #freyberg_dist_local_test()
+    # freyberg_dist_local_test()
+    freyberg_local_threads_test()
     # tenpar_restart_binary_test()
     # csv_tests()
     # tenpar_rns_test()
