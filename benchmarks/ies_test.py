@@ -2432,26 +2432,28 @@ def freyberg_local_threads_test():
     zero_cond_pars = list(par_sum.loc[par_sum==0.0].index)
     print(zero_cond_pars)
 
-    cov = pyemu.Cov.from_parameter_data(pst)
-    num_reals = 10
-    pe = pyemu.ParameterEnsemble.from_gaussian_draw(pst=pst,cov=cov,num_reals=num_reals)
-    pe.enforce()
-    pe.to_csv(os.path.join(template_d,"par_local.csv"))
+    #cov = pyemu.Cov.from_parameter_data(pst)
+    #num_reals = 10
+    #pe = pyemu.ParameterEnsemble.from_gaussian_draw(pst=pst,cov=cov,num_reals=num_reals)
+    #pe.enforce()
+    #pe.to_csv(os.path.join(template_d,"par_local.csv"))
 
     pst.pestpp_options = {}
-    pst.pestpp_options["ies_num_reals"] = num_reals
-    pst.pestpp_options["ies_subset_size"] = num_reals
-    pst.pestpp_options["ies_lambda_mults"] = [0.5,1.0]
-    pst.pestpp_options["lambda_scale_fac"] = 1.0
-    pst.pestpp_options["ies_include_base"] = False
-    pst.pestpp_options["ies_par_en"] = "par_local.csv"
+    #pst.pestpp_options["ies_num_reals"] = num_reals
+    #pst.pestpp_options["ies_subset_size"] = num_reals
+    #pst.pestpp_options["ies_lambda_mults"] = [0.1,1.0,5.0]
+    #pst.pestpp_options["lambda_scale_fac"] = 1.0
+    #pst.pestpp_options["ies_include_base"] = False
+    #pst.pestpp_options["ies_par_en"] = "par_local.csv"
+    pst.pestpp_options["ies_use_approx"] = False
+    pst.pestpp_options["ies_use_prior_scaling"] = True
     pst.pestpp_options["ies_localizer"] = "localizer.mat"
-    pst.pestpp_options["ies_localize_how"] = "pars"
+    pst.pestpp_options["ies_localize_how"] = "par"
     pst.pestpp_options["ies_verbose_level"] = 1
     pst.pestpp_options["ies_save_lambda_en"] = True
     pst.pestpp_options["ies_subset_how"] = "random"
     pst.pestpp_options["ies_accept_phi_fac"] = 1000.0
-    pst.control_data.noptmax = 2
+    pst.control_data.noptmax = 3
     pst.write(os.path.join(template_d, "pest_local.pst"))
     d = test_d+"_base"
     pyemu.os_utils.start_slaves(template_d, exe_path, "pest_local.pst", num_slaves=20, master_dir=d,
@@ -2499,41 +2501,41 @@ def freyberg_local_threads_test():
 if __name__ == "__main__":
     # write_empty_test_matrix()
 
-    # setup_suite_dir("ies_10par_xsec")
-    # setup_suite_dir("ies_freyberg")
-    # run_suite("ies_10par_xsec")
-    # run_suite("ies_freyberg")
-    # rebase("ies_freyberg")
-    # rebase("ies_10par_xsec")
-    # compare_suite("ies_10par_xsec")
-    # compare_suite("ies_freyberg")
+    setup_suite_dir("ies_10par_xsec")
+    setup_suite_dir("ies_freyberg")
+    run_suite("ies_10par_xsec")
+    run_suite("ies_freyberg")
+    rebase("ies_freyberg")
+    rebase("ies_10par_xsec")
+    compare_suite("ies_10par_xsec")
+    compare_suite("ies_freyberg")
 
     # # full list of tests
-    # tenpar_subset_test()
-    # tenpar_full_cov_test()
-    # test_freyberg_full_cov_reorder()
-    # test_freyberg_full_cov_reorder_run()
-    # test_freyberg_full_cov_reorder_run()
-    # eval_freyberg_full_cov()
-    # tenpar_tight_tol_test()
-    # test_chenoliver()
-    # tenpar_narrow_range_test()
-    # test_freyberg_ineq()
-    # tenpar_fixed_test()
-    # tenpar_fixed_test2()
-    # tenpar_subset_how_test()
-    # tenpar_localizer_test1()
-    # tenpar_localizer_test2()
-    # tenpar_localizer_test3()
-    # freyberg_localizer_eval1()
-    # freyberg_localizer_eval2()
-    # freyberg_localizer_test3()
-    # freyberg_dist_local_test()
+    tenpar_subset_test()
+    tenpar_full_cov_test()
+    test_freyberg_full_cov_reorder()
+    test_freyberg_full_cov_reorder_run()
+    test_freyberg_full_cov_reorder_run()
+    eval_freyberg_full_cov()
+    tenpar_tight_tol_test()
+    test_chenoliver()
+    tenpar_narrow_range_test()
+    test_freyberg_ineq()
+    tenpar_fixed_test()
+    tenpar_fixed_test2()
+    tenpar_subset_how_test()
+    tenpar_localizer_test1()
+    tenpar_localizer_test2()
+    tenpar_localizer_test3()
+    freyberg_localizer_eval1()
+    freyberg_localizer_eval2()
+    freyberg_localizer_test3()
+    freyberg_dist_local_test()
     freyberg_local_threads_test()
-    # tenpar_restart_binary_test()
-    # csv_tests()
-    # tenpar_rns_test()
-    # clues_longnames_test()
-    # tenpar_localize_how_test()
+    tenpar_restart_binary_test()
+    csv_tests()
+    tenpar_rns_test()
+    clues_longnames_test()
+    tenpar_localize_how_test()
 
     # freyberg_dist_local_invest()

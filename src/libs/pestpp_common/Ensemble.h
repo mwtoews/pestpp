@@ -28,6 +28,7 @@ public:
 	//Ensemble get(vector<string> &_real_names, vector<string> &_var_names);
 
 	void to_csv(string file_name);
+	void to_binary_old(string file_name, bool transposed=false);
 	void to_binary(string file_name, bool transposed=false);
 	void from_eigen_mat(Eigen::MatrixXd mat, const vector<string> &_real_names, const vector<string> &_var_names);
 	pair<int, int> shape() { return pair<int, int>(reals.rows(), reals.cols()); }
