@@ -1018,7 +1018,7 @@ void Ensemble::to_binary(string file_name, bool transposed)
 		b != e; ++b) {
 		string l = pest_utils::lower_cp(*b);
 		pest_utils::string_to_fortran_char(l, par_name, 200);
-		fout.write(par_name, 12);
+		fout.write(par_name, 200);
 	}
 
 	//save observation and Prior information names
@@ -1026,7 +1026,7 @@ void Ensemble::to_binary(string file_name, bool transposed)
 		b != e; ++b) {
 		string l = pest_utils::lower_cp(*b);
 		pest_utils::string_to_fortran_char(l, obs_name, 200);
-		fout.write(obs_name, 20);
+		fout.write(obs_name, 200);
 	}
 	
 	//save observation names (part 2 prior information)
@@ -1060,24 +1060,20 @@ map<string,int> Ensemble::from_binary(string file_name, vector<string> &names, b
 	{
 		char col_name[200];
 		char row_name[200];
-		n_col = -n_col;
-		n_row = -n_row;
+		n_col = n_col;
+		n_row = n_row;
 		in.read((char*)&n_nonzero, sizeof(n_nonzero));
 
 		// record current position in file
 		streampos begin_sen_pos = in.tellg();
 
 		//advance to col names section
-		in.seekg(n_nonzero*(sizeof(double) + sizeof(int)), ios_base::cur);
+		in.seekg(n_nonzero*(sizeof(double) + sizeof(int) + sizeof(int)), ios_base::cur);
 
 		//read col names
 		vector<string>* col_names = &var_names;
 		vector<string>* row_names = &real_names;
-		if (transposed)
-		{
-			col_names = &real_names;
-			row_names = &var_names;
-		}
+		
 
 		for (int i_rec = 0; i_rec < n_col; ++i_rec)
 		{
@@ -1617,13 +1613,13 @@ void ParameterEnsemble::to_binary(string file_name)
 	int n;
 	int tmp;
 	double data;
-	char par_name[12];
-	char obs_name[20];
+	char par_name[200];
+	char obs_name[200];
 
 	// write header
-	tmp = -n_var;
+	tmp = n_var;
 	fout.write((char*)&tmp, sizeof(tmp));
-	tmp = -n_real;
+	tmp = n_real;
 	fout.write((char*)&tmp, sizeof(tmp));
 
 	//write number nonzero elements in jacobian (includes prior information)
@@ -1648,9 +1644,11 @@ void ParameterEnsemble::to_binary(string file_name)
 
 		for (int jcol = 0; jcol<n_var; ++jcol)
 		{
-			n = irow + 1 + (jcol * n_real);
-			data = pars[vnames[jcol]];
+			n = irow;
 			fout.write((char*) &(n), sizeof(n));
+			n = jcol;
+			fout.write((char*) &(n), sizeof(n));
+			data = pars[vnames[jcol]];
 			fout.write((char*) &(data), sizeof(data));
 		}
 		/*int jcol = n_var;
@@ -1667,8 +1665,8 @@ void ParameterEnsemble::to_binary(string file_name)
 	for (vector<string>::const_iterator b = vnames.begin(), e = vnames.end();
 		b != e; ++b) {
 		string l = pest_utils::lower_cp(*b);
-		pest_utils::string_to_fortran_char(l, par_name, 12);
-		fout.write(par_name, 12);
+		pest_utils::string_to_fortran_char(l, par_name, 200);
+		fout.write(par_name, 200);
 	}
 	/*for (auto fname : fixed_names)
 	{
@@ -1680,8 +1678,8 @@ void ParameterEnsemble::to_binary(string file_name)
 	for (vector<string>::const_iterator b = real_names.begin(), e = real_names.end();
 		b != e; ++b) {
 		string l = pest_utils::lower_cp(*b);
-		pest_utils::string_to_fortran_char(l, obs_name, 20);
-		fout.write(obs_name, 20);
+		pest_utils::string_to_fortran_char(l, obs_name, 200);
+		fout.write(obs_name, 200);
 	}
 	//save observation names (part 2 prior information)
 	fout.close();
