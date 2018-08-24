@@ -29,9 +29,12 @@ ies_vars = ["ies_par_csv", "ies_obs_csv", "ies_restart_obs_csv",
             "ies_bad_phi", "parcov_filename", "ies_num_reals",
             "ies_use_approx", "ies_use_prior_scaling", "ies_reg_factor",
             "ies_lambda_mults", "ies_initial_lambda","ies_include_base","ies_subset_size"]
-
+intel = False
 if "windows" in platform.platform().lower():
-    exe_path = os.path.join("..", "..", "..", "bin", "win", "pestpp-ies.exe")
+    if intel:
+        exe_path = os.path.join("..", "..", "..", "bin", "iwin", "ipestpp-ies.exe")
+    else:
+        exe_path = os.path.join("..", "..", "..", "bin", "win", "pestpp-ies.exe")
 elif "darwin" in platform.platform().lower():
     exe_path = os.path.join("..", "..", "..", "bin", "mac", "pestpp-ies")
 else:
@@ -2447,10 +2450,10 @@ def freyberg_local_threads_test():
     #pe.to_csv(os.path.join(template_d,"par_local.csv"))
 
     pst.pestpp_options = {}
-    #pst.pestpp_options["ies_num_reals"] = num_reals
-    #pst.pestpp_options["ies_subset_size"] = num_reals
-    #pst.pestpp_options["ies_lambda_mults"] = [0.1,1.0,5.0]
-    #pst.pestpp_options["lambda_scale_fac"] = 1.0
+    pst.pestpp_options["ies_num_reals"] = num_reals
+    pst.pestpp_options["ies_subset_size"] = num_reals
+    pst.pestpp_options["ies_lambda_mults"] = [0.1,1.0,5.0]
+    pst.pestpp_options["lambda_scale_fac"] = 1.0
     #pst.pestpp_options["ies_include_base"] = False
     #pst.pestpp_options["ies_par_en"] = "par_local.csv"
     pst.pestpp_options["ies_use_approx"] = False
@@ -2538,11 +2541,11 @@ if __name__ == "__main__":
     # freyberg_localizer_eval2()
     # freyberg_localizer_test3()
     # freyberg_dist_local_test()
-    # freyberg_local_threads_test()
-    tenpar_restart_binary_test()
-    csv_tests()
-    tenpar_rns_test()
-    clues_longnames_test()
-    tenpar_localize_how_test()
+    freyberg_local_threads_test()
+    # tenpar_restart_binary_test()
+    # csv_tests()
+    # tenpar_rns_test()
+    # clues_longnames_test()
+    # tenpar_localize_how_test()
 
     # freyberg_dist_local_invest()

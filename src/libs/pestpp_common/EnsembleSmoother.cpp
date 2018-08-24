@@ -2235,7 +2235,7 @@ bool IterEnsembleSmoother::should_terminate()
 	return false;
 }
 
-ParameterEnsemble IterEnsembleSmoother::calc_upgrade(vector<string> &obs_names, vector<string> &par_names,double cur_lam, int num_reals, string local_col_name)
+ParameterEnsemble IterEnsembleSmoother::calc_upgrade(vector<string> &obs_names, vector<string> &par_names,double cur_lam, int num_reals)
 {
 
 	int maxsing = pest_scenario.get_svd_info().maxsing;
@@ -2284,20 +2284,7 @@ ParameterEnsemble IterEnsembleSmoother::calc_upgrade(vector<string> &obs_names, 
 	}
 
 	Eigen::MatrixXd loc(oe_upgrade.shape().second, oe_upgrade.shape().first);
-	if (local_col_name.size() > 0)
-	{
-		
-		message(2, "getting localizing hadamard matrix");
-		loc = localizer.get_localizing_hadamard_matrix(oe_upgrade.shape().first, local_col_name, obs_names);
-		if (verbose_level > 1)
-		{
-			cout << "loc:" << loc.rows() << ',' << loc.cols() << endl;
-			if (verbose_level > 2)
-				save_mat("local_mat.dat", loc);
-		}
-		
-	}
-
+	
 	Eigen::MatrixXd scaled_par_resid;
 	Eigen::MatrixXd Am;
 	if ((!pest_scenario.get_pestpp_options().get_ies_use_approx()) && (iter > 1))
@@ -2324,8 +2311,6 @@ ParameterEnsemble IterEnsembleSmoother::calc_upgrade(vector<string> &obs_names, 
 	
 	message(2, "calculating obs diff matrix");
 	Eigen::MatrixXd diff = oe_upgrade.get_eigen_mean_diff().transpose();
-	if (local_col_name.size() > 0)
-		diff = diff.cwiseProduct(loc);
 		
 	Eigen::MatrixXd obs_diff = scale * (weights * diff);
 	if (verbose_level > 1)
@@ -2733,7 +2718,7 @@ void LocalUpgradeThread::work(int thread_id, int iter, double cur_lam)
 		Eigen::MatrixXd scaled_residual = weights * obs_resid;
 
 		Eigen::MatrixXd scaled_par_resid;
-		if ((!use_approx))// && (iter > 1))
+		if ((!use_approx) && (iter > 1))
 		{
 			if (use_prior_scaling)
 			{
@@ -2802,7 +2787,7 @@ void LocalUpgradeThread::work(int thread_id, int iter, double cur_lam)
 
 
 		Eigen::MatrixXd upgrade_2;
-		if ((!use_approx))// && (iter > 1))
+		if ((!use_approx) && (iter > 1))
 		{
 			Eigen::MatrixXd x4 = Am.transpose() * scaled_par_resid;
 			Eigen::MatrixXd x5 = Am * x4;
@@ -2926,50 +2911,60 @@ ParameterEnsemble IterEnsembleSmoother::calc_localized_upgrade_threaded(double c
 
 	pe_upgrade.set_zeros();
 	
-	Eigen::setNbThreads(1);
-	vector<thread> threads;
-	message(2, "launching threads");
-	LocalUpgradeThread worker1(par_resid_map, par_diff_map, obs_resid_map, obs_diff_map,
+
+	LocalUpgradeThread worker(par_resid_map, par_diff_map, obs_resid_map, obs_diff_map,
 		localizer, parcov_inv_map, weight_map, pe_upgrade, loc_map, Am_map);
-	for (int i = 0; i < num_threads; i++)
-		threads.push_back(thread(&LocalUpgradeThread::work, &worker1, i, iter, cur_lam));
 
-	message(2, "waiting to join threads");
-	for (auto &t : threads)
-		t.join();
-	
-	message(2, "threaded localized upgrade calculation done");
-	return pe_upgrade;
-}
-
-
-ParameterEnsemble IterEnsembleSmoother::calc_localized_upgrade(double cur_lam)
-{
-	stringstream ss;
-	int i = 0;
-	int lsize = localizer.get_localizer_map().size();
-	ParameterEnsemble pe_upgrade = pe.zeros_like();
-	for (auto local_pair : localizer.get_localizer_map())
+	if (num_threads > 0)
 	{
-		ss.str("");
-		ss << "localized upgrade part " << i + 1 << " of " << lsize;
-		message(2, ss.str());
-		ParameterEnsemble pe_local;
-		if (localizer.get_how() == Localizer::How::PARAMETERS)
-		{
-			pe_local = calc_upgrade(local_pair.second.first, local_pair.second.second, cur_lam, pe.shape().first, local_pair.first);
-		}
-		else
-		{
-			pe_local = calc_upgrade(local_pair.second.first, local_pair.second.second, cur_lam, pe.shape().first);
-		}
+		Eigen::setNbThreads(1);
+		vector<thread> threads;
+		message(2, "launching threads");
+		
+		for (int i = 0; i < num_threads; i++)
+			threads.push_back(thread(&LocalUpgradeThread::work, &worker, i, iter, cur_lam));
 
-		pe_upgrade.add_2_cols_ip(pe_local);
-		i++;
+		message(2, "waiting to join threads");
+		for (auto &t : threads)
+			t.join();
+
+		message(2, "threaded localized upgrade calculation done");
+	}
+	else
+	{
+		worker.work(0,iter,cur_lam);
 	}
 	return pe_upgrade;
-
 }
+
+
+//ParameterEnsemble IterEnsembleSmoother::calc_localized_upgrade(double cur_lam)
+//{
+//	stringstream ss;
+//	int i = 0;
+//	int lsize = localizer.get_localizer_map().size();
+//	ParameterEnsemble pe_upgrade = pe.zeros_like();
+//	for (auto local_pair : localizer.get_localizer_map())
+//	{
+//		ss.str("");
+//		ss << "localized upgrade part " << i + 1 << " of " << lsize;
+//		message(2, ss.str());
+//		ParameterEnsemble pe_local;
+//		if (localizer.get_how() == Localizer::How::PARAMETERS)
+//		{
+//			pe_local = calc_upgrade(local_pair.second.first, local_pair.second.second, cur_lam, pe.shape().first, local_pair.first);
+//		}
+//		else
+//		{
+//			pe_local = calc_upgrade(local_pair.second.first, local_pair.second.second, cur_lam, pe.shape().first);
+//		}
+//
+//		pe_upgrade.add_2_cols_ip(pe_local);
+//		i++;
+//	}
+//	return pe_upgrade;
+//
+//}
 
 bool IterEnsembleSmoother::solve_new()
 {
@@ -3019,10 +3014,11 @@ bool IterEnsembleSmoother::solve_new()
 		//pe_upgrade.to_csv("test.csv");
 		if (use_localizer)
 		{
-			if (num_threads > 0)
+			/*if (num_threads > 0)
 				pe_upgrade = calc_localized_upgrade_threaded(cur_lam);
 			else
-				pe_upgrade = calc_localized_upgrade(cur_lam);
+				pe_upgrade = calc_localized_upgrade(cur_lam);*/
+			pe_upgrade = calc_localized_upgrade_threaded(cur_lam);
 		}
 		else
 			pe_upgrade = calc_upgrade(act_obs_names, act_par_names, cur_lam, pe.shape().first);

@@ -201,9 +201,9 @@ private:
 	bool solve_new();
 	void adjust_pareto_weight(string &obsgroup, double wfac);
 
-	ParameterEnsemble calc_upgrade(vector<string> &obs_names, vector<string> &par_names,double lamb, int num_reals,string local_col_name=string());
+	ParameterEnsemble calc_upgrade(vector<string> &obs_names, vector<string> &par_names,double lamb, int num_reals);
 
-	ParameterEnsemble calc_localized_upgrade(double cur_lam);
+	//ParameterEnsemble calc_localized_upgrade(double cur_lam);
 	ParameterEnsemble calc_localized_upgrade_threaded(double cur_lam);
 
 	//EnsemblePair run_ensemble(ParameterEnsemble &_pe, ObservationEnsemble &_oe);
