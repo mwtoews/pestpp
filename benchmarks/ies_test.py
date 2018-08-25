@@ -2464,6 +2464,7 @@ def freyberg_local_threads_test():
     pst.pestpp_options["ies_save_lambda_en"] = True
     pst.pestpp_options["ies_subset_how"] = "random"
     pst.pestpp_options["ies_accept_phi_fac"] = 1000.0
+    pst.pestpp_options["overdue_giveup_fac"] = 10.0
     pst.control_data.noptmax = 3
     pst.write(os.path.join(template_d, "pest_local.pst"))
     d = test_d+"_base"
@@ -2483,8 +2484,10 @@ def freyberg_local_threads_test():
     base_phi,base_dfs = get_results(d)
 
     pst.pestpp_options["ies_num_threads"] = 1
+
     pst.write(os.path.join(template_d, "pest_local.pst"))
     d = test_d + "_1thread"
+
     pyemu.os_utils.start_slaves(template_d, exe_path, "pest_local.pst", num_slaves=20, master_dir=d,
                                 slave_root=model_d, port=port)
     phi,dfs = get_results(d)
@@ -2521,7 +2524,7 @@ if __name__ == "__main__":
     compare_suite("ies_10par_xsec")
     compare_suite("ies_freyberg")
 
-    # # full list of tests
+    # full list of tests
     tenpar_subset_test()
     tenpar_full_cov_test()
     eval_freyberg_full_cov_reorder()

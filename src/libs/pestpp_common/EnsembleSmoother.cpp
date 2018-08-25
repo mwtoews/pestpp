@@ -3819,7 +3819,11 @@ void IterEnsembleSmoother::set_subset_idx(int size)
 	subset_idxs.clear();
 	int nreal_subset = pest_scenario.get_pestpp_options().get_ies_subset_size();
 	if ((!use_subset) || (nreal_subset >= size))
+	{
+		for (int i = 0; i < size; i++)
+			subset_idxs.push_back(i);
 		return;
+	}
 	vector<string> pe_names = pe.get_real_names();
 
 	vector<string>::iterator bidx = find(pe_names.begin(), pe_names.end(), "base");
