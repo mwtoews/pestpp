@@ -19,7 +19,11 @@ bool Localizer::initialize(PerformanceLog *performance_log)
 	how == How::OBSERVATIONS; //set this for the case with no localization
 	string filename = pest_scenario_ptr->get_pestpp_options().get_ies_localizer();
 	if (filename.size() == 0)
+	{
+		use = false;
 		return false;
+	}
+	use = true;
 	
 	mat.from_file(filename);
 	

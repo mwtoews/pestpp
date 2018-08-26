@@ -2571,13 +2571,34 @@ void LocalUpgradeThread::work(int thread_id, int iter, double cur_lam)
 
 			return mat;
 		}
+		static void save_mat(int verbose_level, int tid, int iter, string prefix, Eigen::MatrixXd &mat)
+		{
+			if (verbose_level < 2)
+				return;
+			cout << "thread: " << tid << ", " << prefix << " rows:cols" << mat.rows() << ":" << mat.cols() << endl;
+			if (verbose_level < 3)
+				return;
+			stringstream ss;
+			ss << "thread:"<< tid << ".iter:" << iter << "." << prefix;
+			try
+			{
+				ofstream f(ss.str());
+				f << mat << endl;
+				f.close();
+			}
+			catch (...)
+			{
+				cout << "error saving matrix", ss.str();
+			}
+		}
 	};
 
 	unique_lock<mutex> ctrl_guard(ctrl_lock, defer_lock);
-	int maxsing, num_reals;
+	int maxsing, num_reals, verbose_level;
 	double eigthresh;
 	bool use_approx;
 	bool use_prior_scaling;
+	bool use_localizer = false;
 
 	while (true)
 	{
@@ -2588,6 +2609,7 @@ void LocalUpgradeThread::work(int thread_id, int iter, double cur_lam)
 			use_approx = pe_upgrade.get_pest_scenario_ptr()->get_pestpp_options().get_ies_use_approx();
 			use_prior_scaling = pe_upgrade.get_pest_scenario_ptr()->get_pestpp_options().get_ies_use_prior_scaling();
 			num_reals = pe_upgrade.shape().first;
+			verbose_level = pe_upgrade.get_pest_scenario_ptr()->get_pestpp_options().get_ies_verbose_level();
 			ctrl_guard.unlock();
 			break;
 		}
@@ -2615,7 +2637,10 @@ void LocalUpgradeThread::work(int thread_id, int iter, double cur_lam)
 				pair<vector<string>, vector<string>> p = cases.at(k);
 				par_names = p.second;
 				obs_names = p.first;
-
+				if ((localizer.get_use()) && (par_names.size() == 1) || (obs_names.size() == 1))
+				{
+					use_localizer = true;
+				}
 				//cout << "tid:" << thread_id << ", parname:" << par_names[0] << endl;
 				count++;
 				next_guard.unlock();
@@ -2634,7 +2659,6 @@ void LocalUpgradeThread::work(int thread_id, int iter, double cur_lam)
 		parcov_inv.resize(0);
 		Am.resize(0, 0);
 
-		//todo make these attributes
 		unique_lock<mutex> obs_diff_guard(obs_diff_lock, defer_lock);
 		unique_lock<mutex> obs_resid_guard(obs_resid_lock, defer_lock);
 		unique_lock<mutex> par_diff_guard(par_diff_lock, defer_lock);
@@ -2648,7 +2672,6 @@ void LocalUpgradeThread::work(int thread_id, int iter, double cur_lam)
 
 		while (true)
 		{
-			//todo switch to components_set() method;
 			if (((use_approx) || (par_resid.rows() > 0)) &&
 				(weights.size() > 0) &&
 				(parcov_inv.size() > 0) &&
@@ -2658,7 +2681,7 @@ void LocalUpgradeThread::work(int thread_id, int iter, double cur_lam)
 				((par_names.size() > 1) || (loc.rows() > 0)) && 
 				((use_approx) || (Am.rows() > 0)))
 				break;
-			if ((par_names.size() == 1) && (loc.rows() == 0) && (loc_guard.try_lock()))
+			if ((use_localizer) && (loc.rows() == 0) && (loc_guard.try_lock()))
 			{
 				loc = localizer.get_localizing_hadamard_matrix(num_reals, par_names[0], obs_names);
 				loc_guard.unlock();
@@ -2715,8 +2738,13 @@ void LocalUpgradeThread::work(int thread_id, int iter, double cur_lam)
 		obs_diff.transposeInPlace();
 		obs_resid.transposeInPlace();
 		par_resid.transposeInPlace();
-		Eigen::MatrixXd scaled_residual = weights * obs_resid;
 
+		local_utils::save_mat(verbose_level, thread_id, iter, "obs_resid", obs_resid);
+		Eigen::MatrixXd scaled_residual = weights * obs_resid;
+		
+		
+
+		local_utils::save_mat(verbose_level, thread_id, iter, "par_resid", par_resid);
 		Eigen::MatrixXd scaled_par_resid;
 		if ((!use_approx) && (iter > 1))
 		{
@@ -2733,12 +2761,13 @@ void LocalUpgradeThread::work(int thread_id, int iter, double cur_lam)
 		stringstream ss;
 
 		double scale = (1.0 / (sqrt(double(num_reals - 1))));
-
+		local_utils::save_mat(verbose_level, thread_id, iter, "obs_diff", obs_diff);
 		if (loc.rows() > 0)
 			obs_diff = obs_diff.cwiseProduct(loc);
 
 		obs_diff = scale * (weights * obs_diff);
 
+		local_utils::save_mat(verbose_level, thread_id, iter, "par_diff", par_diff);
 		if (use_prior_scaling)
 			par_diff = scale * parcov_inv * par_diff;
 		else
@@ -2761,19 +2790,24 @@ void LocalUpgradeThread::work(int thread_id, int iter, double cur_lam)
 
 		Ut.transposeInPlace();
 		obs_diff.resize(0, 0);
+		local_utils::save_mat(verbose_level, thread_id, iter, "Ut", Ut);
+		local_utils::save_mat(verbose_level, thread_id, iter, "s", s);
+		local_utils::save_mat(verbose_level, thread_id, iter, "V", V);
 
 		Eigen::MatrixXd s2 = s.cwiseProduct(s);
 
 		ivec = ((Eigen::VectorXd::Ones(s2.size()) * (cur_lam + 1.0)) + s2).asDiagonal().inverse();
-
+		local_utils::save_mat(verbose_level, thread_id, iter, "ivec", ivec);
 		Eigen::MatrixXd X1 = Ut * scaled_residual;
-
+		local_utils::save_mat(verbose_level, thread_id, iter, "X1", X1);
 		Eigen::MatrixXd X2 = ivec * X1;
 		X1.resize(0, 0);
 
+		local_utils::save_mat(verbose_level, thread_id, iter, "X2", X2);
 		Eigen::MatrixXd X3 = V * s.asDiagonal() * X2;
 		X2.resize(0, 0);
 
+		local_utils::save_mat(verbose_level, thread_id, iter, "X3", X3);
 		if (use_prior_scaling)
 		{
 			upgrade_1 = -1.0 * parcov_inv * par_diff * X3;
@@ -2783,17 +2817,27 @@ void LocalUpgradeThread::work(int thread_id, int iter, double cur_lam)
 			upgrade_1 = -1.0 * par_diff * X3;
 		}
 		upgrade_1.transposeInPlace();
+		local_utils::save_mat(verbose_level, thread_id, iter, "upgrade_1",upgrade_1);
 		X3.resize(0, 0);
 
 
 		Eigen::MatrixXd upgrade_2;
 		if ((!use_approx) && (iter > 1))
 		{
+			local_utils::save_mat(verbose_level, thread_id, iter, "Am",Am);
 			Eigen::MatrixXd x4 = Am.transpose() * scaled_par_resid;
+			local_utils::save_mat(verbose_level, thread_id, iter, "X4", x4);
+			x4.resize(0, 0);
+
 			Eigen::MatrixXd x5 = Am * x4;
 
+			local_utils::save_mat(verbose_level, thread_id, iter, "X5", x5);
 			Eigen::MatrixXd x6 = par_diff.transpose() * x5;
+			x5.resize(0, 0);
+
+			local_utils::save_mat(verbose_level, thread_id, iter, "X6", x6);
 			Eigen::MatrixXd x7 = V * ivec *V.transpose() * x6;
+			x6.resize(0, 0);
 
 			if (use_prior_scaling)
 			{
@@ -2803,8 +2847,11 @@ void LocalUpgradeThread::work(int thread_id, int iter, double cur_lam)
 			{
 				upgrade_2 = -1.0 * (par_diff * x7);
 			}
+			x7.resize(0, 0);
 
 			upgrade_1 = upgrade_1 + upgrade_2.transpose();
+			local_utils::save_mat(verbose_level, thread_id, iter, "upgrade_2", upgrade_2);
+			upgrade_2.resize(0, 0);
 
 		}
 		
@@ -2841,7 +2888,14 @@ ParameterEnsemble IterEnsembleSmoother::calc_localized_upgrade_threaded(double c
 	ParameterEnsemble pe_upgrade(pe.get_pest_scenario_ptr(), pe.get_eigen(vector<string>(), act_par_names, false), pe.get_real_names(), act_par_names);
 	
 	//this copy of the localizer map will be consumed by the worker threads
-	map<string, pair<vector<string>, vector<string>>> loc_map = localizer.get_localizer_map();
+	map<string, pair<vector<string>, vector<string>>> loc_map;
+	if (use_localizer)
+		loc_map = localizer.get_localizer_map();
+	else
+	{
+		pair<vector<string>, vector<string>> p(act_obs_names, act_par_names);
+		loc_map["all"] = p;
+	}
 	
 	//prep the fast look par cov info
 	message(2, "preparing fast-look containers for threaded localization solve");
@@ -2915,7 +2969,12 @@ ParameterEnsemble IterEnsembleSmoother::calc_localized_upgrade_threaded(double c
 	LocalUpgradeThread worker(par_resid_map, par_diff_map, obs_resid_map, obs_diff_map,
 		localizer, parcov_inv_map, weight_map, pe_upgrade, loc_map, Am_map);
 
-	if (num_threads > 0)
+
+	if ((num_threads < 1) || (loc_map.size() == 1))
+	{
+		worker.work(0, iter, cur_lam);
+	}
+	else
 	{
 		Eigen::setNbThreads(1);
 		vector<thread> threads;
@@ -2930,10 +2989,7 @@ ParameterEnsemble IterEnsembleSmoother::calc_localized_upgrade_threaded(double c
 
 		message(2, "threaded localized upgrade calculation done");
 	}
-	else
-	{
-		worker.work(0,iter,cur_lam);
-	}
+	
 	return pe_upgrade;
 }
 
@@ -3011,18 +3067,14 @@ bool IterEnsembleSmoother::solve_new()
 		ss << "starting calcs for lambda" << cur_lam;
 		message(1, "starting lambda calcs for lambda", cur_lam);
 		ParameterEnsemble pe_upgrade;
-		//pe_upgrade.to_csv("test.csv");
-		if (use_localizer)
+		pe_upgrade = calc_localized_upgrade_threaded(cur_lam);
+		/*if (use_localizer)
 		{
-			/*if (num_threads > 0)
-				pe_upgrade = calc_localized_upgrade_threaded(cur_lam);
-			else
-				pe_upgrade = calc_localized_upgrade(cur_lam);*/
 			pe_upgrade = calc_localized_upgrade_threaded(cur_lam);
 		}
 		else
 			pe_upgrade = calc_upgrade(act_obs_names, act_par_names, cur_lam, pe.shape().first);
-
+*/
 		for (auto sf : pest_scenario.get_pestpp_options().get_lambda_scale_vec())
 		{
 

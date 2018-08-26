@@ -385,6 +385,7 @@ void PestppOptions::parce_line(const string &line)
 		string org_value = strip_cp((*i)[2]);
 		upper_ip(key);
 		string value = upper_cp(org_value);
+		//if (value.size() > 0)
 		passed_args.insert(key);
 
 		if (key=="MAX_N_SUPER"){

@@ -27,8 +27,9 @@ public:
 	void set_pest_scenario(Pest *_pest_scenario_ptr) { pest_scenario_ptr = _pest_scenario_ptr; }
 	Eigen::MatrixXd get_localizing_hadamard_matrix(int num_reals,string row_name,vector<string> &obs_names);
 	How get_how() { return how; }
-
+	bool get_use() { return use; }
 private:
+	bool use;
 	How how;
 	Pest * pest_scenario_ptr;
 	Mat mat;
