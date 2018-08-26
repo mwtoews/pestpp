@@ -36,23 +36,31 @@ script:
   - make clean
   - COMPILER=gcc6 CXX=g++-6 FC=gfortran-6 STATIC=no make install
   - cd ..
-  - #wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
-  - #bash miniconda.sh -b -p $HOME/miniconda
-  - #export PATH="$HOME/miniconda/bin:$PATH"
-  - #conda update --yes conda
+  - wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - conda update --yes conda
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
-  - #conda install --yes python=$TRAVIS_PYTHON_VERSION pip numpy scipy pandas matplotlib nose
-  - pip install --upgrade pip
-  - pip install -r requirements.travis.txt
+  - conda install --yes python=$TRAVIS_PYTHON_VERSION pip numpy scipy pandas matplotlib nose
+  - #pip install --upgrade pip
+  - #pip install -r requirements.travis.txt
   - #pip install https://github.com/modflowpy/pymake/zipball/master
-  - pip install --upgrade jupyter
-  - pip install scipy 
-  - pip install nbconvert
-  - pip install nose-timer
-  - pip install coveralls
-  - pip install git+https://github.com/modflowpy/flopy.git@develop
-  - pip install git+https://github.com/jtwhite79/pyemu.git@develop
+  - #pip install --upgrade jupyter
+  - #pip install scipy 
+  - #pip install nbconvert
+  - #pip install nose-timer
+  - #pip install coveralls
+  - #pip install git+https://github.com/modflowpy/flopy.git@develop
+  - git clone --depth 1 --single-branch -b develop https://github.com/modflowpy/flopy.git
+  - cd flopy
+  - python setup.py install
+  - cd ..
+  - #pip install git+https://github.com/jtwhite79/pyemu.git@develop
+  - git clone --depth 1 --single-branch -b develop https://github.com/jtwhite79/pyemu.git
+  - cd pyemu
+  - python setup.py install
+  - cd ..
   - export PYTHONPATH=$PYTHONPATH:.
   - #cd benchmarks
   - export PATH="./test_bin/linux:../test_bin/linux:../../test_bin/linux:$PATH"
