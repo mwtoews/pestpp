@@ -123,10 +123,15 @@ bool Localizer::initialize(PerformanceLog *performance_log)
 
 	vector<vector<string>> par_map;
 	dup_check.clear();
-	for (auto &p : mat.get_col_names())
+	string p;
+	vector<string> col_names = mat.get_col_names();
+	//for (auto &p : mat.get_col_names())
+	for (int i=0;i<mat.ncol();++i)
 	{
+		p = col_names[i];
 		if (par_names.find(p) != par_names.end())
 		{
+			par2col_map[p] = i;
 			par_map.push_back(vector<string>{p});
 			if (dup_check.find(p) != dup_check.end())
 				dups.push_back(p);
@@ -138,6 +143,7 @@ bool Localizer::initialize(PerformanceLog *performance_log)
 
 			for (auto &pp : pargp_map[p])
 			{
+				par2col_map[pp] = i;
 				if (dup_check.find(pp) != dup_check.end())
 					dups.push_back(pp);
 				dup_check.emplace(pp);
@@ -168,7 +174,7 @@ bool Localizer::initialize(PerformanceLog *performance_log)
 	//map all the nz locations in the matrix
 	map<int, vector<int>> idx_map;
 	vector<string> vobs, vpar;
-	
+
 	//int i, j;
 	if (how == How::PARAMETERS)
 	{
@@ -238,28 +244,46 @@ bool Localizer::initialize(PerformanceLog *performance_log)
 	return true;
 }
 
-Eigen::MatrixXd Localizer::get_localizing_hadamard_matrix(int num_reals, string col_name, vector<string> &obs_names)
+Eigen::MatrixXd Localizer::get_localizing_obs_hadamard_matrix(int num_reals, string col_name, vector<string> &obs_names)
 {
 
 	vector<double> values;
 	vector<string> mat_cols = mat.get_col_names();
 	vector<string>::iterator it = find(mat_cols.begin(), mat_cols.end(), col_name);
 	if (it == mat_cols.end())
-		throw runtime_error("Localizer::get_localizing_vector() error: row_name not found: " + col_name);
+		throw runtime_error("Localizer::get_localizing_obs_hadamard_matrix() error: col_name not found: " + col_name);
 	int idx = it - mat_cols.begin();
 	Eigen::VectorXd mat_vec = mat.e_ptr()->col(idx);
-	vector<double> full_vec;
 	int col_idx;
 	Eigen::MatrixXd loc(obs_names.size(), num_reals);
-	//loc.setOnes();
-	//for (auto &name : obs_names)
 	for (int i=0;i<obs_names.size();i++)
 	{
 		col_idx = obs2row_map[obs_names[i]];
 		loc.row(i).setConstant(mat_vec[col_idx]);
 
 	}
-	//cout << loc << endl;
+	return loc;
+
+}
+
+
+Eigen::MatrixXd Localizer::get_localizing_par_hadamard_matrix(int num_reals, string row_name, vector<string> &par_names)
+{
+
+	vector<double> values;
+	vector<string> mat_rows = mat.get_row_names();
+	vector<string>::iterator it = find(mat_rows.begin(), mat_rows.end(), row_name);
+	if (it == mat_rows.end())
+		throw runtime_error("Localizer::get_localizing_par_hadamard_matrix() error: col_name not found: " + row_name);
+	int idx = it - mat_rows.begin();
+	Eigen::VectorXd mat_vec = mat.e_ptr()->row(idx);
+	int col_idx;
+	Eigen::MatrixXd loc(par_names.size(), num_reals);
+	for (int i = 0; i<par_names.size(); i++)
+	{
+		col_idx = par2col_map[par_names[i]];
+		loc.row(i).setConstant(mat_vec[col_idx]);
+	}
 	return loc;
 
 }

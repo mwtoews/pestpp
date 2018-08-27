@@ -787,7 +787,7 @@ int Pest::process_ctl_file(ifstream &fin, string pst_filename)
 	pestpp_options.set_ies_save_lambda_en(false);
 	pestpp_options.set_ies_weight_csv("");
 	pestpp_options.set_ies_subset_how("PHI_BASED");
-	pestpp_options.set_ies_localize_how("OBSERVATIONS");
+	pestpp_options.set_ies_localize_how("PARAMETERS");
 	pestpp_options.set_ies_num_threads(-1);
 
 	pestpp_options.set_condor_submit_file(string());

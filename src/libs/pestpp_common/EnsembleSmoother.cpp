@@ -1555,6 +1555,10 @@ void IterEnsembleSmoother::initialize()
 			message(1, ss.str());
 
 		}
+		if (localizer.get_how() == Localizer::How::OBSERVATIONS)
+			message(1, "localizing by obseravtions");
+		else
+			message(1, "localizing by parameters");
 	}
 
 	bool echo = false;
@@ -2599,6 +2603,7 @@ void LocalUpgradeThread::work(int thread_id, int iter, double cur_lam)
 	bool use_approx;
 	bool use_prior_scaling;
 	bool use_localizer = false;
+	bool loc_by_obs = true;
 
 	while (true)
 	{
@@ -2637,16 +2642,20 @@ void LocalUpgradeThread::work(int thread_id, int iter, double cur_lam)
 				pair<vector<string>, vector<string>> p = cases.at(k);
 				par_names = p.second;
 				obs_names = p.first;
-				if ((localizer.get_use()) && (par_names.size() == 1) || (obs_names.size() == 1))
+				if (localizer.get_use())
 				{
-					use_localizer = true;
+					if (par_names.size() == 1)
+						use_localizer = true;
+					else if (obs_names.size() == 1)
+					{
+						use_localizer = true;
+						loc_by_obs = false;
+					}
 				}
-				//cout << "tid:" << thread_id << ", parname:" << par_names[0] << endl;
 				count++;
 				next_guard.unlock();
 				break;
 			}
-
 		}
 		
 		par_resid.resize(0, 0);
@@ -2683,7 +2692,10 @@ void LocalUpgradeThread::work(int thread_id, int iter, double cur_lam)
 				break;
 			if ((use_localizer) && (loc.rows() == 0) && (loc_guard.try_lock()))
 			{
-				loc = localizer.get_localizing_hadamard_matrix(num_reals, par_names[0], obs_names);
+				if (loc_by_obs)
+					loc = localizer.get_localizing_obs_hadamard_matrix(num_reals, par_names[0], obs_names);
+				else
+					loc = localizer.get_localizing_par_hadamard_matrix(num_reals, obs_names[0], par_names);
 				loc_guard.unlock();
 			}
 			if ((obs_diff.rows() == 0) && (obs_diff_guard.try_lock()))
@@ -2762,11 +2774,16 @@ void LocalUpgradeThread::work(int thread_id, int iter, double cur_lam)
 
 		double scale = (1.0 / (sqrt(double(num_reals - 1))));
 		local_utils::save_mat(verbose_level, thread_id, iter, "obs_diff", obs_diff);
-		if (loc.rows() > 0)
-			obs_diff = obs_diff.cwiseProduct(loc);
+		if (use_localizer)
+		{
+			if (loc_by_obs)
+				obs_diff = obs_diff.cwiseProduct(loc);
+			else
+				par_diff = par_diff.cwiseProduct(loc);
 
+		}
+		
 		obs_diff = scale * (weights * obs_diff);
-
 		local_utils::save_mat(verbose_level, thread_id, iter, "par_diff", par_diff);
 		if (use_prior_scaling)
 			par_diff = scale * parcov_inv * par_diff;
@@ -2928,7 +2945,6 @@ ParameterEnsemble IterEnsembleSmoother::calc_localized_upgrade_threaded(double c
 		weight_map[obs_names[i]] = w;
 	}
 	
-
 	//prep a fast look for obs, par and resid matrices - stored as column vectors in a map
 	map<string, Eigen::VectorXd> par_resid_map, obs_resid_map, Am_map;
 	map<string, Eigen::VectorXd> par_diff_map, obs_diff_map;
@@ -2960,15 +2976,12 @@ ParameterEnsemble IterEnsembleSmoother::calc_localized_upgrade_threaded(double c
 			Am_map[par_names[i]] = mat.row(i);
 		}
 	}
-
 	mat.resize(0, 0);
-
+	// clear the upgrade ensemble
 	pe_upgrade.set_zeros();
 	
-
 	LocalUpgradeThread worker(par_resid_map, par_diff_map, obs_resid_map, obs_diff_map,
 		localizer, parcov_inv_map, weight_map, pe_upgrade, loc_map, Am_map);
-
 
 	if ((num_threads < 1) || (loc_map.size() == 1))
 	{

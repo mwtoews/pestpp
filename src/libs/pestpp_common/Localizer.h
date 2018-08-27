@@ -25,7 +25,8 @@ public:
 	bool initialize(PerformanceLog *performance_log);
 	map<string,pair<vector<string>, vector<string>>> get_localizer_map() { return localizer_map; }
 	void set_pest_scenario(Pest *_pest_scenario_ptr) { pest_scenario_ptr = _pest_scenario_ptr; }
-	Eigen::MatrixXd get_localizing_hadamard_matrix(int num_reals,string row_name,vector<string> &obs_names);
+	Eigen::MatrixXd get_localizing_obs_hadamard_matrix(int num_reals,string col_name,vector<string> &obs_names);
+	Eigen::MatrixXd get_localizing_par_hadamard_matrix(int num_reals, string row_name, vector<string> &par_names);
 	How get_how() { return how; }
 	bool get_use() { return use; }
 private:
@@ -34,7 +35,7 @@ private:
 	Pest * pest_scenario_ptr;
 	Mat mat;
 	map<string,pair<vector<string>, vector<string>>> localizer_map;
-	map<string, int> obs2row_map;
+	map<string, int> obs2row_map, par2col_map;
 };
 
 #endif
