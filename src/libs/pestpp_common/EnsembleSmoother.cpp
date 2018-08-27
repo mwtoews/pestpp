@@ -675,11 +675,14 @@ void ParChangeSummarizer::summarize(ParameterEnsemble &pe)
 	pair<map<string, double>, map<string, double>> moments = pe.get_moment_maps();
 	init_moments = base_pe_ptr->get_moment_maps(pe.get_real_names());
 	stringstream ss;
-	ss << "  ---  parameter group percent change summmary  ---  " << endl;
+	ofstream &frec = file_manager_ptr->rec_ofstream();
+	ss << endl << "       parameter group percent change summmary" << endl;
 	cout << ss.str();
+	frec << ss.str();
 	ss.str("");
-	ss << setw(20) << "group " << setw(20) << "mean change " << setw(20) << "std change " << endl;
+	ss << setw(20) << "group" << setw(20) << "mean change" << setw(20) << "std change" << endl;
 	cout << ss.str();
+	frec << ss.str();
 	double mean_diff = 0.0, std_diff = 0.0;
 	double dsize;
 	vector<string> grp_names = base_pe_ptr->get_pest_scenario().get_ctl_ordered_par_group_names();
@@ -693,10 +696,14 @@ void ParChangeSummarizer::summarize(ParameterEnsemble &pe)
 		dsize = double(init_moments.first.size());
 		mean_diff = mean_diff / dsize;
 		std_diff = std_diff / dsize;
-		cout << setw(20) << grp_name << setw(20) << mean_diff << setw(20) << std_diff << endl;
+		ss.str("");
+		ss << setw(20) << grp_name << setw(20) << mean_diff * 100.0 << setw(20) << std_diff * 100.0 << endl;
+		cout << ss.str();
+		frec << ss.str();
 
 	}
-
+	cout << endl;
+	frec << endl;
 
 }
 
