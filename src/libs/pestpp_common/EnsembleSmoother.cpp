@@ -651,6 +651,56 @@ map<string, double> PhiHandler::calc_composite(map<string, double> &_meas, map<s
 }
 
 
+ParChangeSummarizer::ParChangeSummarizer(ParameterEnsemble *_base_pe_ptr, FileManager *_file_manager_ptr)
+	//base_pe_ptr(_base_pe), file_manager_ptr(_file_manager)
+{
+	base_pe_ptr = _base_pe_ptr;
+	file_manager_ptr = _file_manager_ptr;
+	init_moments = base_pe_ptr->get_moment_maps();
+	ParameterGroupInfo gi = base_pe_ptr->get_pest_scenario().get_base_group_info();
+	string group;
+	for (auto &n : base_pe_ptr->get_var_names())
+	{
+		group = gi.get_group_name(n);
+		if (pargp2par_map.find(group) == pargp2par_map.end())
+			pargp2par_map[group] = set<string>();	
+		pargp2par_map[group].emplace(n);
+	}
+}
+
+
+void ParChangeSummarizer::summarize(ParameterEnsemble &pe)
+{
+	
+	pair<map<string, double>, map<string, double>> moments = pe.get_moment_maps();
+	init_moments = base_pe_ptr->get_moment_maps(pe.get_real_names());
+	stringstream ss;
+	ss << "  ---  parameter group percent change summmary  ---  " << endl;
+	cout << ss.str();
+	ss.str("");
+	ss << setw(20) << "group " << setw(20) << "mean change " << setw(20) << "std change " << endl;
+	cout << ss.str();
+	double mean_diff = 0.0, std_diff = 0.0;
+	double dsize;
+	vector<string> grp_names = base_pe_ptr->get_pest_scenario().get_ctl_ordered_par_group_names();
+	for (auto &grp_name : grp_names)
+	{
+		for (auto & par_name : pargp2par_map[grp_name])
+		{
+			mean_diff += (init_moments.first[par_name] - moments.first[par_name]) / init_moments.first[par_name];
+			std_diff += (init_moments.second[par_name] - moments.second[par_name]) / init_moments.second[par_name];
+		}
+		dsize = double(init_moments.first.size());
+		mean_diff = mean_diff / dsize;
+		std_diff = std_diff / dsize;
+		cout << setw(20) << grp_name << setw(20) << mean_diff << setw(20) << std_diff << endl;
+
+	}
+
+
+}
+
+
 IterEnsembleSmoother::IterEnsembleSmoother(Pest &_pest_scenario, FileManager &_file_manager,
 	OutputFileWriter &_output_file_writer, PerformanceLog *_performance_log,
 	RunManagerAbstract* _run_mgr_ptr) : pest_scenario(_pest_scenario), file_manager(_file_manager),
@@ -1691,7 +1741,7 @@ void IterEnsembleSmoother::initialize()
 	}
 
 	//need this here for Am calcs...
-	message(1, "transforming parameter ensembles to numeric");
+	//message(1, "transforming parameter ensemble to numeric");
 	pe.transform_ip(ParameterEnsemble::transStatus::NUM);
 
 	if (pest_scenario.get_pestpp_options().get_ies_include_base())
@@ -1905,6 +1955,9 @@ void IterEnsembleSmoother::initialize()
 
 	message(1, "current lambda:", last_best_lam);
 	message(0, "initialization complete");
+
+	pcs = ParChangeSummarizer(&pe_base, &file_manager);
+	
 }
 
 Eigen::MatrixXd IterEnsembleSmoother::get_Am(const vector<string> &real_names, const vector<string> &par_names)
@@ -2165,6 +2218,7 @@ void IterEnsembleSmoother::iterate_2_solution()
 			last_best_std = ph.get_std(PhiHandler::phiType::COMPOSITE);
 			ph.report();
 			ph.write(iter, run_mgr_ptr->get_total_runs());
+			pcs.summarize(pe);
 			if (accept)
 				consec_bad_lambda_cycles = 0;
 			else
@@ -2687,7 +2741,7 @@ void LocalUpgradeThread::work(int thread_id, int iter, double cur_lam)
 				(par_diff.rows() > 0) &&
 				(obs_resid.rows() > 0) &&
 				(obs_diff.rows() > 0) &&
-				((par_names.size() > 1) || (loc.rows() > 0)) && 
+				((!use_localizer) || (loc.rows() > 0)) && 
 				((use_approx) || (Am.rows() > 0)))
 				break;
 			if ((use_localizer) && (loc.rows() == 0) && (loc_guard.try_lock()))

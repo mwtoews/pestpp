@@ -413,8 +413,34 @@ vector<double> Ensemble::get_mean_stl_vector()
 		mean_vec.push_back(reals.col(j).mean());
 	}
 	return mean_vec;
-
 }
+
+pair<map<string, double>, map<string, double>>  Ensemble::get_moment_maps(const vector<string> &_real_names)
+{
+	Eigen::VectorXd mean, std;
+	if (_real_names.size() == 0)
+	{
+		mean = reals.colwise().mean();
+		Eigen::MatrixXd mean_diff = get_eigen_mean_diff();
+		std = mean_diff.array().pow(2).colwise().sum().sqrt();
+	}
+	else
+	{
+		mean = get_eigen(_real_names,vector<string>()).colwise().mean();
+		Eigen::MatrixXd mean_diff = get_eigen_mean_diff(_real_names,vector<string>());
+		std = mean_diff.array().pow(2).colwise().sum().sqrt();
+	}
+	map<string, double> mean_map, std_map;
+	string name;
+	for (int i = 0; i < reals.cols(); i++)
+	{
+		name = var_names[i];
+		mean_map[name] = mean[i];
+		std_map[name] = std[i];
+	}
+	return pair<map<string, double>, map<string, double>>(mean_map,std_map);
+}
+
 
 //Ensemble Ensemble::get_mean()
 //{

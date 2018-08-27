@@ -27,6 +27,8 @@ par.dat.tpl par.dat
 obs.dat.ins obs.dat
 ++parcov_filename(prior.cov)
 ++ies_num_reals(30)
+++ies_lambda_mults(0.01,1.0,10.0)
+++lambda_scale_fac(1.0)
 ++ies_initial_lambda(0.001)
 ++ies_use_approx(false)
 ++ies_use_prior_scaling(true)

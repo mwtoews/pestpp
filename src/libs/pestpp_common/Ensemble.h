@@ -58,6 +58,7 @@ public:
 	Eigen::MatrixXd get_eigen_mean_diff(const vector<string> &_real_names, const vector<string> &_var_names);
 
 	vector<double> get_mean_stl_vector();
+	pair<map<string, double>, map<string, double>>  get_moment_maps(const vector<string> &_real_names=vector<string>());
 
 	void append_other_rows(Ensemble &other);
 	void append(string real_name, const Transformable &trans);

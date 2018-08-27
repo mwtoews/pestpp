@@ -95,6 +95,22 @@ private:
 
 };
 
+class ParChangeSummarizer
+{
+public:
+	ParChangeSummarizer() { ; }
+	ParChangeSummarizer(ParameterEnsemble *_base_pe_ptr, FileManager *_file_manager_ptr);
+	void summarize(ParameterEnsemble &pe);
+
+private:
+	ParameterEnsemble * base_pe_ptr;
+	FileManager *file_manager_ptr;
+	map<string, set<string>> pargp2par_map;
+	pair<map<string,double>, map<string, double>> init_moments;
+
+
+};
+
 
 class LocalUpgradeThread
 {
@@ -161,6 +177,7 @@ private:
 	PerformanceLog *performance_log;
 	RunManagerAbstract* run_mgr_ptr;
 	PhiHandler ph;
+	ParChangeSummarizer pcs;
 	Covariance parcov, obscov;
 	double reg_factor;
 

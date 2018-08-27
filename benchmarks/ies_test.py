@@ -757,6 +757,7 @@ def test_chenoliver():
     num_reals = 30
     noptmax = 3
     
+    silent_master = False
 
     shutil.rmtree(test_d)
     
@@ -777,7 +778,7 @@ def test_chenoliver():
     
 
     pyemu.os_utils.start_slaves(template_d,exe_path,"pest.pst",num_slaves=20,
-        master_dir=test_d,slave_root=model_d,port=port,silent_master=True)
+        master_dir=test_d,slave_root=model_d,port=port,silent_master=silent_master)
     df_full_obs = pd.read_csv(os.path.join(test_d,"pest.{0}.obs.csv".format(noptmax)),index_col=0)
     df_full_par = pd.read_csv(os.path.join(test_d,"pest.{0}.par.csv".format(noptmax)),index_col=0)
 
@@ -793,7 +794,7 @@ def test_chenoliver():
     pst.write(os.path.join(template_d,"pest.pst"))
 
     pyemu.os_utils.start_slaves(template_d,exe_path,"pest.pst",num_slaves=20,
-        master_dir=test_d,slave_root=model_d,port=port,silent_master=True)
+        master_dir=test_d,slave_root=model_d,port=port,silent_master=silent_master)
     df_approx_obs = pd.read_csv(os.path.join(test_d,"pest.{0}.obs.csv".format(noptmax)),index_col=0)
     df_approx_par = pd.read_csv(os.path.join(test_d,"pest.{0}.par.csv".format(noptmax)),index_col=0)
 
@@ -831,7 +832,7 @@ def test_chenoliver():
     pst.write(os.path.join(template_d,"pest.pst"))
 
     pyemu.os_utils.start_slaves(template_d,exe_path,"pest.pst",num_slaves=25,
-        master_dir=test_d,slave_root=model_d,port=port,silent_master=True)
+        master_dir=test_d,slave_root=model_d,port=port,silent_master=silent_master)
     df_full_obs = pd.read_csv(os.path.join(test_d,"pest.{0}.obs.csv".format(noptmax)),index_col=0)
     df_full_par = pd.read_csv(os.path.join(test_d,"pest.{0}.par.csv".format(noptmax)),index_col=0)
 
@@ -847,7 +848,7 @@ def test_chenoliver():
     pst.write(os.path.join(template_d,"pest.pst"))
 
     pyemu.os_utils.start_slaves(template_d,exe_path,"pest.pst",num_slaves=25,
-        master_dir=test_d,slave_root=model_d,port=port,silent_master=True)
+        master_dir=test_d,slave_root=model_d,port=port,silent_master=silent_master)
     df_approx_obs = pd.read_csv(os.path.join(test_d,"pest.{0}.obs.csv".format(noptmax)),index_col=0)
     df_approx_par = pd.read_csv(os.path.join(test_d,"pest.{0}.par.csv".format(noptmax)),index_col=0)
 
@@ -2521,42 +2522,42 @@ def freyberg_local_threads_test():
 if __name__ == "__main__":
     # write_empty_test_matrix()
 
-    setup_suite_dir("ies_10par_xsec")
-    setup_suite_dir("ies_freyberg")
-    run_suite("ies_10par_xsec")
-    run_suite("ies_freyberg")
-    rebase("ies_freyberg")
-    rebase("ies_10par_xsec")
-    compare_suite("ies_10par_xsec")
-    compare_suite("ies_freyberg")
+    # setup_suite_dir("ies_10par_xsec")
+    # setup_suite_dir("ies_freyberg")
+    # run_suite("ies_10par_xsec")
+    # run_suite("ies_freyberg")
+    # rebase("ies_freyberg")
+    # rebase("ies_10par_xsec")
+    # compare_suite("ies_10par_xsec")
+    # compare_suite("ies_freyberg")
     #eval_freyberg()
     #eval_10par_xsec()
 
     # full list of tests
-    tenpar_subset_test()
-    tenpar_full_cov_test()
-    eval_freyberg_full_cov_reorder()
-    test_freyberg_full_cov_reorder_run()
-    eval_freyberg_full_cov()
-    tenpar_tight_tol_test()
+    # tenpar_subset_test()
+    # tenpar_full_cov_test()
+    # eval_freyberg_full_cov_reorder()
+    # test_freyberg_full_cov_reorder_run()
+    # eval_freyberg_full_cov()
+    # tenpar_tight_tol_test()
     test_chenoliver()
-    tenpar_narrow_range_test()
-    test_freyberg_ineq()
-    tenpar_fixed_test()
-    tenpar_fixed_test2()
-    tenpar_subset_how_test()
-    tenpar_localizer_test1()
-    tenpar_localizer_test2()
-    tenpar_localizer_test3()
-    freyberg_localizer_eval1()
-    freyberg_localizer_eval2()
-    freyberg_localizer_test3()
-    freyberg_dist_local_test()
-    freyberg_local_threads_test()
-    tenpar_restart_binary_test()
-    csv_tests()
-    tenpar_rns_test()
-    clues_longnames_test()
-    tenpar_localize_how_test()
+    # tenpar_narrow_range_test()
+    # test_freyberg_ineq()
+    # tenpar_fixed_test()
+    # tenpar_fixed_test2()
+    # tenpar_subset_how_test()
+    # tenpar_localizer_test1()
+    # tenpar_localizer_test2()
+    # tenpar_localizer_test3()
+    # freyberg_localizer_eval1()
+    # freyberg_localizer_eval2()
+    # freyberg_localizer_test3()
+    # freyberg_dist_local_test()
+    # freyberg_local_threads_test()
+    # tenpar_restart_binary_test()
+    # csv_tests()
+    # tenpar_rns_test()
+    # clues_longnames_test()
+    # tenpar_localize_how_test()
 
     #freyberg_dist_local_invest()
