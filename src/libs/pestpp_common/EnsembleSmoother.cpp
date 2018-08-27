@@ -2844,9 +2844,12 @@ void LocalUpgradeThread::work(int thread_id, int iter, double cur_lam)
 			local_utils::save_mat(verbose_level, thread_id, iter, "Am",Am);
 			Eigen::MatrixXd x4 = Am.transpose() * scaled_par_resid;
 			local_utils::save_mat(verbose_level, thread_id, iter, "X4", x4);
-			x4.resize(0, 0);
+			
+			par_resid.resize(0, 0);
 
 			Eigen::MatrixXd x5 = Am * x4;
+			x4.resize(0, 0);
+			Am.resize(0, 0);
 
 			local_utils::save_mat(verbose_level, thread_id, iter, "X5", x5);
 			Eigen::MatrixXd x6 = par_diff.transpose() * x5;
