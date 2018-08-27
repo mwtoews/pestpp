@@ -91,7 +91,8 @@ bool Localizer::initialize(PerformanceLog *performance_log)
 		else if (obgnme_map.find(o) != obgnme_map.end())
 		{
 			obs_map.push_back(obgnme_map[o]);
-			
+			if (obgnme_map[o].size() == 0)
+				throw runtime_error("Localizer::initialize() error: listed observation group '" + o + "' has no non-zero weight observations");
 			for (auto &oo : obgnme_map[o])
 			{
 				obs2row_map[oo] = i;
@@ -140,7 +141,8 @@ bool Localizer::initialize(PerformanceLog *performance_log)
 		else if (pargp_map.find(p) != pargp_map.end())
 		{
 			par_map.push_back(pargp_map[p]);
-
+			if (pargp_map[p].size() == 0)
+				throw runtime_error("Localizer::initialize() error: listed parameter group '" + p + "' has no adjustable parameters");
 			for (auto &pp : pargp_map[p])
 			{
 				par2col_map[pp] = i;

@@ -303,7 +303,7 @@ def tenpar_narrow_range_test():
     pst.pestpp_options["ies_enforce_bounds"] = False
     pst.pestpp_options["ies_include_base"] = False
     pst.pestpp_options["ies_group_draws"] = False
-    pst.pestpp_options["ies_verbose_level"] = 3
+    pst.pestpp_options["ies_verbose_level"] = 1
     pst.write(pst_name)
     pyemu.helpers.run(exe_path + " pest.pst", cwd=test_d)
 
@@ -321,7 +321,7 @@ def tenpar_narrow_range_test():
     pst.pestpp_options["ies_enforce_bounds"] = False
     pst.pestpp_options["ies_include_base"] = False
     pst.pestpp_options["ies_group_draws"] = True
-    pst.pestpp_options["ies_verbose_level"] = 3
+    pst.pestpp_options["ies_verbose_level"] = 1
     pst.write(pst_name)
     pyemu.helpers.run(exe_path + " pest.pst", cwd=test_d)
 
@@ -364,7 +364,7 @@ def tenpar_full_cov_test():
     pst.pestpp_options = {}
     pst.pestpp_options["ies_num_reals"] = num_reals
     pst.pestpp_options["parcov_filename"] = "prior.cov"
-    pst.pestpp_options["ies_verbose_level"] = 3
+    pst.pestpp_options["ies_verbose_level"] = 1
     pst.write(pst_name)
     pyemu.helpers.run(exe_path+" pest.pst",cwd=test_d)
 
@@ -1280,7 +1280,7 @@ def tenpar_localizer_test1():
     pst.pestpp_options["ies_subset_size"] = 11
     pst.pestpp_options["ies_par_en"] = "par_local.csv"
     pst.pestpp_options["ies_obs_en"] = "obs_local.csv"
-    pst.pestpp_options["ies_verbose_level"] = 3
+    pst.pestpp_options["ies_verbose_level"] = 1
     pst.control_data.noptmax = 3
     
     #pst.pestpp_options["ies_verbose_level"] = 3
@@ -1632,7 +1632,7 @@ def freyberg_localizer_eval1():
     pst.pestpp_options["ies_include_base"] = False
     pst.pestpp_options["ies_par_en"] = "par_local.csv"
     pst.pestpp_options["ies_localizer"] = "localizer.mat"
-    pst.pestpp_options["ies_verbose_level"] = 3
+    pst.pestpp_options["ies_verbose_level"] = 1
     pst.control_data.noptmax = 3
     print("writing pst")
     pst.write(os.path.join(template_d, "pest_base.pst"))
@@ -1696,7 +1696,7 @@ def freyberg_localizer_eval2():
     pst.pestpp_options["ies_include_base"] = False
     pst.pestpp_options["ies_par_en"] = "par_local.csv"
     pst.pestpp_options["ies_localizer"] = "localizer.mat"
-    pst.pestpp_options["ies_verbose_level"] = 3
+    pst.pestpp_options["ies_verbose_level"] = 1
     pst.control_data.nphistp = 10
     pst.control_data.nphinored = 10
     pst.control_data.noptmax = 3
@@ -2540,7 +2540,7 @@ if __name__ == "__main__":
     # test_freyberg_full_cov_reorder_run()
     # eval_freyberg_full_cov()
     # tenpar_tight_tol_test()
-    test_chenoliver()
+    # test_chenoliver()
     # tenpar_narrow_range_test()
     # test_freyberg_ineq()
     # tenpar_fixed_test()
@@ -2550,14 +2550,14 @@ if __name__ == "__main__":
     # tenpar_localizer_test2()
     # tenpar_localizer_test3()
     # freyberg_localizer_eval1()
-    # freyberg_localizer_eval2()
-    # freyberg_localizer_test3()
-    # freyberg_dist_local_test()
-    # freyberg_local_threads_test()
-    # tenpar_restart_binary_test()
-    # csv_tests()
-    # tenpar_rns_test()
-    # clues_longnames_test()
-    # tenpar_localize_how_test()
+    freyberg_localizer_eval2()
+    freyberg_localizer_test3()
+    freyberg_dist_local_test()
+    freyberg_local_threads_test()
+    tenpar_restart_binary_test()
+    csv_tests()
+    tenpar_rns_test()
+    clues_longnames_test()
+    tenpar_localize_how_test()
 
     #freyberg_dist_local_invest()
