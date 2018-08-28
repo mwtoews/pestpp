@@ -1064,7 +1064,7 @@ map<string, int> Ensemble::from_binary(string file_name, vector<string> &names, 
 	var_names.clear();
 	real_names.clear();
 	reals.resize(0, 0);
-	bool is_new_format = pest_utils::read_binary(file_name, var_names, real_names, reals);
+	bool is_new_format = pest_utils::read_binary(file_name, real_names, var_names, reals);
 	if ((!is_new_format) && (transposed))
 	{
 		vector<string> temp = real_names;
@@ -1073,6 +1073,7 @@ map<string, int> Ensemble::from_binary(string file_name, vector<string> &names, 
 		temp.clear();
 		reals.transposeInPlace();
 	}
+
 	map<string, int> header_info;
 	for (int i = 0; i < var_names.size(); i++)
 		header_info[var_names.at(i)] = i;
@@ -1161,7 +1162,14 @@ map<string,int> Ensemble::from_binary_old(string file_name, vector<string> &name
 			reals(i, j) = data;
 		}
 		in.close();
-
+		
+		set<string> vset(var_names.begin(), var_names.end());
+		set<string> nset(names.begin(), names.end());
+		vector<string> diff;
+		set_symmetric_difference(vset.begin(), vset.end(), nset.begin(), nset.end(), std::back_inserter(diff));
+		if (diff.size() > 0)
+			throw_ensemble_error("the following names are common between the var names in the binary file and the var names expected", diff);
+		
 		map<string, int> header_info;
 		for (int i = 0; i < col_names->size(); i++)
 			header_info[col_names->at(i)] = i;
