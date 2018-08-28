@@ -1945,7 +1945,7 @@ def tenpar_restart_binary_test():
 def tenpar_restart_test():
     """tenpar restart tests"""
     model_d = "ies_10par_xsec"
-    test_d = os.path.join(model_d, "master_restart")
+    test_d = os.path.join(model_d, "master_restart1")
     template_d = os.path.join(model_d, "template")
     pst = pyemu.Pst(os.path.join(template_d, "pest.pst"))
     num_reals = 20
@@ -1974,7 +1974,7 @@ def tenpar_restart_test():
     pst.pestpp_options["ies_lambda_mults"] = 1.0
     pst.pestpp_options["lambda_scale_fac"] = 1.0
     pst.pestpp_options["ies_debug_fail_subset"] = True
-    pst.pestpp_options["ies_debug_fail_remaineder"] = True
+    pst.pestpp_options["ies_debug_fail_remainder"] = True
     #pst.pestpp_options["ies_num_reals"] = num_reals
     pst.pestpp_options["ies_restart_obs_en"] = "restart1.csv"
     pst.pestpp_options["ies_obs_en"] = "base.csv"
@@ -2556,11 +2556,11 @@ if __name__ == "__main__":
     # freyberg_localizer_test3()
     # freyberg_dist_local_test()
     # freyberg_local_threads_test()
-    #tenpar_restart_binary_test()
+    # tenpar_restart_binary_test()
     tenpar_restart_test()
     # csv_tests()
     # tenpar_rns_test()
     # clues_longnames_test()
     # tenpar_localize_how_test()
-
-    #freyberg_dist_local_invest()
+    #
+    # freyberg_dist_local_invest()

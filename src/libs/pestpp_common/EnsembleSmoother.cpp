@@ -694,18 +694,26 @@ void ParChangeSummarizer::summarize(ParameterEnsemble &pe)
 	cout << ss.str();
 	frec << ss.str();
 	double mean_diff = 0.0, std_diff = 0.0;
-	double dsize;
+	double dsize, value1, value2;
 	vector<string> grp_names = base_pe_ptr->get_pest_scenario().get_ctl_ordered_par_group_names();
 	for (auto &grp_name : grp_names)
 	{
 		for (auto & par_name : pargp2par_map[grp_name])
 		{
-			mean_diff += (init_moments.first[par_name] - moments.first[par_name]) / init_moments.first[par_name];
-			std_diff += (init_moments.second[par_name] - moments.second[par_name]) / init_moments.second[par_name];
+			value1 = init_moments.first[par_name];
+			value2 = value1 - moments.first[par_name];
+			if ((value1 != 0.0) && (value2 != 0.0))
+				mean_diff += value2 / value1;
+			value1 = init_moments.second[par_name];
+			value2 = value1 - moments.second[par_name];
+			if ((value1 != 0.0) && (value2 != 0.0))
+				std_diff += value2 / value1;
 		}
 		dsize = double(init_moments.first.size());
-		mean_diff = mean_diff / dsize;
-		std_diff = std_diff / dsize;
+		if (mean_diff > 0.0)
+			mean_diff = mean_diff / dsize;
+		if (std_diff > 0.0)
+			std_diff = std_diff / dsize;
 		ss.str("");
 		ss << setw(15) << grp_name << setw(15) << mean_diff * 100.0 << setw(15) << std_diff * 100.0 << endl;
 		cout << ss.str();
