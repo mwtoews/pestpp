@@ -764,7 +764,7 @@ void Jacobian::save(const string &ext) const
 
 void Jacobian::read(const string &filename)
 {
-	pest_utils::read_binary(filename, base_numeric_par_names, base_sim_obs_names, matrix);
+	pest_utils::read_binary(filename,base_sim_obs_names, base_numeric_par_names, matrix);
 	//ifstream fin;
 	//fin.open(filename.c_str(), ifstream::binary|ios::in);
 
