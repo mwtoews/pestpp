@@ -92,7 +92,8 @@ protected:
 	vector<string> real_names;	
 	map<string, int> var_map;
 	void read_csv(int num_reals,ifstream &csv, map<string,int> header_info);
-	map<string,int> from_binary(string file_name, vector<string> &names,  bool transposed);
+	map<string,int> from_binary_old(string file_name, vector<string> &names,  bool transposed);
+	map<string, int> from_binary(string file_name, vector<string> &names, bool transposed);
 	map<string,int> prepare_csv(const vector<string> &names, ifstream &csv, bool forgive);
 };
 

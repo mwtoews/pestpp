@@ -1059,8 +1059,28 @@ void Ensemble::to_binary(string file_name, bool transposed)
 	fout.close();
 }
 
+map<string, int> Ensemble::from_binary(string file_name, vector<string> &names, bool transposed)
+{
+	var_names.clear();
+	real_names.clear();
+	reals.resize(0, 0);
+	bool is_new_format = pest_utils::read_binary(file_name, var_names, real_names, reals);
+	if ((!is_new_format) && (transposed))
+	{
+		vector<string> temp = real_names;
+		real_names = var_names;
+		var_names = temp;
+		temp.clear();
+		reals.transposeInPlace();
+	}
+	map<string, int> header_info;
+	for (int i = 0; i < var_names.size(); i++)
+		header_info[var_names.at(i)] = i;
+	return header_info;
+}
 
-map<string,int> Ensemble::from_binary(string file_name, vector<string> &names, bool transposed)
+
+map<string,int> Ensemble::from_binary_old(string file_name, vector<string> &names, bool transposed)
 {
 	//load an ensemble from a binary jco-type file.  if transposed=true, reals is transposed and row/col names are swapped for var/real names.
 	//needed to store observation ensembles in binary since obs names are 20 chars and par names are 12 chars
