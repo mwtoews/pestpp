@@ -357,39 +357,48 @@ string PhiHandler::get_summary_header()
 	return ss.str();
 }
 
-void PhiHandler::report()
+void PhiHandler::report(bool echo)
 {
 	ofstream &f = file_manager->rec_ofstream();
 	f << get_summary_header();
-	cout << get_summary_header();
+	if (echo)
+		cout << get_summary_header();
 	string s = get_summary_string(PhiHandler::phiType::COMPOSITE);
 	f << s;
-	cout << s;
+	if (echo)
+		cout << s;
 	s = get_summary_string(PhiHandler::phiType::MEAS);
 	f << s;
-	cout << s;
+	if (echo)
+		cout << s;
 	s = get_summary_string(PhiHandler::phiType::REGUL);
 	f << s;
-	cout << s;
+	if (echo)
+		cout << s;
 	s = get_summary_string(PhiHandler::phiType::ACTUAL);
 	f << s;
-	cout << s;
+	if (echo)
+		cout << s;
 	/*if (*reg_factor == 0.0)
 	{
 		f << "    (note: reg_factor is zero; regularization phi reported but not used)" << endl;
 		cout  << "    (note: reg_factor is zero; regularization phi reported but not used)" << endl;
 	}*/
 	f << "     current reg_factor: " << *reg_factor << endl;
-	cout << "     current reg_factor: " << *reg_factor << endl;
+	if (echo)
+		cout << "     current reg_factor: " << *reg_factor << endl;
 	if (*reg_factor != 0.0)
 	{
 
 		f << "     note: regularization phi reported above does not " << endl;
 		f << "           include the effects of reg_factor, " << endl;
 		f << "           but composite phi does." << endl;
-		cout << "     note: regularization phi reported above does not " << endl;
-		cout << "           include the effects of reg_factor, " << endl;
-		cout << "           but composite phi does." << endl;
+		if (echo)
+		{
+			cout << "     note: regularization phi reported above does not " << endl;
+			cout << "           include the effects of reg_factor, " << endl;
+			cout << "           but composite phi does." << endl;
+		}
 	}
 	f << endl << endl;
 	f.flush();
@@ -1060,7 +1069,7 @@ bool IterEnsembleSmoother::initialize_oe(Covariance &cov)
 //}
 
 template<typename T, typename A>
-void IterEnsembleSmoother::message(int level, const string &_message, vector<T, A> _extras)
+void IterEnsembleSmoother::message(int level, const string &_message, vector<T, A> _extras, bool echo)
 {
 	stringstream ss;
 	if (level == 0)
@@ -1077,7 +1086,7 @@ void IterEnsembleSmoother::message(int level, const string &_message, vector<T, 
 	}
 	if (level == 0)
 		ss << "  ---  ";
-	if ((verbose_level >= 2) || (level < 2))
+	if ((echo) && ((verbose_level >= 2) || (level < 2)))
 		cout << ss.str() << endl;
 	file_manager.rec_ofstream() <<ss.str() << endl;
 	performance_log->log_event(ss.str());
@@ -2953,10 +2962,16 @@ void LocalUpgradeThread::work(int thread_id, int iter, double cur_lam)
 
 
 
-void upgrade_thread_function(int id, int iter,double cur_lam, LocalUpgradeThread &worker)
+void upgrade_thread_function(int id, int iter,double cur_lam, LocalUpgradeThread &worker, exception_ptr &eptr)
 {
-	
-	worker.work(id,iter,cur_lam);
+	try
+	{
+		worker.work(id, iter, cur_lam);
+	}
+	catch (...)
+	{
+		eptr = current_exception();
+	}
 	
 	return;
 }
@@ -3048,7 +3063,8 @@ ParameterEnsemble IterEnsembleSmoother::calc_localized_upgrade_threaded(double c
 	LocalUpgradeThread worker(par_resid_map, par_diff_map, obs_resid_map, obs_diff_map,
 		localizer, parcov_inv_map, weight_map, pe_upgrade, loc_map, Am_map);
 
-	if ((num_threads < 1) || (loc_map.size() == 1))
+	//if ((num_threads < 1) || (loc_map.size() == 1))
+	if (num_threads < 1)
 	{
 		worker.work(0, iter, cur_lam);
 	}
@@ -3056,15 +3072,41 @@ ParameterEnsemble IterEnsembleSmoother::calc_localized_upgrade_threaded(double c
 	{
 		Eigen::setNbThreads(1);
 		vector<thread> threads;
+		vector<exception_ptr> exception_ptrs;
 		message(2, "launching threads");
 		
 		for (int i = 0; i < num_threads; i++)
-			threads.push_back(thread(&LocalUpgradeThread::work, &worker, i, iter, cur_lam));
+		{
+			exception_ptrs.push_back(exception_ptr());
+		}
 
+		for (int i = 0; i < num_threads; i++)
+		{
+			//threads.push_back(thread(&LocalUpgradeThread::work, &worker, i, iter, cur_lam));
+			
+			threads.push_back(thread(upgrade_thread_function, i, iter, cur_lam, std::ref(worker),std::ref( exception_ptrs[i])));
+			
+		}
 		message(2, "waiting to join threads");
-		for (auto &t : threads)
-			t.join();
-
+		//for (auto &t : threads)
+		//	t.join();
+		for (int i = 0; i < num_threads; ++i)
+		{
+			if (exception_ptrs[i])
+			{
+				try
+				{
+					rethrow_exception(exception_ptrs[i]);
+				}
+				catch (const std::exception& e)
+				{
+					ss.str("");
+					ss << "thread " << i << "raised an exception: " << e.what();
+					throw runtime_error(ss.str());
+				}
+			}
+			threads[i].join();
+		}
 		message(2, "threaded localized upgrade calculation done");
 	}
 	
@@ -3145,14 +3187,9 @@ bool IterEnsembleSmoother::solve_new()
 		ss << "starting calcs for lambda" << cur_lam;
 		message(1, "starting lambda calcs for lambda", cur_lam);
 		ParameterEnsemble pe_upgrade;
+		
 		pe_upgrade = calc_localized_upgrade_threaded(cur_lam);
-		/*if (use_localizer)
-		{
-			pe_upgrade = calc_localized_upgrade_threaded(cur_lam);
-		}
-		else
-			pe_upgrade = calc_upgrade(act_obs_names, act_par_names, cur_lam, pe.shape().first);
-*/
+
 		for (auto sf : pest_scenario.get_pestpp_options().get_lambda_scale_vec())
 		{
 
@@ -3200,6 +3237,9 @@ bool IterEnsembleSmoother::solve_new()
 	message(1, "last stdev: ", last_best_std);
 
 	ObservationEnsemble oe_lam_best;
+	bool echo = false;
+	if (verbose_level > 1)
+		echo = true;
 	for (int i = 0; i<pe_lams.size(); i++)
 	{
 		if (oe_lams[i].shape().first == 0)
@@ -3211,9 +3251,12 @@ bool IterEnsembleSmoother::solve_new()
 			message(1, "all realizations dropped as 'bad' for lambda, scale fac ", vals);
 			continue;
 		}
-		message(0, "phi summary for lambda, scale fac:", vals);
+		
 		ph.update(oe_lams[i], pe_lams[i]);
-		ph.report();
+		
+		message(0, "phi summary for lambda, scale fac:", vals,echo);
+		ph.report(echo);
+		
 		mean = ph.get_mean(PhiHandler::phiType::COMPOSITE);
 		std = ph.get_std(PhiHandler::phiType::COMPOSITE);
 		if (mean < best_mean)
@@ -3279,6 +3322,9 @@ bool IterEnsembleSmoother::solve_new()
 				pe_keep_names.push_back(pe_names[i]);
 				oe_keep_names.push_back(oe_names[i]);
 			}
+		message(0, "phi summary for best lambda, scale fac: ", vector<double>({ lam_vals[best_idx],scale_vals[best_idx] }));
+		ph.update(oe_lams[best_idx], pe_lams[best_idx]);
+		ph.report();
 		message(0, "running remaining realizations for best lambda, scale:", vector<double>({ lam_vals[best_idx],scale_vals[best_idx] }));
 
 		//pe_keep_names and oe_keep_names are names of the remaining reals to eval
@@ -3291,7 +3337,8 @@ bool IterEnsembleSmoother::solve_new()
 		vector<int> fails = run_ensemble(remaining_pe_lam, remaining_oe_lam);
 
 		//for testing
-		//fails.push_back(0);
+		if (pest_scenario.get_pestpp_options().get_ies_debug_fail_remainder())
+			fails.push_back(0);
 
 		//if any of the remaining runs failed
 		if (fails.size() == org_pe_idxs.size())
@@ -3302,7 +3349,7 @@ bool IterEnsembleSmoother::solve_new()
 			vector<string> new_pe_idxs, new_oe_idxs;
 			vector<int>::iterator start = fails.begin(), end = fails.end();
 			stringstream ss;
-			ss << "the following par:obs realizations failed during evaluation of the remaining ensemble";
+			ss << "the following par:obs realizations failed during evaluation of the remaining ensemble: ";
 			for (int i = 0; i < org_pe_idxs.size(); i++)
 				if (find(start, end, i) == end)
 				{
@@ -3586,29 +3633,13 @@ vector<ObservationEnsemble> IterEnsembleSmoother::run_lambda_ensembles(vector<Pa
 	ss << "queuing " << pe_lams.size() << " ensembles";
 	performance_log->log_event(ss.str());
 	run_mgr_ptr->reinitialize();
-	/*vector<int> subset_idxs;
-	if ((use_subset) && (subset_size < pe_lams[0].shape().first))
-	{
-		for (int i = 0; i < subset_size; i++)
-			subset_idxs.push_back(i);
-	}*/
+	
 	set_subset_idx(pe_lams[0].shape().first);
 	vector<map<int, int>> real_run_ids_vec;
 	//ParameterEnsemble pe_lam;
 	//for (int i=0;i<pe_lams.size();i++)
 	for (auto &pe_lam : pe_lams)
 	{
-		// if (pest_scenario.get_pestpp_options().get_ies_save_binary())
-		// {
-		// 	ss << file_manager.get_base_filename() << "." << iter << "." << i << ".lambdapars.jcb";
-		// 	pe_lam.to_binary(ss.str());
-		// }
-		// else
-		// {
-		// 	ss << file_manager.get_base_filename() << "." << iter << "." << i << ".lambdapars.jcb";
-		// }
-		// frec << " lambda value " << lam_vals[i] << " pars saved to " << ss.str() << endl;
-		// ss.str("");
 		try
 		{
 			real_run_ids_vec.push_back(pe_lam.add_runs(run_mgr_ptr,subset_idxs));
@@ -3686,8 +3717,8 @@ vector<ObservationEnsemble> IterEnsembleSmoother::run_lambda_ensembles(vector<Pa
 			throw_ies_error(ss.str());
 		}
 
-		//for testing
-		//failed_real_indices.push_back(real_run_ids.size()-1);
+		if (pest_scenario.get_pestpp_options().get_ies_debug_fail_subset())
+			failed_real_indices.push_back(real_run_ids.size()-1);
 
 		if (failed_real_indices.size() > 0)
 		{

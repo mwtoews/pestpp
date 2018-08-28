@@ -33,7 +33,7 @@ public:
 	double get_max(phiType pt);
 	double get_min(phiType pt);
 	map<string, double>* get_phi_map(PhiHandler::phiType &pt);
-	void report();
+	void report(bool echo=true);
 	void write(int iter_num, int total_runs, bool write_group = true);
 	void write_group(int iter_num, int total_runs, vector<double> extra);
 	vector<int> get_idxs_greater_than(double bad_phi, ObservationEnsemble &oe);
@@ -239,7 +239,7 @@ private:
 	void drop_bad_phi(ParameterEnsemble &_pe, ObservationEnsemble &_oe);
 	//void check_ensembles(ObservationEnsemble &oe, ParameterEnsemble &pe);
 	template<typename T, typename A>
-	void message(int level, const string &_message, vector<T, A> _extras);
+	void message(int level, const string &_message, vector<T, A> _extras, bool echo=true);
 	void message(int level, const string &_message);
 
 	//template<typename T, typename A>

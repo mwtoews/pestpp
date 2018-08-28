@@ -1973,6 +1973,8 @@ def tenpar_restart_test():
     pst.pestpp_options["ies_par_en"] = "par1.csv"
     pst.pestpp_options["ies_lambda_mults"] = 1.0
     pst.pestpp_options["lambda_scale_fac"] = 1.0
+    pst.pestpp_options["ies_debug_fail_subset"] = True
+    pst.pestpp_options["ies_debug_fail_remaineder"] = True
     #pst.pestpp_options["ies_num_reals"] = num_reals
     pst.pestpp_options["ies_restart_obs_en"] = "restart1.csv"
     pst.pestpp_options["ies_obs_en"] = "base.csv"
@@ -2550,14 +2552,15 @@ if __name__ == "__main__":
     # tenpar_localizer_test2()
     # tenpar_localizer_test3()
     # freyberg_localizer_eval1()
-    freyberg_localizer_eval2()
-    freyberg_localizer_test3()
-    freyberg_dist_local_test()
-    freyberg_local_threads_test()
-    tenpar_restart_binary_test()
-    csv_tests()
-    tenpar_rns_test()
-    clues_longnames_test()
-    tenpar_localize_how_test()
+    # freyberg_localizer_eval2()
+    # freyberg_localizer_test3()
+    # freyberg_dist_local_test()
+    # freyberg_local_threads_test()
+    #tenpar_restart_binary_test()
+    tenpar_restart_test()
+    # csv_tests()
+    # tenpar_rns_test()
+    # clues_longnames_test()
+    # tenpar_localize_how_test()
 
     #freyberg_dist_local_invest()

@@ -852,6 +852,18 @@ void PestppOptions::parce_line(const string &line)
 		{
 			convert_ip(value, ies_num_threads);
 		}
+		else if (key == "IES_DEBUG_FAIL_SUBSET")
+		{
+			transform(value.begin(), value.end(), value.begin(), ::tolower);
+			istringstream is(value);
+			is >> boolalpha >> ies_debug_fail_subset;
+		}
+		else if (key == "IES_DEBUG_FAIL_REMAINDER")
+		{
+			transform(value.begin(), value.end(), value.begin(), ::tolower);
+			istringstream is(value);
+			is >> boolalpha >> ies_debug_fail_remainder;
+		}
 		else {
 
 			throw PestParsingError(line, "Invalid key word \"" + key +"\"");
