@@ -1011,7 +1011,7 @@ def tenpar_fixed_test():
     pst.parameter_data.loc[fixed_pars,"partrans"] = "fixed"
 
     def compare():
-        csvs = [f for f in os.listdir(test_d) if f.endswith(".par.csv")]
+        csvs = [f for f in os.listdir(test_d) if f.endswith(".par.csv") and "pest_fixed" in f]
         dfs = [pd.read_csv(os.path.join(test_d,csv),index_col=0) for csv in csvs]
         for df in dfs:
             df.columns = df.columns.map(str.lower)
@@ -1258,7 +1258,7 @@ def tenpar_localizer_test1():
     pst = pyemu.Pst(pst_name)
 
     #mat = pyemu.Matrix.from_names(pst.nnz_obs_names,pst.adj_par_names).to_dataframe()
-    mat = pyemu.Matrix.from_names(pst.obs_names,pst.par_names).to_dataframe()
+    mat = pyemu.Matrix.from_names(pst.nnz_obs_names,pst.adj_par_names).to_dataframe()
     mat.loc[:,:] = 1.0
     #mat.iloc[0,:] = 1
     mat = pyemu.Matrix.from_dataframe(mat)
@@ -2552,7 +2552,7 @@ def freyberg_local_threads_test():
 if __name__ == "__main__":
     # write_empty_test_matrix()
 
-    # setup_suite_dir("ies_10par_xsec")
+    #setup_suite_dir("ies_10par_xsec")
     # setup_suite_dir("ies_freyberg")
     # run_suite("ies_10par_xsec")
     # run_suite("ies_freyberg")
@@ -2564,26 +2564,26 @@ if __name__ == "__main__":
     #eval_10par_xsec()
 
     # full list of tests
-    # tenpar_subset_test()
-    # tenpar_full_cov_test()
+    tenpar_subset_test()
+    tenpar_full_cov_test()
     # eval_freyberg_full_cov_reorder()
     # test_freyberg_full_cov_reorder_run()
     # eval_freyberg_full_cov()
-    # tenpar_tight_tol_test()
-    # test_chenoliver()
-    # tenpar_narrow_range_test()
-    # test_freyberg_ineq()
-    # tenpar_fixed_test()
-    # tenpar_fixed_test2()
-    #tenpar_fixed_test3()
-    # tenpar_subset_how_test()
+    tenpar_tight_tol_test()
+    test_chenoliver()
+    tenpar_narrow_range_test()
+    test_freyberg_ineq()
+    tenpar_fixed_test()
+    tenpar_fixed_test2()
+    tenpar_fixed_test3()
+    tenpar_subset_how_test()
     tenpar_localizer_test1()
-    # tenpar_localizer_test2()
-    # tenpar_localizer_test3()
+    tenpar_localizer_test2()
+    tenpar_localizer_test3()
     # freyberg_localizer_eval1()
     # freyberg_localizer_eval2()
     # freyberg_localizer_test3()
-    freyberg_dist_local_test()
+   # freyberg_dist_local_test()
     # freyberg_local_threads_test()
     # tenpar_restart_binary_test()
     # tenpar_restart_test()
