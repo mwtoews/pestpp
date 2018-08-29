@@ -61,6 +61,35 @@ Ensemble Ensemble::zero_like()
 	return new_en;
 }
 
+
+void Ensemble::add_2_cols_ip(const vector<string> &other_var_names, const Eigen::MatrixXd &mat)
+{
+	
+	if (shape().first != mat.rows())
+		throw_ensemble_error("Ensemble::add_2_cols_ip(): first dimensions don't match");
+	
+	map<string, int> this_varmap, other_varmap;
+	for (int i = 0; i < var_names.size(); i++)
+		this_varmap[var_names[i]] = i;
+	
+	vector<string> missing;
+	set<string> svnames(var_names.begin(), var_names.end());
+	set<string>::iterator end = svnames.end();
+	for (int i = 0; i < other_var_names.size(); i++)
+	{
+		if (svnames.find(other_var_names[i]) == end)
+			missing.push_back(other_var_names[i]);
+		other_varmap[other_var_names[i]] = i;
+	}
+	if (missing.size() > 0)
+		throw_ensemble_error("Ensemble::add_2_cols_ip(): the following var names in other were not found", missing);
+	for (auto &ovm : other_varmap)
+	{
+		reals.col(this_varmap[ovm.first]) += mat.col(ovm.second);
+	}
+}
+
+
 void Ensemble::add_2_cols_ip(Ensemble &other)
 {
 	//add values to (a subset of the) columns of reals
@@ -76,27 +105,9 @@ void Ensemble::add_2_cols_ip(Ensemble &other)
 	}
 	if (mismatch.size() > 0)
 	throw_ensemble_error("the following real_names don't match other", mismatch);
-
-	map<string, int> this_varmap, other_varmap;
-	for (int i = 0; i < var_names.size(); i++)
-		this_varmap[var_names[i]] = i;
 	vector<string> other_var_names = other.get_var_names();
+	add_2_cols_ip(other_var_names, other.get_eigen());
 
-	vector<string> missing;
-	set<string> svnames(var_names.begin(), var_names.end());
-	set<string>::iterator end = svnames.end();
-	for (int i = 0; i < other_var_names.size(); i++)
-	{
-		if (svnames.find(other_var_names[i]) == end)
-			missing.push_back(other_var_names[i]);
-		other_varmap[other_var_names[i]] = i;
-	}
-	if (missing.size() > 0)
-	throw_ensemble_error("Ensemble::add_2_cols_ip(): the following var names in other were not found", missing);
-	for (auto &ovm : other_varmap)
-	{
-		reals.col(this_varmap[ovm.first]) += other.get_eigen_ptr()->col(ovm.second);
-	}
 }
 
 void Ensemble::draw(int num_reals, Covariance cov, Transformable &tran, const vector<string> &draw_names,
@@ -402,8 +413,34 @@ vector<double> Ensemble::get_mean_stl_vector()
 		mean_vec.push_back(reals.col(j).mean());
 	}
 	return mean_vec;
-
 }
+
+pair<map<string, double>, map<string, double>>  Ensemble::get_moment_maps(const vector<string> &_real_names)
+{
+	Eigen::VectorXd mean, std;
+	if (_real_names.size() == 0)
+	{
+		mean = reals.colwise().mean();
+		Eigen::MatrixXd mean_diff = get_eigen_mean_diff();
+		std = mean_diff.array().pow(2).colwise().sum().sqrt();
+	}
+	else
+	{
+		mean = get_eigen(_real_names,vector<string>()).colwise().mean();
+		Eigen::MatrixXd mean_diff = get_eigen_mean_diff(_real_names,vector<string>());
+		std = mean_diff.array().pow(2).colwise().sum().sqrt();
+	}
+	map<string, double> mean_map, std_map;
+	string name;
+	for (int i = 0; i < reals.cols(); i++)
+	{
+		name = var_names[i];
+		mean_map[name] = mean[i];
+		std_map[name] = std[i];
+	}
+	return pair<map<string, double>, map<string, double>>(mean_map,std_map);
+}
+
 
 //Ensemble Ensemble::get_mean()
 //{
@@ -849,7 +886,7 @@ void Ensemble::append(string real_name, const Transformable &trans)
 	real_names.push_back(real_name);
 }
 
-void Ensemble::to_binary(string file_name,bool transposed)
+void Ensemble::to_binary_old(string file_name,bool transposed)
 {
 	ofstream fout(file_name, ios::binary);
 	if (!fout.good())
@@ -958,8 +995,93 @@ void Ensemble::to_binary(string file_name,bool transposed)
 	fout.close();
 }
 
+void Ensemble::to_binary(string file_name, bool transposed)
+{
+	ofstream fout(file_name, ios::binary);
+	if (!fout.good())
+	{
+		throw runtime_error("error opening file for binary ensemble:" + file_name);
+	}
+	int n_var = var_names.size();
+	int n_real = real_names.size();
+	int n;
+	int tmp;
+	double data;
+	char par_name[200];
+	char obs_name[200];
 
-map<string,int> Ensemble::from_binary(string file_name, vector<string> &names, bool transposed)
+	// write header
+	
+	tmp = n_var;
+	fout.write((char*)&tmp, sizeof(tmp));
+	tmp = n_real;
+	fout.write((char*)&tmp, sizeof(tmp));
+	
+	//write number nonzero elements in jacobian (includes prior information)
+	n = reals.size();
+	fout.write((char*)&n, sizeof(n));
+
+	//write matrix
+	n = 0;
+	//map<string, double>::const_iterator found_pi_par;
+	//map<string, double>::const_iterator not_found_pi_par;
+	//icount = row_idxs + 1 + col_idxs * self.shape[0]
+	
+	for (int irow = 0; irow < n_real; ++irow)
+	{
+		for (int jcol = 0; jcol < n_var; ++jcol)
+		{
+			
+			data = reals(irow, jcol);
+			fout.write((char*) &(irow), sizeof(irow));
+			fout.write((char*) &(jcol), sizeof(jcol));
+			fout.write((char*) &(data), sizeof(data));
+		}
+	}
+	
+	//save parameter names=
+	for (vector<string>::const_iterator b = var_names.begin(), e = var_names.end();
+		b != e; ++b) {
+		string l = pest_utils::lower_cp(*b);
+		pest_utils::string_to_fortran_char(l, par_name, 200);
+		fout.write(par_name, 200);
+	}
+
+	//save observation and Prior information names
+	for (vector<string>::const_iterator b = real_names.begin(), e = real_names.end();
+		b != e; ++b) {
+		string l = pest_utils::lower_cp(*b);
+		pest_utils::string_to_fortran_char(l, obs_name, 200);
+		fout.write(obs_name, 200);
+	}
+	
+	//save observation names (part 2 prior information)
+	fout.close();
+}
+
+map<string, int> Ensemble::from_binary(string file_name, vector<string> &names, bool transposed)
+{
+	var_names.clear();
+	real_names.clear();
+	reals.resize(0, 0);
+	bool is_new_format = pest_utils::read_binary(file_name, real_names, var_names, reals);
+	if ((!is_new_format) && (transposed))
+	{
+		vector<string> temp = real_names;
+		real_names = var_names;
+		var_names = temp;
+		temp.clear();
+		reals.transposeInPlace();
+	}
+
+	map<string, int> header_info;
+	for (int i = 0; i < var_names.size(); i++)
+		header_info[var_names.at(i)] = i;
+	return header_info;
+}
+
+
+map<string,int> Ensemble::from_binary_old(string file_name, vector<string> &names, bool transposed)
 {
 	//load an ensemble from a binary jco-type file.  if transposed=true, reals is transposed and row/col names are swapped for var/real names.
 	//needed to store observation ensembles in binary since obs names are 20 chars and par names are 12 chars
@@ -975,83 +1097,157 @@ map<string,int> Ensemble::from_binary(string file_name, vector<string> &names, b
 	int i, j;
 	unsigned int n;
 	double data;
-	char col_name[12];
-	char row_name[20];
+	
+	map<string, int> header_info;
 
 	// read header
 	in.read((char*)&n_col, sizeof(n_col));
 	in.read((char*)&n_row, sizeof(n_row));
-	if (n_col > 0) throw runtime_error("Ensemble:::from_binary() error: binary matrix file " + file_name + " was produced by deprecated version of PEST");
-
-	n_col = -n_col;
-	n_row = -n_row;
-	if ((n_col > 1e8) || (n_row > 1e8))
-		throw_ensemble_error("Ensemble::from_binary() n_col or n_row > 1e8, something is prob wrong");
-	in.read((char*)&n_nonzero, sizeof(n_nonzero));
-
-	// record current position in file
-	streampos begin_sen_pos = in.tellg();
-
-	//advance to col names section
-	in.seekg(n_nonzero*(sizeof(double) + sizeof(int)), ios_base::cur);
-
-	//read col names
-	vector<string>* col_names = &var_names;
-	vector<string>* row_names = &real_names;
-	if (transposed)
+	if (n_col > 0) //throw runtime_error("Ensemble:::from_binary() error: binary matrix file " + file_name + " was produced by deprecated version of PEST");
 	{
-		col_names = &real_names;
-		row_names = &var_names;
-	}
+		char col_name[200];
+		char row_name[200];
+		n_col = n_col;
+		n_row = n_row;
+		in.read((char*)&n_nonzero, sizeof(n_nonzero));
 
-	for (int i_rec = 0; i_rec<n_col; ++i_rec)
-	{
-		in.read(col_name, 12);
-		string temp_col = string(col_name, 12);
-		pest_utils::strip_ip(temp_col);
-		pest_utils::upper_ip(temp_col);
-		col_names->push_back(temp_col);
-	}
-	//read row names
-	for (int i_rec = 0; i_rec<n_row; ++i_rec)
-	{
-		in.read(row_name, 20);
-		string temp_row = pest_utils::strip_cp(string(row_name, 20));
-		pest_utils::upper_ip(temp_row);
-		row_names->push_back(temp_row);
-	}
+		// record current position in file
+		streampos begin_sen_pos = in.tellg();
 
-	//make sure that var_names is compatible with names
-	if (var_names.size() != names.size())
-	{
+		//advance to col names section
+		in.seekg(n_nonzero*(sizeof(double) + sizeof(int) + sizeof(int)), ios_base::cur);
+
+		//read col names
+		vector<string>* col_names = &var_names;
+		vector<string>* row_names = &real_names;
+		
+
+		for (int i_rec = 0; i_rec < n_col; ++i_rec)
+		{
+			in.read(col_name, 200);
+			string temp_col = string(col_name, 200);
+			pest_utils::strip_ip(temp_col);
+			pest_utils::upper_ip(temp_col);
+			col_names->push_back(temp_col);
+		}
+		//read row names
+		for (int i_rec = 0; i_rec < n_row; ++i_rec)
+		{
+			in.read(row_name, 200);
+			string temp_row = pest_utils::strip_cp(string(row_name, 200));
+			pest_utils::upper_ip(temp_row);
+			row_names->push_back(temp_row);
+		}
+
+		//make sure that var_names is compatible with names
+		if (var_names.size() != names.size())
+		{
+			set<string> vset(var_names.begin(), var_names.end());
+			set<string> nset(names.begin(), names.end());
+			vector<string> diff;
+			set_symmetric_difference(vset.begin(), vset.end(), nset.begin(), nset.end(), std::back_inserter(diff));
+			throw_ensemble_error("the following names are common between the var names in the binary file and the var names expected", diff);
+		}
+
+		//return to data section of file
+		in.seekg(begin_sen_pos, ios_base::beg);
+
+		reals.resize(n_row, n_col);
+		reals.setZero();
+		for (int i_rec = 0; i_rec < n_nonzero; ++i_rec)
+		{
+			in.read((char*)&(i), sizeof(i));
+			in.read((char*)&(j), sizeof(j));
+			in.read((char*)&(data), sizeof(data));
+			reals(i, j) = data;
+		}
+		in.close();
+		
 		set<string> vset(var_names.begin(), var_names.end());
 		set<string> nset(names.begin(), names.end());
 		vector<string> diff;
-		set_symmetric_difference(vset.begin(), vset.end(), nset.begin(), nset.end(),std::back_inserter(diff));
-		throw_ensemble_error("the following names are common between the var names in the binary file and the var names expected", diff);
+		set_symmetric_difference(vset.begin(), vset.end(), nset.begin(), nset.end(), std::back_inserter(diff));
+		if (diff.size() > 0)
+			throw_ensemble_error("the following names are common between the var names in the binary file and the var names expected", diff);
+		
+		map<string, int> header_info;
+		for (int i = 0; i < col_names->size(); i++)
+			header_info[col_names->at(i)] = i;
 	}
-
-	//return to sensitivity section of file
-	in.seekg(begin_sen_pos, ios_base::beg);
-
-	reals.resize(n_row, n_col);
-	reals.setZero();
-	for (int i_rec = 0; i_rec<n_nonzero; ++i_rec)
+	else
 	{
-		in.read((char*)&(n), sizeof(n));
-		--n;
-		in.read((char*)&(data), sizeof(data));
-		j = int(n / (n_row)); // column index
-		i = (n - n_row*j) % n_row;  //row index
-		reals(i, j) = data;
-	}
-	if (transposed)
-		reals.transposeInPlace();
-	in.close();
+		char col_name[12];
+		char row_name[20];
+		n_col = -n_col;
+		n_row = -n_row;
+		if ((n_col > 1e15) || (n_row > 1e15))
+			throw_ensemble_error("Ensemble::from_binary() n_col or n_row > 1e15, something is prob wrong");
+		in.read((char*)&n_nonzero, sizeof(n_nonzero));
 
-	map<string, int> header_info;
-	for (int i = 0; i < col_names->size(); i++)
-		header_info[col_names->at(i)] = i;
+		// record current position in file
+		streampos begin_sen_pos = in.tellg();
+
+		//advance to col names section
+		in.seekg(n_nonzero*(sizeof(double) + sizeof(int)), ios_base::cur);
+
+		//read col names
+		vector<string>* col_names = &var_names;
+		vector<string>* row_names = &real_names;
+		if (transposed)
+		{
+			col_names = &real_names;
+			row_names = &var_names;
+		}
+
+		for (int i_rec = 0; i_rec < n_col; ++i_rec)
+		{
+			in.read(col_name, 12);
+			string temp_col = string(col_name, 12);
+			pest_utils::strip_ip(temp_col);
+			pest_utils::upper_ip(temp_col);
+			col_names->push_back(temp_col);
+		}
+		//read row names
+		for (int i_rec = 0; i_rec < n_row; ++i_rec)
+		{
+			in.read(row_name, 20);
+			string temp_row = pest_utils::strip_cp(string(row_name, 20));
+			pest_utils::upper_ip(temp_row);
+			row_names->push_back(temp_row);
+		}
+
+		//make sure that var_names is compatible with names
+		if (var_names.size() != names.size())
+		{
+			set<string> vset(var_names.begin(), var_names.end());
+			set<string> nset(names.begin(), names.end());
+			vector<string> diff;
+			set_symmetric_difference(vset.begin(), vset.end(), nset.begin(), nset.end(), std::back_inserter(diff));
+			throw_ensemble_error("the following names are common between the var names in the binary file and the var names expected", diff);
+		}
+
+		//return to sensitivity section of file
+		in.seekg(begin_sen_pos, ios_base::beg);
+
+		reals.resize(n_row, n_col);
+		reals.setZero();
+		for (int i_rec = 0; i_rec < n_nonzero; ++i_rec)
+		{
+			in.read((char*)&(n), sizeof(n));
+			--n;
+			in.read((char*)&(data), sizeof(data));
+			j = int(n / (n_row)); // column index
+			i = (n - n_row * j) % n_row;  //row index
+			reals(i, j) = data;
+		}
+		if (transposed)
+			reals.transposeInPlace();
+		in.close();
+
+		map<string, int> header_info;
+		for (int i = 0; i < col_names->size(); i++)
+			header_info[col_names->at(i)] = i;
+	}
 	return header_info;
 
 }
@@ -1221,6 +1417,11 @@ void ParameterEnsemble::set_pest_scenario(Pest *_pest_scenario)
 	par_transform = pest_scenario_ptr->get_base_par_tran_seq();
 }
 
+
+void ParameterEnsemble::set_zeros()
+{
+	reals.setZero();
+}
 
 ParameterEnsemble ParameterEnsemble::zeros_like()
 {
@@ -1493,13 +1694,13 @@ void ParameterEnsemble::to_binary(string file_name)
 	int n;
 	int tmp;
 	double data;
-	char par_name[12];
-	char obs_name[20];
+	char par_name[200];
+	char obs_name[200];
 
 	// write header
-	tmp = -n_var;
+	tmp = n_var;
 	fout.write((char*)&tmp, sizeof(tmp));
-	tmp = -n_real;
+	tmp = n_real;
 	fout.write((char*)&tmp, sizeof(tmp));
 
 	//write number nonzero elements in jacobian (includes prior information)
@@ -1524,9 +1725,11 @@ void ParameterEnsemble::to_binary(string file_name)
 
 		for (int jcol = 0; jcol<n_var; ++jcol)
 		{
-			n = irow + 1 + (jcol * n_real);
-			data = pars[vnames[jcol]];
+			n = irow;
 			fout.write((char*) &(n), sizeof(n));
+			n = jcol;
+			fout.write((char*) &(n), sizeof(n));
+			data = pars[vnames[jcol]];
 			fout.write((char*) &(data), sizeof(data));
 		}
 		/*int jcol = n_var;
@@ -1543,8 +1746,8 @@ void ParameterEnsemble::to_binary(string file_name)
 	for (vector<string>::const_iterator b = vnames.begin(), e = vnames.end();
 		b != e; ++b) {
 		string l = pest_utils::lower_cp(*b);
-		pest_utils::string_to_fortran_char(l, par_name, 12);
-		fout.write(par_name, 12);
+		pest_utils::string_to_fortran_char(l, par_name, 200);
+		fout.write(par_name, 200);
 	}
 	/*for (auto fname : fixed_names)
 	{
@@ -1556,8 +1759,8 @@ void ParameterEnsemble::to_binary(string file_name)
 	for (vector<string>::const_iterator b = real_names.begin(), e = real_names.end();
 		b != e; ++b) {
 		string l = pest_utils::lower_cp(*b);
-		pest_utils::string_to_fortran_char(l, obs_name, 20);
-		fout.write(obs_name, 20);
+		pest_utils::string_to_fortran_char(l, obs_name, 200);
+		fout.write(obs_name, 200);
 	}
 	//save observation names (part 2 prior information)
 	fout.close();

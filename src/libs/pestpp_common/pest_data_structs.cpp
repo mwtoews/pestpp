@@ -385,7 +385,8 @@ void PestppOptions::parce_line(const string &line)
 		string org_value = strip_cp((*i)[2]);
 		upper_ip(key);
 		string value = upper_cp(org_value);
-		passed_args.insert(key);
+		if (value.size() > 0)
+			passed_args.insert(key);
 
 		if (key=="MAX_N_SUPER"){
 			convert_ip(value, max_n_super);
@@ -846,6 +847,22 @@ void PestppOptions::parce_line(const string &line)
 		else if (key == "IES_LOCALIZE_HOW")
 		{
 			convert_ip(value, ies_localize_how);
+		}
+		else if (key == "IES_NUM_THREADS")
+		{
+			convert_ip(value, ies_num_threads);
+		}
+		else if (key == "IES_DEBUG_FAIL_SUBSET")
+		{
+			transform(value.begin(), value.end(), value.begin(), ::tolower);
+			istringstream is(value);
+			is >> boolalpha >> ies_debug_fail_subset;
+		}
+		else if (key == "IES_DEBUG_FAIL_REMAINDER")
+		{
+			transform(value.begin(), value.end(), value.begin(), ::tolower);
+			istringstream is(value);
+			is >> boolalpha >> ies_debug_fail_remainder;
 		}
 		else {
 

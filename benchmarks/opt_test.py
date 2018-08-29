@@ -107,5 +107,5 @@ def run_supply2_test():
 
 
 if __name__ == "__main__":
-    # std_weights_test()
-    run_supply2_test()
+    std_weights_test()
+    #run_supply2_test()

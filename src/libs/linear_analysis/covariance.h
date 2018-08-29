@@ -48,6 +48,7 @@ public:
 	void to_ascii(const string &filename);
 	void from_ascii(const string &filename);
 	void to_binary(const string &filename);
+	void to_binary_new(const string &filename);
 	void from_binary(const string &filename);
 
 	void from_csv(const string &filename);

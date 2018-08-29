@@ -1,5 +1,8 @@
 #include <random>
+#include <map>
 #include <iomanip>
+#include <mutex>
+#include <thread>
 #include "Ensemble.h"
 #include "RestartController.h"
 #include "utilities.h"
@@ -99,18 +102,21 @@ PhiHandler::PhiHandler(Pest *_pest_scenario, FileManager *_file_manager,
 
 Eigen::MatrixXd PhiHandler::get_obs_resid(ObservationEnsemble &oe)
 {
-	Eigen::MatrixXd resid = oe.get_eigen(vector<string>(), oe_base->get_var_names()) -
+	vector<string> names = oe_base->get_var_names();
+	Eigen::MatrixXd resid = oe.get_eigen(vector<string>(),names) -
 		oe_base->get_eigen(oe.get_real_names(), vector<string>());
+	
 
-	apply_ineq_constraints(resid);
+	apply_ineq_constraints(resid,names);
 	return resid;
 }
 
 
 Eigen::MatrixXd PhiHandler::get_obs_resid_subset(ObservationEnsemble &oe)
 {
-
-	Eigen::MatrixXd resid = oe.get_eigen() - oe_base->get_eigen(oe.get_real_names(), oe.get_var_names());
+	vector<string> names = oe.get_var_names();
+	Eigen::MatrixXd resid = oe.get_eigen() - oe_base->get_eigen(oe.get_real_names(), names);
+	apply_ineq_constraints(resid, names);
 	return resid;
 }
 
@@ -139,7 +145,7 @@ Eigen::MatrixXd PhiHandler::get_actual_obs_resid(ObservationEnsemble &oe)
 	ovals.transposeInPlace();
 	for (int i = 0; i < resid.rows(); i++)
 		resid.row(i) = oe_vals.row(i) - ovals;
-	apply_ineq_constraints(resid);
+	apply_ineq_constraints(resid, act_obs_names);
 	return resid;
 }
 
@@ -351,39 +357,48 @@ string PhiHandler::get_summary_header()
 	return ss.str();
 }
 
-void PhiHandler::report()
+void PhiHandler::report(bool echo)
 {
 	ofstream &f = file_manager->rec_ofstream();
 	f << get_summary_header();
-	cout << get_summary_header();
+	if (echo)
+		cout << get_summary_header();
 	string s = get_summary_string(PhiHandler::phiType::COMPOSITE);
 	f << s;
-	cout << s;
+	if (echo)
+		cout << s;
 	s = get_summary_string(PhiHandler::phiType::MEAS);
 	f << s;
-	cout << s;
+	if (echo)
+		cout << s;
 	s = get_summary_string(PhiHandler::phiType::REGUL);
 	f << s;
-	cout << s;
+	if (echo)
+		cout << s;
 	s = get_summary_string(PhiHandler::phiType::ACTUAL);
 	f << s;
-	cout << s;
+	if (echo)
+		cout << s;
 	/*if (*reg_factor == 0.0)
 	{
 		f << "    (note: reg_factor is zero; regularization phi reported but not used)" << endl;
 		cout  << "    (note: reg_factor is zero; regularization phi reported but not used)" << endl;
 	}*/
 	f << "     current reg_factor: " << *reg_factor << endl;
-	cout << "     current reg_factor: " << *reg_factor << endl;
+	if (echo)
+		cout << "     current reg_factor: " << *reg_factor << endl;
 	if (*reg_factor != 0.0)
 	{
 
 		f << "     note: regularization phi reported above does not " << endl;
 		f << "           include the effects of reg_factor, " << endl;
 		f << "           but composite phi does." << endl;
-		cout << "     note: regularization phi reported above does not " << endl;
-		cout << "           include the effects of reg_factor, " << endl;
-		cout << "           but composite phi does." << endl;
+		if (echo)
+		{
+			cout << "     note: regularization phi reported above does not " << endl;
+			cout << "           include the effects of reg_factor, " << endl;
+			cout << "           but composite phi does." << endl;
+		}
 	}
 	f << endl << endl;
 	f.flush();
@@ -547,18 +562,20 @@ map<string, Eigen::VectorXd> PhiHandler::calc_regul(ParameterEnsemble & pe)
 }
 
 
-void PhiHandler::apply_ineq_constraints(Eigen::MatrixXd &resid)
+void PhiHandler::apply_ineq_constraints(Eigen::MatrixXd &resid, vector<string> &names)
 {
-	vector<string> names = oe_base->get_var_names();
-	vector<string> lt_names = get_lt_obs_names(), gt_names = get_gt_obs_names();
-	vector<string> act_obs_names = pest_scenario->get_ctl_ordered_nz_obs_names();
+	
+	//vector<string> names = oe_base->get_var_names();
+	//vector<string> lt_names = get_lt_obs_names(), gt_names = get_gt_obs_names();
+	//vector<string> act_obs_names = pest_scenario->get_ctl_ordered_nz_obs_names();
+	
 	assert(names.size() == resid.cols());
 
 	map<string, double> lt_vals,gt_vals;
 	Observations obs = pest_scenario->get_ctl_observations();
-	for (auto &n : lt_names)
+	for (auto &n : lt_obs_names)
 		lt_vals[n] = obs.get_rec(n);
-	for (auto &n : gt_names)
+	for (auto &n : gt_obs_names)
 		gt_vals[n] = obs.get_rec(n);
 	if ((lt_vals.size() == 0) && (gt_vals.size() == 0))
 		return;
@@ -640,6 +657,74 @@ map<string, double> PhiHandler::calc_composite(map<string, double> &_meas, map<s
 		}
 	}
 	return phi_map;
+}
+
+
+ParChangeSummarizer::ParChangeSummarizer(ParameterEnsemble *_base_pe_ptr, FileManager *_file_manager_ptr)
+	//base_pe_ptr(_base_pe), file_manager_ptr(_file_manager)
+{
+	base_pe_ptr = _base_pe_ptr;
+	file_manager_ptr = _file_manager_ptr;
+	init_moments = base_pe_ptr->get_moment_maps();
+	ParameterGroupInfo gi = base_pe_ptr->get_pest_scenario().get_base_group_info();
+	string group;
+	for (auto &n : base_pe_ptr->get_var_names())
+	{
+		group = gi.get_group_name(n);
+		if (pargp2par_map.find(group) == pargp2par_map.end())
+			pargp2par_map[group] = set<string>();	
+		pargp2par_map[group].emplace(n);
+	}
+}
+
+
+void ParChangeSummarizer::summarize(ParameterEnsemble &pe)
+{
+	
+	pair<map<string, double>, map<string, double>> moments = pe.get_moment_maps();
+	init_moments = base_pe_ptr->get_moment_maps(pe.get_real_names());
+	stringstream ss;
+	ofstream &frec = file_manager_ptr->rec_ofstream();
+	ss << endl << "   parameter group percent change summmary" << endl;
+	ss << "   (compared to the initial ensemble using active realizations)" << endl;
+	cout << ss.str();
+	frec << ss.str();
+	ss.str("");
+	ss << setw(15) << "group" << setw(15) << "mean change" << setw(15) << "std change" << endl;
+	cout << ss.str();
+	frec << ss.str();
+	double mean_diff = 0.0, std_diff = 0.0;
+	double dsize, value1, value2;
+	vector<string> grp_names = base_pe_ptr->get_pest_scenario().get_ctl_ordered_par_group_names();
+	for (auto &grp_name : grp_names)
+	{
+		mean_diff = 0.0, std_diff = 0.0;
+
+		for (auto & par_name : pargp2par_map[grp_name])
+		{
+			value1 = init_moments.first[par_name];
+			value2 = value1 - moments.first[par_name];
+			if ((value1 != 0.0) && (value2 != 0.0))
+				mean_diff += value2 / value1;
+			value1 = init_moments.second[par_name];
+			value2 = value1 - moments.second[par_name];
+			if ((value1 != 0.0) && (value2 != 0.0))
+				std_diff += value2 / value1;
+		}
+		dsize = double(init_moments.first.size());
+		if (mean_diff != 0.0)
+			mean_diff = mean_diff / dsize;
+		if (std_diff != 0.0)
+			std_diff = std_diff / dsize;
+		ss.str("");
+		ss << setw(15) << grp_name << setw(15) << mean_diff * 100.0 << setw(15) << std_diff * 100.0 << endl;
+		cout << ss.str();
+		frec << ss.str();
+
+	}
+	cout << endl;
+	frec << endl;
+
 }
 
 
@@ -994,7 +1079,7 @@ bool IterEnsembleSmoother::initialize_oe(Covariance &cov)
 //}
 
 template<typename T, typename A>
-void IterEnsembleSmoother::message(int level, const string &_message, vector<T, A> _extras)
+void IterEnsembleSmoother::message(int level, const string &_message, vector<T, A> _extras, bool echo)
 {
 	stringstream ss;
 	if (level == 0)
@@ -1011,7 +1096,7 @@ void IterEnsembleSmoother::message(int level, const string &_message, vector<T, 
 	}
 	if (level == 0)
 		ss << "  ---  ";
-	if ((verbose_level >= 2) || (level < 2))
+	if ((echo) && ((verbose_level >= 2) || (level < 2)))
 		cout << ss.str() << endl;
 	file_manager.rec_ofstream() <<ss.str() << endl;
 	performance_log->log_event(ss.str());
@@ -1123,6 +1208,15 @@ void IterEnsembleSmoother::sanity_checks()
 	{
 		warnings.push_back("not using prior scaling - this is really a dev option, you should always use prior scaling...");
 	}*/
+
+	if ((ppo->get_ies_num_threads() > 0) && (!use_localizer))
+	{
+		warnings.push_back("'ies_num_threads > 0 but no localization, resetting 'ies_num_threads' = 0");
+		ppo->set_ies_num_threads(-1);
+		num_threads = -1;
+	}
+
+
 
 	if (warnings.size() > 0)
 	{
@@ -1435,14 +1529,21 @@ void IterEnsembleSmoother::initialize()
 		message(0, "You are a god among mere mortals!");
 	}
 
-	use_localizer = localizer.initialize(performance_log);
-	if (use_localizer)
+	PestppOptions::SVD_PACK svd = ppo->get_svd_pack();
+	if (svd == PestppOptions::SVD_PACK::PROPACK)
 	{
-		ss.str("");
-		ss << "using localized solution with " << localizer.get_localizer_map().size() << " sequential upgrade steps";
-		message(1, ss.str());
-		ss.str("");
+		message(1, "using PROPACK for truncated svd solve");
 	}
+	else
+	{
+		message(1, "using REDSVD for truncated svd solve");
+	}
+	message(1, "maxsing:", pest_scenario.get_svd_info().maxsing);
+	message(1, "eigthresh: ", pest_scenario.get_svd_info().eigthresh);
+
+	use_localizer = localizer.initialize(performance_log);
+	num_threads = pest_scenario.get_pestpp_options().get_ies_num_threads();
+	
 	iter = 0;
 	//ofstream &frec = file_manager.rec_ofstream();
 	last_best_mean = 1.0E+30;
@@ -1517,6 +1618,25 @@ void IterEnsembleSmoother::initialize()
 	message(1, "max run fail: ", ppo->get_max_run_fail());
 
 	sanity_checks();
+
+	if (use_localizer)
+	{
+		ss.str("");
+		ss << "using localized solution with " << localizer.get_localizer_map().size() << " sequential upgrade steps";
+		message(1, ss.str());
+		ss.str("");
+		if (num_threads > 0)
+		{
+			ss.str("");
+			ss << "using multithreaded localization calculation with " << num_threads << " threads";
+			message(1, ss.str());
+
+		}
+		if (localizer.get_how() == Localizer::How::OBSERVATIONS)
+			message(1, "localizing by obseravtions");
+		else
+			message(1, "localizing by parameters");
+	}
 
 	bool echo = false;
 	if (verbose_level > 1)
@@ -1648,7 +1768,7 @@ void IterEnsembleSmoother::initialize()
 	}
 
 	//need this here for Am calcs...
-	message(1, "transforming parameter ensembles to numeric");
+	//message(1, "transforming parameter ensemble to numeric");
 	pe.transform_ip(ParameterEnsemble::transStatus::NUM);
 
 	if (pest_scenario.get_pestpp_options().get_ies_include_base())
@@ -1848,38 +1968,7 @@ void IterEnsembleSmoother::initialize()
 	if (!pest_scenario.get_pestpp_options().get_ies_use_approx())
 	{
 		message(1, "using full (MAP) update solution");
-		/*performance_log->log_event("calculating 'Am' matrix for full solution");
-		message(1, "forming Am matrix");
-		double scale = (1.0 / (sqrt(double(pe.shape().first - 1))));
-		Eigen::MatrixXd par_diff = scale * pe.get_eigen_mean_diff();
-		par_diff.transposeInPlace();
-		if (verbose_level > 1)
-		{
-			cout << "prior_par_diff: " << par_diff.rows() << ',' << par_diff.cols() << endl;
-			if (verbose_level > 2)
-				save_mat("prior_par_diff.dat", par_diff);
-		}
-
-		Eigen::MatrixXd ivec, upgrade_1, s, V, U, st;
-		SVD_REDSVD rsvd;
-		rsvd.set_performance_log(performance_log);
-
-		rsvd.solve_ip(par_diff, s, U, V, pest_scenario.get_svd_info().eigthresh, pest_scenario.get_svd_info().maxsing);
-		par_diff.resize(0, 0);
-		Eigen::MatrixXd temp = s.asDiagonal();
-		Eigen::MatrixXd temp2 = temp.inverse();
-		Am = U * temp;
-		if (verbose_level > 1)
-		{
-			cout << "Am:" << Am.rows() << ',' << Am.cols() << endl;
-			if (verbose_level > 2)
-			{
-				save_mat("am.dat", Am);
-				save_mat("am_u.dat", U);
-				save_mat("am_v.dat", V);
-				save_mat("am_s_inv.dat", temp2);
-			}
-		}*/
+	
 	}
 
 	last_best_mean = ph.get_mean(PhiHandler::phiType::COMPOSITE);
@@ -1893,6 +1982,9 @@ void IterEnsembleSmoother::initialize()
 
 	message(1, "current lambda:", last_best_lam);
 	message(0, "initialization complete");
+
+	pcs = ParChangeSummarizer(&pe_base, &file_manager);
+	
 }
 
 Eigen::MatrixXd IterEnsembleSmoother::get_Am(const vector<string> &real_names, const vector<string> &par_names)
@@ -1916,7 +2008,6 @@ Eigen::MatrixXd IterEnsembleSmoother::get_Am(const vector<string> &real_names, c
 	rsvd.solve_ip(par_diff, s, U, V, pest_scenario.get_svd_info().eigthresh, pest_scenario.get_svd_info().maxsing);
 	par_diff.resize(0, 0);
 	Eigen::MatrixXd temp = s.asDiagonal();
-	Eigen::MatrixXd temp2 = temp.inverse();
 	Eigen::MatrixXd Am = U * temp;
 	return Am;
 }
@@ -2154,6 +2245,7 @@ void IterEnsembleSmoother::iterate_2_solution()
 			last_best_std = ph.get_std(PhiHandler::phiType::COMPOSITE);
 			ph.report();
 			ph.write(iter, run_mgr_ptr->get_total_runs());
+			pcs.summarize(pe);
 			if (accept)
 				consec_bad_lambda_cycles = 0;
 			else
@@ -2228,312 +2320,837 @@ bool IterEnsembleSmoother::should_terminate()
 	return false;
 }
 
-ParameterEnsemble IterEnsembleSmoother::calc_upgrade(vector<string> &obs_names, vector<string> &par_names,double cur_lam, int num_reals, string local_col_name)
+//ParameterEnsemble IterEnsembleSmoother::calc_upgrade(vector<string> &obs_names, vector<string> &par_names,double cur_lam, int num_reals)
+//{
+//
+//	int maxsing = pest_scenario.get_svd_info().maxsing;
+//	double eigthresh = pest_scenario.get_svd_info().eigthresh;
+//
+//	ObservationEnsemble oe_upgrade(oe.get_pest_scenario_ptr(), oe.get_eigen(vector<string>(), obs_names, false), oe.get_real_names(), obs_names);
+//	ParameterEnsemble pe_upgrade(pe.get_pest_scenario_ptr(), pe.get_eigen(vector<string>(), par_names, false), pe.get_real_names(), par_names);
+//	pe_upgrade.set_trans_status(ParameterEnsemble::transStatus::NUM);
+//	//todo: pre-extract the diagonal of the prior, invert and store in faster lookup container
+//	Eigen::DiagonalMatrix<double, Eigen::Dynamic> parcov_inv;// = parcov.get(par_names).inv().e_ptr()->toDense().cwiseSqrt().asDiagonal();
+//	if (parcov.isdiagonal())
+//		parcov_inv = parcov.get(par_names).inv().get_matrix().diagonal().cwiseSqrt().asDiagonal();
+//	else
+//	{
+//		message(2, "first extracting diagonal from prior parameter covariance matrix");
+//		Covariance parcov_diag;
+//		Covariance parcov_local = parcov.get(par_names, false);
+//		parcov_diag.from_diagonal(parcov_local);
+//		parcov_inv = parcov_diag.inv().get_matrix().diagonal().cwiseSqrt().asDiagonal();
+//	}
+//
+//	//todo: pre-extract the weights and store in a faster lookup container
+//	Eigen::VectorXd weight_vec(obs_names.size());
+//	for (int i = 0; i < obs_names.size(); i++)
+//	{
+//		weight_vec[i] = pest_scenario.get_observation_info_ptr()->get_weight(obs_names[i]);
+//	}
+//	Eigen::DiagonalMatrix<double, Eigen::Dynamic> weights = weight_vec.asDiagonal();
+//
+//	//this one is prob gonna be a big bottle neck. Does each thread get a copy of oe_base?    
+//	performance_log->log_event("calculate residual matrix");
+//	//oe_base var_names should be ordered by act_obs_names, so only reorder real_names
+//	//oe should only include active realizations, so only reorder var_names
+//	message(2, "calculating residual matrix");
+//	//Eigen::MatrixXd scaled_residual = obscov_inv_sqrt * ph.get_obs_resid(oe).transpose();
+//	Eigen::MatrixXd scaled_residual = weights * ph.get_obs_resid_subset(oe_upgrade).transpose();
+//	if (verbose_level > 1)
+//	{
+//		cout << "scaled_residual: " << scaled_residual.rows() << ',' << scaled_residual.cols() << endl;
+//		if (verbose_level > 2)
+//		{
+//			save_mat("scaled_residual.dat", scaled_residual);
+//			Eigen::MatrixXd residual = ph.get_obs_resid_subset(oe_upgrade).transpose();
+//			save_mat("residual.dat", residual);
+//		}
+//	}
+//
+//	Eigen::MatrixXd loc(oe_upgrade.shape().second, oe_upgrade.shape().first);
+//	
+//	Eigen::MatrixXd scaled_par_resid;
+//	Eigen::MatrixXd Am;
+//	if ((!pest_scenario.get_pestpp_options().get_ies_use_approx()) && (iter > 1))
+//	{
+//		Am = get_Am(pe.get_real_names(), par_names);
+//		message(2, "calculating parameter correction (full solution, MAP)");
+//		
+//
+//		if (pest_scenario.get_pestpp_options().get_ies_use_prior_scaling())
+//		{
+//			//throw runtime_error("parcov scaling not implemented for localization");
+//			scaled_par_resid = parcov_inv * ph.get_par_resid(pe_upgrade).transpose();
+//		}
+//		else
+//		{
+//			scaled_par_resid = ph.get_par_resid_subset(pe_upgrade).transpose();
+//		}
+//	}
+//
+//	stringstream ss;
+//
+//	double scale = (1.0 / (sqrt(double(oe_upgrade.shape().first - 1))));
+//	
+//	
+//	message(2, "calculating obs diff matrix");
+//	Eigen::MatrixXd diff = oe_upgrade.get_eigen_mean_diff().transpose();
+//		
+//	Eigen::MatrixXd obs_diff = scale * (weights * diff);
+//	if (verbose_level > 1)
+//	{
+//		cout << "obs_diff: " << obs_diff.rows() << ',' << obs_diff.cols() << endl;
+//		if (verbose_level > 2)
+//			save_mat("obs_diff.dat", obs_diff);
+//	}
+//
+//	performance_log->log_event("calculate scaled par diff");
+//	message(2, "calculating par diff matrix");
+//	//pe_upgrade.transform_ip(ParameterEnsemble::transStatus::NUM);
+//	diff = pe_upgrade.get_eigen_mean_diff().transpose();
+//	Eigen::MatrixXd par_diff;
+//	if (pest_scenario.get_pestpp_options().get_ies_use_prior_scaling())
+//	{
+//		//throw runtime_error("parcov scale not implemented for localization");
+//		//cout << "...applying prior par cov scaling to par diff matrix" << endl;
+//		par_diff = scale * parcov_inv * diff;
+//	}
+//	else
+//		par_diff = scale * diff;
+//
+//	if (verbose_level > 1)
+//	{
+//		cout << "par_diff:" << par_diff.rows() << ',' << par_diff.cols() << endl;
+//		if (verbose_level > 2)
+//		{
+//			save_mat("scaled_par_diff.dat", par_diff);
+//			save_mat("par_diff.dat", diff);
+//		}
+//	}
+//	//performance_log->log_event("SVD of obs diff");
+//	message(2, "calculating SVD of obs diff matrix");
+//	Eigen::MatrixXd ivec, upgrade_1, s, V, Ut;
+//
+//
+//	if (pest_scenario.get_pestpp_options().get_svd_pack() == PestppOptions::SVD_PACK::PROPACK)
+//	{
+//		SVD_PROPACK rsvd;
+//		rsvd.set_performance_log(performance_log);
+//		rsvd.solve_ip(obs_diff, s, Ut, V, eigthresh, maxsing);
+//	}
+//	else
+//	{
+//		SVD_REDSVD rsvd;
+//		rsvd.set_performance_log(performance_log);
+//		rsvd.solve_ip(obs_diff, s, Ut, V, eigthresh, maxsing);
+//	}
+//
+//	Ut.transposeInPlace();
+//	obs_diff.resize(0, 0);
+//
+//	Eigen::MatrixXd s2 = s.cwiseProduct(s);
+//	if (verbose_level > 1)
+//	{
+//		cout << "s2: " << s2.rows() << ',' << s2.cols() << endl;
+//		cout << "Ut: " << Ut.rows() << ',' << Ut.cols() << endl;
+//		cout << "V:" << V.rows() << ',' << V.cols() << endl;
+//		if (verbose_level > 2)
+//		{
+//			save_mat("ut.dat", Ut);
+//			save_mat("s2.dat", s2);
+//		}
+//	}
+//
+//	message(2, "calculating scaled identity matrix");
+//	ivec = ((Eigen::VectorXd::Ones(s2.size()) * (cur_lam + 1.0)) + s2).asDiagonal().inverse();
+//	if (verbose_level > 1)
+//	{
+//		cout << "ivec:" << ivec.rows() << ',' << ivec.cols() << endl;
+//		if (verbose_level > 2)
+//			save_mat("ivec.dat", ivec);
+//	}
+//
+//	message(2, "forming X1");
+//	Eigen::MatrixXd X1 = Ut * scaled_residual;
+//	if (verbose_level > 1)
+//	{
+//		cout << "X1: " << X1.rows() << ',' << X1.cols() << endl;
+//		if (verbose_level > 2)
+//			save_mat("X1.dat", X1);
+//	}
+//	//scaled_residual.resize(0, 0);
+//	//Ut.resize(0, 0);
+//
+//	message(2, "forming X2");
+//	Eigen::MatrixXd X2 = ivec * X1;
+//	if (verbose_level > 1)
+//	{
+//		cout << "X2: " << X2.rows() << ',' << X2.cols() << endl;
+//		if (verbose_level > 2)
+//			save_mat("X2.dat", X2);
+//	}
+//	X1.resize(0, 0);
+//
+//	message(2, "forming X3");
+//	Eigen::MatrixXd X3 = V * s.asDiagonal() * X2;
+//	if (verbose_level > 1)
+//	{
+//		cout << "X3: " << X3.rows() << ',' << X3.cols() << endl;
+//		if (verbose_level > 2)
+//			save_mat("X3.dat", X3);
+//	}
+//	X2.resize(0, 0);
+//
+//	message(2, "forming upgrade_1");
+//	if (pest_scenario.get_pestpp_options().get_ies_use_prior_scaling())
+//	{
+//		upgrade_1 = -1.0 * parcov_inv * par_diff * X3;
+//	}
+//	else
+//	{
+//		upgrade_1 = -1.0 * par_diff * X3;
+//	}
+//	upgrade_1.transposeInPlace();
+//	if (verbose_level > 1)
+//	{
+//		cout << "upgrade_1:" << upgrade_1.rows() << ',' << upgrade_1.cols() << endl;
+//		if (verbose_level > 2)
+//			save_mat("upgrade_1.dat", upgrade_1);
+//	}
+//	X3.resize(0, 0);
+//
+//
+//	Eigen::MatrixXd upgrade_2;
+//	if ((!pest_scenario.get_pestpp_options().get_ies_use_approx()) && (iter > 1))
+//	{
+//		
+//
+//		message(2, "forming X4");
+//		if (verbose_level > 1)
+//		{
+//			cout << "scaled_par_resid: " << scaled_par_resid.rows() << ',' << scaled_par_resid.cols() << endl;
+//			if (verbose_level > 2)
+//				save_mat("scaled_par_resid.dat", scaled_par_resid);
+//		}
+//		
+//		Eigen::MatrixXd x4 = Am.transpose() * scaled_par_resid;
+//		if (verbose_level > 1)
+//		{
+//			cout << "x4: " << x4.rows() << ',' << x4.cols() << endl;
+//			if (verbose_level > 2)
+//				save_mat("x4.dat", x4);
+//		}
+//
+//		//performance_log->log_event("forming x5");
+//		message(2, "forming X5");
+//		Eigen::MatrixXd x5 = Am * x4;
+//		if (verbose_level > 1)
+//		{
+//			cout << "x5: " << x5.rows() << ',' << x5.cols() << endl;
+//			if (verbose_level > 2)
+//				save_mat("x5.dat", x5);
+//		}
+//
+//		message(2, "forming X6");
+//		performance_log->log_event("forming x6");
+//		Eigen::MatrixXd x6 = par_diff.transpose() * x5;
+//		if (verbose_level > 1)
+//		{
+//			cout << "x6: " << x6.rows() << ',' << x6.cols() << endl;
+//			if (verbose_level > 2)
+//				save_mat("x6.dat", x6);
+//		}
+//
+//		message(2, "forming X7");
+//		//performance_log->log_event("forming x7");
+//		if (verbose_level > 1)
+//		{
+//			cout << "V: " << V.rows() << ',' << V.cols() << endl;
+//			if (verbose_level > 2)
+//				save_mat("V.dat", V);
+//		}
+//		Eigen::MatrixXd x7 = V * ivec *V.transpose() * x6;
+//		if (verbose_level > 1)
+//		{
+//			cout << "x7: " << x7.rows() << ',' << x7.cols() << endl;
+//			if (verbose_level > 2)
+//				save_mat("x7.dat", x7);
+//		}
+//
+//		//performance_log->log_event("forming upgrade_2");
+//		message(2, "forming upgrade_2");
+//
+//		if (pest_scenario.get_pestpp_options().get_ies_use_prior_scaling())
+//		{
+//			upgrade_2 = -1.0 * parcov_inv * par_diff * x7;
+//		}
+//		else
+//		{
+//			upgrade_2 = -1.0 * (par_diff * x7);
+//		}
+//
+//		if (verbose_level > 1)
+//		{
+//			cout << "upgrade_2: " << upgrade_2.rows() << ',' << upgrade_2.cols() << endl;
+//			if (verbose_level > 2)
+//				save_mat("upgrade_2", upgrade_2);
+//		}
+//		upgrade_1 = upgrade_1 + upgrade_2.transpose();
+//		//pe_lam.set_eigen(*pe_lam.get_eigen_ptr() + upgrade_2.transpose());
+//
+//	}
+//	//ParameterEnsemble upgrade_pe(&pest_scenario);
+//	//upgrade_pe.from_eigen_mat(upgrade_1,pe.get_real_names(), par_names);
+//	pe_upgrade.set_eigen(upgrade_1);
+//	return pe_upgrade;
+//}
+
+
+LocalUpgradeThread::LocalUpgradeThread(map<string, Eigen::VectorXd> &_par_resid_map, map<string, Eigen::VectorXd> &_par_diff_map,
+	map<string, Eigen::VectorXd> &_obs_resid_map, map<string, Eigen::VectorXd> &_obs_diff_map,
+	Localizer &_localizer, map<string, double> &_parcov_inv_map,map<string, double> &_weight_map, 
+	ParameterEnsemble &_pe_upgrade, map<string,pair<vector<string>,vector<string>>> &_cases,
+	map<string, Eigen::VectorXd> &_Am_map): par_resid_map(_par_resid_map),
+	par_diff_map(_par_diff_map), obs_resid_map(_obs_resid_map),obs_diff_map(_obs_diff_map),localizer(_localizer),
+	pe_upgrade(_pe_upgrade),cases(_cases), parcov_inv_map(_parcov_inv_map), weight_map(_weight_map), Am_map(_Am_map)
 {
-
-	//---------
-	//not thread safe section
-	//---------
-
-	int maxsing = pest_scenario.get_svd_info().maxsing;
-	double eigthresh = pest_scenario.get_svd_info().eigthresh;
-
-	ObservationEnsemble oe_upgrade(oe.get_pest_scenario_ptr(), oe.get_eigen(vector<string>(), obs_names, false), oe.get_real_names(), obs_names);
-	ParameterEnsemble pe_upgrade(pe.get_pest_scenario_ptr(), pe.get_eigen(vector<string>(), par_names, false), pe.get_real_names(), par_names);
-
-	//todo: pre-extract the diagonal of the prior, invert and store in faster lookup container
-	Eigen::DiagonalMatrix<double, Eigen::Dynamic> parcov_inv;// = parcov.get(par_names).inv().e_ptr()->toDense().cwiseSqrt().asDiagonal();
-	if (parcov.isdiagonal())
-		parcov_inv = parcov.get(par_names).inv().get_matrix().diagonal().cwiseSqrt().asDiagonal();
-	else
+	
+	parcov_inv_map = _parcov_inv_map;
+	weight_map = _weight_map;
+	count = 0;
+	for (auto &c : cases)
 	{
-		message(2, "first extracting diagonal from prior parameter covariance matrix");
-		Covariance parcov_diag;
-		Covariance parcov_local = parcov.get(par_names, false);
-		parcov_diag.from_diagonal(parcov_local);
-		parcov_inv = parcov_diag.inv().get_matrix().diagonal().cwiseSqrt().asDiagonal();
+		keys.push_back(c.first);
 	}
 
-	//todo: pre-extract the weights and store in a faster lookup container
-	Eigen::VectorXd weight_vec(obs_names.size());
+}
+
+
+void LocalUpgradeThread::work(int thread_id, int iter, double cur_lam)
+{
+	class local_utils
+	{
+	public:
+		static Eigen::DiagonalMatrix<double, Eigen::Dynamic> get_matrix_from_map(vector<string> &names, map<string, double> &dmap)
+		{
+			Eigen::VectorXd vec(names.size());
+			int i = 0;
+			for (auto name : names)
+			{
+				vec[i] = dmap.at(name);
+				++i;
+			}
+			Eigen::DiagonalMatrix<double, Eigen::Dynamic> m = vec.asDiagonal();
+			return m;
+		}
+		static Eigen::MatrixXd get_matrix_from_map(int num_reals, vector<string> &names, map<string, Eigen::VectorXd> &emap)
+		{
+			Eigen::MatrixXd mat(num_reals, names.size());
+			mat.setZero();
+
+			for (int j = 0; j < names.size(); j++)
+			{
+				mat.col(j) = emap[names[j]];
+			}
+
+			return mat;
+		}
+		static void save_mat(int verbose_level, int tid, int iter, string prefix, Eigen::MatrixXd &mat)
+		{
+			if (verbose_level < 2)
+				return;
+			cout << "thread: " << tid << ", " << prefix << " rows:cols" << mat.rows() << ":" << mat.cols() << endl;
+			if (verbose_level < 3)
+				return;
+			stringstream ss;
+			ss << "thread:"<< tid << ".iter:" << iter << "." << prefix;
+			try
+			{
+				ofstream f(ss.str());
+				f << mat << endl;
+				f.close();
+			}
+			catch (...)
+			{
+				cout << "error saving matrix", ss.str();
+			}
+		}
+	};
+
+	unique_lock<mutex> ctrl_guard(ctrl_lock, defer_lock);
+	int maxsing, num_reals, verbose_level;
+	double eigthresh;
+	bool use_approx;
+	bool use_prior_scaling;
+	bool use_localizer = false;
+	bool loc_by_obs = true;
+
+	while (true)
+	{
+		if (ctrl_guard.try_lock())
+		{
+			maxsing = pe_upgrade.get_pest_scenario_ptr()->get_svd_info().maxsing;
+			eigthresh = pe_upgrade.get_pest_scenario_ptr()->get_svd_info().eigthresh;
+			use_approx = pe_upgrade.get_pest_scenario_ptr()->get_pestpp_options().get_ies_use_approx();
+			use_prior_scaling = pe_upgrade.get_pest_scenario_ptr()->get_pestpp_options().get_ies_use_prior_scaling();
+			num_reals = pe_upgrade.shape().first;
+			verbose_level = pe_upgrade.get_pest_scenario_ptr()->get_pestpp_options().get_ies_verbose_level();
+			ctrl_guard.unlock();
+			break;
+		}
+	}
+
+	Eigen::MatrixXd par_resid, par_diff, Am;
+	Eigen::MatrixXd obs_resid, obs_diff, loc;
+	Eigen::DiagonalMatrix<double, Eigen::Dynamic> weights, parcov_inv;
+	vector<string> par_names, obs_names;
+	while (true)
+	{
+		unique_lock<mutex> next_guard(next_lock, defer_lock);
+		par_names.clear();
+		obs_names.clear();
+		//the end condition
+		while (true)
+		{	
+			if (next_guard.try_lock())
+			{
+				if (count == keys.size())
+				{
+					return;
+				}
+				string k = keys[count];
+				pair<vector<string>, vector<string>> p = cases.at(k);
+				par_names = p.second;
+				obs_names = p.first;
+				if (localizer.get_use())
+				{
+					if ((par_names.size() == 1) && (k == par_names[0]))
+						use_localizer = true;
+					else if ((obs_names.size() == 1) && (k == obs_names[0]))
+					{
+						use_localizer = true;
+						loc_by_obs = false;
+					}
+				}
+				count++;
+				next_guard.unlock();
+				break;
+			}
+		}
+		
+		par_resid.resize(0, 0);
+		par_diff.resize(0, 0);
+		obs_resid.resize(0, 0);
+		obs_diff.resize(0, 0);
+		loc.resize(0, 0);
+		Am.resize(0, 0);
+		weights.resize(0);
+		parcov_inv.resize(0);
+		Am.resize(0, 0);
+
+		unique_lock<mutex> obs_diff_guard(obs_diff_lock, defer_lock);
+		unique_lock<mutex> obs_resid_guard(obs_resid_lock, defer_lock);
+		unique_lock<mutex> par_diff_guard(par_diff_lock, defer_lock);
+		unique_lock<mutex> par_resid_guard(par_resid_lock, defer_lock);
+		unique_lock<mutex> loc_guard(loc_lock, defer_lock);
+		unique_lock<mutex> weight_guard(weight_lock, defer_lock);
+		unique_lock<mutex> parcov_guard(parcov_lock, defer_lock);
+		unique_lock<mutex> am_guard(am_lock, defer_lock);
+
+		bool use_propack = false;
+
+		while (true)
+		{
+			if (((use_approx) || (par_resid.rows() > 0)) &&
+				(weights.size() > 0) &&
+				(parcov_inv.size() > 0) &&
+				(par_diff.rows() > 0) &&
+				(obs_resid.rows() > 0) &&
+				(obs_diff.rows() > 0) &&
+				((!use_localizer) || (loc.rows() > 0)) && 
+				((use_approx) || (Am.rows() > 0)))
+				break;
+			if ((use_localizer) && (loc.rows() == 0) && (loc_guard.try_lock()))
+			{
+				if (loc_by_obs)
+					loc = localizer.get_localizing_obs_hadamard_matrix(num_reals, par_names[0], obs_names);
+				else
+					loc = localizer.get_localizing_par_hadamard_matrix(num_reals, obs_names[0], par_names);
+				loc_guard.unlock();
+			}
+			if ((obs_diff.rows() == 0) && (obs_diff_guard.try_lock()))
+			{
+				//piggy back here for thread safety
+				if (pe_upgrade.get_pest_scenario_ptr()->get_pestpp_options().get_svd_pack() == PestppOptions::SVD_PACK::PROPACK)
+					use_propack = true;
+				obs_diff = local_utils::get_matrix_from_map(num_reals, obs_names, obs_diff_map);
+				obs_diff_guard.unlock();
+			}
+			if ((obs_resid.rows() == 0) && (obs_resid_guard.try_lock()))
+			{
+				obs_resid = local_utils::get_matrix_from_map(num_reals, obs_names, obs_resid_map);
+				obs_resid_guard.unlock();
+			}
+			if ((par_diff.rows() == 0) && (par_diff_guard.try_lock()))
+			{
+				par_diff = local_utils::get_matrix_from_map(num_reals, par_names, par_diff_map);
+				par_diff_guard.unlock();
+			}
+			if ((par_resid.rows() == 0) && (par_resid_guard.try_lock()))
+			{
+				par_resid = local_utils::get_matrix_from_map(num_reals, par_names, par_resid_map);
+				par_resid_guard.unlock();
+			}
+			if ((weights.rows() == 0) && (weight_guard.try_lock()))
+			{
+				weights = local_utils::get_matrix_from_map(obs_names, weight_map);
+				weight_guard.unlock();
+			}
+			if ((parcov_inv.rows() == 0) && (parcov_guard.try_lock()))
+			{
+				parcov_inv = local_utils::get_matrix_from_map(par_names, parcov_inv_map);
+				parcov_guard.unlock();
+			}
+			if ((!use_approx) && (Am.rows() == 0) && (am_guard.try_lock()))
+			{
+				//Am = local_utils::get_matrix_from_map(num_reals, par_names, Am_map).transpose();
+				int am_cols = Am_map[par_names[0]].size();
+				Am.resize(par_names.size(),am_cols);
+				Am.setZero();
+
+				for (int j = 0; j < par_names.size(); j++)
+				{
+					Am.row(j) = Am_map[par_names[j]];
+				}
+				am_guard.unlock();
+			}
+		}
+		
+		par_diff.transposeInPlace();
+		obs_diff.transposeInPlace();
+		obs_resid.transposeInPlace();
+		par_resid.transposeInPlace();
+
+		local_utils::save_mat(verbose_level, thread_id, iter, "obs_resid", obs_resid);
+		Eigen::MatrixXd scaled_residual = weights * obs_resid;
+		
+		
+
+		local_utils::save_mat(verbose_level, thread_id, iter, "par_resid", par_resid);
+		Eigen::MatrixXd scaled_par_resid;
+		if ((!use_approx) && (iter > 1))
+		{
+			if (use_prior_scaling)
+			{
+				scaled_par_resid = parcov_inv * par_resid;
+			}
+			else
+			{
+				scaled_par_resid = par_resid;
+			}
+		}
+
+		stringstream ss;
+
+		double scale = (1.0 / (sqrt(double(num_reals - 1))));
+		local_utils::save_mat(verbose_level, thread_id, iter, "obs_diff", obs_diff);
+		if (use_localizer)
+		{
+			if (loc_by_obs)
+				obs_diff = obs_diff.cwiseProduct(loc);
+			else
+				par_diff = par_diff.cwiseProduct(loc);
+
+		}
+		
+		obs_diff = scale * (weights * obs_diff);
+		local_utils::save_mat(verbose_level, thread_id, iter, "par_diff", par_diff);
+		if (use_prior_scaling)
+			par_diff = scale * parcov_inv * par_diff;
+		else
+			par_diff = scale * par_diff;
+
+
+		//performance_log->log_event("SVD of obs diff");
+		Eigen::MatrixXd ivec, upgrade_1, s, V, Ut;
+		
+		if (!use_propack)
+		{
+			SVD_REDSVD rsvd;
+			rsvd.solve_ip(obs_diff, s, Ut, V, eigthresh, maxsing);
+		}
+		else
+		{
+			SVD_PROPACK psvd;
+			psvd.solve_ip(obs_diff, s, Ut, V, eigthresh, maxsing);
+		}
+
+		Ut.transposeInPlace();
+		obs_diff.resize(0, 0);
+		local_utils::save_mat(verbose_level, thread_id, iter, "Ut", Ut);
+		local_utils::save_mat(verbose_level, thread_id, iter, "s", s);
+		local_utils::save_mat(verbose_level, thread_id, iter, "V", V);
+
+		Eigen::MatrixXd s2 = s.cwiseProduct(s);
+
+		ivec = ((Eigen::VectorXd::Ones(s2.size()) * (cur_lam + 1.0)) + s2).asDiagonal().inverse();
+		local_utils::save_mat(verbose_level, thread_id, iter, "ivec", ivec);
+		Eigen::MatrixXd X1 = Ut * scaled_residual;
+		local_utils::save_mat(verbose_level, thread_id, iter, "X1", X1);
+		Eigen::MatrixXd X2 = ivec * X1;
+		X1.resize(0, 0);
+
+		local_utils::save_mat(verbose_level, thread_id, iter, "X2", X2);
+		Eigen::MatrixXd X3 = V * s.asDiagonal() * X2;
+		X2.resize(0, 0);
+
+		local_utils::save_mat(verbose_level, thread_id, iter, "X3", X3);
+		if (use_prior_scaling)
+		{
+			upgrade_1 = -1.0 * parcov_inv * par_diff * X3;
+		}
+		else
+		{
+			upgrade_1 = -1.0 * par_diff * X3;
+		}
+		upgrade_1.transposeInPlace();
+		local_utils::save_mat(verbose_level, thread_id, iter, "upgrade_1",upgrade_1);
+		X3.resize(0, 0);
+
+
+		Eigen::MatrixXd upgrade_2;
+		if ((!use_approx) && (iter > 1))
+		{
+			local_utils::save_mat(verbose_level, thread_id, iter, "Am",Am);
+			Eigen::MatrixXd x4 = Am.transpose() * scaled_par_resid;
+			local_utils::save_mat(verbose_level, thread_id, iter, "X4", x4);
+			
+			par_resid.resize(0, 0);
+
+			Eigen::MatrixXd x5 = Am * x4;
+			x4.resize(0, 0);
+			Am.resize(0, 0);
+
+			local_utils::save_mat(verbose_level, thread_id, iter, "X5", x5);
+			Eigen::MatrixXd x6 = par_diff.transpose() * x5;
+			x5.resize(0, 0);
+
+			local_utils::save_mat(verbose_level, thread_id, iter, "X6", x6);
+			Eigen::MatrixXd x7 = V * ivec *V.transpose() * x6;
+			x6.resize(0, 0);
+
+			if (use_prior_scaling)
+			{
+				upgrade_2 = -1.0 * parcov_inv * par_diff * x7;
+			}
+			else
+			{
+				upgrade_2 = -1.0 * (par_diff * x7);
+			}
+			x7.resize(0, 0);
+
+			upgrade_1 = upgrade_1 + upgrade_2.transpose();
+			local_utils::save_mat(verbose_level, thread_id, iter, "upgrade_2", upgrade_2);
+			upgrade_2.resize(0, 0);
+
+		}
+		
+		unique_lock<mutex> put_guard(put_lock, defer_lock);
+		while (true)
+		{
+			if (put_guard.try_lock())
+			{
+				pe_upgrade.add_2_cols_ip(par_names, upgrade_1);
+				put_guard.unlock();
+				break;
+			}
+		}
+	}
+
+}
+
+
+
+void upgrade_thread_function(int id, int iter,double cur_lam, LocalUpgradeThread &worker, exception_ptr &eptr)
+{
+	try
+	{
+		worker.work(id, iter, cur_lam);
+	}
+	catch (...)
+	{
+		eptr = current_exception();
+	}
+	
+	return;
+}
+
+
+ParameterEnsemble IterEnsembleSmoother::calc_localized_upgrade_threaded(double cur_lam)
+{
+	stringstream ss;
+	
+	ObservationEnsemble oe_upgrade(oe.get_pest_scenario_ptr(), oe.get_eigen(vector<string>(), act_obs_names, false), oe.get_real_names(), act_obs_names);
+	ParameterEnsemble pe_upgrade(pe.get_pest_scenario_ptr(), pe.get_eigen(vector<string>(), act_par_names, false), pe.get_real_names(), act_par_names);
+	
+	//this copy of the localizer map will be consumed by the worker threads
+	map<string, pair<vector<string>, vector<string>>> loc_map;
+	if (use_localizer)
+		loc_map = localizer.get_localizer_map();
+	else
+	{
+		pair<vector<string>, vector<string>> p(act_obs_names, act_par_names);
+		loc_map["all"] = p;
+	}
+	
+	//prep the fast look par cov info
+	message(2, "preparing fast-look containers for threaded localization solve");
+	map<string, double> parcov_inv_map;
+	Eigen::VectorXd parcov_inv;// = parcov.get(par_names).inv().e_ptr()->toDense().cwiseSqrt().asDiagonal();
+	if (parcov.isdiagonal())
+		parcov_inv = parcov.inv().get_matrix().diagonal().cwiseSqrt();
+	else
+	{
+		message(2, "extracting diagonal from prior parameter covariance matrix");
+		Covariance parcov_diag;
+		parcov_diag.from_diagonal(parcov);
+		parcov_inv = parcov_diag.inv().get_matrix().diagonal().cwiseSqrt();
+	}
+	vector<string> par_names = pe_upgrade.get_var_names();
+	for (int i = 0; i < parcov_inv.size(); i++)
+		parcov_inv_map[par_names[i]] = parcov_inv[i];
+
+
+	//prep the fast lookup weights info
+	map<string, double> weight_map;
+	vector<string> obs_names = oe_upgrade.get_var_names();
+	double w;
 	for (int i = 0; i < obs_names.size(); i++)
 	{
-		weight_vec[i] = pest_scenario.get_observation_info_ptr()->get_weight(obs_names[i]);
+		w = pest_scenario.get_observation_info_ptr()->get_weight(obs_names[i]);
+		//don't want to filter on weight here - might be changing weights, etc...
+		//if (w == 0.0)
+		//	continue;
+		weight_map[obs_names[i]] = w;
 	}
-	Eigen::DiagonalMatrix<double, Eigen::Dynamic> weights = weight_vec.asDiagonal();
-
-	//this one is prob gonna be a big bottle neck. Does each thread get a copy of oe_base?    
-	performance_log->log_event("calculate residual matrix");
-	//oe_base var_names should be ordered by act_obs_names, so only reorder real_names
-	//oe should only include active realizations, so only reorder var_names
-	message(2, "calculating residual matrix");
-	//Eigen::MatrixXd scaled_residual = obscov_inv_sqrt * ph.get_obs_resid(oe).transpose();
-	Eigen::MatrixXd scaled_residual = weights * ph.get_obs_resid_subset(oe_upgrade).transpose();
-	if (verbose_level > 1)
-	{
-		cout << "scaled_residual: " << scaled_residual.rows() << ',' << scaled_residual.cols() << endl;
-		if (verbose_level > 2)
-		{
-			save_mat("scaled_residual.dat", scaled_residual);
-			Eigen::MatrixXd residual = ph.get_obs_resid_subset(oe_upgrade).transpose();
-			save_mat("residual.dat", residual);
-		}
-	}
-
-	Eigen::MatrixXd loc(oe_upgrade.shape().second, oe_upgrade.shape().first);
-	if (local_col_name.size() > 0)
-	{
-		
-		message(2, "getting localizing hadamard matrix");
-		loc = localizer.get_localizing_hadamard_matrix(oe_upgrade.shape().first, local_col_name, obs_names);
-		if (verbose_level > 1)
-		{
-			cout << "loc:" << loc.rows() << ',' << loc.cols() << endl;
-			if (verbose_level > 2)
-				save_mat("local_mat.dat", loc);
-		}
-		
-	}
-
-	Eigen::MatrixXd scaled_par_resid;
-	Eigen::MatrixXd Am;
-	if ((!pest_scenario.get_pestpp_options().get_ies_use_approx()) && (iter > 1))
-	{
-		Am = get_Am(pe.get_real_names(), par_names);
-		message(2, "calculating parameter correction (full solution, MAP)");
-		performance_log->log_event("forming scaled par resid");
-
-		if (pest_scenario.get_pestpp_options().get_ies_use_prior_scaling())
-		{
-			//throw runtime_error("parcov scaling not implemented for localization");
-			scaled_par_resid = parcov_inv * ph.get_par_resid(pe_upgrade).transpose();
-		}
-		else
-		{
-			scaled_par_resid = ph.get_par_resid_subset(pe_upgrade).transpose();
-		}
-	}
-
-	//----------
-	// threads safe
-	//----------
-
-
-	stringstream ss;
-
-	double scale = (1.0 / (sqrt(double(oe_upgrade.shape().first - 1))));
 	
+	//prep a fast look for obs, par and resid matrices - stored as column vectors in a map
+	map<string, Eigen::VectorXd> par_resid_map, obs_resid_map, Am_map;
+	map<string, Eigen::VectorXd> par_diff_map, obs_diff_map;
+	Eigen::MatrixXd mat = ph.get_obs_resid_subset(oe_upgrade);
+	for (int i = 0; i < obs_names.size(); i++)
+	{
+		obs_resid_map[obs_names[i]] = mat.col(i);
+	}
+	mat = oe_upgrade.get_eigen_mean_diff();
+	for (int i = 0; i < obs_names.size(); i++)
+	{
+		obs_diff_map[obs_names[i]] = mat.col(i);
+	}
+	mat = ph.get_par_resid_subset(pe_upgrade);
+	for (int i = 0; i <par_names.size(); i++)
+	{
+		par_resid_map[par_names[i]] = mat.col(i);
+	}	
+	mat = pe_upgrade.get_eigen_mean_diff();
+	for (int i = 0; i <par_names.size(); i++)
+	{
+		par_diff_map[par_names[i]] = mat.col(i);
+	}
+	if (!pest_scenario.get_pestpp_options().get_ies_use_approx())
+	{
+		mat = get_Am(pe_upgrade.get_real_names(), pe_upgrade.get_var_names());
+		for (int i = 0; i < par_names.size(); i++)
+		{
+			Am_map[par_names[i]] = mat.row(i);
+		}
+	}
+	mat.resize(0, 0);
+	// clear the upgrade ensemble
+	pe_upgrade.set_zeros();
 	
-	message(2, "calculating obs diff matrix");
-	Eigen::MatrixXd diff = oe_upgrade.get_eigen_mean_diff().transpose();
-	if (local_col_name.size() > 0)
-		diff = diff.cwiseProduct(loc);
-		
-	Eigen::MatrixXd obs_diff = scale * (weights * diff);
-	if (verbose_level > 1)
+	LocalUpgradeThread worker(par_resid_map, par_diff_map, obs_resid_map, obs_diff_map,
+		localizer, parcov_inv_map, weight_map, pe_upgrade, loc_map, Am_map);
+
+	//if ((num_threads < 1) || (loc_map.size() == 1))
+	if (num_threads < 1)
 	{
-		cout << "obs_diff: " << obs_diff.rows() << ',' << obs_diff.cols() << endl;
-		if (verbose_level > 2)
-			save_mat("obs_diff.dat", obs_diff);
-	}
-
-	performance_log->log_event("calculate scaled par diff");
-	message(2, "calculating par diff matrix");
-	pe.transform_ip(ParameterEnsemble::transStatus::NUM);
-	diff = pe_upgrade.get_eigen_mean_diff().transpose();
-	Eigen::MatrixXd par_diff;
-	if (pest_scenario.get_pestpp_options().get_ies_use_prior_scaling())
-	{
-		//throw runtime_error("parcov scale not implemented for localization");
-		cout << "...applying prior par cov scaling to par diff matrix" << endl;
-		par_diff = scale * parcov_inv * diff;
-	}
-	else
-		par_diff = scale * diff;
-
-	if (verbose_level > 1)
-	{
-		cout << "par_diff:" << par_diff.rows() << ',' << par_diff.cols() << endl;
-		if (verbose_level > 2)
-		{
-			save_mat("scaled_par_diff.dat", par_diff);
-			save_mat("par_diff.dat", diff);
-		}
-	}
-	//performance_log->log_event("SVD of obs diff");
-	message(2, "calculating SVD of obs diff matrix");
-	Eigen::MatrixXd ivec, upgrade_1, s, V, Ut;
-
-
-	//SVD_REDSVD rsvd;
-	SVD_REDSVD rsvd;
-	rsvd.set_performance_log(performance_log);
-	rsvd.solve_ip(obs_diff, s, Ut, V, eigthresh, maxsing);
-
-	//SVD_EIGEN esvd;
-	//esvd.set_performance_log(performance_log);
-	//esvd.solve_ip(obs_diff, s, Ut, V, pest_scenario.get_svd_info().eigthresh, pest_scenario.get_svd_info().maxsing);
-
-	Ut.transposeInPlace();
-	obs_diff.resize(0, 0);
-
-	Eigen::MatrixXd s2 = s.cwiseProduct(s);
-	if (verbose_level > 1)
-	{
-		cout << "s2: " << s2.rows() << ',' << s2.cols() << endl;
-		cout << "Ut: " << Ut.rows() << ',' << Ut.cols() << endl;
-		cout << "V:" << V.rows() << ',' << V.cols() << endl;
-		if (verbose_level > 2)
-		{
-			save_mat("ut.dat", Ut);
-			save_mat("s2.dat", s2);
-		}
-	}
-
-	message(2, "calculating scaled identity matrix");
-	ivec = ((Eigen::VectorXd::Ones(s2.size()) * (cur_lam + 1.0)) + s2).asDiagonal().inverse();
-	if (verbose_level > 1)
-	{
-		cout << "ivec:" << ivec.rows() << ',' << ivec.cols() << endl;
-		if (verbose_level > 2)
-			save_mat("ivec.dat", ivec);
-	}
-
-	message(2, "forming X1");
-	Eigen::MatrixXd X1 = Ut * scaled_residual;
-	if (verbose_level > 1)
-	{
-		cout << "X1: " << X1.rows() << ',' << X1.cols() << endl;
-		if (verbose_level > 2)
-			save_mat("X1.dat", X1);
-	}
-	//scaled_residual.resize(0, 0);
-	//Ut.resize(0, 0);
-
-	message(2, "forming X2");
-	Eigen::MatrixXd X2 = ivec * X1;
-	if (verbose_level > 1)
-	{
-		cout << "X2: " << X2.rows() << ',' << X2.cols() << endl;
-		if (verbose_level > 2)
-			save_mat("X2.dat", X2);
-	}
-	X1.resize(0, 0);
-
-	message(2, "forming X3");
-	Eigen::MatrixXd X3 = V * s.asDiagonal() * X2;
-	if (verbose_level > 1)
-	{
-		cout << "X3: " << X3.rows() << ',' << X3.cols() << endl;
-		if (verbose_level > 2)
-			save_mat("X3.dat", X3);
-	}
-	X2.resize(0, 0);
-
-	message(2, "forming upgrade_1");
-	if (pest_scenario.get_pestpp_options().get_ies_use_prior_scaling())
-	{
-		upgrade_1 = -1.0 * parcov_inv * par_diff * X3;
+		worker.work(0, iter, cur_lam);
 	}
 	else
 	{
-		upgrade_1 = -1.0 * par_diff * X3;
-	}
-	upgrade_1.transposeInPlace();
-	if (verbose_level > 1)
-	{
-		cout << "upgrade_1:" << upgrade_1.rows() << ',' << upgrade_1.cols() << endl;
-		if (verbose_level > 2)
-			save_mat("upgrade_1.dat", upgrade_1);
-	}
-	X3.resize(0, 0);
-
-
-	Eigen::MatrixXd upgrade_2;
-	if ((!pest_scenario.get_pestpp_options().get_ies_use_approx()) && (iter > 1))
-	{
+		Eigen::setNbThreads(1);
+		vector<thread> threads;
+		vector<exception_ptr> exception_ptrs;
+		message(2, "launching threads");
 		
-
-		message(2, "forming X4");
-		if (verbose_level > 1)
+		for (int i = 0; i < num_threads; i++)
 		{
-			cout << "scaled_par_resid: " << scaled_par_resid.rows() << ',' << scaled_par_resid.cols() << endl;
-			if (verbose_level > 2)
-				save_mat("scaled_par_resid.dat", scaled_par_resid);
-		}
-		
-		Eigen::MatrixXd x4 = Am.transpose() * scaled_par_resid;
-		if (verbose_level > 1)
-		{
-			cout << "x4: " << x4.rows() << ',' << x4.cols() << endl;
-			if (verbose_level > 2)
-				save_mat("x4.dat", x4);
+			exception_ptrs.push_back(exception_ptr());
 		}
 
-		//performance_log->log_event("forming x5");
-		message(2, "forming X5");
-		Eigen::MatrixXd x5 = Am * x4;
-		if (verbose_level > 1)
+		for (int i = 0; i < num_threads; i++)
 		{
-			cout << "x5: " << x5.rows() << ',' << x5.cols() << endl;
-			if (verbose_level > 2)
-				save_mat("x5.dat", x5);
+			//threads.push_back(thread(&LocalUpgradeThread::work, &worker, i, iter, cur_lam));
+			
+			threads.push_back(thread(upgrade_thread_function, i, iter, cur_lam, std::ref(worker),std::ref( exception_ptrs[i])));
+			
 		}
-
-		message(2, "forming X6");
-		performance_log->log_event("forming x6");
-		Eigen::MatrixXd x6 = par_diff.transpose() * x5;
-		if (verbose_level > 1)
+		message(2, "waiting to join threads");
+		//for (auto &t : threads)
+		//	t.join();
+		for (int i = 0; i < num_threads; ++i)
 		{
-			cout << "x6: " << x6.rows() << ',' << x6.cols() << endl;
-			if (verbose_level > 2)
-				save_mat("x6.dat", x6);
+			if (exception_ptrs[i])
+			{
+				try
+				{
+					rethrow_exception(exception_ptrs[i]);
+				}
+				catch (const std::exception& e)
+				{
+					ss.str("");
+					ss << "thread " << i << "raised an exception: " << e.what();
+					throw runtime_error(ss.str());
+				}
+			}
+			threads[i].join();
 		}
-
-		message(2, "forming X7");
-		//performance_log->log_event("forming x7");
-		if (verbose_level > 1)
-		{
-			cout << "V: " << V.rows() << ',' << V.cols() << endl;
-			if (verbose_level > 2)
-				save_mat("V.dat", V);
-		}
-		Eigen::MatrixXd x7 = V * ivec *V.transpose() * x6;
-		if (verbose_level > 1)
-		{
-			cout << "x7: " << x7.rows() << ',' << x7.cols() << endl;
-			if (verbose_level > 2)
-				save_mat("x7.dat", x7);
-		}
-
-		//performance_log->log_event("forming upgrade_2");
-		message(2, "forming upgrade_2");
-
-		if (pest_scenario.get_pestpp_options().get_ies_use_prior_scaling())
-		{
-			upgrade_2 = -1.0 * parcov_inv * par_diff * x7;
-		}
-		else
-		{
-			upgrade_2 = -1.0 * (par_diff * x7);
-		}
-
-		if (verbose_level > 1)
-		{
-			cout << "upgrade_2: " << upgrade_2.rows() << ',' << upgrade_2.cols() << endl;
-			if (verbose_level > 2)
-				save_mat("upgrade_2", upgrade_2);
-		}
-		upgrade_1 = upgrade_1 + upgrade_2.transpose();
-		//pe_lam.set_eigen(*pe_lam.get_eigen_ptr() + upgrade_2.transpose());
-
+		message(2, "threaded localized upgrade calculation done");
 	}
-	//ParameterEnsemble upgrade_pe(&pest_scenario);
-	//upgrade_pe.from_eigen_mat(upgrade_1,pe.get_real_names(), par_names);
-	pe_upgrade.set_eigen(upgrade_1);
+	
 	return pe_upgrade;
 }
 
+
+//ParameterEnsemble IterEnsembleSmoother::calc_localized_upgrade(double cur_lam)
+//{
+//	stringstream ss;
+//	int i = 0;
+//	int lsize = localizer.get_localizer_map().size();
+//	ParameterEnsemble pe_upgrade = pe.zeros_like();
+//	for (auto local_pair : localizer.get_localizer_map())
+//	{
+//		ss.str("");
+//		ss << "localized upgrade part " << i + 1 << " of " << lsize;
+//		message(2, ss.str());
+//		ParameterEnsemble pe_local;
+//		if (localizer.get_how() == Localizer::How::PARAMETERS)
+//		{
+//			pe_local = calc_upgrade(local_pair.second.first, local_pair.second.second, cur_lam, pe.shape().first, local_pair.first);
+//		}
+//		else
+//		{
+//			pe_local = calc_upgrade(local_pair.second.first, local_pair.second.second, cur_lam, pe.shape().first);
+//		}
+//
+//		pe_upgrade.add_2_cols_ip(pe_local);
+//		i++;
+//	}
+//	return pe_upgrade;
+//
+//}
 
 bool IterEnsembleSmoother::solve_new()
 {
@@ -2545,7 +3162,7 @@ bool IterEnsembleSmoother::solve_new()
 		message(1, "need at least ", error_min_reals);
 		throw_ies_error(string("too few active realizations, cannot continue"));
 	}
-	if (pe.shape().first <= warn_min_reals)
+	if (pe.shape().first < warn_min_reals)
 	{
 		ss.str("");
 		ss << "WARNING: less than " << warn_min_reals << " active realizations...might not be enough";
@@ -2579,34 +3196,9 @@ bool IterEnsembleSmoother::solve_new()
 		double cur_lam = last_best_lam * lam_mult;
 		ss << "starting calcs for lambda" << cur_lam;
 		message(1, "starting lambda calcs for lambda", cur_lam);
-		ParameterEnsemble pe_upgrade = pe.zeros_like();
-		//pe_upgrade.to_csv("test.csv");
-		if (use_localizer)
-		{
-			int i = 0;
-			int lsize = localizer.get_localizer_map().size();
-			for (auto local_pair : localizer.get_localizer_map())
-			{
-				ss.str("");
-				ss << "localized upgrade part " << i + 1 << " of " << lsize;
-				message(2, ss.str());
-				ParameterEnsemble pe_local;
-				if (localizer.get_how() == Localizer::How::PARAMETERS)
-				{
-					pe_local = calc_upgrade(local_pair.second.first, local_pair.second.second, cur_lam, pe.shape().first, local_pair.first);
-				}
-				else
-				{
-					pe_local = calc_upgrade(local_pair.second.first, local_pair.second.second, cur_lam, pe.shape().first);
-				}
-				
-				pe_upgrade.add_2_cols_ip(pe_local);
-				i++;
-			}
-			
-		}
-		else
-			pe_upgrade = calc_upgrade(act_obs_names, act_par_names, cur_lam, pe.shape().first);
+		ParameterEnsemble pe_upgrade;
+		
+		pe_upgrade = calc_localized_upgrade_threaded(cur_lam);
 
 		for (auto sf : pest_scenario.get_pestpp_options().get_lambda_scale_vec())
 		{
@@ -2655,6 +3247,9 @@ bool IterEnsembleSmoother::solve_new()
 	message(1, "last stdev: ", last_best_std);
 
 	ObservationEnsemble oe_lam_best;
+	bool echo = false;
+	if (verbose_level > 1)
+		echo = true;
 	for (int i = 0; i<pe_lams.size(); i++)
 	{
 		if (oe_lams[i].shape().first == 0)
@@ -2666,9 +3261,12 @@ bool IterEnsembleSmoother::solve_new()
 			message(1, "all realizations dropped as 'bad' for lambda, scale fac ", vals);
 			continue;
 		}
-		message(0, "phi summary for lambda, scale fac:", vals);
+		
 		ph.update(oe_lams[i], pe_lams[i]);
-		ph.report();
+		
+		message(0, "phi summary for lambda, scale fac:", vals,echo);
+		ph.report(echo);
+		
 		mean = ph.get_mean(PhiHandler::phiType::COMPOSITE);
 		std = ph.get_std(PhiHandler::phiType::COMPOSITE);
 		if (mean < best_mean)
@@ -2734,6 +3332,9 @@ bool IterEnsembleSmoother::solve_new()
 				pe_keep_names.push_back(pe_names[i]);
 				oe_keep_names.push_back(oe_names[i]);
 			}
+		message(0, "phi summary for best lambda, scale fac: ", vector<double>({ lam_vals[best_idx],scale_vals[best_idx] }));
+		ph.update(oe_lams[best_idx], pe_lams[best_idx]);
+		ph.report();
 		message(0, "running remaining realizations for best lambda, scale:", vector<double>({ lam_vals[best_idx],scale_vals[best_idx] }));
 
 		//pe_keep_names and oe_keep_names are names of the remaining reals to eval
@@ -2746,7 +3347,8 @@ bool IterEnsembleSmoother::solve_new()
 		vector<int> fails = run_ensemble(remaining_pe_lam, remaining_oe_lam);
 
 		//for testing
-		//fails.push_back(0);
+		if (pest_scenario.get_pestpp_options().get_ies_debug_fail_remainder())
+			fails.push_back(0);
 
 		//if any of the remaining runs failed
 		if (fails.size() == org_pe_idxs.size())
@@ -2757,7 +3359,7 @@ bool IterEnsembleSmoother::solve_new()
 			vector<string> new_pe_idxs, new_oe_idxs;
 			vector<int>::iterator start = fails.begin(), end = fails.end();
 			stringstream ss;
-			ss << "the following par:obs realizations failed during evaluation of the remaining ensemble";
+			ss << "the following par:obs realizations failed during evaluation of the remaining ensemble: ";
 			for (int i = 0; i < org_pe_idxs.size(); i++)
 				if (find(start, end, i) == end)
 				{
@@ -2844,514 +3446,7 @@ bool IterEnsembleSmoother::solve_new()
 	return true;
 }
 
-//
-//bool IterEnsembleSmoother::solve_old()
-//{
-//	stringstream ss;
-//	ofstream &frec = file_manager.rec_ofstream();
-//	if (pe.shape().first <= error_min_reals)
-//	{
-//		message(0, "too few active realizations:", oe.shape().first);
-//		message(1, "need at least ", error_min_reals);
-//		throw_ies_error(string("too few active realizations, cannot continue"));
-//	}
-//	if (pe.shape().first <= warn_min_reals)
-//	{
-//		ss.str("");
-//		ss << "WARNING: less than " << warn_min_reals << " active realizations...might not be enough";
-//		string s = ss.str();
-//		message(1, s);
-//	}
-//
-//	if ((use_subset) && (subset_size > pe.shape().first))
-//	{
-//		ss.str("");
-//		ss << "++ies_subset size (" << subset_size << ") greater than ensemble size (" << pe.shape().first << ")";
-//		frec << "  ---  " << ss.str() << endl;
-//		cout << "  ---  " << ss.str() << endl;
-//		frec << "  ...reducing ++ies_subset_size to " << pe.shape().first << endl;
-//		cout << "  ...reducing ++ies_subset_size to " << pe.shape().first << endl;
-//		subset_size = pe.shape().first;
-//	}
-//
-//	double scale = (1.0 / (sqrt(double(oe.shape().first - 1))));
-//
-//	performance_log->log_event("calculate residual matrix");
-//	//oe_base var_names should be ordered by act_obs_names, so only reorder real_names
-//	//oe should only include active realizations, so only reorder var_names
-//	message(1, "calculating residual matrix");
-//	Eigen::MatrixXd scaled_residual = obscov_inv_sqrt * ph.get_obs_resid(oe).transpose();
-//	if (verbose_level > 1)
-//	{
-//		cout << "scaled_residual: " << scaled_residual.rows() << ',' << scaled_residual.cols() << endl;
-//		if (verbose_level > 2)
-//		{
-//			save_mat("scaled_residual.dat", scaled_residual);
-//			Eigen::MatrixXd residual = ph.get_obs_resid(oe).transpose();
-//			save_mat("residual.dat",residual);
-//		}
-//	}
-//
-//	performance_log->log_event("calculate scaled obs diff");
-//	message(1, "calculating obs diff matrix");
-//	Eigen::MatrixXd diff = oe.get_eigen_mean_diff(vector<string>(),act_obs_names).transpose();
-//	Eigen::MatrixXd obs_diff = scale * (obscov_inv_sqrt * diff);
-//	if (verbose_level > 1)
-//	{
-//		cout << "obs_diff: " << obs_diff.rows() << ',' << obs_diff.cols() << endl;
-//		if (verbose_level > 2)
-//			save_mat("obs_diff.dat", obs_diff);
-//	}
-//
-//	performance_log->log_event("calculate scaled par diff");
-//	message(1, "calculating par diff matrix");
-//	pe.transform_ip(ParameterEnsemble::transStatus::NUM);
-//	diff = pe.get_eigen_mean_diff(vector<string>(), act_par_names).transpose();
-//	Eigen::MatrixXd par_diff;
-//	if (pest_scenario.get_pestpp_options().get_ies_use_prior_scaling())
-//	{
-//		cout << "...applying prior par cov scaling to par diff matrix" << endl;
-//		par_diff = scale * parcov_inv_sqrt * diff;
-//	}
-//	else
-//		par_diff = scale * diff;
-//
-//	if (verbose_level > 1)
-//	{
-//		cout << "par_diff:" << par_diff.rows() << ',' << par_diff.cols() << endl;
-//		if (verbose_level > 2)
-//		{
-//			save_mat("scaled_par_diff.dat", par_diff);
-//			save_mat("par_diff.dat", diff);
-//		}
-//	}
-//
-//	performance_log->log_event("SVD of obs diff");
-//	message(1, "calculating SVD of obs diff matrix");
-//	Eigen::MatrixXd ivec, upgrade_1, s,V,Ut;
-//
-//	SVD_REDSVD rsvd;
-//	rsvd.set_performance_log(performance_log);
-//	rsvd.solve_ip(obs_diff, s, Ut, V, pest_scenario.get_svd_info().eigthresh, pest_scenario.get_svd_info().maxsing);
-//
-//	//SVD_EIGEN esvd;
-//	//esvd.set_performance_log(performance_log);
-//	//esvd.solve_ip(obs_diff, s, Ut, V, pest_scenario.get_svd_info().eigthresh, pest_scenario.get_svd_info().maxsing);
-//
-//	Ut.transposeInPlace();
-//	obs_diff.resize(0, 0);
-//
-//	Eigen::MatrixXd s2 = s.cwiseProduct(s);
-//	if (verbose_level > 1)
-//	{
-//		cout << "s2: " << s2.rows() << ',' << s2.cols() << endl;
-//		cout << "Ut: " << Ut.rows() << ',' << Ut.cols() << endl;
-//		cout << "V:" << V.rows() << ',' << V.cols() << endl;
-//		if (verbose_level > 2)
-//		{
-//			save_mat("ut.dat", Ut);
-//			save_mat("s2.dat", s2);
-//		}
-//	}
-//
-//	vector<ParameterEnsemble> pe_lams;
-//	vector<double> lam_vals, scale_vals;
-//	for (auto &lam_mult : lam_mults)
-//	{
-//		ss.str("");
-//		double cur_lam = last_best_lam * lam_mult;
-//		ss << "starting calcs for lambda" << cur_lam;
-//		message(0, "starting lambda calcs for lambda", cur_lam);
-//
-//		performance_log->log_event(ss.str());
-//		performance_log->log_event("form scaled identity matrix");
-//		message(1, "calculating scaled identity matrix");
-//		ivec = ((Eigen::VectorXd::Ones(s2.size()) * (cur_lam + 1.0)) + s2).asDiagonal().inverse();
-//		if (verbose_level > 1)
-//		{
-//			cout << "ivec:" << ivec.rows() << ',' << ivec.cols() << endl;
-//			if (verbose_level > 2)
-//				save_mat("ivec.dat", ivec);
-//		}
-//
-//
-//		message(1, "forming X1");
-//		Eigen::MatrixXd X1 = Ut * scaled_residual;
-//		if (verbose_level > 1)
-//		{
-//			cout << "X1: " << X1.rows() << ',' << X1.cols() << endl;
-//			if (verbose_level > 2)
-//				save_mat("X1.dat", X1);
-//		}
-//		//scaled_residual.resize(0, 0);
-//		//Ut.resize(0, 0);
-//
-//		message(1, "forming X2");
-//		Eigen::MatrixXd X2 = ivec * X1;
-//		if (verbose_level > 1)
-//		{
-//			cout << "X2: " << X2.rows() << ',' << X2.cols() << endl;
-//			if (verbose_level > 2)
-//				save_mat("X2.dat", X2);
-//		}
-//		X1.resize(0, 0);
-//
-//		message(1, "forming X3");
-//		Eigen::MatrixXd X3 = V * s.asDiagonal() * X2;
-//		if (verbose_level > 1)
-//		{
-//			cout << "X3: " << X3.rows() << ',' << X3.cols() << endl;
-//			if (verbose_level > 2)
-//				save_mat("X3.dat", X3);
-//		}
-//		X2.resize(0, 0);
-//
-//		message(1, "forming upgrade_1");
-//		if (pest_scenario.get_pestpp_options().get_ies_use_prior_scaling())
-//		{
-//			upgrade_1 = -1.0 * parcov_inv_sqrt * par_diff * X3;
-//		}
-//		else
-//		{
-//			upgrade_1 = -1.0 * par_diff * X3;
-//		}
-//		upgrade_1.transposeInPlace();
-//		if (verbose_level > 1)
-//		{
-//			cout << "upgrade_1:" << upgrade_1.rows() << ',' << upgrade_1.cols() << endl;
-//			if (verbose_level > 2)
-//				save_mat("upgrade_1.dat", upgrade_1);
-//		}
-//		X3.resize(0,0);
-//
-//		/*ParameterEnsemble pe_lam = pe;
-//		pe_lam.set_eigen(*pe_lam.get_eigen_ptr() + upgrade_1);
-//		upgrade_1.resize(0, 0);*/
-//
-//		Eigen::MatrixXd upgrade_2;
-//		if ((!pest_scenario.get_pestpp_options().get_ies_use_approx()) && (iter > 1))
-//		{
-//			performance_log->log_event("calculating parameter correction (full solution)");
-//			message(1, "calculating parameter correction (full solution, MAP)");
-//			performance_log->log_event("forming scaled par resid");
-//			Eigen::MatrixXd scaled_par_resid;
-//			if (pest_scenario.get_pestpp_options().get_ies_use_prior_scaling())
-//			{
-//				scaled_par_resid = parcov_inv_sqrt *  ph.get_par_resid(pe).transpose();
-//			}
-//			else
-//			{
-//				scaled_par_resid = ph.get_par_resid(pe).transpose();
-//			}
-//
-//			//scaled_par_resid.transposeInPlace();
-//
-//			performance_log->log_event("forming x4");
-//			message(1, "forming X4");
-//			if (verbose_level > 1)
-//			{
-//				cout << "scaled_par_resid: " << scaled_par_resid.rows() << ',' << scaled_par_resid.cols() << endl;
-//				if (verbose_level > 2)
-//					save_mat("scaled_par_resid.dat", scaled_par_resid);
-//			}
-//			Eigen::MatrixXd x4 = Am.transpose() * scaled_par_resid;
-//			if (verbose_level > 1)
-//			{
-//				cout << "x4: " << x4.rows() << ',' << x4.cols() << endl;
-//				if (verbose_level > 2)
-//					save_mat("x4.dat", x4);
-//			}
-//
-//			performance_log->log_event("forming x5");
-//			message(1, "forming X5");
-//			Eigen::MatrixXd x5 = Am * x4;
-//			if (verbose_level > 1)
-//			{
-//				cout << "x5: " << x5.rows() << ',' << x5.cols() << endl;
-//				if (verbose_level > 2)
-//					save_mat("x5.dat", x5);
-//			}
-//
-//			message(1, "forming X6");
-//			performance_log->log_event("forming x6");
-//			Eigen::MatrixXd x6 = par_diff.transpose() * x5;
-//			if (verbose_level > 1)
-//			{
-//				cout << "x6: " << x6.rows() << ',' << x6.cols() << endl;
-//				if (verbose_level > 2)
-//					save_mat("x6.dat", x6);
-//			}
-//
-//			message(1, "forming X7");
-//			performance_log->log_event("forming x7");
-//			if (verbose_level > 1)
-//			{
-//				cout << "V: " << V.rows() << ',' << V.cols() << endl;
-//				if (verbose_level > 2)
-//					save_mat("V.dat", V);
-//			}
-//			Eigen::MatrixXd x7 = V * ivec *V.transpose() * x6;
-//			if (verbose_level > 1)
-//			{
-//				cout << "x7: " << x7.rows() << ',' << x7.cols() << endl;
-//				if (verbose_level > 2)
-//					save_mat("x7.dat", x7);
-//			}
-//
-//			performance_log->log_event("forming upgrade_2");
-//			message(1, "forming upgrade_2");
-//
-//			if (pest_scenario.get_pestpp_options().get_ies_use_prior_scaling())
-//			{
-//				upgrade_2 = -1.0 * parcov_inv_sqrt * par_diff * x7;
-//			}
-//			else
-//			{
-//				upgrade_2 = -1.0 * (par_diff * x7);
-//			}
-//
-//			if (verbose_level > 1)
-//			{
-//				cout << "upgrade_2: " << upgrade_2.rows() << ',' << upgrade_2.cols() << endl;
-//				if (verbose_level > 2)
-//					save_mat("upgrade_2", upgrade_2);
-//			}
-//
-//			//pe_lam.set_eigen(*pe_lam.get_eigen_ptr() + upgrade_2.transpose());
-//		}
-//
-//		for (auto sf : pest_scenario.get_pestpp_options().get_lambda_scale_vec())
-//		{
-//
-//			ParameterEnsemble pe_lam_scale = pe;
-//			if (upgrade_2.rows() > 0)
-//				upgrade_1 = upgrade_1 + upgrade_2.transpose();
-//			pe_lam_scale.set_eigen(*pe_lam_scale.get_eigen_ptr() + (upgrade_1 * sf));
-//			if (pest_scenario.get_pestpp_options().get_ies_enforce_bounds())
-//				pe_lam_scale.enforce_bounds();
-//			pe_lams.push_back(pe_lam_scale);
-//			lam_vals.push_back(cur_lam);
-//			scale_vals.push_back(sf);
-//			if (!pest_scenario.get_pestpp_options().get_ies_save_lambda_en())
-//				continue;
-//			ss.str("");
-//			ss << file_manager.get_base_filename() << "." << iter << "." << cur_lam << ".lambda." << sf << ".scale.par";
-//
-//			if (pest_scenario.get_pestpp_options().get_ies_save_binary())
-//			{
-//				ss << ".jcb";
-//				pe_lam_scale.to_binary(ss.str());
-//			}
-//			else
-//			{
-//				ss << ".csv";
-//				pe_lam_scale.to_csv(ss.str());
-//			}
-//			frec << "lambda, scale value " << cur_lam << ',' << sf << " pars saved to " << ss.str() << endl;
-//
-//		}
-//
-//
-//		ss.str("");
-//		message(1, "finished calcs for lambda:", cur_lam);
-//
-//	}
-//	//return;
-//	vector<map<int, int>> real_run_ids_lams;
-//	int best_idx = -1;
-//	double best_mean = 1.0e+30, best_std = 1.0e+30;
-//	double mean, std;
-//
-//	message(0, "running lambda ensembles");
-//	vector<ObservationEnsemble> oe_lams = run_lambda_ensembles(pe_lams, lam_vals,scale_vals);
-//
-//	message(0, "evaluting lambda ensembles");
-//	message(1, "last mean: ", last_best_mean);
-//	message(1, "last stdev: ", last_best_std);
-//
-//	ObservationEnsemble oe_lam_best;
-//	for (int i=0;i<pe_lams.size();i++)
-//	{
-//		//for testing...
-//		//pest_scenario.get_pestpp_options_ptr()->set_ies_bad_phi(0.0);
-//		//if all runs failed...
-//		if (oe_lams[i].shape().first == 0)
-//			continue;
-//		vector<double> vals({ lam_vals[i],scale_vals[i] });
-//		drop_bad_phi(pe_lams[i], oe_lams[i]);
-//		if (oe_lams[i].shape().first == 0)
-//		{
-//			message(1, "all realizations dropped as 'bad' for lambda, scale fac ",vals);
-//			continue;
-//		}
-//		message(0, "phi summary for lambda, scale fac:", vals);
-//		ph.update(oe_lams[i], pe_lams[i]);
-//		ph.report();
-//		mean = ph.get_mean(PhiHandler::phiType::COMPOSITE);
-//		std = ph.get_std(PhiHandler::phiType::COMPOSITE);
-//		if (mean < best_mean)
-//		{
-//			oe_lam_best = oe_lams[i];
-//			best_mean = mean;
-//			best_std = std;
-//			best_idx = i;
-//		}
-//	}
-//	if (best_idx == -1)
-//	{
-//		message(0, "WARNING:  unsuccessful lambda testing, resetting lambda to 10000.0");
-//		last_best_lam = 10000.0;
-//		return false;
-//
-//	}
-//	double acc_fac = pest_scenario.get_pestpp_options().get_ies_accept_phi_fac();
-//	double lam_inc = pest_scenario.get_pestpp_options().get_ies_lambda_inc_fac();
-//	double lam_dec = pest_scenario.get_pestpp_options().get_ies_lambda_dec_fac();
-//
-//
-//	//subset stuff here
-//	if ((best_idx != -1) && (use_subset) && (subset_size < pe.shape().first))
-//	{
-//
-//		double acc_phi = last_best_mean * acc_fac;
-//		if (best_mean > acc_phi)
-//		{
-//			double new_lam = last_best_lam * lam_inc;
-//			new_lam = (new_lam > lambda_max) ? lambda_max : new_lam;
-//			last_best_lam = new_lam;
-//			ss.str("");
-//			ss << "best subset mean phi  (" << best_mean << ") greater than acceptable phi : " << acc_phi;
-//			string m = ss.str();
-//			message(0, m);
-//			message(1, "abandoning current lambda ensembles, increasing lambda to ", new_lam);
-//			message(1,"returing to lambda calculations...");
-//			return false;
-//		}
-//
-//
-//		//release the memory of the unneeded pe_lams
-//		for (int i = 0; i < pe_lams.size(); i++)
-//		{
-//			if (i == best_idx)
-//				continue;
-//			pe_lams[i] = ParameterEnsemble();
-//		}
-//		//need to work out which par and obs en real names to run - some may have failed during subset testing...
-//		ObservationEnsemble remaining_oe_lam = oe;//copy
-//		ParameterEnsemble remaining_pe_lam = pe_lams[best_idx];
-//		vector<string> pe_keep_names, oe_keep_names;
-//		vector<string> pe_names = pe.get_real_names(), oe_names = oe.get_real_names();
-//		vector<string> org_pe_idxs,org_oe_idxs;
-//		for (int i = subset_size; i <pe.shape().first; i++)
-//		{
-//			pe_keep_names.push_back(pe_names[i]);
-//			oe_keep_names.push_back(oe_names[i]);
-//		}
-//		message(0, "running remaining realizations for best lambda, scale:", vector<double>({ lam_vals[best_idx],scale_vals[best_idx] }));
-//
-//		//pe_keep_names and oe_keep_names are names of the remaining reals to eval
-//		remaining_pe_lam.keep_rows(pe_keep_names);
-//		remaining_oe_lam.keep_rows(oe_keep_names);
-//		//save these names for later
-//		org_pe_idxs = remaining_pe_lam.get_real_names();
-//		org_oe_idxs = remaining_oe_lam.get_real_names();
-//		///run
-//		vector<int> fails = run_ensemble(remaining_pe_lam, remaining_oe_lam);
-//		//if any of the remaining runs failed
-//		if (fails.size() ==org_pe_idxs.size())
-//			throw_ies_error(string("all remaining realizations failed...something is prob wrong"));
-//		if (fails.size() > 0)
-//		{
-//
-//			vector<string> new_pe_idxs, new_oe_idxs;
-//			vector<int>::iterator start = fails.begin(), end = fails.end();
-//			stringstream ss;
-//			ss << "the following par:obs realizations failed during evaluation of the remaining ensemble";
-//			for (int i = 0; i < org_pe_idxs.size(); i++)
-//				if (find(start,end,i) == end)
-//				{
-//					new_pe_idxs.push_back(org_pe_idxs[i]);
-//					new_oe_idxs.push_back(org_oe_idxs[i]);
-//				}
-//				else
-//				{
-//					ss << org_pe_idxs[i] << ":" << org_oe_idxs[i] << " , ";
-//				}
-//			string s = ss.str();
-//			message(1, s);
-//			remaining_oe_lam.keep_rows(new_oe_idxs);
-//			remaining_pe_lam.keep_rows(new_pe_idxs);
-//
-//		}
-//		//drop the remaining runs from the par en then append the remaining par runs (in case some failed)
-//		performance_log->log_event("assembling ensembles");
-//		pe_lams[best_idx].drop_rows(pe_keep_names);
-//		pe_lams[best_idx].append_other_rows(remaining_pe_lam);
-//		//append the remaining obs en
-//		oe_lam_best.append_other_rows(remaining_oe_lam);
-//		assert(pe_lams[best_idx].shape().first == oe_lam_best.shape().first);
-//		drop_bad_phi(pe_lams[best_idx], oe_lam_best);
-//		if (oe_lam_best.shape().first == 0)
-//		{
-//			throw_ies_error(string("all realization dropped after finishing subset runs...something might be wrong..."));
-//		}
-//		performance_log->log_event("updating phi");
-//		ph.update(oe_lam_best, pe_lams[best_idx]);
-//		best_mean = ph.get_mean(PhiHandler::phiType::COMPOSITE);
-//		best_std = ph.get_std(PhiHandler::phiType::COMPOSITE);
-//		message(1, "phi summary for entire ensemble using lambda,scale_fac ", vector<double>({ lam_vals[best_idx],scale_vals[best_idx] }));
-//		ph.report();
-//	}
-//	else
-//	{
-//		ph.update(oe_lam_best, pe_lams[best_idx]);
-//		best_mean = ph.get_mean(PhiHandler::phiType::COMPOSITE);
-//		best_std = ph.get_std(PhiHandler::phiType::COMPOSITE);
-//	}
-//
-//	ph.update(oe_lam_best, pe_lams[best_idx]);
-//	best_mean = ph.get_mean(PhiHandler::phiType::COMPOSITE);
-//	best_std = ph.get_std(PhiHandler::phiType::COMPOSITE);
-//	message(1, "last best mean phi * acceptable phi factor: ", last_best_mean * acc_fac);
-//	message(1, "current best mean phi: ", best_mean);
-//
-//	//track this here for phi-based termination check
-//	best_mean_phis.push_back(best_mean);
-//
-//	if (best_mean < last_best_mean * acc_fac)
-//	{
-//		message(0,"updating parameter ensemble");
-//		performance_log->log_event("updating parameter ensemble");
-//		last_best_mean = best_mean;
-//
-//		pe = pe_lams[best_idx];
-//		oe = oe_lam_best;
-//		if (best_std < last_best_std * acc_fac)
-//		{
-//			double new_lam = lam_vals[best_idx] * lam_dec;
-//			new_lam = (new_lam < lambda_min) ? lambda_min : new_lam;
-//			message(0, "updating lambda to ", new_lam);
-//			last_best_lam = new_lam;
-//		}
-//		else
-//		{
-//			message(0, "not updating lambda");
-//		}
-//		last_best_std = best_std;
-//	}
-//
-//	else
-//	{
-//		message(0, "not updating parameter ensemble");
-//		ph.update(oe, pe);
-//		double new_lam = last_best_lam * lam_inc;
-//		new_lam = (new_lam > lambda_max) ? lambda_max : new_lam;
-//		message(0, "incresing lambda to: ", new_lam);
-//		last_best_lam = new_lam;
-//	}
-//	//report_and_save();
-//	return true;
-//}
+
 
 void IterEnsembleSmoother::report_and_save()
 {
@@ -3404,7 +3499,11 @@ void IterEnsembleSmoother::set_subset_idx(int size)
 	subset_idxs.clear();
 	int nreal_subset = pest_scenario.get_pestpp_options().get_ies_subset_size();
 	if ((!use_subset) || (nreal_subset >= size))
+	{
+		for (int i = 0; i < size; i++)
+			subset_idxs.push_back(i);
 		return;
+	}
 	vector<string> pe_names = pe.get_real_names();
 
 	vector<string>::iterator bidx = find(pe_names.begin(), pe_names.end(), "base");
@@ -3544,29 +3643,13 @@ vector<ObservationEnsemble> IterEnsembleSmoother::run_lambda_ensembles(vector<Pa
 	ss << "queuing " << pe_lams.size() << " ensembles";
 	performance_log->log_event(ss.str());
 	run_mgr_ptr->reinitialize();
-	/*vector<int> subset_idxs;
-	if ((use_subset) && (subset_size < pe_lams[0].shape().first))
-	{
-		for (int i = 0; i < subset_size; i++)
-			subset_idxs.push_back(i);
-	}*/
+	
 	set_subset_idx(pe_lams[0].shape().first);
 	vector<map<int, int>> real_run_ids_vec;
 	//ParameterEnsemble pe_lam;
 	//for (int i=0;i<pe_lams.size();i++)
 	for (auto &pe_lam : pe_lams)
 	{
-		// if (pest_scenario.get_pestpp_options().get_ies_save_binary())
-		// {
-		// 	ss << file_manager.get_base_filename() << "." << iter << "." << i << ".lambdapars.jcb";
-		// 	pe_lam.to_binary(ss.str());
-		// }
-		// else
-		// {
-		// 	ss << file_manager.get_base_filename() << "." << iter << "." << i << ".lambdapars.jcb";
-		// }
-		// frec << " lambda value " << lam_vals[i] << " pars saved to " << ss.str() << endl;
-		// ss.str("");
 		try
 		{
 			real_run_ids_vec.push_back(pe_lam.add_runs(run_mgr_ptr,subset_idxs));
@@ -3644,8 +3727,8 @@ vector<ObservationEnsemble> IterEnsembleSmoother::run_lambda_ensembles(vector<Pa
 			throw_ies_error(ss.str());
 		}
 
-		//for testing
-		//failed_real_indices.push_back(real_run_ids.size()-1);
+		if (pest_scenario.get_pestpp_options().get_ies_debug_fail_subset())
+			failed_real_indices.push_back(real_run_ids.size()-1);
 
 		if (failed_real_indices.size() > 0)
 		{

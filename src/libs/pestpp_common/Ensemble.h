@@ -28,6 +28,7 @@ public:
 	//Ensemble get(vector<string> &_real_names, vector<string> &_var_names);
 
 	void to_csv(string file_name);
+	void to_binary_old(string file_name, bool transposed=false);
 	void to_binary(string file_name, bool transposed=false);
 	void from_eigen_mat(Eigen::MatrixXd mat, const vector<string> &_real_names, const vector<string> &_var_names);
 	pair<int, int> shape() { return pair<int, int>(reals.rows(), reals.cols()); }
@@ -40,6 +41,7 @@ public:
 
 	void extend_cols(Eigen::MatrixXd &_reals, const vector<string> &_var_names);
 	void add_2_cols_ip(Ensemble &other);
+	void add_2_cols_ip(const vector<string> &_var_names, const Eigen::MatrixXd &mat);
 	Ensemble zero_like();
 
 	void reserve(vector<string> _real_names, vector<string> _var_names);
@@ -56,6 +58,7 @@ public:
 	Eigen::MatrixXd get_eigen_mean_diff(const vector<string> &_real_names, const vector<string> &_var_names);
 
 	vector<double> get_mean_stl_vector();
+	pair<map<string, double>, map<string, double>>  get_moment_maps(const vector<string> &_real_names=vector<string>());
 
 	void append_other_rows(Ensemble &other);
 	void append(string real_name, const Transformable &trans);
@@ -89,7 +92,8 @@ protected:
 	vector<string> real_names;	
 	map<string, int> var_map;
 	void read_csv(int num_reals,ifstream &csv, map<string,int> header_info);
-	map<string,int> from_binary(string file_name, vector<string> &names,  bool transposed);
+	map<string,int> from_binary_old(string file_name, vector<string> &names,  bool transposed);
+	map<string, int> from_binary(string file_name, vector<string> &names, bool transposed);
 	map<string,int> prepare_csv(const vector<string> &names, ifstream &csv, bool forgive);
 };
 
@@ -107,6 +111,7 @@ public:
 
 	ParameterEnsemble() { ; }
 	ParameterEnsemble zeros_like();
+	void set_zeros();
 	//ParameterEnsemble get_new(const vector<string> &_real_names, const vector<string> &_var_names);
 
 	//void from_csv(string file_name,const vector<string> &ordered_names);

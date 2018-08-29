@@ -72,12 +72,13 @@ void RunManagerSerial::run()
 				obs.clear();
 				obs.insert(obs_name_vec, obs_vec);
 				mi.run(&pars, &obs);
+				
+				OperSys::chdir(run_dir.c_str());
+				success_runs += 1;
 				std::cout << string(message.str().size(), '\b');
 				message.str("");
 				message << "(" << success_runs << "/" << nruns << " runs complete)";
 				std::cout << message.str();
-				OperSys::chdir(run_dir.c_str());
-				success_runs += 1;
 				file_stor.update_run(i_run, pars, obs);
 
 			}
