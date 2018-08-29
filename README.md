@@ -27,6 +27,7 @@ The PEST++ software suite includes several stand-alone tools for model-independe
 All members of the software suite can be compiled for PC, MAC, or Linux and have several run managers to support parallelization.  precompiled binaries are available in the "bin" folder.  Windows users with older OS versions should use the ``bin/iwin`` binaries (starting "i", compiled with intel C++) to avoid the dreaded MSVC missing runtime DLL issue
 
 ## Recent Updates
+<b> update 29 August 2018 </b>: ``pestpp-ies`` now includes a multi-threaded localization (using a combination of local analysis and observation covariance tapering) solver (as of v 4.1.5) as well as other optimizations to improve the speed of calculating par-by-par localization.  The number of threads is controlled through the ``++ies_num_threads`` argument
 
 <b> update 5 August 2018 </b>: Welcome to the active fork of ``pestpp-ies``, ``pestpp-opt``, and ``pestpp-swp``. I strive to actively support users, so please raise issues related to these codes as needed.  I will also try to support ``pestpp`` users as best I can although this code is a lower priority for me.
 
@@ -219,8 +220,9 @@ Here is a (more or less) complete list of ``++`` arguments that can be added to 
 
 * ``ies_subset_how(<subset_how>)``: choice for how the subset is selected.  Choices are "first" (use the first ``subset_size`` realizations),"last" (use the last ``subset_size`` realizations),"random" (randomly select ``subset_size`` realizations each iteration),"phi_based" (chose ``subset_size`` realizations spread across the composite phi from the last iteration). Default is "phi_based". If present, the ``base`` parameter realization will always be included in the subset.  
 
-* ``ies_localizer(<localizer>)``: an optional localizer to use to localize spurious cross-correlations between observations and parameters.  The file format is determined by the extension: "mat","cov","csv","jco"/"jcb".  The row names of the matrix are observation names and/or observation group names and columns are parameter names and/or parameter group names (each obs/par can only be include once even through groups).  Currently only zero vs nonzero entires are used to localize.  
+* ``ies_localizer(<localizer>)``: an optional localizer to use to localize spurious cross-correlations between observations and parameters.  The file format is determined by the extension: "mat","cov","csv","jco"/"jcb".  The row names of the matrix are observation names and/or observation group names and columns are parameter names and/or parameter group names (each obs/par can only be include once even through groups).  Values should range between 0.0 and 1.0 (although no check is made).  Adjustable parameters not listed in the columns are implicitly treated as ``fixed`` and non-zero weight observations not listed in the rows are implicitly treated as zero-weighted. 
 
+* ``ies_num_threads`` : the number of threads to use when calculating localized upgrades for large numbers of parameters.  Default is ``0``.
 ### USGS disclaimer
 
 This software has been approved for release by the U.S. Geological Survey (USGS). Although the software has been subjected to rigorous review, the USGS reserves the right to update the software as needed pursuant to further analysis and review. No warranty, expressed or implied, is made by the USGS or the U.S. Government as to the functionality of the software and related material nor shall the fact of release constitute any such warranty. Furthermore, the software is released on condition that neither the USGS nor the U.S. Government shall be held liable for any damages resulting from its authorized or unauthorized use
