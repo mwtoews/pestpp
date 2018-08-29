@@ -268,8 +268,9 @@ int main(int argc, char* argv[])
 	try
 	{
 #endif
+		string version = PESTPP_VERSION;
 		cout << endl << endl;
-		cout << "             pestpp-swp - a parameteric sweep utility" << endl;
+		cout << "             pestpp-swp - a parameteric sweep utility, version " << version << endl;
 		cout << "                     for PEST(++) datasets " << endl << endl;
 		cout << "                 by the PEST++ development team" << endl << endl << endl;
 		// build commandline
