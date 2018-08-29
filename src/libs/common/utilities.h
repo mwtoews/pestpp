@@ -20,6 +20,9 @@
 #include "network_package.h"
 #include <thread>
 #include <chrono>
+#include <Eigen/Dense>
+#include <Eigen/Sparse>
+
 
 
 
@@ -210,6 +213,8 @@ class CompareItemInSet
 		const std::set<type> &set_ref;
 };
 
+
+
 void copyfile(const string &from_file, const string &to_file);
 
 std::string fortran_str_2_string(char *fstr, int str_len);
@@ -283,7 +288,9 @@ private:
 };
 
 
+bool read_binary(const string &filename, vector<string> &row_names, vector<string> &col_names, Eigen::SparseMatrix<double> &matrix);
 
+bool read_binary(const string &filename, vector<string> &row_names, vector<string> &col_names, Eigen::MatrixXd &matrix);
 
 }  // end namespace pest_utils
 #endif /* UTILITIES_H_ */

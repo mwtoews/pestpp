@@ -764,88 +764,89 @@ void Jacobian::save(const string &ext) const
 
 void Jacobian::read(const string &filename)
 {
-	ifstream fin;
-	fin.open(filename.c_str(), ifstream::binary|ios::in);
+	pest_utils::read_binary(filename,base_sim_obs_names, base_numeric_par_names, matrix);
+	//ifstream fin;
+	//fin.open(filename.c_str(), ifstream::binary|ios::in);
 
-	if (!fin)
-	{
-		throw runtime_error("unable to open binary jacobian file: " + filename + " for reading");
-	}
+	//if (!fin)
+	//{
+	//	throw runtime_error("unable to open binary jacobian file: " + filename + " for reading");
+	//}
 
-	int n_par;
-	int n_nonzero;
-	int n_obs_and_pi;
-	int i,j,n;
-	double data;
-	char par_name[12];
-	char obs_name[20];
+	//int n_par;
+	//int n_nonzero;
+	//int n_obs_and_pi;
+	//int i,j,n;
+	//double data;
+	//char par_name[12];
+	//char obs_name[20];
 
-	// read header
-	fin.read((char*) &n_par, sizeof(n_par));
-	fin.read((char*) &n_obs_and_pi, sizeof(n_obs_and_pi));
-	n_par = -n_par;
-	n_obs_and_pi = -n_obs_and_pi;
-	////read number nonzero elements in jacobian (observations + prior information)
-	fin.read((char*)&n_nonzero, sizeof(n_nonzero));
+	//// read header
+	//fin.read((char*) &n_par, sizeof(n_par));
+	//fin.read((char*) &n_obs_and_pi, sizeof(n_obs_and_pi));
+	//n_par = -n_par;
+	//n_obs_and_pi = -n_obs_and_pi;
+	//////read number nonzero elements in jacobian (observations + prior information)
+	//fin.read((char*)&n_nonzero, sizeof(n_nonzero));
 
-	file_manager.get_ofstream("rec") << "  -->reading " << n_nonzero <<
-		" jacobian elements for " << n_par << " parameters and" << endl <<
-		"  --> " << n_obs_and_pi << " observations and prior info" << endl;
+	//file_manager.get_ofstream("rec") << "  -->reading " << n_nonzero <<
+	//	" jacobian elements for " << n_par << " parameters and" << endl <<
+	//	"  --> " << n_obs_and_pi << " observations and prior info" << endl;
 
-	cout << "  -->reading " << n_nonzero <<
-		" jacobian elements for " << n_par << " parameters and" << endl <<
-		"  --> " << n_obs_and_pi << " observations and prior info" << endl;
+	//cout << "  -->reading " << n_nonzero <<
+	//	" jacobian elements for " << n_par << " parameters and" << endl <<
+	//	"  --> " << n_obs_and_pi << " observations and prior info" << endl;
 
-	// record current position in file
+	//// record current position in file
 
-	streampos begin_sen_pos = fin.tellg();
+	//streampos begin_sen_pos = fin.tellg();
 
-	//advance to parameter names section
-	fin.seekg(n_nonzero*(sizeof(double)+sizeof(int)), ios_base::cur);
+	////advance to parameter names section
+	//fin.seekg(n_nonzero*(sizeof(double)+sizeof(int)), ios_base::cur);
 
-	//read parameter names
-	base_numeric_par_names.clear();
-	for (int i_rec=0; i_rec<n_par; ++i_rec)
-	{
-		fin.read(par_name, 12);
-		string temp_par = string(par_name, 12);
-		strip_ip(temp_par);
-		upper_ip(temp_par);
-		base_numeric_par_names.push_back(temp_par);
-	}
-	//read observation and Prior info names
-	base_sim_obs_names.clear();
+	////read parameter names
+	//base_numeric_par_names.clear();
+	//for (int i_rec=0; i_rec<n_par; ++i_rec)
+	//{
+	//	fin.read(par_name, 12);
+	//	string temp_par = string(par_name, 12);
+	//	strip_ip(temp_par);
+	//	upper_ip(temp_par);
+	//	base_numeric_par_names.push_back(temp_par);
+	//}
+	////read observation and Prior info names
+	//base_sim_obs_names.clear();
 
-	for (int i_rec=0; i_rec<n_obs_and_pi; ++i_rec)
-	{
-		fin.read(obs_name, 20);
-		string tmp_obs_name = strip_cp(string(obs_name, 20));
-		upper_ip(tmp_obs_name);
-		base_sim_obs_names.push_back(tmp_obs_name);
-	}
+	//for (int i_rec=0; i_rec<n_obs_and_pi; ++i_rec)
+	//{
+	//	fin.read(obs_name, 20);
+	//	string tmp_obs_name = strip_cp(string(obs_name, 20));
+	//	upper_ip(tmp_obs_name);
+	//	base_sim_obs_names.push_back(tmp_obs_name);
+	//}
 
-	//return to sensitivity section of file
-	fin.seekg(begin_sen_pos, ios_base::beg);
+	////return to sensitivity section of file
+	//fin.seekg(begin_sen_pos, ios_base::beg);
 
-	// read matrix
-	std::vector<Eigen::Triplet<double> > triplet_list;
-	triplet_list.reserve(n_nonzero);
-	for (int i_rec=0; i_rec<n_nonzero; ++ i_rec)
-	{
-		fin.read((char*) &(n), sizeof(n));
-		--n;
-		fin.read((char*) &(data), sizeof(data));
-		j = int(n/(n_obs_and_pi)); // parameter index
-		i = (n-n_obs_and_pi*j) % n_obs_and_pi;  //observation index
-		triplet_list.push_back(Eigen::Triplet<double>(i, j, data));
-	}
-	matrix.resize(n_obs_and_pi, n_par);
-	matrix.setZero();
-	matrix.setFromTriplets(triplet_list.begin(), triplet_list.end());
-	fin.close();
+	//// read matrix
+	//std::vector<Eigen::Triplet<double> > triplet_list;
+	//triplet_list.reserve(n_nonzero);
+	//for (int i_rec=0; i_rec<n_nonzero; ++ i_rec)
+	//{
+	//	fin.read((char*) &(n), sizeof(n));
+	//	--n;
+	//	fin.read((char*) &(data), sizeof(data));
+	//	j = int(n/(n_obs_and_pi)); // parameter index
+	//	i = (n-n_obs_and_pi*j) % n_obs_and_pi;  //observation index
+	//	triplet_list.push_back(Eigen::Triplet<double>(i, j, data));
+	//}
+	//matrix.resize(n_obs_and_pi, n_par);
+	//matrix.setZero();
+	//matrix.setFromTriplets(triplet_list.begin(), triplet_list.end());
+	//fin.close();
 
-	cout << "   ....done" << endl;
-	file_manager.get_ofstream("rec") << "   ....done" << endl;
+	//cout << "   ....done" << endl;
+	//file_manager.get_ofstream("rec") << "   ....done" << endl;
 
 }
 

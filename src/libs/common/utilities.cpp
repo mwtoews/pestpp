@@ -13,6 +13,9 @@
 #include "config_os.h"
 #include "Transformable.h"
 #include "network_package.h"
+#include <Eigen/Dense>
+#include <Eigen/Sparse>
+
 
 //template <class T> const T& min ( const T& a, const T& b );
 
@@ -552,7 +555,182 @@ void  thread_exceptions::rethrow()
 	}
 }
 
+bool read_binary(const string &filename, vector<string> &row_names, vector<string> &col_names, Eigen::SparseMatrix<double> &matrix)
+{
 
+	ifstream in;
+	in.open(filename.c_str(), ifstream::binary);
+	if (!in.good())
+	{
+		stringstream ss;
+		ss << "Mat::from_binary() error opening binary file " << filename << " for reading";
+		throw runtime_error(ss.str());
+	}
+
+	row_names.clear();
+	col_names.clear();
+	matrix.resize(0, 0);
+
+	int n_par;
+	int n_nonzero;
+	int n_obs_and_pi;
+	int i, j;
+	unsigned int n;
+	double data;
+	char col_name[12];
+	char row_name[20];
+
+	// read header
+	in.read((char*)&n_par, sizeof(n_par));
+	in.read((char*)&n_obs_and_pi, sizeof(n_obs_and_pi));
+	
+	bool is_new_format = false;
+	if (n_par > 0)
+	{
+		is_new_format = true;
+		char col_name[200];
+		char row_name[200];
+
+
+		if (n_par > 100000000)
+			throw runtime_error("pest_utils::read_binary() failed sanity check: npar > 100 mil");
+
+		////read number nonzero elements in jacobian (observations + prior information)
+		in.read((char*)&n_nonzero, sizeof(n_nonzero));
+
+		if ((n_par == 0) || (n_obs_and_pi == 0) || (n_nonzero == 0))
+		{
+			throw runtime_error("pest_utils::read_binary() npar, nobs and/or nnz is zero");
+		}
+
+		cout << "reading " << n_nonzero << " elements, " << n_obs_and_pi << " rows, " << n_par << " columns" << endl;
+
+		// record current position in file
+		streampos begin_sen_pos = in.tellg();
+
+		//advance to parameter names section
+		in.seekg(n_nonzero*(sizeof(double) + sizeof(int) + sizeof(int)), ios_base::cur);
+
+		//read parameter names
+		for (int i_rec = 0; i_rec<n_par; ++i_rec)
+		{
+			in.read(col_name, 200);
+			string temp_col = string(col_name, 200);
+			pest_utils::strip_ip(temp_col);
+			pest_utils::upper_ip(temp_col);
+			col_names.push_back(temp_col);
+		}
+		//read observation and Prior info names
+		for (int i_rec = 0; i_rec<n_obs_and_pi; ++i_rec)
+		{
+			in.read(row_name, 200);
+			string temp_row = pest_utils::strip_cp(string(row_name, 200));
+			pest_utils::upper_ip(temp_row);
+			row_names.push_back(temp_row);
+		}
+
+		//return to sensitivity section of file
+		in.seekg(begin_sen_pos, ios_base::beg);
+
+		// read matrix
+		std::vector<Eigen::Triplet<double> > triplet_list;
+		triplet_list.reserve(n_nonzero);
+		for (int i_rec = 0; i_rec<n_nonzero; ++i_rec)
+		{
+			in.read((char*)&(i), sizeof(i));
+			in.read((char*)&(j), sizeof(j));
+			in.read((char*)&(data), sizeof(data));
+
+			if ((i >= n_obs_and_pi) || (i < 0))
+				cout << "invalid 'i':" << i << " at " << n << " data:" << data << " j: " << j << endl;
+			if ((j >= n_par) || (j < 0))
+				cout << "invalid 'j':" << j << " at " << n << " data:" << data << " i: " << i << endl;
+			triplet_list.push_back(Eigen::Triplet<double>(i, j, data));
+		}
+		matrix.resize(n_obs_and_pi, n_par);
+		matrix.setZero();
+		matrix.setFromTriplets(triplet_list.begin(), triplet_list.end());
+		in.close();
+
+	}
+	else
+	{
+		char col_name[12];
+		char row_name[20];
+		n_par = -n_par;
+		n_obs_and_pi = -n_obs_and_pi;
+
+		if (n_par > 100000000)
+			throw runtime_error("pest_utils::read_binary() failed sanity check: npar > 100 mil");
+
+		////read number nonzero elements in jacobian (observations + prior information)
+		in.read((char*)&n_nonzero, sizeof(n_nonzero));
+
+		if ((n_par == 0) || (n_obs_and_pi == 0) || (n_nonzero == 0))
+		{
+			throw runtime_error("pest_utils::read_binary() npar, nobs and/or nnz is zero");
+		}
+
+		cout << "reading " << n_nonzero << " elements, " << n_obs_and_pi << " rows, " << n_par << " columns" << endl;
+
+		// record current position in file
+		streampos begin_sen_pos = in.tellg();
+
+		//advance to parameter names section
+		in.seekg(n_nonzero*(sizeof(double) + sizeof(int)), ios_base::cur);
+
+		//read parameter names
+		for (int i_rec = 0; i_rec<n_par; ++i_rec)
+		{
+			in.read(col_name, 12);
+			string temp_col = string(col_name, 12);
+			pest_utils::strip_ip(temp_col);
+			pest_utils::upper_ip(temp_col);
+			col_names.push_back(temp_col);
+		}
+		//read observation and Prior info names
+		for (int i_rec = 0; i_rec<n_obs_and_pi; ++i_rec)
+		{
+			in.read(row_name, 20);
+			string temp_row = pest_utils::strip_cp(string(row_name, 20));
+			pest_utils::upper_ip(temp_row);
+			row_names.push_back(temp_row);
+		}
+
+		//return to sensitivity section of file
+		in.seekg(begin_sen_pos, ios_base::beg);
+
+		// read matrix
+		std::vector<Eigen::Triplet<double> > triplet_list;
+		triplet_list.reserve(n_nonzero);
+		for (int i_rec = 0; i_rec<n_nonzero; ++i_rec)
+		{
+			in.read((char*)&(n), sizeof(n));
+			n = n - 1;
+			in.read((char*)&(data), sizeof(data));
+			j = int(n / (n_obs_and_pi)); // column index
+			i = (n - n_obs_and_pi * j) % n_obs_and_pi;  //row index
+			if ((i >= n_obs_and_pi) || (i < 0))
+				cout << "invalid 'i':" << i << " at " << n << " data:" << data << " j: " << j << endl;
+			if ((j >= n_par) || (j < 0))
+				cout << "invalid 'j':" << j << " at " << n << " data:" << data << " i: " << i << endl;
+			triplet_list.push_back(Eigen::Triplet<double>(i, j, data));
+		}
+		matrix.resize(n_obs_and_pi, n_par);
+		matrix.setZero();
+		matrix.setFromTriplets(triplet_list.begin(), triplet_list.end());
+		in.close();
+	}
+	return is_new_format;
+}
+
+bool read_binary(const string &filename, vector<string> &row_names, vector<string> &col_names, Eigen::MatrixXd &matrix)
+{
+	Eigen::SparseMatrix<double> smatrix;
+	bool is_new_format = read_binary(filename, row_names, col_names, smatrix);
+	matrix = Eigen::MatrixXd(smatrix);
+	return is_new_format;
+}
 
 
 } // end of namespace pest_utils

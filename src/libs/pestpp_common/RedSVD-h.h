@@ -32,6 +32,7 @@
 
 #include <cstdlib>
 #include <cmath>
+#include <random>
 
 namespace RedSVD
 {
@@ -42,18 +43,19 @@ namespace RedSVD
 		using std::log;
 		using std::cos;
 		using std::sin;
-
+		
 		const Scalar PI(3.1415926535897932384626433832795028841971693993751);
 
 		Scalar v1 = (Scalar)(std::rand() + Scalar(1)) / ((Scalar)RAND_MAX+Scalar(2));
 		Scalar v2 = (Scalar)(std::rand() + Scalar(1)) / ((Scalar)RAND_MAX+Scalar(2));
+		
 		Scalar len = sqrt(Scalar(-2) * log(v1));
 		x = len * cos(Scalar(2) * PI * v2);
 		y = len * sin(Scalar(2) * PI * v2);
 	}
 
 	template<typename MatrixType>
-	inline void sample_gaussian(MatrixType& mat)
+	inline void sample_gaussian_precpp11(MatrixType& mat)
 	{
 		typedef typename MatrixType::Index Index;
 
@@ -65,6 +67,20 @@ namespace RedSVD
 				sample_gaussian(mat(i, mat.cols()-1), mat(i, mat.cols()-1));
 		}
 	}
+
+	template<typename MatrixType>
+	inline void sample_gaussian(MatrixType& mat)
+	{
+		typedef typename MatrixType::Index Index;
+		std::default_random_engine generator;
+		std::normal_distribution<double> distribution(0.0, 1.0);
+		for (Index i = 0; i < mat.rows(); ++i)
+		{
+			for (Index j = 0; j < mat.cols(); ++j )
+				mat(i,j) = distribution(generator);
+		}
+	}
+
 
 	template<typename MatrixType>
 	inline void gram_schmidt(MatrixType& mat)

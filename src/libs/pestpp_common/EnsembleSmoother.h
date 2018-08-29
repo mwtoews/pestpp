@@ -3,6 +3,8 @@
 
 #include <map>
 #include <random>
+#include <mutex>
+#include <thread>
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
 #include "FileManager.h"
@@ -31,7 +33,7 @@ public:
 	double get_max(phiType pt);
 	double get_min(phiType pt);
 	map<string, double>* get_phi_map(PhiHandler::phiType &pt);
-	void report();
+	void report(bool echo=true);
 	void write(int iter_num, int total_runs, bool write_group = true);
 	void write_group(int iter_num, int total_runs, vector<double> extra);
 	vector<int> get_idxs_greater_than(double bad_phi, ObservationEnsemble &oe);
@@ -46,7 +48,7 @@ public:
 	vector<string> get_lt_obs_names() { return lt_obs_names; }
 	vector<string> get_gt_obs_names() { return gt_obs_names; }
 
-	void apply_ineq_constraints(Eigen::MatrixXd &resid);
+	void apply_ineq_constraints(Eigen::MatrixXd &resid, vector<string> &names);
 
 private:
 	map<string, double> get_summary_stats(phiType pt);
@@ -93,6 +95,66 @@ private:
 
 };
 
+class ParChangeSummarizer
+{
+public:
+	ParChangeSummarizer() { ; }
+	ParChangeSummarizer(ParameterEnsemble *_base_pe_ptr, FileManager *_file_manager_ptr);
+	void summarize(ParameterEnsemble &pe);
+
+private:
+	ParameterEnsemble * base_pe_ptr;
+	FileManager *file_manager_ptr;
+	map<string, set<string>> pargp2par_map;
+	pair<map<string,double>, map<string, double>> init_moments;
+
+
+};
+
+
+class LocalUpgradeThread
+{
+public:
+
+	LocalUpgradeThread(map<string, Eigen::VectorXd> &_par_resid_map, map<string, Eigen::VectorXd> &_par_diff_map,
+		map<string, Eigen::VectorXd> &_obs_resid_map, map<string, Eigen::VectorXd> &_obs_diff_map, 
+		Localizer &_localizer, map<string, double> &_parcov_inv_map,
+		map<string, double> &_weight_map, ParameterEnsemble &_pe_upgrade, 
+		map<string, pair<vector<string>, vector<string>>> &_cases,
+		map<string, Eigen::VectorXd> &_Am_map);
+
+	//Eigen::DiagonalMatrix<double, Eigen::Dynamic> get_matrix_from_map(vector<string> &names, map<string, double> &dmap);	
+	//Eigen::MatrixXd get_matrix_from_map(int num_reals, vector<string> &names, map<string, Eigen::VectorXd> &emap);
+
+
+	void work(int thread_id, int iter, double cur_lam);
+
+
+private:
+	vector<string> keys;
+	int count;
+	//double eigthresh, cur_lam;
+	//int maxsing, num_reals,iter, thread_id;
+	//bool use_approx, use_prior_scaling;
+
+	map<string, pair<vector<string>, vector<string>>> &cases;
+
+	ParameterEnsemble &pe_upgrade;
+	//PhiHandler &ph;
+	Localizer &localizer;
+	map<string, double> &parcov_inv_map;
+	map<string, double> &weight_map;
+
+	map<string, Eigen::VectorXd> &par_resid_map, &par_diff_map, &Am_map;
+	map<string, Eigen::VectorXd> &obs_resid_map, &obs_diff_map;
+
+	mutex ctrl_lock, weight_lock, loc_lock, parcov_lock;
+	mutex obs_resid_lock, obs_diff_lock, par_resid_lock;
+	mutex par_diff_lock, am_lock, put_lock;
+	mutex next_lock;
+	
+};
+
 
 class IterEnsembleSmoother
 {
@@ -115,11 +177,14 @@ private:
 	PerformanceLog *performance_log;
 	RunManagerAbstract* run_mgr_ptr;
 	PhiHandler ph;
+	ParChangeSummarizer pcs;
 	Covariance parcov, obscov;
 	double reg_factor;
 
 	bool use_localizer;
 	Localizer localizer;
+
+	int num_threads;
 
 	set<string> pp_args;
 
@@ -153,7 +218,10 @@ private:
 	bool solve_new();
 	void adjust_pareto_weight(string &obsgroup, double wfac);
 
-	ParameterEnsemble calc_upgrade(vector<string> &obs_names, vector<string> &par_names,double lamb, int num_reals,string local_col_name=string());
+	//ParameterEnsemble calc_upgrade(vector<string> &obs_names, vector<string> &par_names,double lamb, int num_reals);
+
+	//ParameterEnsemble calc_localized_upgrade(double cur_lam);
+	ParameterEnsemble calc_localized_upgrade_threaded(double cur_lam);
 
 	//EnsemblePair run_ensemble(ParameterEnsemble &_pe, ObservationEnsemble &_oe);
 	vector<int> run_ensemble(ParameterEnsemble &_pe, ObservationEnsemble &_oe, const vector<int> &real_idxs=vector<int>());
@@ -171,7 +239,7 @@ private:
 	void drop_bad_phi(ParameterEnsemble &_pe, ObservationEnsemble &_oe);
 	//void check_ensembles(ObservationEnsemble &oe, ParameterEnsemble &pe);
 	template<typename T, typename A>
-	void message(int level, const string &_message, vector<T, A> _extras);
+	void message(int level, const string &_message, vector<T, A> _extras, bool echo=true);
 	void message(int level, const string &_message);
 
 	//template<typename T, typename A>
