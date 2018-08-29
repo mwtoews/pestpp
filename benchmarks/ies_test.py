@@ -2084,11 +2084,37 @@ def freyberg_dist_local_test():
     model_d = "ies_freyberg"
     test_d = os.path.join(model_d, "master_dist_local1")
     template_d = os.path.join(model_d, "template")
+    pst = pyemu.Pst(os.path.join(template_d, "pest.pst"))
+    par = pst.parameter_data
+    pt = par.loc[par.partrans=="log","parnme"]
+    def compare_par_summary():
+        pe_base = pd.read_csv(os.path.join(test_d,"pest_local.0.par.csv"),index_col=0)
+        pe_base.columns = pe_base.columns.str.lower()
+        pe_base.loc[:,pt] = pe_base.loc[:,pt].apply(np.log10)
+        par_csvs = [f for f in os.listdir(test_d) if ".par.csv" in f and not "0.par.csv" in f]
+        base_mean = pe_base.mean(axis=0)
+        base_std = pe_base.std(axis=0)
+        for par_csv in par_csvs:
+            pe = pd.read_csv(os.path.join(test_d,par_csv),index_col=0)
+            pe.columns = pe.columns.str.lower()
+            pe.loc[:,pt] = pe.loc[:,pt].apply(np.log10)
+            for grp in pst.par_groups:
+                pnames = par.loc[par.pargp==grp,"parnme"]
+                mean = pe.loc[:,pnames].mean(axis=0)
+                std = pe.loc[:,pnames].std(axis=0)
+                d = (base_mean.loc[pnames] - mean)
+                print(d.loc[d!=0.0])
+                mean_diff = np.nanmean(((base_mean.loc[pnames] - mean) / base_mean.loc[pnames]))
+                std_diff = np.nanmean(((base_std.loc[pnames] - std) / base_std.loc[pnames]))
+                print(par_csv,grp,mean_diff, std_diff)
+
+    
+
     m = flopy.modflow.Modflow.load("freyberg.nam",model_ws=template_d,load_only=[],check=False)
     if os.path.exists(test_d):
        shutil.rmtree(test_d)
     # print("loading pst")
-    pst = pyemu.Pst(os.path.join(template_d, "pest.pst"))
+
 
     par = pst.parameter_data
     par.loc[:,"partrans"] = "fixed"
@@ -2175,6 +2201,8 @@ def freyberg_dist_local_test():
         print(f)
         print(diff.loc[:,zero_cond_pars].max(axis=1))
         assert diff.loc[:,zero_cond_pars].max().max() < 1.0e-6, diff.loc[:,zero_cond_pars].max()
+    compare_par_summary()
+
 
 def freyberg_dist_local_invest():
     import flopy
@@ -2524,43 +2552,43 @@ def freyberg_local_threads_test():
 if __name__ == "__main__":
     # write_empty_test_matrix()
 
-    setup_suite_dir("ies_10par_xsec")
-    setup_suite_dir("ies_freyberg")
-    run_suite("ies_10par_xsec")
-    run_suite("ies_freyberg")
-    rebase("ies_freyberg")
-    rebase("ies_10par_xsec")
-    compare_suite("ies_10par_xsec")
-    compare_suite("ies_freyberg")
+    # setup_suite_dir("ies_10par_xsec")
+    # setup_suite_dir("ies_freyberg")
+    # run_suite("ies_10par_xsec")
+    # run_suite("ies_freyberg")
+    # rebase("ies_freyberg")
+    # rebase("ies_10par_xsec")
+    # compare_suite("ies_10par_xsec")
+    # compare_suite("ies_freyberg")
     #eval_freyberg()
     #eval_10par_xsec()
 
     # full list of tests
-    tenpar_subset_test()
-    tenpar_full_cov_test()
-    eval_freyberg_full_cov_reorder()
-    test_freyberg_full_cov_reorder_run()
-    eval_freyberg_full_cov()
-    tenpar_tight_tol_test()
-    test_chenoliver()
-    tenpar_narrow_range_test()
-    test_freyberg_ineq()
-    tenpar_fixed_test()
-    tenpar_fixed_test2()
-    tenpar_subset_how_test()
-    tenpar_localizer_test1()
-    tenpar_localizer_test2()
-    tenpar_localizer_test3()
-    freyberg_localizer_eval1()
-    freyberg_localizer_eval2()
-    freyberg_localizer_test3()
+    # tenpar_subset_test()
+    # tenpar_full_cov_test()
+    # eval_freyberg_full_cov_reorder()
+    # test_freyberg_full_cov_reorder_run()
+    # eval_freyberg_full_cov()
+    # tenpar_tight_tol_test()
+    # test_chenoliver()
+    # tenpar_narrow_range_test()
+    # test_freyberg_ineq()
+    # tenpar_fixed_test()
+    # tenpar_fixed_test2()
+    # tenpar_subset_how_test()
+    # tenpar_localizer_test1()
+    # tenpar_localizer_test2()
+    # tenpar_localizer_test3()
+    # freyberg_localizer_eval1()
+    # freyberg_localizer_eval2()
+    # freyberg_localizer_test3()
     freyberg_dist_local_test()
-    freyberg_local_threads_test()
-    tenpar_restart_binary_test()
-    tenpar_restart_test()
-    csv_tests()
-    tenpar_rns_test()
-    clues_longnames_test()
-    tenpar_localize_how_test()
-
-    freyberg_dist_local_invest()
+    # freyberg_local_threads_test()
+    # tenpar_restart_binary_test()
+    # tenpar_restart_test()
+    # csv_tests()
+    # tenpar_rns_test()
+    # clues_longnames_test()
+    # tenpar_localize_how_test()
+    #
+    # freyberg_dist_local_invest()

@@ -698,6 +698,8 @@ void ParChangeSummarizer::summarize(ParameterEnsemble &pe)
 	vector<string> grp_names = base_pe_ptr->get_pest_scenario().get_ctl_ordered_par_group_names();
 	for (auto &grp_name : grp_names)
 	{
+		mean_diff = 0.0, std_diff = 0.0;
+
 		for (auto & par_name : pargp2par_map[grp_name])
 		{
 			value1 = init_moments.first[par_name];
@@ -710,9 +712,9 @@ void ParChangeSummarizer::summarize(ParameterEnsemble &pe)
 				std_diff += value2 / value1;
 		}
 		dsize = double(init_moments.first.size());
-		if (mean_diff > 0.0)
+		if (mean_diff != 0.0)
 			mean_diff = mean_diff / dsize;
-		if (std_diff > 0.0)
+		if (std_diff != 0.0)
 			std_diff = std_diff / dsize;
 		ss.str("");
 		ss << setw(15) << grp_name << setw(15) << mean_diff * 100.0 << setw(15) << std_diff * 100.0 << endl;
