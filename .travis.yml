@@ -69,7 +69,7 @@ script:
   - nosetests -v -w ./benchmarks ies_test.py opt_test.py
 
 after_success:
-  - chmod +x ./trigger_travis.sh
+  - chmod +x trigger_travis.sh
   - ./trigger_travis.sh jtwhite79 pestpp-opt_benchmarks $TRAVIS_ACCESS_TOKEN
 notifications:
   email: true
