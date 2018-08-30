@@ -3555,7 +3555,6 @@ void IterEnsembleSmoother::set_subset_idx(int size)
 			idx = uni(Ensemble::rand_engine);
 			if (find(subset_idxs.begin(), subset_idxs.end(), idx) != subset_idxs.end())
 				continue;
-			cout << idx << "," << i << endl;
 			subset_idxs.push_back(idx);
 
 		}
