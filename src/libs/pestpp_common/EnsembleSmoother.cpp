@@ -3546,18 +3546,17 @@ void IterEnsembleSmoother::set_subset_idx(int size)
 
 	else if (how == "RANDOM")
 	{
-		std::uniform_int_distribution<int> uni(0, size);
+		std::uniform_int_distribution<int> uni(0, size-1);
 		int idx;
-		for (int i = 0; i < 10000; i++)
+		for (int i = 0; i < 10000000; i++)
 		{
 			if (subset_idxs.size() >= nreal_subset)
 				break;
 			idx = uni(Ensemble::rand_engine);
 			if (find(subset_idxs.begin(), subset_idxs.end(), idx) != subset_idxs.end())
 				continue;
-
+			cout << idx << "," << i << endl;
 			subset_idxs.push_back(idx);
-
 
 		}
 

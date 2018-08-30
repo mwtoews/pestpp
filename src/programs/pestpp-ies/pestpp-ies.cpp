@@ -39,10 +39,12 @@ int main(int argc, char* argv[])
 	try
 	{
 #endif
+		string version = PESTPP_VERSION;
 		cout << endl << endl;
-		cout << "             pestpp-ies: a GLM iterative ensemble smoother" << endl;
+		cout << "             pestpp-ies: a GLM iterative ensemble smoother, version " << version << endl;
 		cout << "                     for PEST(++) datasets " << endl << endl;
 		cout << "                 by the PEST++ development team" << endl << endl << endl;
+
 		// build commandline
 		string commandline = "";
 		for (int i = 0; i < argc; ++i)
