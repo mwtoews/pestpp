@@ -379,11 +379,12 @@ void PhiHandler::report(bool echo)
 	f << s;
 	if (echo)
 		cout << s;
-	/*if (*reg_factor == 0.0)
+	if (*reg_factor == 0.0)
 	{
 		f << "    (note: reg_factor is zero; regularization phi reported but not used)" << endl;
-		cout  << "    (note: reg_factor is zero; regularization phi reported but not used)" << endl;
-	}*/
+		if (echo)
+			cout  << "    (note: reg_factor is zero; regularization phi reported but not used)" << endl;
+	}
 	f << "     current reg_factor: " << *reg_factor << endl;
 	if (echo)
 		cout << "     current reg_factor: " << *reg_factor << endl;
@@ -2623,6 +2624,7 @@ LocalUpgradeThread::LocalUpgradeThread(map<string, Eigen::VectorXd> &_par_resid_
 	{
 		keys.push_back(c.first);
 	}
+	random_shuffle(keys.begin(), keys.end());
 
 }
 
