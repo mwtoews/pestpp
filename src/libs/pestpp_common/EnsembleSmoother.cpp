@@ -1321,12 +1321,20 @@ void IterEnsembleSmoother::initialize_restart_oe()
 
 	}
 
+	if (oe.shape().first != pe.shape().first)
+	{
+		ss << "number of reals differ between restart obs en (" << oe.shape().first << ") and par en (" << pe.shape().first << ")";
+		throw_ies_error(ss.str());
+	}
 
-	if (oe.shape().first < oe_base.shape().first) //maybe some runs failed...
+	//if (oe.shape().first < oe_base.shape().first) //maybe some runs failed...
+	if (oe.shape().first <= oe_base.shape().first)
 	{
 		//find which realizations are missing and reorder oe_base, pe and pe_base
-		message(1, "shape mismatch detected with restart obs ensemble...checking for compatibility");
-		vector<string> pe_real_names;
+
+		//message(1, "shape mismatch detected with restart obs ensemble...checking for compatibility");
+		
+		/*vector<string> pe_real_names;
 		start = oe_base_real_names.begin();
 		end = oe_base_real_names.end();
 		vector<string>::const_iterator it;
@@ -1339,7 +1347,7 @@ void IterEnsembleSmoother::initialize_restart_oe()
 				iit = it - start;
 				pe_real_names.push_back(pe_org_real_names[iit]);
 			}
-		}
+		}*/
 		try
 		{
 			oe_base.reorder(oe_real_names, vector<string>());
@@ -1353,7 +1361,11 @@ void IterEnsembleSmoother::initialize_restart_oe()
 		{
 			throw_ies_error(string("error reordering oe_base with restart oe"));
 		}
-		try
+
+		
+
+
+		/*try
 		{
 			pe.reorder(pe_real_names, vector<string>());
 		}
@@ -1365,7 +1377,7 @@ void IterEnsembleSmoother::initialize_restart_oe()
 		catch (...)
 		{
 			throw_ies_error(string("error reordering pe with restart oe"));
-		}
+		}*/
 	}
 	else if (oe.shape().first > oe_base.shape().first) //something is wrong
 	{
@@ -1706,7 +1718,6 @@ void IterEnsembleSmoother::initialize()
 			vector<string> oe_names = oe.get_real_names();
 			set<string> oset(oe_names.begin(), oe_names.end());
 			vector<string> missing;
-			bool compat = true;
 			for (auto n : pe.get_real_names())
 				if (oset.find(n) == oset.end())
 				{
