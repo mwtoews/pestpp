@@ -1988,14 +1988,15 @@ def tenpar_restart_test():
     pst.pestpp_options["lambda_scale_fac"] = 1.0
     pst.pestpp_options["ies_debug_fail_subset"] = True
     pst.pestpp_options["ies_debug_fail_remainder"] = True
+    pst.pestpp_options["ies_debug_bad_phi"] = True
     #pst.pestpp_options["ies_num_reals"] = num_reals
     pst.pestpp_options["ies_restart_obs_en"] = "restart1.csv"
     pst.pestpp_options["ies_obs_en"] = "base.csv"
-    pst.control_data.noptmax = 3
+    pst.control_data.noptmax = 2
     pst.write(os.path.join(template_d,"pest_restart.pst"))
     pyemu.os_utils.start_slaves(template_d, exe_path, "pest_restart.pst", num_slaves=10,
                                 slave_root=model_d, master_dir=test_d, port=port)
-    assert os.path.exists(os.path.join(test_d,"pest_restart.3.par.csv"))
+    assert os.path.exists(os.path.join(test_d,"pest_restart.{0}.par.csv".format(pst.control_data.noptmax)))
     assert os.path.exists(os.path.join(test_d, "pest_restart.phi.group.csv"))
     df = pd.read_csv(os.path.join(test_d, "pest_restart.phi.group.csv"))
     diff = df.obs_realization - df.par_realization
@@ -2593,7 +2594,7 @@ if __name__ == "__main__":
     # tenpar_fixed_test()
     # tenpar_fixed_test2()
     #
-    # tenpar_subset_how_test()
+    tenpar_subset_how_test()
     # tenpar_localizer_test1()
     # tenpar_localizer_test2()
     # tenpar_localizer_test3()
@@ -2602,7 +2603,7 @@ if __name__ == "__main__":
     # freyberg_localizer_test3()
     # freyberg_dist_local_test()
     # freyberg_local_threads_test()
-    tenpar_restart_binary_test()
+    # tenpar_restart_binary_test()
     # tenpar_restart_test()
     # csv_tests()
     # tenpar_rns_test()

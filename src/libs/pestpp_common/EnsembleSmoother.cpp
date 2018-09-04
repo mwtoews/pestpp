@@ -1936,7 +1936,6 @@ void IterEnsembleSmoother::initialize()
 	}
 
 
-
 	performance_log->log_event("calc initial phi");
 	//initialize the phi handler
 	ph = PhiHandler(&pest_scenario, &file_manager, &oe_base, &pe_base, &parcov, &reg_factor, &weights);
@@ -2030,13 +2029,13 @@ void IterEnsembleSmoother::drop_bad_phi(ParameterEnsemble &_pe, ObservationEnsem
 	//assert(_pe.shape().first == _oe.shape().first);
 	vector<int> idxs = ph.get_idxs_greater_than(pest_scenario.get_pestpp_options().get_ies_bad_phi(), _oe);
 
-	//for testing
-	//idxs.push_back(0);
-
+	if (pest_scenario.get_pestpp_options().get_ies_debug_bad_phi())
+		idxs.push_back(0);
+	
 	if (idxs.size() > 0)
 	{
 
-		message(0, "droppping realizations as bad: ", idxs.size());
+		message(0, "dropping realizations as bad: ", idxs.size());
 
 		vector<string> par_real_names = _pe.get_real_names(), obs_real_names = _oe.get_real_names();
 		stringstream ss;
@@ -3321,7 +3320,6 @@ bool IterEnsembleSmoother::solve_new()
 			return false;
 		}
 
-
 		//release the memory of the unneeded pe_lams
 		for (int i = 0; i < pe_lams.size(); i++)
 		{
@@ -3343,6 +3341,14 @@ bool IterEnsembleSmoother::solve_new()
 			if (ssub.find(pe_names[i]) == ssub.end())
 			{
 				pe_keep_names.push_back(pe_names[i]);
+				//oe_keep_names.push_back(oe_names[i]);
+			}
+		ssub.clear();
+		for (auto &i : subset_idxs)
+			ssub.emplace(oe_names[i]);
+		for (int i = 0; i<oe_names.size(); i++)
+			if (ssub.find(oe_names[i]) == ssub.end())
+			{
 				oe_keep_names.push_back(oe_names[i]);
 			}
 		message(0, "phi summary for best lambda, scale fac: ", vector<double>({ lam_vals[best_idx],scale_vals[best_idx] }));
@@ -3351,7 +3357,9 @@ bool IterEnsembleSmoother::solve_new()
 		message(0, "running remaining realizations for best lambda, scale:", vector<double>({ lam_vals[best_idx],scale_vals[best_idx] }));
 
 		//pe_keep_names and oe_keep_names are names of the remaining reals to eval
+		performance_log->log_event("dropping subset idxs from remaining_pe_lam");
 		remaining_pe_lam.keep_rows(pe_keep_names);
+		performance_log->log_event("dropping subset idxs from remaining_oe_lam");
 		remaining_oe_lam.keep_rows(oe_keep_names);
 		//save these names for later
 		org_pe_idxs = remaining_pe_lam.get_real_names();

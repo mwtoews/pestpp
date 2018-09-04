@@ -864,6 +864,12 @@ void PestppOptions::parce_line(const string &line)
 			istringstream is(value);
 			is >> boolalpha >> ies_debug_fail_remainder;
 		}
+		else if (key == "IES_DEBUG_BAD_PHI")
+		{
+			transform(value.begin(), value.end(), value.begin(), ::tolower);
+			istringstream is(value);
+			is >> boolalpha >> ies_debug_bad_phi;
+		}
 		else {
 
 			throw PestParsingError(line, "Invalid key word \"" + key +"\"");
