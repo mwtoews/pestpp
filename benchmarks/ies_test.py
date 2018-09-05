@@ -25,7 +25,7 @@ tests = """0) 10par_xsec "standard user mode" - draw reals from par-bounds prior
 8) freyberg full solution with empirical parcov - supplied par csv, obs csv and restart csv with fails, bad phi,MAP solution, prior scaling, lam mults 
 9) synth restart and upgrade 1.1M par problem"""
 
-ies_vars = ["ies_par_csv", "ies_obs_csv", "ies_restart_obs_csv",
+ies_vars = ["ies_par_en", "ies_obs_en", "ies_restart_obs_en",
             "ies_bad_phi", "parcov_filename", "ies_num_reals",
             "ies_use_approx", "ies_use_prior_scaling", "ies_reg_factor",
             "ies_lambda_mults", "ies_initial_lambda","ies_include_base","ies_subset_size"]
@@ -104,10 +104,11 @@ def setup_suite_dir(model_d):
     pe.to_binary(os.path.join(new_d, "par.jcb"))
     pe.to_csv(os.path.join(new_d, "sweep_in.csv"))
     pe.loc[:, pst.adj_par_names].to_csv(os.path.join(new_d, "par_some.csv"))
-
+    pe.iloc[:-3, :].to_csv(os.path.join(new_d, "restart_failed_par.csv"))
     oe = pyemu.ObservationEnsemble.from_id_gaussian_draw(pst, num_reals=num_reals)
     oe.index = idx
     oe.to_csv(os.path.join(new_d, "obs.csv"))
+    oe.iloc[:-3, :].to_csv(os.path.join(new_d, "restart_failed_base_obs.csv"))
     oe.to_binary(os.path.join(new_d, "obs.jcb"))
 
     pst.write(os.path.join(new_d, "pest.pst"))
@@ -2570,44 +2571,44 @@ def freyberg_local_threads_test():
 if __name__ == "__main__":
     # write_empty_test_matrix()
 
-    # setup_suite_dir("ies_10par_xsec")
-    # setup_suite_dir("ies_freyberg")
-    # run_suite("ies_10par_xsec")
-    # run_suite("ies_freyberg")
-    # rebase("ies_freyberg")
-    # rebase("ies_10par_xsec")
-    # compare_suite("ies_10par_xsec")
-    # compare_suite("ies_freyberg")
+    setup_suite_dir("ies_10par_xsec")
+    setup_suite_dir("ies_freyberg")
+    run_suite("ies_10par_xsec")
+    run_suite("ies_freyberg")
+    rebase("ies_freyberg")
+    rebase("ies_10par_xsec")
+    compare_suite("ies_10par_xsec")
+    compare_suite("ies_freyberg")
     #eval_freyberg()
     #eval_10par_xsec()
 
     # full list of tests
-    # tenpar_subset_test()
-    # tenpar_full_cov_test()
-    # eval_freyberg_full_cov_reorder()
-    # test_freyberg_full_cov_reorder_run()
-    # eval_freyberg_full_cov()
-    # tenpar_tight_tol_test()
-    # test_chenoliver()
-    # tenpar_narrow_range_test()
-    # test_freyberg_ineq()
-    # tenpar_fixed_test()
-    # tenpar_fixed_test2()
+    tenpar_subset_test()
+    tenpar_full_cov_test()
+    eval_freyberg_full_cov_reorder()
+    test_freyberg_full_cov_reorder_run()
+    eval_freyberg_full_cov()
+    tenpar_tight_tol_test()
+    test_chenoliver()
+    tenpar_narrow_range_test()
+    test_freyberg_ineq()
+    tenpar_fixed_test()
+    tenpar_fixed_test2()
     #
     tenpar_subset_how_test()
-    # tenpar_localizer_test1()
-    # tenpar_localizer_test2()
-    # tenpar_localizer_test3()
-    # freyberg_localizer_eval1()
-    # freyberg_localizer_eval2()
-    # freyberg_localizer_test3()
-    # freyberg_dist_local_test()
-    # freyberg_local_threads_test()
-    # tenpar_restart_binary_test()
-    # tenpar_restart_test()
-    # csv_tests()
-    # tenpar_rns_test()
-    # clues_longnames_test()
-    # tenpar_localize_how_test()
+    tenpar_localizer_test1()
+    tenpar_localizer_test2()
+    tenpar_localizer_test3()
+    freyberg_localizer_eval1()
+    freyberg_localizer_eval2()
+    freyberg_localizer_test3()
+    freyberg_dist_local_test()
+    freyberg_local_threads_test()
+    tenpar_restart_binary_test()
+    tenpar_restart_test()
+    csv_tests()
+    tenpar_rns_test()
+    clues_longnames_test()
+    tenpar_localize_how_test()
 
     # freyberg_dist_local_invest()

@@ -384,8 +384,12 @@ void PestppOptions::parce_line(const string &line)
 		string key = (*i)[1];
 		string org_value = strip_cp((*i)[2]);
 		upper_ip(key);
+
 		string value = upper_cp(org_value);
+		
 		if (value.size() > 0)
+			if (passed_args.find(key) != passed_args.end())
+				throw PestParsingError(line, "Duplicate key word \"" + key + "\", possibly through an alias");
 			passed_args.insert(key);
 
 		if (key=="MAX_N_SUPER"){
@@ -472,6 +476,8 @@ void PestppOptions::parce_line(const string &line)
 		}
 		else if (key == "PREDICTIONS" || key == "FORECASTS")
 		{
+			passed_args.insert("PREDICTIONS");
+			passed_args.insert("FORECASTS");
 			prediction_names.clear();
 			vector<string> prediction_tok;
 			tokenize(value, prediction_tok, ",");
@@ -483,6 +489,9 @@ void PestppOptions::parce_line(const string &line)
 		else if ((key == "PARCOV") || (key == "PARAMETER_COVARIANCE")
 			|| (key == "PARCOV_FILENAME"))
 		{
+			passed_args.insert("PARCOV");
+			passed_args.insert("PARAMETER_COVARIANCE");
+			passed_args.insert("PARCOV_FILENAME");
 			//convert_ip(org_value, parcov_filename);
 			parcov_filename = org_value;
 		}
@@ -490,12 +499,18 @@ void PestppOptions::parce_line(const string &line)
 		else if ((key == "OBSCOV") || (key == "OBSERVATION_COVARIANCE")
 			|| (key == "OBSCOV_FILENAME"))
 		{
+			passed_args.insert("OBSCOV");
+			passed_args.insert("OBSERVATION_COVARIANCE");
+			passed_args.insert("OBSCOV_FILENAME");
 			//convert_ip(org_value, parcov_filename);
 			obscov_filename = org_value;
 		}
 
 		else if ((key == "BASE_JACOBIAN") || (key == "BASE_JACOBIAN_FILENAME"))
 		{
+			passed_args.insert("BASE_JACOBIAN");
+			passed_args.insert("BASE_JACOBIAN_FILENAME");
+			
 			//convert_ip(org_value, basejac_filename);
 			basejac_filename = org_value;
 		}
@@ -522,11 +537,21 @@ void PestppOptions::parce_line(const string &line)
 			condor_submit_file = org_value;
 		}
 		else if ((key == "SWEEP_PARAMETER_CSV_FILE") || (key == "SWEEP_PAR_CSV"))
+		{
+			passed_args.insert("SWEEP_PARAMETER_CSV_FILE");
+			passed_args.insert("SWEEP_PAR_CSV");
+			
 			//convert_ip(org_value, sweep_parameter_csv_file);
 			sweep_parameter_csv_file = org_value;
+		}
 		else if ((key == "SWEEP_OUTPUT_CSV_FILE") || (key == "SWEEP_OBS_CSV"))
+		{
+			passed_args.insert("SWEEP_OUTPUT_CSV_FILE");
+			passed_args.insert("SWEEP_OBS_CSV");
+			
 			//convert_ip(org_value, sweep_output_csv_file);
 			sweep_output_csv_file = org_value;
+		}
 		else if (key == "SWEEP_CHUNK")
 			convert_ip(value, sweep_chunk);
 		else if (key == "SWEEP_FORGIVE")
@@ -611,6 +636,8 @@ void PestppOptions::parce_line(const string &line)
 		}
 		else if ((key == "OPT_OBJ_FUNC") || (key == "OPT_OBJECTIVE_FUNCTION"))
 		{
+			passed_args.insert("OPT_OBJ_FUNC");
+			passed_args.insert("OPT_OBJECTIVE_FUNCTION");
 			convert_ip(value,opt_obj_func);
 		}
 		else if (key == "OPT_COIN_LOG")
@@ -635,6 +662,8 @@ void PestppOptions::parce_line(const string &line)
 
 		else if ((key == "OPT_DEC_VAR_GROUPS") || (key == "OPT_DECISION_VARIABLE_GROUPS"))
 		{
+			passed_args.insert("OPT_DEC_VAR_GROUPS");
+			passed_args.insert("OPT_DECISION_VARIABLE_GROUPS");
 			opt_dec_var_groups.clear();
 			vector<string> tok;
 			tokenize(value, tok, ", ");
@@ -646,6 +675,8 @@ void PestppOptions::parce_line(const string &line)
 
 		else if ((key == "OPT_EXT_VAR_GROUPS") || (key == "OPT_EXTERNAL_VARIABLE_GROUPS"))
 		{
+			passed_args.insert("OPT_EXT_VAR_GROUPS");
+			passed_args.insert("OPT_EXTERNAL_VARIABLE_GROUPS");
 			opt_external_var_groups.clear();
 			vector<string> tok;
 			tokenize(value, tok, ", ");
@@ -704,29 +735,32 @@ void PestppOptions::parce_line(const string &line)
 			is >> boolalpha >> opt_include_bnd_pi;
 		}
 
-		else if ((key == "IES_PAR_CSV") || (key == "IES_PARAMETER_CSV")||
-			(key == "IES_PAR_EN") || (key == "IES_PARAMETER_ENSEMBLE"))
+		else if ((key == "IES_PAR_EN") || (key == "IES_PARAMETER_ENSEMBLE"))
 		{
+			passed_args.insert("IES_PARAMETER_ENSEMBLE");
+			passed_args.insert("IES_PAR_EN");
 			//convert_ip(value, ies_par_csv);
 			ies_par_csv = org_value;
 		}
-		else if ((key == "IES_OBS_CSV") || (key == "IES_OBSERVATION_CSV") ||
-			(key == "IES_OBS_EN") || (key == "IES_OBSERVATION_ENSEMBLE"))
+		else if ((key == "IES_OBS_EN") || (key == "IES_OBSERVATION_ENSEMBLE"))
 		{
+			passed_args.insert("IES_OBSERVATION_ENSEMBLE");
+			passed_args.insert("IES_OBS_EN");
 			//convert_ip(value, ies_obs_csv);
 			ies_obs_csv = org_value;
 		}
-		else if ((key == "IES_OBS_RESTART_CSV") || (key == "IES_OBSERVATION_RESTART_CSV")
-			|| (key == "IES_RESTART_OBS_CSV") || (key == "IES_OBSERVATION_RESTART_ENSEMBLE") ||
-			(key == "IES_RESTART_OBSERVATION_ENSEMBLE") || (key == "IES_RESTART_OBS_EN") ||
-			(key == "IES_OBS_RESTART_EN"))
+		else if ((key == "IES_RESTART_OBSERVATION_ENSEMBLE") || (key == "IES_RESTART_OBS_EN"))
 		{
+			passed_args.insert("IES_RESTART_OBSERVATION_ENSEMBLE");
+			passed_args.insert("IES_RESTART_OBS_EN");
 			//convert_ip(value, ies_obs_restart_csv);
 			ies_obs_restart_csv = org_value;
 		}
 
 		else if ((key == "IES_USE_APPROXIMATE_SOLUTION") || (key == "IES_USE_APPROX"))
 		{
+			passed_args.insert("IES_USE_APPROXIMATE_SOLUTION");
+			passed_args.insert("IES_USE_APPROX");
 			transform(value.begin(), value.end(), value.begin(), ::tolower);
 			istringstream is(value);
 			is >> boolalpha >> ies_use_approx;
@@ -743,6 +777,8 @@ void PestppOptions::parce_line(const string &line)
 		}
 		else if ((key == "IES_INIT_LAM") || (key == "IES_INITIAL_LAMBDA"))
 		{
+			passed_args.insert("IES_INIT_LAM");
+			passed_args.insert("IES_INITIAL_LAMBDA");
 			convert_ip(value, ies_init_lam);
 		}
 		else if (key == "IES_USE_APPROX")
@@ -755,6 +791,8 @@ void PestppOptions::parce_line(const string &line)
 		}
 		else if  ((key == "IES_REG_FACTOR") || (key == "IES_REG_FAC"))
 		{
+			passed_args.insert("IES_REG_FACTOR");
+			passed_args.insert("IES_REG_FAC");
 			convert_ip(value, ies_reg_factor);
 		}
 		else if (key == "IES_VERBOSE_LEVEL")
@@ -778,6 +816,8 @@ void PestppOptions::parce_line(const string &line)
 		}
 		else if ((key == "IES_INCLUDE_BASE") || (key == "IES_ADD_BASE"))
 		{
+			passed_args.insert("IES_INCLUDE_BASE");
+			passed_args.insert("IES_ADD_BASE");
 			transform(value.begin(), value.end(), value.begin(), ::tolower);
 			istringstream is(value);
 			is >> boolalpha >> ies_include_base;
@@ -832,12 +872,16 @@ void PestppOptions::parce_line(const string &line)
 		}
 		else if ((key == "IES_SAVE_LAMBDA_EN") || (key == "IES_SAVE_LAMBDA_ENSEMBLES"))
 		{
+			passed_args.insert("IES_SAVE_LAMBDA_EN");
+			passed_args.insert("IES_SAVE_LAMBDA_ENSEMBLES");
 			transform(value.begin(), value.end(), value.begin(), ::tolower);
 			istringstream is(value);
 			is >> boolalpha >> ies_save_lambda_en;
 		}
-		else if ((key == "IES_WEIGHST_EN") || (key == "IES_WEIGHTS_ENSEMBLE"))
+		else if ((key == "IES_WEIGHTS_EN") || (key == "IES_WEIGHTS_ENSEMBLE"))
 		{
+			passed_args.insert("IES_WEIGHTS_EN");
+			passed_args.insert("IES_WEIGHTS_ENSEMBLE");
 			ies_weight_csv = org_value;
 		}
 		else if (key == "IES_SUBSET_HOW")
