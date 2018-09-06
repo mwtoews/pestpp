@@ -379,11 +379,12 @@ void PhiHandler::report(bool echo)
 	f << s;
 	if (echo)
 		cout << s;
-	/*if (*reg_factor == 0.0)
+	if (*reg_factor == 0.0)
 	{
 		f << "    (note: reg_factor is zero; regularization phi reported but not used)" << endl;
-		cout  << "    (note: reg_factor is zero; regularization phi reported but not used)" << endl;
-	}*/
+		if (echo)
+			cout  << "    (note: reg_factor is zero; regularization phi reported but not used)" << endl;
+	}
 	f << "     current reg_factor: " << *reg_factor << endl;
 	if (echo)
 		cout << "     current reg_factor: " << *reg_factor << endl;
@@ -1320,12 +1321,20 @@ void IterEnsembleSmoother::initialize_restart_oe()
 
 	}
 
+	if (oe.shape().first != pe.shape().first)
+	{
+		ss << "number of reals differ between restart obs en (" << oe.shape().first << ") and par en (" << pe.shape().first << ")";
+		throw_ies_error(ss.str());
+	}
 
-	if (oe.shape().first < oe_base.shape().first) //maybe some runs failed...
+	//if (oe.shape().first < oe_base.shape().first) //maybe some runs failed...
+	if (oe.shape().first <= oe_base.shape().first)
 	{
 		//find which realizations are missing and reorder oe_base, pe and pe_base
-		message(1, "shape mismatch detected with restart obs ensemble...checking for compatibility");
-		vector<string> pe_real_names;
+
+		//message(1, "shape mismatch detected with restart obs ensemble...checking for compatibility");
+		
+		/*vector<string> pe_real_names;
 		start = oe_base_real_names.begin();
 		end = oe_base_real_names.end();
 		vector<string>::const_iterator it;
@@ -1338,7 +1347,7 @@ void IterEnsembleSmoother::initialize_restart_oe()
 				iit = it - start;
 				pe_real_names.push_back(pe_org_real_names[iit]);
 			}
-		}
+		}*/
 		try
 		{
 			oe_base.reorder(oe_real_names, vector<string>());
@@ -1352,7 +1361,11 @@ void IterEnsembleSmoother::initialize_restart_oe()
 		{
 			throw_ies_error(string("error reordering oe_base with restart oe"));
 		}
-		try
+
+		
+
+
+		/*try
 		{
 			pe.reorder(pe_real_names, vector<string>());
 		}
@@ -1364,7 +1377,7 @@ void IterEnsembleSmoother::initialize_restart_oe()
 		catch (...)
 		{
 			throw_ies_error(string("error reordering pe with restart oe"));
-		}
+		}*/
 	}
 	else if (oe.shape().first > oe_base.shape().first) //something is wrong
 	{
@@ -1705,7 +1718,6 @@ void IterEnsembleSmoother::initialize()
 			vector<string> oe_names = oe.get_real_names();
 			set<string> oset(oe_names.begin(), oe_names.end());
 			vector<string> missing;
-			bool compat = true;
 			for (auto n : pe.get_real_names())
 				if (oset.find(n) == oset.end())
 				{
@@ -1924,7 +1936,6 @@ void IterEnsembleSmoother::initialize()
 	}
 
 
-
 	performance_log->log_event("calc initial phi");
 	//initialize the phi handler
 	ph = PhiHandler(&pest_scenario, &file_manager, &oe_base, &pe_base, &parcov, &reg_factor, &weights);
@@ -2012,40 +2023,63 @@ Eigen::MatrixXd IterEnsembleSmoother::get_Am(const vector<string> &real_names, c
 	return Am;
 }
 
-void IterEnsembleSmoother::drop_bad_phi(ParameterEnsemble &_pe, ObservationEnsemble &_oe)
+void IterEnsembleSmoother::drop_bad_phi(ParameterEnsemble &_pe, ObservationEnsemble &_oe, bool is_subset)
 {
 	//don't use this assert because _pe maybe full size, but _oe might be subset size
-	//assert(_pe.shape().first == _oe.shape().first);
+	if (!is_subset)
+		if (_pe.shape().first != _oe.shape().first)
+			throw_ies_error("IterEnsembleSmoother::drop_bad_phi() error: _pe != _oe and not subset");
+		
+	
 	vector<int> idxs = ph.get_idxs_greater_than(pest_scenario.get_pestpp_options().get_ies_bad_phi(), _oe);
 
-	//for testing
-	//idxs.push_back(0);
-
+	if (pest_scenario.get_pestpp_options().get_ies_debug_bad_phi())
+		idxs.push_back(0);
+	
 	if (idxs.size() > 0)
 	{
 
-		message(0, "droppping realizations as bad: ", idxs.size());
+		message(0, "dropping realizations as bad: ", idxs.size());
 
 		vector<string> par_real_names = _pe.get_real_names(), obs_real_names = _oe.get_real_names();
 		stringstream ss;
 		string pname;
+		string oname;
+
 		int pidx;
-		vector<string> full_onames;
+		vector<string> full_onames, full_pnames;
 		// if a subset drop, then use the full oe index, otherwise, just use _oe index
-		if (_oe.shape().first != _pe.shape().first)
+		/*if (_oe.shape().first != _pe.shape().first)
 		{
 			full_onames = oe.get_real_names();
 		}
 		else
 		{
 			full_onames = _oe.get_real_names();
-		}
+		}*/
+		full_onames = oe.get_real_names();
+		full_pnames = pe.get_real_names();
 		vector<string> pdrop, odrop;
 		for (auto i : idxs)
 		{
-			//find the index of this i in the full set of obs names - for the case of randomized subsets
-			pidx = find(full_onames.begin(), full_onames.end(), obs_real_names[i]) - full_onames.begin();
-			pname = par_real_names[pidx];
+			oname = obs_real_names[i];
+			
+			if (is_subset)
+			{
+				pidx = find(full_onames.begin(), full_onames.end(), oname) - full_onames.begin();
+				if (find(subset_idxs.begin(), subset_idxs.end(), pidx) == subset_idxs.end())
+				{
+					ss.str("");
+					ss << "drop_bad_phi() error: idx " << pidx << " not found in subset_idxs";
+					throw_ies_error(ss.str());
+				}
+				pname = full_pnames[pidx];
+			}
+			else
+			{
+				pidx = i;
+				pname = par_real_names[pidx];
+			}
 			ss << pname << " : " << obs_real_names[i] << " , ";
 			pdrop.push_back(pname);
 			odrop.push_back(obs_real_names[i]);
@@ -2623,6 +2657,7 @@ LocalUpgradeThread::LocalUpgradeThread(map<string, Eigen::VectorXd> &_par_resid_
 	{
 		keys.push_back(c.first);
 	}
+	random_shuffle(keys.begin(), keys.end());
 
 }
 
@@ -3255,7 +3290,7 @@ bool IterEnsembleSmoother::solve_new()
 		if (oe_lams[i].shape().first == 0)
 			continue;
 		vector<double> vals({ lam_vals[i],scale_vals[i] });
-		drop_bad_phi(pe_lams[i], oe_lams[i]);
+		drop_bad_phi(pe_lams[i], oe_lams[i], true);
 		if (oe_lams[i].shape().first == 0)
 		{
 			message(1, "all realizations dropped as 'bad' for lambda, scale fac ", vals);
@@ -3308,7 +3343,6 @@ bool IterEnsembleSmoother::solve_new()
 			return false;
 		}
 
-
 		//release the memory of the unneeded pe_lams
 		for (int i = 0; i < pe_lams.size(); i++)
 		{
@@ -3330,6 +3364,14 @@ bool IterEnsembleSmoother::solve_new()
 			if (ssub.find(pe_names[i]) == ssub.end())
 			{
 				pe_keep_names.push_back(pe_names[i]);
+				//oe_keep_names.push_back(oe_names[i]);
+			}
+		ssub.clear();
+		for (auto &i : subset_idxs)
+			ssub.emplace(oe_names[i]);
+		for (int i = 0; i<oe_names.size(); i++)
+			if (ssub.find(oe_names[i]) == ssub.end())
+			{
 				oe_keep_names.push_back(oe_names[i]);
 			}
 		message(0, "phi summary for best lambda, scale fac: ", vector<double>({ lam_vals[best_idx],scale_vals[best_idx] }));
@@ -3338,7 +3380,9 @@ bool IterEnsembleSmoother::solve_new()
 		message(0, "running remaining realizations for best lambda, scale:", vector<double>({ lam_vals[best_idx],scale_vals[best_idx] }));
 
 		//pe_keep_names and oe_keep_names are names of the remaining reals to eval
+		performance_log->log_event("dropping subset idxs from remaining_pe_lam");
 		remaining_pe_lam.keep_rows(pe_keep_names);
+		performance_log->log_event("dropping subset idxs from remaining_oe_lam");
 		remaining_oe_lam.keep_rows(oe_keep_names);
 		//save these names for later
 		org_pe_idxs = remaining_pe_lam.get_real_names();

@@ -25,7 +25,7 @@ tests = """0) 10par_xsec "standard user mode" - draw reals from par-bounds prior
 8) freyberg full solution with empirical parcov - supplied par csv, obs csv and restart csv with fails, bad phi,MAP solution, prior scaling, lam mults 
 9) synth restart and upgrade 1.1M par problem"""
 
-ies_vars = ["ies_par_csv", "ies_obs_csv", "ies_restart_obs_csv",
+ies_vars = ["ies_par_en", "ies_obs_en", "ies_restart_obs_en",
             "ies_bad_phi", "parcov_filename", "ies_num_reals",
             "ies_use_approx", "ies_use_prior_scaling", "ies_reg_factor",
             "ies_lambda_mults", "ies_initial_lambda","ies_include_base","ies_subset_size"]
@@ -104,10 +104,11 @@ def setup_suite_dir(model_d):
     pe.to_binary(os.path.join(new_d, "par.jcb"))
     pe.to_csv(os.path.join(new_d, "sweep_in.csv"))
     pe.loc[:, pst.adj_par_names].to_csv(os.path.join(new_d, "par_some.csv"))
-
+    pe.iloc[:-3, :].to_csv(os.path.join(new_d, "restart_failed_par.csv"))
     oe = pyemu.ObservationEnsemble.from_id_gaussian_draw(pst, num_reals=num_reals)
     oe.index = idx
     oe.to_csv(os.path.join(new_d, "obs.csv"))
+    oe.iloc[:-3, :].to_csv(os.path.join(new_d, "restart_failed_base_obs.csv"))
     oe.to_binary(os.path.join(new_d, "obs.jcb"))
 
     pst.write(os.path.join(new_d, "pest.pst"))
@@ -1893,7 +1894,8 @@ def tenpar_restart_binary_test():
     pst.pestpp_options["ies_save_binary"] = True
     pst.pestpp_options["ies_lambda_mults"] = 1.0
     pst.pestpp_options["lambda_scale_fac"] = 1.0
-    pst.control_data.noptmax = -1
+    pst.pestpp_options["ies_include_base"] = False
+    pst.control_data.noptmax = 1
     pst.write(os.path.join(template_d, "pest_restart.pst"))
     pyemu.os_utils.start_slaves(template_d, exe_path, "pest_restart.pst", num_slaves=10,
                                 slave_root=model_d, master_dir=test_d, port=port)
@@ -1905,6 +1907,11 @@ def tenpar_restart_binary_test():
     df1 = pd.read_csv(os.path.join(test_d,"pest_restart.phi.actual.csv"),index_col=0)
     assert oe.shape == (num_reals,pst.nobs)
     assert pe.shape == (num_reals,pst.npar)
+
+    assert os.path.exists(os.path.join(test_d, "pest_restart.phi.group.csv"))
+    df = pd.read_csv(os.path.join(test_d, "pest_restart.phi.group.csv"))
+    diff = df.obs_realization.apply(np.int) - df.par_realization.apply(np.int)
+    assert diff.max() == 0, diff
 
     pst.pestpp_options["ies_par_en"] = "pest_restart.0.par.jcb"
     pst.pestpp_options["ies_obs_en"] = "pest_restart.base.obs.jcb"
@@ -1926,6 +1933,13 @@ def tenpar_restart_binary_test():
     assert pe1.shape == (num_reals, pst.npar)
     diff = df1.loc[0,"mean"] - df2.loc[0,"mean"]
     assert diff == 0.0,diff
+    assert os.path.exists(os.path.join(test_d+"_2", "pest_restart_2.phi.group.csv"))
+    df = pd.read_csv(os.path.join(test_d+"_2", "pest_restart_2.phi.group.csv"))
+    diff = df.obs_realization - df.par_realization
+    assert diff.max() == 0, diff
+
+
+
     #
     # shutil.copy2(os.path.join(test_d, "pest_restart.base.obs.csv"), os.path.join(template_d, "base.csv"))
     #
@@ -1948,7 +1962,7 @@ def tenpar_restart_test():
     test_d = os.path.join(model_d, "master_restart1")
     template_d = os.path.join(model_d, "template")
     pst = pyemu.Pst(os.path.join(template_d, "pest.pst"))
-    num_reals = 20
+    num_reals = 30
     if os.path.exists(test_d):
        shutil.rmtree(test_d)
     #shutil.copytree(template_d, test_d)
@@ -1975,14 +1989,20 @@ def tenpar_restart_test():
     pst.pestpp_options["lambda_scale_fac"] = 1.0
     pst.pestpp_options["ies_debug_fail_subset"] = True
     pst.pestpp_options["ies_debug_fail_remainder"] = True
+    pst.pestpp_options["ies_debug_bad_phi"] = True
     #pst.pestpp_options["ies_num_reals"] = num_reals
     pst.pestpp_options["ies_restart_obs_en"] = "restart1.csv"
     pst.pestpp_options["ies_obs_en"] = "base.csv"
-    pst.control_data.noptmax = 3
+    pst.control_data.noptmax = 2
     pst.write(os.path.join(template_d,"pest_restart.pst"))
     pyemu.os_utils.start_slaves(template_d, exe_path, "pest_restart.pst", num_slaves=10,
                                 slave_root=model_d, master_dir=test_d, port=port)
-    assert os.path.exists(os.path.join(test_d,"pest_restart.3.par.csv"))
+    assert os.path.exists(os.path.join(test_d,"pest_restart.{0}.par.csv".format(pst.control_data.noptmax))),\
+        os.listdir(test_d)
+    assert os.path.exists(os.path.join(test_d, "pest_restart.phi.group.csv"))
+    df = pd.read_csv(os.path.join(test_d, "pest_restart.phi.group.csv"))
+    diff = df.obs_realization - df.par_realization
+    assert diff.max() == 0,diff
 
 def tenpar_rns_test():
     """tenpar rns test"""
@@ -2552,30 +2572,30 @@ def freyberg_local_threads_test():
 if __name__ == "__main__":
     # write_empty_test_matrix()
 
-    # setup_suite_dir("ies_10par_xsec")
-    # setup_suite_dir("ies_freyberg")
-    # run_suite("ies_10par_xsec")
-    # run_suite("ies_freyberg")
-    # rebase("ies_freyberg")
-    # rebase("ies_10par_xsec")
-    # compare_suite("ies_10par_xsec")
-    # compare_suite("ies_freyberg")
+    setup_suite_dir("ies_10par_xsec")
+    setup_suite_dir("ies_freyberg")
+    run_suite("ies_10par_xsec")
+    run_suite("ies_freyberg")
+    rebase("ies_freyberg")
+    rebase("ies_10par_xsec")
+    compare_suite("ies_10par_xsec")
+    compare_suite("ies_freyberg")
     #eval_freyberg()
     #eval_10par_xsec()
 
     # full list of tests
-    # tenpar_subset_test()
-    # tenpar_full_cov_test()
-    # # eval_freyberg_full_cov_reorder()
-    # # test_freyberg_full_cov_reorder_run()
-    # # eval_freyberg_full_cov()
-    # tenpar_tight_tol_test()
-    # test_chenoliver()
-    # tenpar_narrow_range_test()
-    # test_freyberg_ineq()
-    # tenpar_fixed_test()
-    # tenpar_fixed_test2()
-    
+    tenpar_subset_test()
+    tenpar_full_cov_test()
+    eval_freyberg_full_cov_reorder()
+    test_freyberg_full_cov_reorder_run()
+    eval_freyberg_full_cov()
+    tenpar_tight_tol_test()
+    test_chenoliver()
+    tenpar_narrow_range_test()
+    test_freyberg_ineq()
+    tenpar_fixed_test()
+    tenpar_fixed_test2()
+
     tenpar_subset_how_test()
     tenpar_localizer_test1()
     tenpar_localizer_test2()
@@ -2591,5 +2611,5 @@ if __name__ == "__main__":
     tenpar_rns_test()
     clues_longnames_test()
     tenpar_localize_how_test()
-    #
+
     # freyberg_dist_local_invest()
