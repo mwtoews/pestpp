@@ -2023,10 +2023,14 @@ Eigen::MatrixXd IterEnsembleSmoother::get_Am(const vector<string> &real_names, c
 	return Am;
 }
 
-void IterEnsembleSmoother::drop_bad_phi(ParameterEnsemble &_pe, ObservationEnsemble &_oe)
+void IterEnsembleSmoother::drop_bad_phi(ParameterEnsemble &_pe, ObservationEnsemble &_oe, bool is_subset)
 {
 	//don't use this assert because _pe maybe full size, but _oe might be subset size
-	//assert(_pe.shape().first == _oe.shape().first);
+	if (!is_subset)
+		if (_pe.shape().first != _oe.shape().first)
+			throw_ies_error("IterEnsembleSmoother::drop_bad_phi() error: _pe != _oe and not subset");
+		
+	
 	vector<int> idxs = ph.get_idxs_greater_than(pest_scenario.get_pestpp_options().get_ies_bad_phi(), _oe);
 
 	if (pest_scenario.get_pestpp_options().get_ies_debug_bad_phi())
@@ -2040,23 +2044,42 @@ void IterEnsembleSmoother::drop_bad_phi(ParameterEnsemble &_pe, ObservationEnsem
 		vector<string> par_real_names = _pe.get_real_names(), obs_real_names = _oe.get_real_names();
 		stringstream ss;
 		string pname;
+		string oname;
+
 		int pidx;
-		vector<string> full_onames;
+		vector<string> full_onames, full_pnames;
 		// if a subset drop, then use the full oe index, otherwise, just use _oe index
-		if (_oe.shape().first != _pe.shape().first)
+		/*if (_oe.shape().first != _pe.shape().first)
 		{
 			full_onames = oe.get_real_names();
 		}
 		else
 		{
 			full_onames = _oe.get_real_names();
-		}
+		}*/
+		full_onames = oe.get_real_names();
+		full_pnames = pe.get_real_names();
 		vector<string> pdrop, odrop;
 		for (auto i : idxs)
 		{
-			//find the index of this i in the full set of obs names - for the case of randomized subsets
-			pidx = find(full_onames.begin(), full_onames.end(), obs_real_names[i]) - full_onames.begin();
-			pname = par_real_names[pidx];
+			oname = obs_real_names[i];
+			
+			if (is_subset)
+			{
+				pidx = find(full_onames.begin(), full_onames.end(), oname) - full_onames.begin();
+				if (find(subset_idxs.begin(), subset_idxs.end(), pidx) == subset_idxs.end())
+				{
+					ss.str("");
+					ss << "drop_bad_phi() error: idx " << pidx << " not found in subset_idxs";
+					throw_ies_error(ss.str());
+				}
+				pname = full_pnames[pidx];
+			}
+			else
+			{
+				pidx = i;
+				pname = par_real_names[pidx];
+			}
 			ss << pname << " : " << obs_real_names[i] << " , ";
 			pdrop.push_back(pname);
 			odrop.push_back(obs_real_names[i]);
@@ -3267,7 +3290,7 @@ bool IterEnsembleSmoother::solve_new()
 		if (oe_lams[i].shape().first == 0)
 			continue;
 		vector<double> vals({ lam_vals[i],scale_vals[i] });
-		drop_bad_phi(pe_lams[i], oe_lams[i]);
+		drop_bad_phi(pe_lams[i], oe_lams[i], true);
 		if (oe_lams[i].shape().first == 0)
 		{
 			message(1, "all realizations dropped as 'bad' for lambda, scale fac ", vals);
