@@ -399,6 +399,8 @@ public:
 	void set_ies_debug_fail_subset(bool _fail) { ies_debug_fail_subset = _fail; }
 	bool get_ies_debug_fail_remainder() const { return ies_debug_fail_remainder; }
 	void set_ies_debug_fail_remainder(bool _fail) { ies_debug_fail_remainder = _fail; }
+	bool get_ies_debug_bad_phi() const { return ies_debug_bad_phi; }
+	void set_ies_debug_bad_phi(bool _fail) { ies_debug_bad_phi = _fail; }
 
 
 	set<string> get_passed_args() const { return passed_args; }
@@ -494,6 +496,7 @@ private:
 	int ies_num_threads;
 	bool ies_debug_fail_subset;
 	bool ies_debug_fail_remainder;
+	bool ies_debug_bad_phi;
 };
 
 ostream& operator<< (ostream &os, const PestppOptions& val);

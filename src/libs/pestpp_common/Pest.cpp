@@ -791,6 +791,7 @@ int Pest::process_ctl_file(ifstream &fin, string pst_filename)
 	pestpp_options.set_ies_num_threads(-1);
 	pestpp_options.set_ies_debug_fail_subset(false);
 	pestpp_options.set_ies_debug_fail_remainder(false);
+	pestpp_options.set_ies_debug_bad_phi(false);
 
 	pestpp_options.set_condor_submit_file(string());
 	pestpp_options.set_overdue_giveup_minutes(1.0e+30);
