@@ -2732,6 +2732,8 @@ void LocalUpgradeThread::work(int thread_id, int iter, double cur_lam)
 			num_reals = pe_upgrade.shape().first;
 			verbose_level = pe_upgrade.get_pest_scenario_ptr()->get_pestpp_options().get_ies_verbose_level();
 			ctrl_guard.unlock();
+			if (pe_upgrade.get_pest_scenario_ptr()->get_pestpp_options().get_ies_localize_how().substr(1) == "P")
+				loc_by_obs = false;
 			break;
 		}
 	}
@@ -2765,7 +2767,7 @@ void LocalUpgradeThread::work(int thread_id, int iter, double cur_lam)
 					else if ((obs_names.size() == 1) && (k == obs_names[0]))
 					{
 						use_localizer = true;
-						loc_by_obs = false;
+						//loc_by_obs = false;
 					}
 				}
 				count++;
