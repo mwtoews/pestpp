@@ -2446,6 +2446,26 @@ def tenpar_localize_how_test():
     plt.savefig(os.path.join(test_d+"_p", "local_test.pdf"))
     assert diff.max().max() == 0
 
+    mat = pyemu.Matrix.from_names(pst.nnz_obs_names,pst.adj_par_names).to_dataframe()
+    mat.loc[:, :] = 1.0
+    # mat.iloc[0,:] = 1
+    mat = pyemu.Matrix.from_dataframe(mat)
+    mat.to_ascii(os.path.join(template_d, "localizer.mat"))
+
+    pst.pestpp_options["ies_localize_how"] = "p"
+    pst.control_data.noptmax = 2
+    pst.write(os.path.join(template_d, "pest_local_p.pst"))
+    pyemu.os_utils.start_slaves(template_d, exe_path, "pest_local_p.pst", num_slaves=10,
+                                master_dir=test_d + "_p", verbose=True, slave_root=model_d,
+                                port=port)
+
+    pst.pestpp_options["ies_localize_how"] = "o"
+    pst.control_data.noptmax = 2
+    pst.write(os.path.join(template_d, "pest_local_p.pst"))
+    pyemu.os_utils.start_slaves(template_d, exe_path, "pest_local_p.pst", num_slaves=10,
+                                master_dir=test_d + "_p", verbose=True, slave_root=model_d,
+                                port=port)
+
 def freyberg_local_threads_test():
     import flopy
     model_d = "ies_freyberg"
@@ -2573,43 +2593,43 @@ if __name__ == "__main__":
     # write_empty_test_matrix()
 
     setup_suite_dir("ies_10par_xsec")
-    setup_suite_dir("ies_freyberg")
-    run_suite("ies_10par_xsec")
-    run_suite("ies_freyberg")
-    rebase("ies_freyberg")
-    rebase("ies_10par_xsec")
-    compare_suite("ies_10par_xsec")
-    compare_suite("ies_freyberg")
+    # setup_suite_dir("ies_freyberg")
+    # run_suite("ies_10par_xsec")
+    # run_suite("ies_freyberg")
+    # rebase("ies_freyberg")
+    # rebase("ies_10par_xsec")
+    # compare_suite("ies_10par_xsec")
+    # compare_suite("ies_freyberg")
     #eval_freyberg()
     #eval_10par_xsec()
 
     # full list of tests
-    tenpar_subset_test()
-    tenpar_full_cov_test()
-    eval_freyberg_full_cov_reorder()
-    test_freyberg_full_cov_reorder_run()
-    eval_freyberg_full_cov()
-    tenpar_tight_tol_test()
-    test_chenoliver()
-    tenpar_narrow_range_test()
-    test_freyberg_ineq()
-    tenpar_fixed_test()
-    tenpar_fixed_test2()
+    # tenpar_subset_test()
+    # tenpar_full_cov_test()
+    # eval_freyberg_full_cov_reorder()
+    # test_freyberg_full_cov_reorder_run()
+    # eval_freyberg_full_cov()
+    # tenpar_tight_tol_test()
+    # test_chenoliver()
+    # tenpar_narrow_range_test()
+    # test_freyberg_ineq()
+    # tenpar_fixed_test()
+    # tenpar_fixed_test2()
 
-    tenpar_subset_how_test()
-    tenpar_localizer_test1()
-    tenpar_localizer_test2()
-    tenpar_localizer_test3()
-    freyberg_localizer_eval1()
-    freyberg_localizer_eval2()
-    freyberg_localizer_test3()
-    freyberg_dist_local_test()
-    freyberg_local_threads_test()
-    tenpar_restart_binary_test()
-    tenpar_restart_test()
-    csv_tests()
-    tenpar_rns_test()
-    clues_longnames_test()
+    # tenpar_subset_how_test()
+    # tenpar_localizer_test1()
+    # tenpar_localizer_test2()
+    # tenpar_localizer_test3()
+    # freyberg_localizer_eval1()
+    # freyberg_localizer_eval2()
+    # freyberg_localizer_test3()
+    # freyberg_dist_local_test()
+    # freyberg_local_threads_test()
+    # tenpar_restart_binary_test()
+    # tenpar_restart_test()
+    # csv_tests()
+    # tenpar_rns_test()
+    # clues_longnames_test()
     tenpar_localize_how_test()
 
     # freyberg_dist_local_invest()

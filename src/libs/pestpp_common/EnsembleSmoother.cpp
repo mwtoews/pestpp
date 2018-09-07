@@ -385,9 +385,12 @@ void PhiHandler::report(bool echo)
 		if (echo)
 			cout  << "    (note: reg_factor is zero; regularization phi reported but not used)" << endl;
 	}
-	f << "     current reg_factor: " << *reg_factor << endl;
-	if (echo)
-		cout << "     current reg_factor: " << *reg_factor << endl;
+	else
+	{
+		f << "     current reg_factor: " << *reg_factor << endl;
+		if (echo)
+			cout << "     current reg_factor: " << *reg_factor << endl;
+	}
 	if (*reg_factor != 0.0)
 	{
 
