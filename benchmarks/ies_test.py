@@ -2236,9 +2236,9 @@ def freyberg_dist_local_invest():
     pst = pyemu.Pst(os.path.join(template_d, "pest.pst"))
 
     obs = pst.observation_data
-    #pobs = obs.loc[obs.obgnme=="pothead","obsnme"]
-    #obs.loc[pobs[::3],"weight"] = 1.0
-    #obs.loc[pobs[::3],"obsval"] += np.random.normal(0.0,2.0,pobs[::3].shape[0])
+    pobs = obs.loc[obs.obgnme=="pothead","obsnme"]
+    obs.loc[pobs[::3],"weight"] = 1.0
+    obs.loc[pobs[::3],"obsval"] += np.random.normal(0.0,2.0,pobs[::3].shape[0])
 
     par = pst.parameter_data
     par.loc[:, "partrans"] = "fixed"
@@ -2273,7 +2273,7 @@ def freyberg_dist_local_invest():
     df.columns = pst.nnz_obs_names
 
     mat = pyemu.Matrix.from_dataframe(df.T)
-    tol = 0.15
+    tol = 0.45
     mat.x[mat.x < tol] = 0.0
     mat.to_ascii(os.path.join(template_d, "localizer.mat"))
     df_tol = mat.to_dataframe()
@@ -2310,7 +2310,7 @@ def freyberg_dist_local_invest():
     pst.pestpp_options["ies_accept_phi_fac"] = 1000.0
     pst.control_data.nphinored = 20
     #pst.pestpp_options["ies_initial_lambda"] = 0.1
-    pst.control_data.noptmax = 1
+    pst.control_data.noptmax = 10
     pst.write(os.path.join(template_d, "pest_local.pst"))
     pyemu.os_utils.start_slaves(template_d, exe_path, "pest_local.pst", num_slaves=20, master_dir=test_d,
                                 slave_root=model_d, port=port)
@@ -2630,6 +2630,6 @@ if __name__ == "__main__":
     # csv_tests()
     # tenpar_rns_test()
     # clues_longnames_test()
-    tenpar_localize_how_test()
+    # tenpar_localize_how_test()
 
-    # freyberg_dist_local_invest()
+    freyberg_dist_local_invest()

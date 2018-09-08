@@ -1990,7 +1990,8 @@ void IterEnsembleSmoother::initialize()
 	last_best_lam = pest_scenario.get_pestpp_options().get_ies_init_lam();
 	if (last_best_lam <= 0.0)
 	{
-		double x = last_best_mean / (2.0 * double(oe.shape().second));
+		//double x = last_best_mean / (2.0 * double(oe.shape().second));
+		double x = last_best_mean / (2.0 * double(pest_scenario.get_ctl_ordered_nz_obs_names().size()));
 		last_best_lam = pow(10.0,(floor(log10(x))));
 	}
 
@@ -2750,6 +2751,7 @@ void LocalUpgradeThread::work(int thread_id, int iter, double cur_lam)
 		unique_lock<mutex> next_guard(next_lock, defer_lock);
 		par_names.clear();
 		obs_names.clear();
+		use_localizer = false;
 		//the end condition
 		while (true)
 		{	
@@ -2765,9 +2767,9 @@ void LocalUpgradeThread::work(int thread_id, int iter, double cur_lam)
 				obs_names = p.first;
 				if (localizer.get_use())
 				{
-					if ((par_names.size() == 1) && (k == par_names[0]))
+					if ((loc_by_obs) && (par_names.size() == 1) && (k == par_names[0]))
 						use_localizer = true;
-					else if ((obs_names.size() == 1) && (k == obs_names[0]))
+					else if ((!loc_by_obs) && (obs_names.size() == 1) && (k == obs_names[0]))
 					{
 						use_localizer = true;
 						//loc_by_obs = false;
@@ -2814,9 +2816,9 @@ void LocalUpgradeThread::work(int thread_id, int iter, double cur_lam)
 			if ((use_localizer) && (loc.rows() == 0) && (loc_guard.try_lock()))
 			{
 				if (loc_by_obs)
-					loc = localizer.get_localizing_obs_hadamard_matrix(num_reals, par_names[0], obs_names);
-				else
 					loc = localizer.get_localizing_par_hadamard_matrix(num_reals, obs_names[0], par_names);
+				else
+					loc = localizer.get_localizing_obs_hadamard_matrix(num_reals, par_names[0], obs_names);
 				loc_guard.unlock();
 			}
 			if ((obs_diff.rows() == 0) && (obs_diff_guard.try_lock()))
@@ -2898,9 +2900,9 @@ void LocalUpgradeThread::work(int thread_id, int iter, double cur_lam)
 		if (use_localizer)
 		{
 			if (loc_by_obs)
-				obs_diff = obs_diff.cwiseProduct(loc);
-			else
 				par_diff = par_diff.cwiseProduct(loc);
+			else	
+				obs_diff = obs_diff.cwiseProduct(loc);
 
 		}
 		
