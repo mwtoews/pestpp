@@ -181,6 +181,8 @@ private:
 	Covariance parcov, obscov;
 	double reg_factor;
 
+	string base_name = "BASE";
+
 	bool use_localizer;
 	Localizer localizer;
 

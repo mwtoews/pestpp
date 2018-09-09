@@ -869,7 +869,7 @@ void IterEnsembleSmoother::add_bases()
 	//check that 'base' isn't already in ensemble
 	vector<string> rnames = pe.get_real_names();
 	bool inpar = false;
-	if (find(rnames.begin(), rnames.end(), "base") != rnames.end())
+	if (find(rnames.begin(), rnames.end(), base_name) != rnames.end())
 	{
 		message(1, "'base' realization already in parameter ensemble, ignoring '++ies_include_base'");
 		inpar = true;
@@ -881,12 +881,12 @@ void IterEnsembleSmoother::add_bases()
 		pe.get_par_transform().active_ctl2numeric_ip(pars);
 		vector<int> drop{ pe.shape().first - 1 };
 		pe.drop_rows(drop);
-		pe.append("base", pars);
+		pe.append(base_name, pars);
 	}
 
 	//check that 'base' isn't already in ensemble
 	rnames = oe.get_real_names();
-	if (find(rnames.begin(), rnames.end(), "base") != rnames.end())
+	if (find(rnames.begin(), rnames.end(), base_name) != rnames.end())
 	{
 		message(1, "'base' realization already in observation ensemble, ignoring '++ies_include_base'");
 	}
@@ -897,7 +897,7 @@ void IterEnsembleSmoother::add_bases()
 		{
 			vector<string> prnames = pe.get_real_names();
 
-			int idx = find(prnames.begin(), prnames.end(), "base") - prnames.begin();
+			int idx = find(prnames.begin(), prnames.end(), base_name) - prnames.begin();
 			//cout << idx << "," << rnames.size() << endl;
 			string oreal = rnames[idx];
 			stringstream ss;
@@ -908,9 +908,9 @@ void IterEnsembleSmoother::add_bases()
 			vector<string> drop;
 			drop.push_back(oreal);
 			oe.drop_rows(drop);
-			oe.append("base", obs);
-			//rnames.insert(rnames.begin() + idx, string("base"));
-			rnames[idx] = "base";
+			oe.append(base_name, obs);
+			//rnames.insert(rnames.begin() + idx, string(base_name));
+			rnames[idx] = base_name;
 			oe.reorder(rnames, vector<string>());
 		}
 		else
@@ -918,7 +918,7 @@ void IterEnsembleSmoother::add_bases()
 			message(1, "adding 'base' observation values to ensemble");
 			vector<int> drop{ oe.shape().first - 1 };
 			oe.drop_rows(drop);
-			oe.append("base", obs);
+			oe.append(base_name, obs);
 		}
 	}
 
@@ -926,7 +926,7 @@ void IterEnsembleSmoother::add_bases()
 	rnames = weights.get_real_names();
 	if (rnames.size() == 0)
 		return;
-	if (find(rnames.begin(), rnames.end(), "base") != rnames.end())
+	if (find(rnames.begin(), rnames.end(), base_name) != rnames.end())
 	{
 		message(1, "'base' realization already in weights ensemble, ignoring '++ies_include_base'");
 	}
@@ -949,7 +949,7 @@ void IterEnsembleSmoother::add_bases()
 		{
 			vector<string> prnames = pe.get_real_names();
 
-			int idx = find(prnames.begin(), prnames.end(), "base") - prnames.begin();
+			int idx = find(prnames.begin(), prnames.end(), base_name) - prnames.begin();
 			//cout << idx << "," << rnames.size() << endl;
 			string oreal = rnames[idx];
 			stringstream ss;
@@ -960,9 +960,9 @@ void IterEnsembleSmoother::add_bases()
 			vector<string> drop;
 			drop.push_back(oreal);
 			weights.drop_rows(drop);
-			weights.append("base", wobs);
-			//rnames.insert(rnames.begin() + idx, string("base"));
-			rnames[idx] = "base";
+			weights.append(base_name, wobs);
+			//rnames.insert(rnames.begin() + idx, string(base_name));
+			rnames[idx] = base_name;
 			weights.reorder(rnames, vector<string>());
 		}
 		else
@@ -970,7 +970,7 @@ void IterEnsembleSmoother::add_bases()
 			message(1, "adding 'base' weight values to weights");
 
 
-			weights.append("base", wobs);
+			weights.append(base_name, wobs);
 		}
 	}
 }
@@ -1329,16 +1329,18 @@ void IterEnsembleSmoother::initialize_restart_oe()
 		//check if all oe names are found in par en, if so, we can reorder and proceed.  otthewise, die
 		missing.clear();
 		vector<string> pe_real_names = pe.get_real_names();
-		for (auto &pname : pe_real_names)
+		for (auto &oname : oe_real_names)
 		{
-			if (find(oe_real_names.begin(), oe_real_names.end(), pname) == oe_real_names.end())
-				missing.push_back(pname);
+			if (find(pe_real_names.begin(), pe_real_names.end(), oname) == pe_real_names.end())
+				missing.push_back(oname);
 		}
 
 		if (missing.size() > 0)
 		{
 			ss << "number of reals differ between restart obs en (" << oe.shape().first << ") and par en (" << pe.shape().first << ")";
-			ss << " and realization names could not be aligned";
+			ss << " and realization names could not be aligned:";
+			for (auto &m : missing)
+				ss << m << ",";
 			throw_ies_error(ss.str());
 		}
 
@@ -1817,11 +1819,11 @@ void IterEnsembleSmoother::initialize()
 	pe.transform_ip(ParameterEnsemble::transStatus::NUM);
 
 	if (pest_scenario.get_pestpp_options().get_ies_include_base())
-		if (pp_args.find("IES_RESTART_OBS_EN") != pp_args.end())
+		/*if (pp_args.find("IES_RESTART_OBS_EN") != pp_args.end())
 		{
 			message(1, "Warning: even though `ies_include_base` is true, you passed a restart obs en, not adding 'base' realization...");
 		}
-		else
+		else*/
 			add_bases();
 
 	ss.str("");
@@ -3587,7 +3589,7 @@ void IterEnsembleSmoother::set_subset_idx(int size)
 	}
 	vector<string> pe_names = pe.get_real_names();
 
-	vector<string>::iterator bidx = find(pe_names.begin(), pe_names.end(), "base");
+	vector<string>::iterator bidx = find(pe_names.begin(), pe_names.end(), base_name);
 	if (bidx != pe_names.end())
 	{
 
