@@ -1549,9 +1549,6 @@ void IterEnsembleSmoother::initialize_obscov()
 	string how = obscov.try_from(pest_scenario, file_manager, false);
 	message(1, "obscov loaded ", how);
 	obscov = obscov.get(act_obs_names);
-
-
-
 }
 
 
@@ -1559,6 +1556,7 @@ void IterEnsembleSmoother::initialize()
 {
 	message(0, "initializing");
 	pp_args = pest_scenario.get_pestpp_options().get_passed_args();
+
 	stringstream ss;
 
 	//set some defaults

@@ -86,7 +86,7 @@ protected:
 	//ObjectiveFunc *obj_func_ptr;
 	//OutputFileWriter &output_file_writer;
 	//PerformanceLog *performance_log;
-
+	string base_name = "BASE";
 	Eigen::MatrixXd reals;
 	vector<string> var_names;
 	vector<string> real_names;	
