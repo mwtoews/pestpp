@@ -1326,8 +1326,37 @@ void IterEnsembleSmoother::initialize_restart_oe()
 
 	if (oe.shape().first != pe.shape().first)
 	{
-		ss << "number of reals differ between restart obs en (" << oe.shape().first << ") and par en (" << pe.shape().first << ")";
-		throw_ies_error(ss.str());
+		//check if all oe names are found in par en, if so, we can reorder and proceed.  otthewise, die
+		missing.clear();
+		vector<string> pe_real_names = pe.get_real_names();
+		for (auto &pname : pe_real_names)
+		{
+			if (find(oe_real_names.begin(), oe_real_names.end(), pname) == oe_real_names.end())
+				missing.push_back(pname);
+		}
+
+		if (missing.size() > 0)
+		{
+			ss << "number of reals differ between restart obs en (" << oe.shape().first << ") and par en (" << pe.shape().first << ")";
+			ss << " and realization names could not be aligned";
+			throw_ies_error(ss.str());
+		}
+
+		message(2, "reordering pe to align with restart obs en, num reals: ", oe_real_names.size());
+		try
+		{
+			pe.reorder(oe_real_names, vector<string>());
+		}
+		catch (exception &e)
+		{
+			ss << "error reordering pe with restart oe:" << e.what();
+			throw_ies_error(ss.str());
+		}
+		catch (...)
+		{
+			throw_ies_error(string("error reordering pe with restart oe"));
+		}
+
 	}
 
 	//if (oe.shape().first < oe_base.shape().first) //maybe some runs failed...
@@ -1351,6 +1380,7 @@ void IterEnsembleSmoother::initialize_restart_oe()
 				pe_real_names.push_back(pe_org_real_names[iit]);
 			}
 		}*/
+		message(2, "reordering oe_base to align with restart obs en,num reals:", oe_real_names.size());
 		try
 		{
 			oe_base.reorder(oe_real_names, vector<string>());

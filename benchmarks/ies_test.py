@@ -2237,8 +2237,8 @@ def freyberg_dist_local_invest():
 
     obs = pst.observation_data
     pobs = obs.loc[obs.obgnme=="pothead","obsnme"]
-    obs.loc[pobs[::3],"weight"] = 1.0
-    obs.loc[pobs[::3],"obsval"] += np.random.normal(0.0,2.0,pobs[::3].shape[0])
+    obs.loc[pobs[::2],"weight"] = 2.0
+    obs.loc[pobs[::2],"obsval"] += np.random.normal(0.0,4.0,pobs[::3].shape[0])
 
     par = pst.parameter_data
     par.loc[:, "partrans"] = "fixed"
@@ -2258,7 +2258,7 @@ def freyberg_dist_local_invest():
     obs_nz.loc[:, 'y'] = obs_nz.apply(lambda x: m.sr.ycentergrid[x.i, x.j], axis=1)
 
     dfs = []
-    v = pyemu.geostats.ExpVario(contribution=1.0, a=600)
+    v = pyemu.geostats.ExpVario(contribution=1.0, a=1000)
     for name in pst.nnz_obs_names:
         x, y = obs_nz.loc[name, ['x', 'y']].values
         # print(name,x,y)
@@ -2275,6 +2275,7 @@ def freyberg_dist_local_invest():
     mat = pyemu.Matrix.from_dataframe(df.T)
     tol = 0.45
     mat.x[mat.x < tol] = 0.0
+    #mat.x[mat.x > 0.0] = 1.0
     mat.to_ascii(os.path.join(template_d, "localizer.mat"))
     df_tol = mat.to_dataframe()
     par_sum = df_tol.sum(axis=0)
@@ -2310,7 +2311,7 @@ def freyberg_dist_local_invest():
     pst.pestpp_options["ies_accept_phi_fac"] = 1000.0
     pst.control_data.nphinored = 20
     #pst.pestpp_options["ies_initial_lambda"] = 0.1
-    pst.control_data.noptmax = 10
+    pst.control_data.noptmax = 20
     pst.write(os.path.join(template_d, "pest_local.pst"))
     pyemu.os_utils.start_slaves(template_d, exe_path, "pest_local.pst", num_slaves=20, master_dir=test_d,
                                 slave_root=model_d, port=port)
