@@ -2679,11 +2679,11 @@ LocalUpgradeThread::LocalUpgradeThread(map<string, Eigen::VectorXd> &_par_resid_
 	map<string, Eigen::VectorXd> &_obs_resid_map, map<string, Eigen::VectorXd> &_obs_diff_map,
 	Localizer &_localizer, map<string, double> &_parcov_inv_map,map<string, double> &_weight_map, 
 	ParameterEnsemble &_pe_upgrade, map<string,pair<vector<string>,vector<string>>> &_cases,
-	map<string, Eigen::VectorXd> &_Am_map): par_resid_map(_par_resid_map),
+	map<string, Eigen::VectorXd> &_Am_map, Localizer::How &_how): par_resid_map(_par_resid_map),
 	par_diff_map(_par_diff_map), obs_resid_map(_obs_resid_map),obs_diff_map(_obs_diff_map),localizer(_localizer),
 	pe_upgrade(_pe_upgrade),cases(_cases), parcov_inv_map(_parcov_inv_map), weight_map(_weight_map), Am_map(_Am_map)
 {
-	
+	how = _how;
 	parcov_inv_map = _parcov_inv_map;
 	weight_map = _weight_map;
 	count = 0;
@@ -2766,7 +2766,8 @@ void LocalUpgradeThread::work(int thread_id, int iter, double cur_lam)
 			num_reals = pe_upgrade.shape().first;
 			verbose_level = pe_upgrade.get_pest_scenario_ptr()->get_pestpp_options().get_ies_verbose_level();
 			ctrl_guard.unlock();
-			if (pe_upgrade.get_pest_scenario_ptr()->get_pestpp_options().get_ies_localize_how().substr(1) == "P")
+			//if (pe_upgrade.get_pest_scenario_ptr()->get_pestpp_options().get_ies_localize_how()[0] == 'P')
+			if (how == Localizer::How::PARAMETERS)
 				loc_by_obs = false;
 			break;
 		}
@@ -3141,9 +3142,9 @@ ParameterEnsemble IterEnsembleSmoother::calc_localized_upgrade_threaded(double c
 	mat.resize(0, 0);
 	// clear the upgrade ensemble
 	pe_upgrade.set_zeros();
-	
+	Localizer::How _how = localizer.get_how();
 	LocalUpgradeThread worker(par_resid_map, par_diff_map, obs_resid_map, obs_diff_map,
-		localizer, parcov_inv_map, weight_map, pe_upgrade, loc_map, Am_map);
+		localizer, parcov_inv_map, weight_map, pe_upgrade, loc_map, Am_map, _how);
 
 	//if ((num_threads < 1) || (loc_map.size() == 1))
 	if (num_threads < 1)
