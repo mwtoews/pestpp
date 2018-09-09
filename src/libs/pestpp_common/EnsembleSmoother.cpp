@@ -1326,7 +1326,7 @@ void IterEnsembleSmoother::initialize_restart_oe()
 
 	if (oe.shape().first != pe.shape().first)
 	{
-		//check if all oe names are found in par en, if so, we can reorder and proceed.  otthewise, die
+		//check if all oe names are found in par en, if so, we can reorder and proceed.  otherwise, die
 		missing.clear();
 		vector<string> pe_real_names = pe.get_real_names();
 		for (auto &oname : oe_real_names)
@@ -1819,11 +1819,11 @@ void IterEnsembleSmoother::initialize()
 	pe.transform_ip(ParameterEnsemble::transStatus::NUM);
 
 	if (pest_scenario.get_pestpp_options().get_ies_include_base())
-		/*if (pp_args.find("IES_RESTART_OBS_EN") != pp_args.end())
+		if (pp_args.find("IES_RESTART_OBS_EN") != pp_args.end())
 		{
 			message(1, "Warning: even though `ies_include_base` is true, you passed a restart obs en, not adding 'base' realization...");
 		}
-		else*/
+		else
 			add_bases();
 
 	ss.str("");
