@@ -276,7 +276,7 @@ Eigen::MatrixXd Localizer::get_localizing_obs_hadamard_matrix(int num_reals, str
 	vector<string> mat_cols = mat.get_col_names();
 	vector<string>::iterator it = find(mat_cols.begin(), mat_cols.end(), col_name);
 	if (it == mat_cols.end())
-		throw runtime_error("Localizer::get_localizing_obs_hadamard_matrix() error: col_name not found: " + col_name);
+		throw runtime_error("Localizer::get_localizing_obs_hadamard_matrix() error: col_name not found in localizer matrix: " + col_name);
 	int idx = it - mat_cols.begin();
 	Eigen::VectorXd mat_vec = mat.e_ptr()->col(idx);
 	int col_idx;
@@ -299,7 +299,7 @@ Eigen::MatrixXd Localizer::get_localizing_par_hadamard_matrix(int num_reals, str
 	vector<string> mat_rows = mat.get_row_names();
 	vector<string>::iterator it = find(mat_rows.begin(), mat_rows.end(), row_name);
 	if (it == mat_rows.end())
-		throw runtime_error("Localizer::get_localizing_par_hadamard_matrix() error: col_name not found: " + row_name);
+		throw runtime_error("Localizer::get_localizing_par_hadamard_matrix() error: row_name not found in localizer matrix: " + row_name);
 	int idx = it - mat_rows.begin();
 	Eigen::VectorXd mat_vec = mat.e_ptr()->row(idx);
 	int col_idx;

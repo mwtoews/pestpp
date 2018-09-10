@@ -385,9 +385,12 @@ void PhiHandler::report(bool echo)
 		if (echo)
 			cout  << "    (note: reg_factor is zero; regularization phi reported but not used)" << endl;
 	}
-	f << "     current reg_factor: " << *reg_factor << endl;
-	if (echo)
-		cout << "     current reg_factor: " << *reg_factor << endl;
+	else
+	{
+		f << "     current reg_factor: " << *reg_factor << endl;
+		if (echo)
+			cout << "     current reg_factor: " << *reg_factor << endl;
+	}
 	if (*reg_factor != 0.0)
 	{
 
@@ -866,7 +869,7 @@ void IterEnsembleSmoother::add_bases()
 	//check that 'base' isn't already in ensemble
 	vector<string> rnames = pe.get_real_names();
 	bool inpar = false;
-	if (find(rnames.begin(), rnames.end(), "base") != rnames.end())
+	if (find(rnames.begin(), rnames.end(), base_name) != rnames.end())
 	{
 		message(1, "'base' realization already in parameter ensemble, ignoring '++ies_include_base'");
 		inpar = true;
@@ -878,12 +881,12 @@ void IterEnsembleSmoother::add_bases()
 		pe.get_par_transform().active_ctl2numeric_ip(pars);
 		vector<int> drop{ pe.shape().first - 1 };
 		pe.drop_rows(drop);
-		pe.append("base", pars);
+		pe.append(base_name, pars);
 	}
 
 	//check that 'base' isn't already in ensemble
 	rnames = oe.get_real_names();
-	if (find(rnames.begin(), rnames.end(), "base") != rnames.end())
+	if (find(rnames.begin(), rnames.end(), base_name) != rnames.end())
 	{
 		message(1, "'base' realization already in observation ensemble, ignoring '++ies_include_base'");
 	}
@@ -894,7 +897,7 @@ void IterEnsembleSmoother::add_bases()
 		{
 			vector<string> prnames = pe.get_real_names();
 
-			int idx = find(prnames.begin(), prnames.end(), "base") - prnames.begin();
+			int idx = find(prnames.begin(), prnames.end(), base_name) - prnames.begin();
 			//cout << idx << "," << rnames.size() << endl;
 			string oreal = rnames[idx];
 			stringstream ss;
@@ -905,9 +908,9 @@ void IterEnsembleSmoother::add_bases()
 			vector<string> drop;
 			drop.push_back(oreal);
 			oe.drop_rows(drop);
-			oe.append("base", obs);
-			//rnames.insert(rnames.begin() + idx, string("base"));
-			rnames[idx] = "base";
+			oe.append(base_name, obs);
+			//rnames.insert(rnames.begin() + idx, string(base_name));
+			rnames[idx] = base_name;
 			oe.reorder(rnames, vector<string>());
 		}
 		else
@@ -915,7 +918,7 @@ void IterEnsembleSmoother::add_bases()
 			message(1, "adding 'base' observation values to ensemble");
 			vector<int> drop{ oe.shape().first - 1 };
 			oe.drop_rows(drop);
-			oe.append("base", obs);
+			oe.append(base_name, obs);
 		}
 	}
 
@@ -923,7 +926,7 @@ void IterEnsembleSmoother::add_bases()
 	rnames = weights.get_real_names();
 	if (rnames.size() == 0)
 		return;
-	if (find(rnames.begin(), rnames.end(), "base") != rnames.end())
+	if (find(rnames.begin(), rnames.end(), base_name) != rnames.end())
 	{
 		message(1, "'base' realization already in weights ensemble, ignoring '++ies_include_base'");
 	}
@@ -946,7 +949,7 @@ void IterEnsembleSmoother::add_bases()
 		{
 			vector<string> prnames = pe.get_real_names();
 
-			int idx = find(prnames.begin(), prnames.end(), "base") - prnames.begin();
+			int idx = find(prnames.begin(), prnames.end(), base_name) - prnames.begin();
 			//cout << idx << "," << rnames.size() << endl;
 			string oreal = rnames[idx];
 			stringstream ss;
@@ -957,9 +960,9 @@ void IterEnsembleSmoother::add_bases()
 			vector<string> drop;
 			drop.push_back(oreal);
 			weights.drop_rows(drop);
-			weights.append("base", wobs);
-			//rnames.insert(rnames.begin() + idx, string("base"));
-			rnames[idx] = "base";
+			weights.append(base_name, wobs);
+			//rnames.insert(rnames.begin() + idx, string(base_name));
+			rnames[idx] = base_name;
 			weights.reorder(rnames, vector<string>());
 		}
 		else
@@ -967,7 +970,7 @@ void IterEnsembleSmoother::add_bases()
 			message(1, "adding 'base' weight values to weights");
 
 
-			weights.append("base", wobs);
+			weights.append(base_name, wobs);
 		}
 	}
 }
@@ -1323,8 +1326,39 @@ void IterEnsembleSmoother::initialize_restart_oe()
 
 	if (oe.shape().first != pe.shape().first)
 	{
-		ss << "number of reals differ between restart obs en (" << oe.shape().first << ") and par en (" << pe.shape().first << ")";
-		throw_ies_error(ss.str());
+		//check if all oe names are found in par en, if so, we can reorder and proceed.  otherwise, die
+		missing.clear();
+		vector<string> pe_real_names = pe.get_real_names();
+		for (auto &oname : oe_real_names)
+		{
+			if (find(pe_real_names.begin(), pe_real_names.end(), oname) == pe_real_names.end())
+				missing.push_back(oname);
+		}
+
+		if (missing.size() > 0)
+		{
+			ss << "number of reals differ between restart obs en (" << oe.shape().first << ") and par en (" << pe.shape().first << ")";
+			ss << " and realization names could not be aligned:";
+			for (auto &m : missing)
+				ss << m << ",";
+			throw_ies_error(ss.str());
+		}
+
+		message(2, "reordering pe to align with restart obs en, num reals: ", oe_real_names.size());
+		try
+		{
+			pe.reorder(oe_real_names, vector<string>());
+		}
+		catch (exception &e)
+		{
+			ss << "error reordering pe with restart oe:" << e.what();
+			throw_ies_error(ss.str());
+		}
+		catch (...)
+		{
+			throw_ies_error(string("error reordering pe with restart oe"));
+		}
+
 	}
 
 	//if (oe.shape().first < oe_base.shape().first) //maybe some runs failed...
@@ -1348,6 +1382,7 @@ void IterEnsembleSmoother::initialize_restart_oe()
 				pe_real_names.push_back(pe_org_real_names[iit]);
 			}
 		}*/
+		message(2, "reordering oe_base to align with restart obs en,num reals:", oe_real_names.size());
 		try
 		{
 			oe_base.reorder(oe_real_names, vector<string>());
@@ -1514,9 +1549,6 @@ void IterEnsembleSmoother::initialize_obscov()
 	string how = obscov.try_from(pest_scenario, file_manager, false);
 	message(1, "obscov loaded ", how);
 	obscov = obscov.get(act_obs_names);
-
-
-
 }
 
 
@@ -1524,6 +1556,7 @@ void IterEnsembleSmoother::initialize()
 {
 	message(0, "initializing");
 	pp_args = pest_scenario.get_pestpp_options().get_passed_args();
+
 	stringstream ss;
 
 	//set some defaults
@@ -1987,7 +2020,8 @@ void IterEnsembleSmoother::initialize()
 	last_best_lam = pest_scenario.get_pestpp_options().get_ies_init_lam();
 	if (last_best_lam <= 0.0)
 	{
-		double x = last_best_mean / (2.0 * double(oe.shape().second));
+		//double x = last_best_mean / (2.0 * double(oe.shape().second));
+		double x = last_best_mean / (2.0 * double(pest_scenario.get_ctl_ordered_nz_obs_names().size()));
 		last_best_lam = pow(10.0,(floor(log10(x))));
 	}
 
@@ -2645,11 +2679,11 @@ LocalUpgradeThread::LocalUpgradeThread(map<string, Eigen::VectorXd> &_par_resid_
 	map<string, Eigen::VectorXd> &_obs_resid_map, map<string, Eigen::VectorXd> &_obs_diff_map,
 	Localizer &_localizer, map<string, double> &_parcov_inv_map,map<string, double> &_weight_map, 
 	ParameterEnsemble &_pe_upgrade, map<string,pair<vector<string>,vector<string>>> &_cases,
-	map<string, Eigen::VectorXd> &_Am_map): par_resid_map(_par_resid_map),
+	map<string, Eigen::VectorXd> &_Am_map, Localizer::How &_how): par_resid_map(_par_resid_map),
 	par_diff_map(_par_diff_map), obs_resid_map(_obs_resid_map),obs_diff_map(_obs_diff_map),localizer(_localizer),
 	pe_upgrade(_pe_upgrade),cases(_cases), parcov_inv_map(_parcov_inv_map), weight_map(_weight_map), Am_map(_Am_map)
 {
-	
+	how = _how;
 	parcov_inv_map = _parcov_inv_map;
 	weight_map = _weight_map;
 	count = 0;
@@ -2732,6 +2766,9 @@ void LocalUpgradeThread::work(int thread_id, int iter, double cur_lam)
 			num_reals = pe_upgrade.shape().first;
 			verbose_level = pe_upgrade.get_pest_scenario_ptr()->get_pestpp_options().get_ies_verbose_level();
 			ctrl_guard.unlock();
+			//if (pe_upgrade.get_pest_scenario_ptr()->get_pestpp_options().get_ies_localize_how()[0] == 'P')
+			if (how == Localizer::How::PARAMETERS)
+				loc_by_obs = false;
 			break;
 		}
 	}
@@ -2745,6 +2782,7 @@ void LocalUpgradeThread::work(int thread_id, int iter, double cur_lam)
 		unique_lock<mutex> next_guard(next_lock, defer_lock);
 		par_names.clear();
 		obs_names.clear();
+		use_localizer = false;
 		//the end condition
 		while (true)
 		{	
@@ -2760,12 +2798,12 @@ void LocalUpgradeThread::work(int thread_id, int iter, double cur_lam)
 				obs_names = p.first;
 				if (localizer.get_use())
 				{
-					if ((par_names.size() == 1) && (k == par_names[0]))
+					if ((loc_by_obs) && (par_names.size() == 1) && (k == par_names[0]))
 						use_localizer = true;
-					else if ((obs_names.size() == 1) && (k == obs_names[0]))
+					else if ((!loc_by_obs) && (obs_names.size() == 1) && (k == obs_names[0]))
 					{
 						use_localizer = true;
-						loc_by_obs = false;
+						//loc_by_obs = false;
 					}
 				}
 				count++;
@@ -2809,9 +2847,9 @@ void LocalUpgradeThread::work(int thread_id, int iter, double cur_lam)
 			if ((use_localizer) && (loc.rows() == 0) && (loc_guard.try_lock()))
 			{
 				if (loc_by_obs)
-					loc = localizer.get_localizing_obs_hadamard_matrix(num_reals, par_names[0], obs_names);
-				else
 					loc = localizer.get_localizing_par_hadamard_matrix(num_reals, obs_names[0], par_names);
+				else
+					loc = localizer.get_localizing_obs_hadamard_matrix(num_reals, par_names[0], obs_names);
 				loc_guard.unlock();
 			}
 			if ((obs_diff.rows() == 0) && (obs_diff_guard.try_lock()))
@@ -2893,9 +2931,9 @@ void LocalUpgradeThread::work(int thread_id, int iter, double cur_lam)
 		if (use_localizer)
 		{
 			if (loc_by_obs)
-				obs_diff = obs_diff.cwiseProduct(loc);
-			else
 				par_diff = par_diff.cwiseProduct(loc);
+			else	
+				obs_diff = obs_diff.cwiseProduct(loc);
 
 		}
 		
@@ -3104,9 +3142,9 @@ ParameterEnsemble IterEnsembleSmoother::calc_localized_upgrade_threaded(double c
 	mat.resize(0, 0);
 	// clear the upgrade ensemble
 	pe_upgrade.set_zeros();
-	
+	Localizer::How _how = localizer.get_how();
 	LocalUpgradeThread worker(par_resid_map, par_diff_map, obs_resid_map, obs_diff_map,
-		localizer, parcov_inv_map, weight_map, pe_upgrade, loc_map, Am_map);
+		localizer, parcov_inv_map, weight_map, pe_upgrade, loc_map, Am_map, _how);
 
 	//if ((num_threads < 1) || (loc_map.size() == 1))
 	if (num_threads < 1)
@@ -3550,7 +3588,7 @@ void IterEnsembleSmoother::set_subset_idx(int size)
 	}
 	vector<string> pe_names = pe.get_real_names();
 
-	vector<string>::iterator bidx = find(pe_names.begin(), pe_names.end(), "base");
+	vector<string>::iterator bidx = find(pe_names.begin(), pe_names.end(), base_name);
 	if (bidx != pe_names.end())
 	{
 

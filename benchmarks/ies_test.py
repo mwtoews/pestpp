@@ -1415,7 +1415,7 @@ def prep_for_travis(model_d):
 def tenpar_incr_num_reals_test():
     """tenpar incr num reals test"""
     model_d = "ies_10par_xsec"
-    test_d = os.path.join(model_d, "master_incr_num_reals1")
+    test_d = os.path.join(model_d, "master_incr_num_reals2")
     template_d = os.path.join(model_d, "template")
     pst = pyemu.Pst(os.path.join(template_d, "pest.pst"))
     num_reals = 10
@@ -1441,7 +1441,7 @@ def tenpar_incr_num_reals_test():
 
     df1 = pd.read_csv(os.path.join(test_d,"pest_restart.2.par.csv"),index_col=0)
     df2 = pd.read_csv(os.path.join(test_d,"pest.0.par.csv"),index_col=0)
-    diff = df1.loc["base",:] - df2.loc["base",:]
+    diff = df1.loc["BASE",:] - df2.loc["BASE",:]
     print(diff)
     print(diff.max())
 
@@ -2236,9 +2236,9 @@ def freyberg_dist_local_invest():
     pst = pyemu.Pst(os.path.join(template_d, "pest.pst"))
 
     obs = pst.observation_data
-    #pobs = obs.loc[obs.obgnme=="pothead","obsnme"]
-    #obs.loc[pobs[::3],"weight"] = 1.0
-    #obs.loc[pobs[::3],"obsval"] += np.random.normal(0.0,2.0,pobs[::3].shape[0])
+    pobs = obs.loc[obs.obgnme=="pothead","obsnme"]
+    obs.loc[pobs[::2],"weight"] = 2.0
+    obs.loc[pobs[::2],"obsval"] += np.random.normal(0.0,4.0,pobs[::2].shape[0])
 
     par = pst.parameter_data
     par.loc[:, "partrans"] = "fixed"
@@ -2258,7 +2258,7 @@ def freyberg_dist_local_invest():
     obs_nz.loc[:, 'y'] = obs_nz.apply(lambda x: m.sr.ycentergrid[x.i, x.j], axis=1)
 
     dfs = []
-    v = pyemu.geostats.ExpVario(contribution=1.0, a=600)
+    v = pyemu.geostats.ExpVario(contribution=1.0, a=1000)
     for name in pst.nnz_obs_names:
         x, y = obs_nz.loc[name, ['x', 'y']].values
         # print(name,x,y)
@@ -2273,8 +2273,9 @@ def freyberg_dist_local_invest():
     df.columns = pst.nnz_obs_names
 
     mat = pyemu.Matrix.from_dataframe(df.T)
-    tol = 0.15
+    tol = 0.45
     mat.x[mat.x < tol] = 0.0
+    #mat.x[mat.x > 0.0] = 1.0
     mat.to_ascii(os.path.join(template_d, "localizer.mat"))
     df_tol = mat.to_dataframe()
     par_sum = df_tol.sum(axis=0)
@@ -2310,7 +2311,7 @@ def freyberg_dist_local_invest():
     pst.pestpp_options["ies_accept_phi_fac"] = 1000.0
     pst.control_data.nphinored = 20
     #pst.pestpp_options["ies_initial_lambda"] = 0.1
-    pst.control_data.noptmax = 1
+    pst.control_data.noptmax = 20
     pst.write(os.path.join(template_d, "pest_local.pst"))
     pyemu.os_utils.start_slaves(template_d, exe_path, "pest_local.pst", num_slaves=20, master_dir=test_d,
                                 slave_root=model_d, port=port)
@@ -2446,6 +2447,26 @@ def tenpar_localize_how_test():
     plt.savefig(os.path.join(test_d+"_p", "local_test.pdf"))
     assert diff.max().max() == 0
 
+    mat = pyemu.Matrix.from_names(pst.nnz_obs_names,pst.adj_par_names).to_dataframe()
+    mat.loc[:, :] = 1.0
+    # mat.iloc[0,:] = 1
+    mat = pyemu.Matrix.from_dataframe(mat)
+    mat.to_ascii(os.path.join(template_d, "localizer.mat"))
+
+    pst.pestpp_options["ies_localize_how"] = "p"
+    pst.control_data.noptmax = 2
+    pst.write(os.path.join(template_d, "pest_local_p.pst"))
+    pyemu.os_utils.start_slaves(template_d, exe_path, "pest_local_p.pst", num_slaves=10,
+                                master_dir=test_d + "_p", verbose=True, slave_root=model_d,
+                                port=port)
+
+    pst.pestpp_options["ies_localize_how"] = "o"
+    pst.control_data.noptmax = 2
+    pst.write(os.path.join(template_d, "pest_local_p.pst"))
+    pyemu.os_utils.start_slaves(template_d, exe_path, "pest_local_p.pst", num_slaves=10,
+                                master_dir=test_d + "_p", verbose=True, slave_root=model_d,
+                                port=port)
+
 def freyberg_local_threads_test():
     import flopy
     model_d = "ies_freyberg"
@@ -2572,44 +2593,43 @@ def freyberg_local_threads_test():
 if __name__ == "__main__":
     # write_empty_test_matrix()
 
-    setup_suite_dir("ies_10par_xsec")
-    setup_suite_dir("ies_freyberg")
-    run_suite("ies_10par_xsec")
-    run_suite("ies_freyberg")
-    rebase("ies_freyberg")
-    rebase("ies_10par_xsec")
-    compare_suite("ies_10par_xsec")
-    compare_suite("ies_freyberg")
+    # setup_suite_dir("ies_10par_xsec")
+    # setup_suite_dir("ies_freyberg")
+    # run_suite("ies_10par_xsec")
+    # run_suite("ies_freyberg")
+    # rebase("ies_freyberg")
+    # rebase("ies_10par_xsec")
+    # compare_suite("ies_10par_xsec")
+    # compare_suite("ies_freyberg")
     #eval_freyberg()
     #eval_10par_xsec()
 
-    # full list of tests
-    tenpar_subset_test()
-    tenpar_full_cov_test()
-    eval_freyberg_full_cov_reorder()
-    test_freyberg_full_cov_reorder_run()
-    eval_freyberg_full_cov()
-    tenpar_tight_tol_test()
-    test_chenoliver()
-    tenpar_narrow_range_test()
-    test_freyberg_ineq()
-    tenpar_fixed_test()
-    tenpar_fixed_test2()
-
-    tenpar_subset_how_test()
-    tenpar_localizer_test1()
-    tenpar_localizer_test2()
-    tenpar_localizer_test3()
-    freyberg_localizer_eval1()
-    freyberg_localizer_eval2()
-    freyberg_localizer_test3()
-    freyberg_dist_local_test()
-    freyberg_local_threads_test()
-    tenpar_restart_binary_test()
-    tenpar_restart_test()
+    #full list of tests
+    # tenpar_subset_test()
+    # tenpar_full_cov_test()
+    # eval_freyberg_full_cov_reorder()
+    # test_freyberg_full_cov_reorder_run()
+    # eval_freyberg_full_cov()
+    # tenpar_tight_tol_test()
+    # test_chenoliver()
+    # tenpar_narrow_range_test()
+    # test_freyberg_ineq()
+    # tenpar_fixed_test()
+    # tenpar_fixed_test2()\
+    # tenpar_subset_how_test()
+    # tenpar_localizer_test1()
+    # tenpar_localizer_test2()
+    # tenpar_localizer_test3()
+    # freyberg_localizer_eval1()
+    # freyberg_localizer_eval2()
+    # freyberg_localizer_test3()
+    # freyberg_dist_local_test()
+    # freyberg_local_threads_test()
+    # tenpar_restart_binary_test()
+    # tenpar_restart_test()
     csv_tests()
-    tenpar_rns_test()
-    clues_longnames_test()
-    tenpar_localize_how_test()
-
-    # freyberg_dist_local_invest()
+    # tenpar_rns_test()
+    # clues_longnames_test()
+    # tenpar_localize_how_test()
+    #tenpar_incr_num_reals_test()
+    #freyberg_dist_local_invest()
