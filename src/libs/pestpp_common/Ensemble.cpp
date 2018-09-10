@@ -1460,12 +1460,18 @@ map<int,int> ParameterEnsemble::add_runs(RunManagerAbstract *run_mgr_ptr,const v
 			run_real_names.push_back(real_names[i]);
 	else
 		run_real_names = real_names;
+	int idx;
+	map<string, int> rmap;
 
+	for (int i = 0; i < real_names.size(); i++)
+		rmap[real_names[i]] = i;
 	for (auto &rname : run_real_names)
 	{
-		Eigen::VectorXd rvector = get_real_vector(rname);
+		//idx = find(real_names.begin(), real_names.end(), rname) - real_names.begin();
+		idx = rmap[rname];
+		//Eigen::VectorXd rvector = get_real_vector(idx);
 		pars_real = pars;
-		pars_real.update_without_clear(var_names, get_real_vector(rname));
+		pars_real.update_without_clear(var_names, get_real_vector(idx));
 		//make sure the pars are in the right trans status
 		if (tstat == ParameterEnsemble::transStatus::CTL)
 			par_transform.active_ctl2model_ip(pars_real);
@@ -1473,7 +1479,7 @@ map<int,int> ParameterEnsemble::add_runs(RunManagerAbstract *run_mgr_ptr,const v
 			par_transform.numeric2model_ip(pars_real);
 		replace_fixed(rname, pars_real);
 		run_id = run_mgr_ptr->add_run(pars_real);
-		real_run_ids[find(real_names.begin(), real_names.end(), rname) - real_names.begin()]  = run_id;
+		real_run_ids[idx]  = run_id;
 	}
 	return real_run_ids;
 }
@@ -1623,12 +1629,12 @@ void ParameterEnsemble::save_fixed()
 		}
 	}
 	// add the "base" if its not in the real names already
-	if (find(real_names.begin(), real_names.end(), "base") == real_names.end())
+	if (find(real_names.begin(), real_names.end(), base_name) == real_names.end())
 	{
 		Parameters pars = pest_scenario_ptr->get_ctl_parameters();
 		for (auto fname : fixed_names)
 		{
-			pair<string, string> key("base", fname);
+			pair<string, string> key(base_name, fname);
 			fixed_map[key] = pars[fname];
 		}
 	}
