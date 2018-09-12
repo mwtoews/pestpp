@@ -482,8 +482,9 @@ void PestppOptions::parce_line(const string &line)
 			vector<string> prediction_tok;
 			tokenize(value, prediction_tok, ",");
 			for (const auto &pname : prediction_tok)
-			{
-				prediction_names.push_back(pname);
+			{ 
+				
+				prediction_names.push_back(strip_cp(pname));
 			}
 		}
 		else if ((key == "PARCOV") || (key == "PARAMETER_COVARIANCE")
@@ -669,7 +670,7 @@ void PestppOptions::parce_line(const string &line)
 			tokenize(value, tok, ", ");
 			for (const auto &name : tok)
 			{
-				opt_dec_var_groups.push_back(name);
+				opt_dec_var_groups.push_back(strip_cp(name));
 			}
 		}
 
@@ -682,7 +683,7 @@ void PestppOptions::parce_line(const string &line)
 			tokenize(value, tok, ", ");
 			for (const auto &name : tok)
 			{
-				opt_external_var_groups.push_back(name);
+				opt_external_var_groups.push_back(strip_cp(name));
 			}
 		}
 
@@ -693,7 +694,7 @@ void PestppOptions::parce_line(const string &line)
 			tokenize(value, tok, ", ");
 			for (const auto &name : tok)
 			{
-				opt_constraint_groups.push_back(name);
+				opt_constraint_groups.push_back(strip_cp(name));
 			}
 		}
 
