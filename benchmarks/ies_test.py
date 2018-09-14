@@ -2197,6 +2197,7 @@ def freyberg_dist_local_test():
     pst.pestpp_options["ies_verbose_level"] = 1
     pst.pestpp_options["ies_subset_how"] = "random"
     pst.pestpp_options["ies_accept_phi_fac"] = 1000.0
+    pst.pestpp_options["overdue_giveup_fac"] = 1000.0
     pst.control_data.noptmax = 2
     pst.write(os.path.join(template_d, "pest_local.pst"))
     pyemu.os_utils.start_slaves(template_d, exe_path, "pest_local.pst", num_slaves=20, master_dir=test_d,
