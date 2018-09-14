@@ -32,7 +32,7 @@ All members of the software suite can be compiled for PC, MAC, or Linux and have
 
 ## Recent Updates
 
-<b> update 15 September 2018 </b>: An official PEST++ V4 manual is now available in the Documentation directory.  It is a docx file so any contributions (revsisions/extensions/clarifications/etc) are greatly appreciated!
+<b> update 15 September 2018 </b>: An official PEST++ V4 manual is now available in the Documentation directory.  It is a docx file so any contributions (revisions/extensions/clarifications/etc) are greatly appreciated!
 
 <b> update 29 August 2018 </b>: ``pestpp-ies`` now includes a multi-threaded localization (using a combination of local analysis and observation covariance tapering) solver (as of v 4.1.5) as well as other optimizations to improve the speed of calculating par-by-par localization.  The number of threads is controlled through the ``++ies_num_threads`` argument
 
