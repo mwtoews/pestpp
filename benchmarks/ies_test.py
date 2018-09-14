@@ -2628,7 +2628,7 @@ if __name__ == "__main__":
     # freyberg_local_threads_test()
     # tenpar_restart_binary_test()
     # tenpar_restart_test()
-    # csv_tests()
+    csv_tests()
     # tenpar_rns_test()
     # clues_longnames_test()
     # tenpar_localize_how_test()
