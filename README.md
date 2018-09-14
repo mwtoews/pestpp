@@ -4,7 +4,11 @@ Object Oriented Inverse Modeling Software
 [![Travis Status](https://travis-ci.org/jtwhite79/pestpp.svg?branch=master)](https://travis-ci.org/jtwhite79/pestpp)
 [![Build status](https://ci.appveyor.com/api/projects/status/jlyivnw4jhstp8l8?svg=true)](https://ci.appveyor.com/project/jtwhite79/pestpp)
 
-## links to latest binaries
+## Documentation
+
+The lastest PEST++ manual is available [here](https://github.com/jtwhite79/pestpp/tree/master/documentation). Direct zip download [here](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/jtwhite79/pestpp/tree/master/documentation)
+
+## Links to latest binaries
 
 * [windows (users with current visual studio installed)](https://github.com/jtwhite79/pestpp/tree/master/bin/win).  Direct zip download [here](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/jtwhite79/pestpp/tree/master/bin/win)
 * [windows compiled with intel C++ (the 'i' prefix)](https://github.com/jtwhite79/pestpp/tree/master/bin/iwin).  Direct zip download [here](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/jtwhite79/pestpp/tree/master/bin/iwin)
@@ -14,7 +18,7 @@ Object Oriented Inverse Modeling Software
 ## Overview
 The PEST++ software suite includes several stand-alone tools for model-independent (non-intrusive) computer model parameter estimation and uncertainty analysis.  Codes include:
 
-* ``pestpp``: deterministic GLM parameter estimation using "on-the-fly" subspace reparameterization, effectively reproducing the SVD-Assist methodology of PEST without any user intervention
+* ``pestpp``: deterministic GLM parameter estimation using "on-the-fly" subspace reparameterization, effectively reproducing the SVD-Assist methodology of PEST without any user intervention and FOSM-based parameter and (optional) forecast uncertainty estimation.
 
 * ``pestpp-gsa``: Global senitivity analysis using either Morris or Sobol
 
@@ -27,6 +31,9 @@ The PEST++ software suite includes several stand-alone tools for model-independe
 All members of the software suite can be compiled for PC, MAC, or Linux and have several run managers to support parallelization.  precompiled binaries are available in the "bin" folder.  Windows users with older OS versions should use the ``bin/iwin`` binaries (starting "i", compiled with intel C++) to avoid the dreaded MSVC missing runtime DLL issue
 
 ## Recent Updates
+
+<b> update 15 September 2018 </b>: An official PEST++ V4 manual is now available in the Documentation directory.  It is a docx file so any contributions (revsisions/extensions/clarifications/etc) are greatly appreciated!
+
 <b> update 29 August 2018 </b>: ``pestpp-ies`` now includes a multi-threaded localization (using a combination of local analysis and observation covariance tapering) solver (as of v 4.1.5) as well as other optimizations to improve the speed of calculating par-by-par localization.  The number of threads is controlled through the ``++ies_num_threads`` argument
 
 <b> update 5 August 2018 </b>: Welcome to the active fork of ``pestpp-ies``, ``pestpp-opt``, and ``pestpp-swp``. I strive to actively support users, so please raise issues related to these codes as needed.  I will also try to support ``pestpp`` users as best I can although this code is a lower priority for me.
