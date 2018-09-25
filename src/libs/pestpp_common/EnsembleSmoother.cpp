@@ -3328,6 +3328,25 @@ bool IterEnsembleSmoother::solve_new()
 		if (oe_lams[i].shape().first == 0)
 			continue;
 		vector<double> vals({ lam_vals[i],scale_vals[i] });
+		if (pest_scenario.get_pestpp_options().get_ies_save_lambda_en())
+			
+		{
+			ss.str("");
+			ss << file_manager.get_base_filename() << "." << iter << "." << lam_vals[i] << ".lambda." << scale_vals[i] << ".scale.obs";
+
+			if (pest_scenario.get_pestpp_options().get_ies_save_binary())
+			{
+				ss << ".jcb";
+				oe_lams[i].to_binary(ss.str());
+			}
+			else
+			{
+				ss << ".csv";
+				oe_lams[i].to_csv(ss.str());
+			}
+			frec << "lambda, scale value " << lam_vals[i] << ',' << scale_vals[i] << " pars saved to " << ss.str() << endl;
+
+		}
 		drop_bad_phi(pe_lams[i], oe_lams[i], true);
 		if (oe_lams[i].shape().first == 0)
 		{

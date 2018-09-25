@@ -6,6 +6,10 @@ Object Oriented Inverse Modeling Software
 
 ## Documentation
 
+The lastest PEST++ manual is available [here](https://github.com/jtwhite79/pestpp/tree/develop/documentation). Direct zip download [here](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/jtwhite79/pestpp/tree/develop/documentation)
+
+## Links to latest binaries
+
 The lastest PEST++ manual is available [here](https://github.com/jtwhite79/pestpp/tree/master/documentation). Direct zip download [here](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/jtwhite79/pestpp/tree/master/documentation)
 
 ## Links to latest binaries
@@ -34,11 +38,7 @@ All members of the software suite can be compiled for PC, MAC, or Linux and have
 
 <b> update 15 September 2018 </b>: An official PEST++ V4 manual is now available in the Documentation directory.  It is a docx file so any contributions (revisions/extensions/clarifications/etc) are greatly appreciated!
 
-<b> update 29 August 2018 </b>: ``pestpp-ies`` now includes a multi-threaded localization (using a combination of local analysis and observation covariance tapering) solver (as of v 4.1.5) as well as other optimizations to improve the speed of calculating par-by-par localization.  The number of threads is controlled through the ``++ies_num_threads`` argument
-
-<b> update 5 August 2018 </b>: Welcome to the active fork of ``pestpp-ies``, ``pestpp-opt``, and ``pestpp-swp``. I strive to actively support users, so please raise issues related to these codes as needed.  I will also try to support ``pestpp`` users as best I can although this code is a lower priority for me.
-
-<b> update 4 July 2018 </b>: PESTPP++ version 4.0.0 has been released to support the newly-developed ``pestpp-ies``. A manuscript documenting ``pestpp-ies`` is available here: [https://www.sciencedirect.com/science/article/pii/S1364815218302676](https://www.sciencedirect.com/science/article/pii/S1364815218302676).  Stay tuned for an actual manual to accompany version 4!
+<b> update 5 August 2018 </b>: Welcome to the active fork of ``pestpp-ies``, ``pestpp-opt``, and ``pestpp-swp``. I strive to actively support users, so please raise issues related to these codes as needed.  I will also try to support ``pestpp`` users are best I can although this code is a lower priority for me.
 
 <b> update 30 July 2018 </b>: The PEST++ now supports parameter and observation names up to 200 characters in length. This allows for more descriptive naming and better support for problems with very large numbers of pars and obs.  Note that if a parameter name exceeds 12 chars or an observation name exceeds 20 chars, the resulting jacobian binary file will include truncated names (at 12 and 20 chars, respectively) and names exceeding these lengths are not backward compatible with PEST. 
 
