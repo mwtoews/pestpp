@@ -726,6 +726,7 @@ void sequentialLP::initialize_and_check()
 		double weight;
 		end = constraint_groups.end();
 		start = constraint_groups.begin();
+		int nobszw = 0;
 		for (auto &obs_name : pest_scenario.get_ctl_ordered_obs_names())
 		{
 			group = oinfo.get_observation_rec_ptr(obs_name)->group;
@@ -734,7 +735,8 @@ void sequentialLP::initialize_and_check()
 			{
 				if (weight == 0.0)
 				{
-					cout << "Warning: observation constraint " << obs_name << " has 0.0 weight, skipping" << endl;
+					//cout << "Warning: observation constraint " << obs_name << " has 0.0 weight, skipping" << endl;
+					nobszw++;
 					f_rec << "Warning: observation constraint " << obs_name << " has 0.0 weight, skipping" << endl;
 				}
 				else
@@ -744,7 +746,7 @@ void sequentialLP::initialize_and_check()
 
 			}
 		}
-
+		cout << "Warning: " << nobszw << " of the observation constraints (see rec file for list) have 0.0 weight, skipping" << endl;
 
 
 		//look for prior information constraints
@@ -1418,6 +1420,7 @@ CoinPackedMatrix sequentialLP::jacobian_to_coinpackedmatrix()
 
 	//iterate through the eigen sparse matrix
 	int elems_par;
+	int npar_zelems = 0;
 	for (int i = 0; i < eig_ord_jco.outerSize(); ++i)
 	{
 		elems_par = 0;
@@ -1431,10 +1434,11 @@ CoinPackedMatrix sequentialLP::jacobian_to_coinpackedmatrix()
 		}
 		if (elems_par == 0)
 		{
-			cout << "all zero elements for decision variable: " << ctl_ord_dec_var_names[i] << endl;
-
+			//cout << "all zero elements for decision variable: " << ctl_ord_dec_var_names[i] << endl;
+			npar_zelems++;
 		}
 	}
+	cout << "number of decision variables with all zero elements: " << npar_zelems << endl;
 	if (elem_count != eig_ord_jco.nonZeros())
 	{
 		throw_sequentialLP_error("sequentialLP::jacobian_to_coinpackedmatrix() error: wrong number of triplet components");
