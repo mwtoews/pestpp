@@ -526,19 +526,37 @@ pair<sequentialLP::ConstraintSense,string> sequentialLP::get_sense_from_group_na
 		return pair<ConstraintSense,string>(ConstraintSense::undefined,"undefined");
 }
 
+
+double  ErfInv2(double x) 
+{
+	float tt1, tt2, lnx, sgn;
+	sgn = (x < 0) ? -1.0f : 1.0f;
+
+	x = (1 - x)*(1 + x);        // x = 1 - x*x;
+	lnx = logf(x);
+	//double PI = 3.14159265358979323846;
+	tt1 = 2 / (M_PI*0.147) + 0.5f * lnx;
+	tt2 = 1 / (0.147) * lnx;
+
+	return(sgn*sqrtf(-tt1 + sqrtf(tt1*tt1 - tt2)));
+}
+
 double sequentialLP::get_probit()
 {
 
-	double probit = 0.0;
-	vector<double>::iterator start = probit_inputs.begin();
-	vector<double>::iterator end = probit_inputs.end();
+	//double probit = 0.0;
+	//vector<double>::iterator start = probit_inputs.begin();
+	//vector<double>::iterator end = probit_inputs.end();
+
+	double output = sqrt(2.0) * ErfInv2((2.0 * risk) - 1.0);
 
 	//find the nearest values in the probit_input vector
-	auto const it = std::lower_bound(start, end, risk);
+	/*auto const it = std::lower_bound(start, end, risk);
 	int idx = find(start, end, *it) - start;
 	if (idx >= probit_inputs.size())
 		throw_sequentialLP_error("error looking up probit function value");
 	double output = probit_outputs[idx];
+	*/
 	return output;
 
 
