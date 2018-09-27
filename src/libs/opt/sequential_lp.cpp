@@ -912,10 +912,12 @@ void sequentialLP::initialize_and_check()
 			//make sure there is at least one non-decision var adjustable parameter
 			vector<string>::iterator start = ctl_ord_dec_var_names.begin();
 			vector<string>::iterator end = ctl_ord_dec_var_names.end();
+			set<string> dec_set(ctl_ord_dec_var_names.begin(), ctl_ord_dec_var_names.end());
 			for (auto &name : pest_scenario.get_ctl_ordered_par_names())
 			{
 				//if this parameter is not a decision var
-				if (find(start, end, name) == end)
+				//if (find(start, end, name) == end)
+				if (dec_set.find(name) == dec_set.end())
 				{
 					ParameterRec::TRAN_TYPE tt = pest_scenario.get_ctl_parameter_info().get_parameter_rec_ptr(name)->tranform_type;
 					if ((tt == ParameterRec::TRAN_TYPE::LOG) || (tt == ParameterRec::TRAN_TYPE::NONE))
