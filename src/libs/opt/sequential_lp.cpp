@@ -744,6 +744,7 @@ void sequentialLP::initialize_and_check()
 		double weight;
 		end = constraint_groups.end();
 		start = constraint_groups.begin();
+		int nobszw = 0;
 		for (auto &obs_name : pest_scenario.get_ctl_ordered_obs_names())
 		{
 			group = oinfo.get_observation_rec_ptr(obs_name)->group;
@@ -752,7 +753,8 @@ void sequentialLP::initialize_and_check()
 			{
 				if (weight == 0.0)
 				{
-					cout << "Warning: observation constraint " << obs_name << " has 0.0 weight, skipping" << endl;
+					//cout << "Warning: observation constraint " << obs_name << " has 0.0 weight, skipping" << endl;
+					nobszw++;
 					f_rec << "Warning: observation constraint " << obs_name << " has 0.0 weight, skipping" << endl;
 				}
 				else
@@ -762,7 +764,7 @@ void sequentialLP::initialize_and_check()
 
 			}
 		}
-
+		cout << "Warning: " << nobszw << " of the observation constraints (see rec file for list) have 0.0 weight, skipping" << endl;
 
 
 		//look for prior information constraints
@@ -928,10 +930,12 @@ void sequentialLP::initialize_and_check()
 			//make sure there is at least one non-decision var adjustable parameter
 			vector<string>::iterator start = ctl_ord_dec_var_names.begin();
 			vector<string>::iterator end = ctl_ord_dec_var_names.end();
+			set<string> dec_set(ctl_ord_dec_var_names.begin(), ctl_ord_dec_var_names.end());
 			for (auto &name : pest_scenario.get_ctl_ordered_par_names())
 			{
 				//if this parameter is not a decision var
-				if (find(start, end, name) == end)
+				//if (find(start, end, name) == end)
+				if (dec_set.find(name) == dec_set.end())
 				{
 					ParameterRec::TRAN_TYPE tt = pest_scenario.get_ctl_parameter_info().get_parameter_rec_ptr(name)->tranform_type;
 					if ((tt == ParameterRec::TRAN_TYPE::LOG) || (tt == ParameterRec::TRAN_TYPE::NONE))
@@ -1436,6 +1440,7 @@ CoinPackedMatrix sequentialLP::jacobian_to_coinpackedmatrix()
 
 	//iterate through the eigen sparse matrix
 	int elems_par;
+	int npar_zelems = 0;
 	for (int i = 0; i < eig_ord_jco.outerSize(); ++i)
 	{
 		elems_par = 0;
@@ -1449,10 +1454,11 @@ CoinPackedMatrix sequentialLP::jacobian_to_coinpackedmatrix()
 		}
 		if (elems_par == 0)
 		{
-			cout << "all zero elements for decision variable: " << ctl_ord_dec_var_names[i] << endl;
-
+			//cout << "all zero elements for decision variable: " << ctl_ord_dec_var_names[i] << endl;
+			npar_zelems++;
 		}
 	}
+	cout << "number of decision variables with all zero elements: " << npar_zelems << endl;
 	if (elem_count != eig_ord_jco.nonZeros())
 	{
 		throw_sequentialLP_error("sequentialLP::jacobian_to_coinpackedmatrix() error: wrong number of triplet components");
@@ -1734,19 +1740,21 @@ void sequentialLP::iter_presolve()
 		set<string> names(temp.begin(),temp.end());
 		set<string>::iterator start = names.begin();
 		set<string>::iterator end = names.end();
-		vector<string>::iterator ext_start = ctl_ord_ext_var_names.begin();
-		vector<string>::iterator ext_end = ctl_ord_ext_var_names.end();
-
+		//vector<string>::iterator ext_start = ctl_ord_ext_var_names.begin();
+		//vector<string>::iterator ext_end = ctl_ord_ext_var_names.end();
+		set<string> ext_set(ctl_ord_ext_var_names.begin(), ctl_ord_ext_var_names.end());
 		vector<string> missing;
 		for (auto &name : ctl_ord_dec_var_names)
 			//if this dec var is not in the jco and is not an external var
-			if ((find(start, end, name) == end) && (find(ext_start,ext_end,name) == ext_end))
+			//if ((find(start, end, name) == end) && (find(ext_start,ext_end,name) == ext_end))
+			if ((names.find(name) == end) && (ext_set.find(name) == ext_set.end()))
 				missing.push_back(name);
 		if (missing.size() > 0)
 			throw_sequentialLP_error("the following decision vars were not found in the jacobian " + basejac_filename + " : ", missing);
 
 		for (auto &name : adj_par_names)
-			if (find(start, end, name) == end)
+			//if (find(start, end, name) == end)
+			if ((names.find(name) == end))
 				missing.push_back(name);
 		if (missing.size() > 0)
 			throw_sequentialLP_error("the following adjustable parameters were not found in the jacobian " + basejac_filename + " : ", missing);

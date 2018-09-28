@@ -46,7 +46,7 @@ int main(int argc, char* argv[])
 #endif
 		string version = PESTPP_VERSION;
 		cout << endl << endl;
-		cout << "             pestpp-opt - a tool for chance-constrainted linear programming, version " << version << endl << endl;
+		cout << "             pestpp-opt - a tool for chance-constrained linear programming, version " << version << endl << endl;
 		cout << "                                 by the PEST++ development team" << endl;
 		// build commandline
 		string commandline = "";
@@ -229,7 +229,7 @@ int main(int argc, char* argv[])
 		if (!restart_flag || save_restart_rec_header)
 		{
 			fout_rec << "             pestpp-opt version " << version << endl << endl;
-			fout_rec << "                 by the petspp development team" << endl;
+			fout_rec << "                 by the pestpp development team" << endl;
 			fout_rec << endl;
 			fout_rec << "using control file: \"" << complete_path << "\"" << endl << endl;
 		}
