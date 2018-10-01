@@ -1734,13 +1734,14 @@ void sequentialLP::iter_presolve()
 		set<string> names(temp.begin(),temp.end());
 		set<string>::iterator start = names.begin();
 		set<string>::iterator end = names.end();
-		vector<string>::iterator ext_start = ctl_ord_ext_var_names.begin();
-		vector<string>::iterator ext_end = ctl_ord_ext_var_names.end();
-
+		//vector<string>::iterator ext_start = ctl_ord_ext_var_names.begin();
+		//vector<string>::iterator ext_end = ctl_ord_ext_var_names.end();
+		set<string> ext_set(ctl_ord_ext_var_names.begin(), ctl_ord_ext_var_names.end());
+		
 		vector<string> missing;
 		for (auto &name : ctl_ord_dec_var_names)
 			//if this dec var is not in the jco and is not an external var
-			if ((find(start, end, name) == end) && (find(ext_start,ext_end,name) == ext_end))
+			if ((names.find(name) == end) && (ext_set.find(name) == ext_set.end()))
 				missing.push_back(name);
 		if (missing.size() > 0)
 			throw_sequentialLP_error("the following decision vars were not found in the jacobian " + basejac_filename + " : ", missing);
@@ -1750,7 +1751,6 @@ void sequentialLP::iter_presolve()
 				missing.push_back(name);
 		if (missing.size() > 0)
 			throw_sequentialLP_error("the following adjustable parameters were not found in the jacobian " + basejac_filename + " : ", missing);
-
 
 		names.clear();
 		temp = jco.get_sim_obs_names();
