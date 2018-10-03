@@ -56,7 +56,7 @@ public:
 	//the full matrix
 	Mat posterior_parameter_matrix();
 	Mat* posterior_parameter_ptr();
-
+	Covariance posterior_parameter_covariance_matrix();
 	//prior predictive variance from parcov
 	double prior_prediction_variance(string &pred_name);
 	//map <pred_name,variance> from parcov
@@ -202,5 +202,5 @@ map<string, double> get_obj_comps(string &filename);
 map<string, int> get_nnz_group(Pest &pest_scenario);
 ObservationInfo normalize_weights_by_residual(Pest &pest_scenario, string &resid_filename);
 ObservationInfo normalize_weights_by_residual(Pest &pest_scenario, PhiData obj);
-
+ObservationInfo normalize_weights_by_residual(Pest &pest_scenario, Observations &sim);
 #endif

@@ -401,6 +401,8 @@ public:
 	void set_ies_debug_fail_remainder(bool _fail) { ies_debug_fail_remainder = _fail; }
 	bool get_ies_debug_bad_phi() const { return ies_debug_bad_phi; }
 	void set_ies_debug_bad_phi(bool _fail) { ies_debug_bad_phi = _fail; }
+	bool get_ies_debug_upgrade_only() const { return ies_debug_upgrade_only; }
+	void set_ies_debug_upgrade_only(bool _flag) { ies_debug_upgrade_only = _flag; }
 
 
 	set<string> get_passed_args() const { return passed_args; }
@@ -497,6 +499,7 @@ private:
 	bool ies_debug_fail_subset;
 	bool ies_debug_fail_remainder;
 	bool ies_debug_bad_phi;
+	bool ies_debug_upgrade_only;
 };
 
 ostream& operator<< (ostream &os, const PestppOptions& val);

@@ -806,8 +806,10 @@ void PestppOptions::parce_line(const string &line)
 			istringstream is(value);
 			is >> boolalpha >> ies_use_prior_scaling;
 		}
-		else if (key == "IES_NUM_REALS")
+		else if ((key == "IES_NUM_REALS") || (key == "NUM_REALS"))
 		{
+			passed_args.insert("IES_NUM_REALS");
+			passed_args.insert("NUM_REALS");
 			convert_ip(value, ies_num_reals);
 			//ies_num_reals_passed = true;
 		}
@@ -914,6 +916,12 @@ void PestppOptions::parce_line(const string &line)
 			transform(value.begin(), value.end(), value.begin(), ::tolower);
 			istringstream is(value);
 			is >> boolalpha >> ies_debug_bad_phi;
+		}
+		else if (key == "IES_DEBUG_UPGRADE_ONLY")
+		{
+			transform(value.begin(), value.end(), value.begin(), ::tolower);
+			istringstream is(value);
+			is >> boolalpha >> ies_debug_upgrade_only;
 		}
 		else {
 

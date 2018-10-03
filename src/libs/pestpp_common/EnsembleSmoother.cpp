@@ -763,7 +763,7 @@ bool IterEnsembleSmoother::initialize_pe(Covariance &cov)
 	if (par_csv.size() == 0)
 	{
 		message(1, "drawing parameter realizations: ", num_reals);
-		pe.draw(num_reals, cov, performance_log, pest_scenario.get_pestpp_options().get_ies_verbose_level());
+		pe.draw(num_reals, pest_scenario.get_ctl_parameters(),cov, performance_log, pest_scenario.get_pestpp_options().get_ies_verbose_level());
 		// stringstream ss;
 		// ss << file_manager.get_base_filename() << ".0.par.csv";
 		// message(1, "saving initial parameter ensemble to ", ss.str());
@@ -3306,7 +3306,13 @@ bool IterEnsembleSmoother::solve_new()
 		message(1, "finished calcs for lambda:", cur_lam);
 
 	}
-	//return;
+	
+	if (pest_scenario.get_pestpp_options().get_ies_debug_upgrade_only())
+	{
+		message(0, "ies_debug_upgrade_only is true, exiting");
+		throw_ies_error("ies_debug_upgrade_only is true, exiting");
+	}
+
 	vector<map<int, int>> real_run_ids_lams;
 	int best_idx = -1;
 	double best_mean = 1.0e+30, best_std = 1.0e+30;

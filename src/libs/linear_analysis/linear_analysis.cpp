@@ -146,10 +146,35 @@ ObservationInfo normalize_weights_by_residual(Pest &pest_scenario, PhiData obj_c
 			obs_info.set_weight(ogrp.first, weight);
 		}
 	}
+
 	return obs_info;
 }
 
+ObservationInfo normalize_weights_by_residual(Pest &pest_scenario, Observations &sim)
+{
+	ObservationInfo obs_info = pest_scenario.get_ctl_observation_info();
+	Observations obs = pest_scenario.get_ctl_observations();
 
+	const ObservationRec* obs_rec;
+	double weight,swr,new_weight;
+
+	for (auto &oname : pest_scenario.get_ctl_ordered_nz_obs_names())
+	{
+		weight = obs_info.get_observation_rec_ptr(oname)->weight;
+		swr = pow(((obs[oname] - sim[oname]) * weight), 2);
+		new_weight = weight * sqrt(1.0 / swr);
+			
+		if (new_weight > weight)
+			new_weight = weight;
+		else if (new_weight <= numeric_limits<double>::min())
+			new_weight = 0.0;
+		else if (new_weight >= numeric_limits<double>::max())
+			new_weight = 1.0e+30;
+		obs_info.set_weight(oname, new_weight);
+		
+	}
+	return obs_info;
+}
 
 
 
@@ -878,6 +903,13 @@ Mat* linear_analysis::posterior_parameter_ptr()
 	Mat* ptr = &posterior;
 	return ptr;
 }
+
+Covariance linear_analysis::posterior_parameter_covariance_matrix()
+{
+	if (posterior.nrow() == 0) calc_posterior();
+	return posterior;
+}
+
 
 double linear_analysis::prior_prediction_variance(string &pred_name)
 {
