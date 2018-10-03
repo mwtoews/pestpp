@@ -1336,11 +1336,11 @@ ParameterEnsemble::ParameterEnsemble(Pest *_pest_scenario_ptr, Eigen::MatrixXd _
 
 
 
-void ParameterEnsemble::draw(int num_reals, Covariance &cov, PerformanceLog *plog, int level)
+void ParameterEnsemble::draw(int num_reals, Parameters par, Covariance &cov, PerformanceLog *plog, int level)
 {
 	///draw a parameter ensemble
 	var_names = pest_scenario_ptr->get_ctl_ordered_adj_par_names(); //only draw for adjustable pars
-	Parameters par = pest_scenario_ptr->get_ctl_parameters();
+	//Parameters par = pest_scenario_ptr->get_ctl_parameters();
 	par_transform.active_ctl2numeric_ip(par);//removes fixed/tied pars
 	tstat = transStatus::NUM;
 	ParameterGroupInfo pgi = pest_scenario_ptr->get_base_group_info();
