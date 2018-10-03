@@ -51,6 +51,7 @@
 #include "linear_analysis.h"
 #include "logger.h"
 #include "covariance.h"
+#include "Ensemble.h"
 
 
 using namespace std;
@@ -746,10 +747,11 @@ int main(int argc, char* argv[])
 			// and report new weights to the rec file
 			fout_rec << endl;
 			ObservationInfo reweight;
-			reweight = normalize_weights_by_residual(pest_scenario, phi_data);
+			Observations sim = optimum_run.get_obs();
+			reweight = normalize_weights_by_residual(pest_scenario, sim);
 			fout_rec << "Note: The observation covariance matrix has been constructed from " << endl;
 			fout_rec << "      weights listed in the pest control file that have been scaled by " << endl;
-			fout_rec << "      by the final objective function components to account for " << endl;
+			fout_rec << "      by the final residuals to account for " << endl;
 			fout_rec << "      the level of measurement noise implied by the original weights so" << endl;
 			fout_rec << "      the total objective function is equal to the number of  " << endl;
 			fout_rec << "      non-zero weighted observations." << endl;
@@ -821,6 +823,22 @@ int main(int argc, char* argv[])
 				la.write_pred_credible_range(fout_rec, predsum_filename, init_final_pred_values);
 				fout_rec << "Note : the above prediction uncertainty summary was written to file '" + predsum_filename +
 					"'" << endl << endl;
+			}
+			set<string> args = pest_scenario.get_pestpp_options().get_passed_args();
+			if (args.find("NUM_REALS") != args.end())
+			{
+				int num_reals = pest_scenario.get_pestpp_options().get_ies_num_reals();
+				fout_rec << "drawing " << num_reals << " posterior parameter realizations";
+				ParameterEnsemble pe(&pest_scenario);
+				Covariance cov = la.posterior_parameter_matrix();
+				pe.draw(num_reals,optimum_run.get_ctl_pars(),cov, &performance_log,1);
+				pe.to_csv(file_manager.get_base_filename() + ".post.paren.csv");
+				map<int,int> run_map = pe.add_runs(run_manager_ptr);
+				run_manager_ptr->run();
+				ObservationEnsemble oe(&pest_scenario);
+				oe.draw(num_reals, obscov, &performance_log, 1);
+				oe.update_from_runs(run_map, run_manager_ptr);
+				oe.to_csv(file_manager.get_base_filename() + ".post.obsen.csv");
 			}
 			cout << "  ---  finished uncertainty analysis calculations  ---  " << endl << endl << endl;
 		}

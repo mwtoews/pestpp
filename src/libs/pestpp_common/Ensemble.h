@@ -130,7 +130,7 @@ public:
 	void set_pest_scenario(Pest *_pest_scenario);
 	map<int,int> add_runs(RunManagerAbstract *run_mgr_ptr,const vector<int> &real_idxs=vector<int>());
 
-	void draw(int num_reals, Covariance &cov, PerformanceLog *plog, int level);
+	void draw(int num_reals, Parameters par, Covariance &cov, PerformanceLog *plog, int level);
 	Covariance get_diagonal_cov_matrix();
 	void to_binary(string filename);
 
