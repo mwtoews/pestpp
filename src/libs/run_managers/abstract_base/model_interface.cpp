@@ -34,10 +34,14 @@ void ModelInterface::throw_mio_error(string base_message)
 {
 	int mess_len = 500;
 	char message[500];
+	int nerr_len = 500;
+	char err_instruct[500];
+	for (int i = 0; i < 500; i++)
+		err_instruct[i] = ' ';
 	//cout << endl << endl << " MODEL INTERFACE ERROR:" << endl;
 	mio_get_message_string_w_(&ifail, &mess_len, message);
 	string err = string(message);
-	auto s_end = err.find_last_not_of(" \t", 400);
+	auto s_end = err.find_last_not_of(" \t", 500);
 	err = err.substr(0, s_end);
 	throw runtime_error("model input/output error:" + base_message + "\n" + err);
 }
@@ -405,8 +409,10 @@ void ModelInterface::run(pest_utils::thread_flag* terminate, pest_utils::thread_
 		int nins = insfile_vec.size();
 		int nobs = obs_name_vec.size();
 		obs_vals.resize(nobs, -9999.00);
-		int nerr_len = 500;
+		/*int nerr_len = 500;
 		char err_instruct[500];
+		for (int i = 0; i < 500; i++)
+			err_instruct[i] = '|';*/
 		try {
 			mio_read_model_output_files_w_(&ifail, &nobs,
 				pest_utils::StringvecFortranCharArray(obs_name_vec, 200, pest_utils::TO_LOWER).get_prt(),
@@ -419,12 +425,13 @@ void ModelInterface::run(pest_utils::thread_flag* terminate, pest_utils::thread_
 		}
 		if (ifail != 0)
 		{
+			/*int jfail;
+			mio_get_message_string_w_(&jfail, &nerr_len, err_instruct);
 			string err = string(err_instruct);
-			auto s_end = err.find_last_not_of(" \t",1000);
-			err = err.substr(0, s_end);
+			auto s_end = err.find_last_not_of(' ',500);
+			err = err.substr(0, s_end);*/
 
-			throw_mio_error("error processing model output files:" + err);
-
+			throw_mio_error("error processing model output files");
 		}
 
 		// invalid.clear();
