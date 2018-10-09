@@ -842,7 +842,7 @@ subroutine mio_read_model_output_files(ifail,nobs,aobs,obs,instruction)
         integer, intent(out)                            :: ifail   ! error indicator
         integer, intent(in)                             :: nobs    ! number of observations
         !character (len=*), intent(in), dimension(nobs)  :: aobs    ! observation names
-        character*50 :: aobs(nobs)
+        character*200 :: aobs(nobs)
         double precision, intent(out), dimension(nobs)  :: obs     ! observation values
         !character (len=*), intent(out)                  :: instruction ! instruction of error
         character (len=20000)  :: instruction
@@ -2153,7 +2153,7 @@ end module model_input_output_interface
         integer, intent(out)                :: ifail ! indicates error condition
         integer, intent(in)                 :: npar  ! number of parameters
         !character (len=*), dimension(npar)  :: apar  ! parameter names
-        character*50  :: apar(npar)
+        character*200  :: apar(npar)
         call mio_process_template_files(ifail,npar,apar)
         return
     end subroutine mio_process_template_files_w
