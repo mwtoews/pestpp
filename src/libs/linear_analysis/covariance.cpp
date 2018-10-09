@@ -923,9 +923,14 @@ bool Mat::isdiagonal()
 void Mat::drop_cols(const vector<string> &drop_col_names)
 {
 	vector<string> missing_col_names;
+	const set<string> snames(col_names.begin(), col_names.end());
+	set<string>::const_iterator send = snames.end();
 	for (auto &name : drop_col_names)
-		if (find(col_names.begin(), col_names.end(), name) == col_names.end())
+	{
+		//if (find(col_names.begin(), col_names.end(), name) == col_names.end())
+		if (snames.find(name) == send)
 			missing_col_names.push_back(name);
+	}
 
 	if (missing_col_names.size() != 0)
 	{
@@ -940,9 +945,14 @@ void Mat::drop_cols(const vector<string> &drop_col_names)
 		new_col_names = col_names;
 	else
 	{
+		const set<string> snames(drop_col_names.begin(), drop_col_names.end());
+		set<string>::const_iterator send = snames.end();
 		for (auto &name : col_names)
-			if (find(drop_col_names.begin(), drop_col_names.end(), name) == drop_col_names.end())
+		{
+			//if (find(drop_col_names.begin(), drop_col_names.end(), name) == drop_col_names.end())
+			if (snames.find(name) == send)
 				new_col_names.push_back(name);
+		}
 	}
 	Mat new_mat = get(row_names, new_col_names);
 	matrix = new_mat.get_matrix();
@@ -954,9 +964,15 @@ void Mat::drop_rows(const vector<string> &drop_row_names)
 {
 
 	vector<string> missing_row_names;
+	const set<string> snames(row_names.begin(), row_names.end());
+	set<string>::const_iterator send = snames.end();
+
 	for (auto &name : drop_row_names)
-		if (find(row_names.begin(), row_names.end(), name) == row_names.end())
+	{
+		//if (find(row_names.begin(), row_names.end(), name) == row_names.end())
+		if (snames.find(name) == send)
 			missing_row_names.push_back(name);
+	}
 
 	if (missing_row_names.size() != 0)
 	{
@@ -972,9 +988,14 @@ void Mat::drop_rows(const vector<string> &drop_row_names)
 		new_row_names = row_names;
 	else
 	{
+		const set<string> snames(drop_row_names.begin(), drop_row_names.end());
+		set<string>::const_iterator send = snames.end();
 		for (auto &name : row_names)
-			if (find(drop_row_names.begin(), drop_row_names.end(), name) == drop_row_names.end())
+		{
+			//if (find(drop_row_names.begin(), drop_row_names.end(), name) == drop_row_names.end())
+			if (snames.find(name) == send)
 				new_row_names.push_back(name);
+		}
 	}
 	if (new_row_names.size() == 0)
 		matrix = Eigen::SparseMatrix<double>();
