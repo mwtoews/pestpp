@@ -441,7 +441,7 @@ void SVDSolver::calc_lambda_upgrade_vec_JtQJ(const Jacobian &jacobian, const QSq
 		bool recalc_js = false;
 		Eigen::SparseMatrix<double> S;
 
-		if (lambda != 0.0)
+		if (true)
 		{
 			//Compute Scaling Matrix Sii
 			performance_log->log_event("commencing to scale JtQJ matrix");
