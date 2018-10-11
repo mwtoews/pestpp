@@ -49,6 +49,18 @@ void Pest::set_defaults()
 
 void Pest::check_inputs(ostream &f_rec)
 {
+	if (other_lines.size() > 0)
+	{
+		stringstream ss;
+		ss << "Note: " << other_lines.size() << " unused lines pest control file, see rec file..." << endl;
+		cout << ss.str();
+		f_rec << "Note: " << other_lines.size() << " unused lines pest control file:" << endl;
+		for (auto &line : other_lines)
+		{
+			f_rec <<"  -->  line number " << line.first << ": '" << line.second << "' " << endl;
+		}
+	}
+
 	if ((control_info.noptmax == 0) && (pestpp_options.get_max_run_fail() > 1))
 	{
 		cout << "noptmax = 0, resetting max_run_fail = 1" << endl;
@@ -190,8 +202,16 @@ void Pest::check_inputs(ostream &f_rec)
 	if (n_super < 0)
 	{
 		stringstream ss;
-		ss << "pest++ option 'n_iter_super' must >= 0, not " << n_super;
-		f_rec << "pest++ option 'n_iter_super' must >= 0, not " << n_super;
+		ss << "pest++ option 'n_iter_super' must be >= 0, not " << n_super;
+		f_rec << "pest++ option 'n_iter_super' must be >= 0, not " << n_super;
+		throw PestError(ss.str());
+	}
+
+	if ((n_base == -1) && (n_super == 0))
+	{
+		stringstream ss;
+		ss << "pest++ option 'n_iter_base' == -1 so 'n_iter_super' must be > 0, not " << n_super;
+		f_rec << "pest++ option 'n_iter_base' == -1 so 'n_iter_super' must be > 0, not " << n_super;
 		throw PestError(ss.str());
 	}
 
@@ -247,6 +267,9 @@ void Pest::check_inputs(ostream &f_rec)
 			cout << "'base_jacobian' is none, so 'hotstart_resfile' being ignored..." << endl;
 			f_rec << "'base_jacobian' is none, so 'hotstart_resfile' being ignored..." << endl;
 		}
+
+	
+
 }
 
 void Pest::check_io()
@@ -346,7 +369,6 @@ int Pest::process_ctl_file(ifstream &fin, string pst_filename)
 	bool use_dynamic_reg = false;
 	bool reg_adj_grp_weights = false;
 	vector<string> pestpp_input;
-	vector<string> other_lines;
 	regul_scheme_ptr = new DynamicRegularization(use_dynamic_reg);
 
 	TranTied *t_tied = new TranTied("PEST to model tied transformation");
@@ -373,7 +395,16 @@ int Pest::process_ctl_file(ifstream &fin, string pst_filename)
 		tokens.clear();
 		tokenize(line_upper, tokens);
 		sec_lnum = lnum - sec_begin_lnum;
-		if (tokens.empty())
+		
+		if (lnum == 1)
+		{
+			if (tokens[0] != "PCF")
+			{
+				cout << "WARNING: fist line of control file should be 'PCF' not " << tokens[0] << endl;
+			}
+		}
+
+		else if (tokens.empty())
 		{
 			//skip blank line
 		}
@@ -408,11 +439,11 @@ int Pest::process_ctl_file(ifstream &fin, string pst_filename)
 			}
 
 
-			if (sec_lnum == 2)
+			else if (sec_lnum == 2)
 			{
 				convert_ip(tokens[0], num_par);
 			}
-			if (sec_lnum == 3)
+			else if (sec_lnum == 3)
 			{
 				convert_ip(tokens[0], num_tpl_file);
 				if(tokens.size() >= 5) {
@@ -462,7 +493,10 @@ int Pest::process_ctl_file(ifstream &fin, string pst_filename)
 				convert_ip(tokens[4], control_info.relparstp);
 				convert_ip(tokens[5], control_info.nrelpar);
 			}
-			else {}
+			else
+			{
+				other_lines[lnum] = line;
+			}
 		}
 		else if (section == "SINGULAR VALUE DECOMPOSITION")
 		{
@@ -472,6 +506,10 @@ int Pest::process_ctl_file(ifstream &fin, string pst_filename)
 			}
 			if (sec_lnum == 3) {
 				convert_ip(tokens[0], svd_info.eigwrite);
+			}
+			else
+			{
+				other_lines[lnum] = line;
 			}
 		}
 		else if (section == "PARAMETER GROUPS")
@@ -678,6 +716,10 @@ int Pest::process_ctl_file(ifstream &fin, string pst_filename)
 				regul_scheme_ptr = new DynamicRegularization(use_dynamic_reg, reg_adj_grp_weights, phimlim,
 					phimaccept, fracphim, wfmin, wfmax, wffac, wftol, wfinit);
 			}
+			else
+			{
+				other_lines[lnum] = line;
+			}
 		}
 		else if (section == "PARETO")
 		{
@@ -698,6 +740,10 @@ int Pest::process_ctl_file(ifstream &fin, string pst_filename)
 				convert_ip(tokens[2], pareto_info.niter_fin);
 			}
 
+		}
+		else
+		{
+			other_lines[lnum] = line;
 		}
 	}
 
@@ -802,7 +848,7 @@ int Pest::process_ctl_file(ifstream &fin, string pst_filename)
 
 			pestpp_options.parce_line(*b);
 	}
-
+	
 	if (pestpp_options.get_auto_norm() > 0.0)
 	{
 		cout << "WARNING 'autonorm' option is being deprecated in favor of use_parcov_scaling. " << endl;

@@ -27,7 +27,7 @@ using namespace std;
 class PestError : public std::runtime_error {
 public:
 	PestError(const string &_message="") : runtime_error(_message), message(_message) {};
-	virtual ~PestError() throw () {}
+	virtual ~PestError() throw (){}
 	void add_front(const string &s) {message = s + message;}
 	void add_back(const string &s) {message += s;}
 	void raise() {throw *this;}
