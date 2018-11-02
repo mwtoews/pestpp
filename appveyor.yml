@@ -41,6 +41,8 @@ install:
   - pip install git+https://github.com/jtwhite79/pyemu.git@develop
   # Show the installed packages + versions
   - conda list
+  - #git clone -b master --depth 1 https://github.com/jtwhite79/pestpp-opt_benchmarks
+  - #git clone -b master --depth 1 https://github.com/jtwhite79/pestpp-ies_benchmarks
 
 build: false
 
@@ -48,7 +50,8 @@ test_script:
   - #cd benchmarks
   - set PATH=..\..\..\test_bin\win;..\..\test_bin\win;%PATH%;
   - nosetests -v -w ./benchmarks ci_prep.py
-  - nosetests -v -w ./benchmarks ies_test.py opt_test.py
+  - #nosetests -v -w ./pestpp-ies_benchmarks ies_test.py
+  - #nosetests -v -w ./pestpp-opt_benchmarks opt_test.py
 
 after_test:
  - echo done

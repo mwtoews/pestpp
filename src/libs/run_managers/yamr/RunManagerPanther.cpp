@@ -487,11 +487,21 @@ RunManagerAbstract::RUN_UNTIL_COND RunManagerPanther::run_until(RUN_UNTIL_COND c
 		message.str("");
 		message << "   " << model_runs_done << " runs complete :  " << get_num_failed_runs() << " runs failed";
 		cout << message.str() << endl << endl;
-		f_rmr << endl << "---------------------" << endl << message.str() << endl << endl;
+		f_rmr << endl << "---------------------" << endl << message.str() << endl;
 
 		//Removed because it was preventing the restart from functioning properly
 		//if (model_runs_done == 0)
 		//	throw PestError("no runs completed successfully");
+
+		set<int> fids = get_failed_run_ids();
+		if (fids.size() > 0)
+		{
+			f_rmr << "  failed run_ids and (attempts):";
+			for (auto fid : fids)
+				f_rmr << " " << fid << "(" << failure_map.count(fid) << ")";
+		}
+		f_rmr << endl << endl;
+			
 
 		if (init_sim.size() == 0)
 		{
@@ -723,12 +733,13 @@ void RunManagerPanther::schedule_runs()
 						//kill_runs(run_id, true, "overdue");
 						stringstream ss;
 						ss << "overdue. duration:" << duration << ", avg:" << avg_runtime;
-						kill_run(it_slave, ss.str());
+						//kill_run(it_slave, ss.str());
+						kill_runs(run_id, true, ss.str());
 						should_schedule = false;
-						update_run_failed(run_id, it_slave->get_socket_fd());
+						//update_run_failed(run_id, it_slave->get_socket_fd());
 						model_runs_timed_out += overdue_kill_runs_vec.size();
 					}
-					else if (overdue_kill_runs_vec.size() >= max_concurrent_runs)
+					else if (overdue_kill_runs_vec.size() > max_concurrent_runs)
 					{
 						// kill the overdue runs
 						kill_runs(run_id, true, "overdue");
@@ -747,7 +758,7 @@ void RunManagerPanther::schedule_runs()
 						kill_run(it_slave, ss.str());
 						update_run_failed(run_id, it_slave->get_socket_fd());
 
-						if (failure_map.count(run_id) + overdue_kill_runs_vec.size() < max_n_failure)
+						if (failure_map.count(run_id) + overdue_kill_runs_vec.size() <= max_n_failure)
 						{
 							should_schedule = true;
 						}
@@ -1116,7 +1127,8 @@ void RunManagerPanther::kill_run(list<SlaveInfoRec>::iterator slave_info_iter, c
 		//schedule run to be killed
 		string host_name = slave_info_iter->get_hostname();
 		stringstream ss;
-		ss << "sending kill request. reason: " << reason << ", run id:" << run_id << ", slave: " << host_name << "$" << slave_info_iter->get_work_dir();
+		ss << "sending kill request. reason: " << reason << ", run id:" << run_id;
+		ss<< ",  num previous fails:" << failure_map.count(run_id) << ", slave: " << host_name << "$" << slave_info_iter->get_work_dir();
 		report(ss.str(), false);
 		NetPackage net_pack(NetPackage::PackType::REQ_KILL, 0, 0, "");
 		char data = '\0';
