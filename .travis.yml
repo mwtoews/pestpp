@@ -54,7 +54,7 @@ script:
   - export PYTHONPATH=$PYTHONPATH:.
   - export PATH="./test_bin/linux:../test_bin/linux:../../test_bin/linux:$PATH"
   - nosetests -v -w ./benchmarks ci_prep.py
-  - nosetests -v -w ./benchmarks ies_test.py
+  - #nosetests -v -w ./benchmarks ies_test.py
 
 
 after_success:
