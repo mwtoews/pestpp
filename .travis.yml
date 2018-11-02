@@ -60,5 +60,6 @@ script:
 after_success:
   - chmod +x trigger-travis.sh
   - ./trigger-travis.sh jtwhite79 pestpp-opt_benchmarks $TRAVIS_ACCESS_TOKEN
+  - ./trigger-travis.sh jtwhite79 pestpp-ies_benchmarks $TRAVIS_ACCESS_TOKEN
 notifications:
   email: true
