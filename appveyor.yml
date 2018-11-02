@@ -49,7 +49,7 @@ build: false
 test_script:
   - #cd benchmarks
   - set PATH=..\..\..\test_bin\win;..\..\test_bin\win;%PATH%;
-  - nosetests -v -w ./benchmarks ci_prep.py
+  - #nosetests -v -w ./benchmarks ci_prep.py
   - nosetests -v -w ./pestpp-ies_benchmarks ies_test.py
 
 after_test:
