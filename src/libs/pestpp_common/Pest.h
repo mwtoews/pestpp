@@ -96,6 +96,7 @@ private:
 	vector<string> ctl_ordered_obs_group_names;
 	vector<string> ctl_ordered_pi_names;
 	DynamicRegularization *regul_scheme_ptr;
+	map<int,string> other_lines;
 };
 ostream& operator<< (ostream &os, const Pest& val);
 #endif /* PEST_H_ */
