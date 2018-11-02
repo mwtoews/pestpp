@@ -31,7 +31,7 @@ noptmax = 4
 num_reals = 20
 port = 4020
 
-def setup_suite_dir(model_d):
+def basic_test(model_d="ies_10par_xsec"):
     pyemu.Ensemble.reseed()
     base_d = os.path.join(model_d, "template")
     new_d = os.path.join(model_d, "test_template")
@@ -115,4 +115,4 @@ def setup_suite_dir(model_d):
     
 
 if __name__ == "__main__":
-	setup_suite_dir("ies_10par_xsec")
+	basic_test("ies_10par_xsec")
