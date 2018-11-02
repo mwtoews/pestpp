@@ -11,6 +11,14 @@ builds:
 ``pestpp-opt`` benchmarks:
 
 [![Travis Status](https://travis-ci.org/jtwhite79/pestpp-opt_benchmarks.svg?branch=master)](https://travis-ci.org/jtwhite79/pestpp-opt_benchmarks)
+[![Build status](https://ci.appveyor.com/api/projects/status/26yaiugb7w5i0nc2?svg=true)](https://ci.appveyor.com/project/jtwhite79/pestpp-opt_benchmarks)
+
+
+``pestpp-ies`` benchmarks:
+
+[![Travis Status](https://travis-ci.org/jtwhite79/pestpp-ies_benchmarks.svg?branch=master)](https://travis-ci.org/jtwhite79/pestpp-ies_benchmarks)
+[![Build status](https://ci.appveyor.com/api/projects/status/20uhstpq8o2d5qlo?svg=true)](https://ci.appveyor.com/project/jtwhite79/pestpp-ies_benchmarks)
+
 
 ## Documentation
 
