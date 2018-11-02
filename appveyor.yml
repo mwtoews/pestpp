@@ -41,8 +41,8 @@ install:
   - pip install git+https://github.com/jtwhite79/pyemu.git@develop
   # Show the installed packages + versions
   - conda list
-  - git clone -b develop --depth 1 https://github.com/jtwhite79/pestpp-opt_benchmarks
-  - git clone -b develop --depth 1 https://github.com/jtwhite79/pestpp-ies_benchmarks
+  - git clone -b master --depth 1 https://github.com/jtwhite79/pestpp-opt_benchmarks
+  - git clone -b master --depth 1 https://github.com/jtwhite79/pestpp-ies_benchmarks
 
 build: false
 
