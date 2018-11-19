@@ -55,6 +55,7 @@ int main(int argc, char* argv[])
 	cout << endl << endl;
 	cout << "             pestpp-gsa: a tool for global sensitivity analysis, version " << version << endl << endl;
 	cout << "                         by The PEST++ Development Team" << endl;
+	
 	// build commandline
 	string commandline = "";
 	for(int i=0; i<argc; ++i)
@@ -182,9 +183,15 @@ int main(int argc, char* argv[])
 	}
 
 	ofstream &fout_rec = file_manager.open_ofile_ext("rec");
-	fout_rec << "             GSA++ Version " << version << endl << endl;
-	fout_rec << "                 by The PEST++ Development Team" << endl;
+	fout_rec << "             pestpp-gsa: a tool for global sensitivity analysis, version " << version << endl << endl;
+	fout_rec << "                         by The PEST++ Development Team" << endl << endl;
 
+	fout_rec << "using control file: \"" << complete_path << "\"" << endl;
+	fout_rec << "in directory: \"" << OperSys::getcwd() << "\"" << endl << endl;
+	
+	cout << endl;
+	cout << "using control file: \"" << complete_path << "\"" << endl;
+	cout << "in directory: \"" << OperSys::getcwd() << "\"" << endl << endl;
 
 	// create pest run and process control file to initialize it
 	Pest pest_scenario;

@@ -11,7 +11,7 @@
 #if defined(_MSC_VER)
 #  include <direct.h>
 #  include <cctype>
-#  define getcwd _getcwd
+#  define get_cwd _getcwd
 #  include <cctype>
 #else
 #  include <unistd.h>
