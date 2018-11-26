@@ -1838,7 +1838,7 @@ subroutine mio_wrtsig(ifail,val,word,nw,precis,tval,nopnt)
             if(lw.ge.13) then
               write(word,'(1pe13.7)',err=80) val
               ! jwhite 27/11/2018 - hack for padding with leading zeros
-              if (nw.gt.lw) then
+              if (nw.ge.lw) then !ge to account for leading single space
                 wtemp = adjustl(word)
                 do itemp=lw,nw
                   wtemp = '0' // wtemp
@@ -1879,7 +1879,7 @@ subroutine mio_wrtsig(ifail,val,word,nw,precis,tval,nopnt)
               write(word,'(1PE22.15E3)',err=80) val
 #endif        
               ! jwhite 27/11/2018 - hack for padding with leading zeros
-              if (nw.gt.lw) then
+              if (nw.ge.lw) then !ge to account for leading single space
                 wtemp = adjustl(word)
                 do itemp=lw,nw
                   wtemp = '0' // wtemp
