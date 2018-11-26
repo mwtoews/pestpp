@@ -38,7 +38,7 @@ module model_input_output_interface
       integer, allocatable, dimension(:)              :: nw         ! minimum word length of a parameter
       character (len=1),   allocatable, dimension(:)  :: mrkdel     ! Marker delimiters
       character (len=1),   allocatable, dimension(:)  :: pardel     ! Parameter delimiters
-      character (len=23), allocatable,  dimension(:)  :: pword      ! Word for each parameter
+      character (len=200), allocatable,  dimension(:)  :: pword      ! Word for each parameter
 
 ! -- Filenames
 
@@ -169,7 +169,7 @@ subroutine mio_initialise(ifail,numin,numout,npar,nobs)
       !else
       !  nopnt=0
       !end if
-      precis=0 !jwhite
+      precis=1 !jwhite
       nopnt=0 !jwhite
       mcall=0
 
@@ -1783,10 +1783,11 @@ subroutine mio_wrtsig(ifail,val,word,nw,precis,tval,nopnt)
 !           ifail=-3 ...... internal error type 3
 
         integer precis,lw,pos,inc,d,p,w,j,jj,k,jexp,n,jfail,nw,epos,pp,nopnt,kexp,iflag,lexp
-        integer ifail
+        integer ifail,itemp
         double precision val,tval
-        character*29 tword,ttword,fmt*14
-        character*(*) word
+        character*200 tword,ttword,fmt*14
+        character*200 word
+        character*200 wtemp
 
 !       The following line overcomes what appears to be a bug in the LF90
 !       compiler
@@ -1799,9 +1800,11 @@ subroutine mio_wrtsig(ifail,val,word,nw,precis,tval,nopnt)
             ifail = -1
             return
         endif
+        
         lexp=0
         iflag=0
         word=' '
+        wtemp=' '
         pos=1
         if(val.lt.0.0d0)pos=0
 #ifdef USE_D_FORMAT
@@ -1820,6 +1823,7 @@ subroutine mio_wrtsig(ifail,val,word,nw,precis,tval,nopnt)
           lw=min(15,nw)
         else
           lw=min(23,nw)
+          !lw = nw
         end if
 
         n=0
@@ -1833,11 +1837,27 @@ subroutine mio_wrtsig(ifail,val,word,nw,precis,tval,nopnt)
           if(pos.eq.1) then
             if(lw.ge.13) then
               write(word,'(1pe13.7)',err=80) val
+              ! jwhite 27/11/2018 - hack for padding with leading zeros
+              if (nw.gt.lw) then
+                wtemp = adjustl(word)
+                do itemp=lw,nw
+                  wtemp = '0' // wtemp
+                end do
+                word = trim(wtemp)
+              end if
               go to 200
             end if
           else
             if(lw.ge.14)then
               write(word,'(1pe14.7)',err=80) val
+              ! jwhite 27/11/2018 - hack for padding with leading zeros
+              if (nw.gt.lw) then
+                wtemp = adjustl(word)
+                do itemp=lw,nw
+                  wtemp = '0' // wtemp
+                end do
+                word = trim(wtemp)
+              end if
               go to 200
             end if
           end if
@@ -1852,11 +1872,20 @@ subroutine mio_wrtsig(ifail,val,word,nw,precis,tval,nopnt)
           end if
           if(pos.eq.1) then
             if(lw.ge.22) then
+              
 #ifdef USE_D_FORMAT
               write(word,'(1PD22.15D3)',err=80) val
 #else
               write(word,'(1PE22.15E3)',err=80) val
-#endif
+#endif        
+              ! jwhite 27/11/2018 - hack for padding with leading zeros
+              if (nw.gt.lw) then
+                wtemp = adjustl(word)
+                do itemp=lw,nw
+                  wtemp = '0' // wtemp
+                end do
+                word = trim(wtemp)
+              end if
               go to 200
             end if
           else
@@ -1866,6 +1895,14 @@ subroutine mio_wrtsig(ifail,val,word,nw,precis,tval,nopnt)
 #else
               write(word,'(1PE23.15E3)',err=80) val
 #endif
+              !jwhite - leading zero hack
+              if (nw.gt.lw) then
+                wtemp = adjustl(word)
+                do itemp=lw,nw
+                  wtemp = '0' // wtemp
+                end do
+                word = trim(wtemp)
+              end if
               go to 200
             end if
           end if
@@ -2086,11 +2123,11 @@ subroutine mio_wrtsig(ifail,val,word,nw,precis,tval,nopnt)
           word(n:n)=' '
         end if
 
-200     if(len_trim(word).gt.lw)then
+200     if(len_trim(word).gt.nw)then
           ifail=-2
           return
         end if
-        write(fmt,30) lw,0
+        write(fmt,30) nw,0
         read(word,fmt,err=400) tval
         return
 300     ifail=3
