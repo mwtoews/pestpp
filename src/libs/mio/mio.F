@@ -1897,10 +1897,16 @@ subroutine mio_wrtsig(ifail,val,word,nw,precis,tval,nopnt)
 #endif
               !jwhite - leading zero hack
               if (nw.gt.lw) then
+#ifdef USE_D_FORMAT
+              write(word,'(1PD22.15D3)',err=80) abs(val)
+#else
+              write(word,'(1PE22.15E3)',err=80) abs(val)
+#endif
                 wtemp = adjustl(word)
-                do itemp=lw,nw
+                do itemp=lw,nw-1
                   wtemp = '0' // wtemp
                 end do
+                wtemp = '-' // wtemp
                 word = trim(wtemp)
               end if
               go to 200

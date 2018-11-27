@@ -274,6 +274,17 @@ void Pest::check_inputs(ostream &f_rec)
 
 void Pest::check_io()
 {
+
+	if (model_exec_info.tplfile_vec.size() == 0)
+	{
+		cout << "Error: number of template files = 0" << endl;
+		throw runtime_error("number of template files = 0");
+	}
+	if (model_exec_info.insfile_vec.size() == 0)
+	{
+		cout << "Error: number of instruction files = 0" << endl;
+		throw runtime_error("number of instruction files = 0");
+	}
 	//make sure we can atleast access the model IO files
 	vector<string> inaccessible_files;
 	for (auto &file : model_exec_info.insfile_vec)
