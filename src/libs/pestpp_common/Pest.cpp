@@ -52,9 +52,9 @@ void Pest::check_inputs(ostream &f_rec)
 	if (other_lines.size() > 0)
 	{
 		stringstream ss;
-		ss << "Note: " << other_lines.size() << " unused lines pest control file, see rec file..." << endl;
+		ss << "Note: " << other_lines.size() << " unused lines in pest control file, see rec file..." << endl;
 		cout << ss.str();
-		f_rec << "Note: " << other_lines.size() << " unused lines pest control file:" << endl;
+		f_rec << "Note: " << other_lines.size() << " unused lines in pest control file:" << endl;
 		for (auto &line : other_lines)
 		{
 			f_rec <<"  -->  line number " << line.first << ": '" << line.second << "' " << endl;

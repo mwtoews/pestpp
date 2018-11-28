@@ -1026,7 +1026,7 @@ void RunManagerPanther::process_message(int i_sock)
 			stringstream ss;
 			ss << "run " << run_id << " received from: " << host_name << "$" << slave_info_iter->get_work_dir() <<
 				"  (run time:" << slave_info_iter->get_runtime_minute() << " min, avg run time:" << get_global_runtime_minute() << " min, group id:" << group_id <<
-				", run id = " << run_id << " concurrent:" << get_n_concurrent(run_id) << ")";
+				", run id: " << run_id << " concurrent:" << get_n_concurrent(run_id) << ")";
 			report(ss.str(), false);
 			process_model_run(i_sock, net_pack);
 		}

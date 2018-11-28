@@ -2095,11 +2095,17 @@ subroutine mio_wrtsig(ifail,val,word,nw,precis,tval,nopnt)
         word(1:j-k)=tword(k:j-1)
         jj=j
         j=j-k+1
-        if(precis.eq.0)then
-          word(j:j)='E'
-        else
-          word(j:j)='E'
-        end if
+        !if(precis.eq.0)then
+        !  word(j:j)='E'
+        !else
+        !  word(j:j)='E'
+        !end if
+#ifdef USE_D_FORMAT
+        word(j:j) = 'D'
+#else
+        word(j:j) = 'E'
+#endif
+       
         jj=jj+2
         if(nopnt.eq.0) jj=jj-1
         if(tword(jj:jj).eq.'-')then
