@@ -2098,7 +2098,7 @@ subroutine mio_wrtsig(ifail,val,word,nw,precis,tval,nopnt)
         if(precis.eq.0)then
           word(j:j)='E'
         else
-          word(j:j)='D'
+          word(j:j)='E'
         end if
         jj=jj+2
         if(nopnt.eq.0) jj=jj-1
