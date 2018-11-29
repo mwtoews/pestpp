@@ -52,9 +52,9 @@ void Pest::check_inputs(ostream &f_rec)
 	if (other_lines.size() > 0)
 	{
 		stringstream ss;
-		ss << "Note: " << other_lines.size() << " unused lines pest control file, see rec file..." << endl;
+		ss << "Note: " << other_lines.size() << " unused lines in pest control file, see rec file..." << endl;
 		cout << ss.str();
-		f_rec << "Note: " << other_lines.size() << " unused lines pest control file:" << endl;
+		f_rec << "Note: " << other_lines.size() << " unused lines in pest control file:" << endl;
 		for (auto &line : other_lines)
 		{
 			f_rec <<"  -->  line number " << line.first << ": '" << line.second << "' " << endl;
@@ -274,6 +274,17 @@ void Pest::check_inputs(ostream &f_rec)
 
 void Pest::check_io()
 {
+
+	if (model_exec_info.tplfile_vec.size() == 0)
+	{
+		cout << "Error: number of template files = 0" << endl;
+		throw runtime_error("number of template files = 0");
+	}
+	if (model_exec_info.insfile_vec.size() == 0)
+	{
+		cout << "Error: number of instruction files = 0" << endl;
+		throw runtime_error("number of instruction files = 0");
+	}
 	//make sure we can atleast access the model IO files
 	vector<string> inaccessible_files;
 	for (auto &file : model_exec_info.insfile_vec)
