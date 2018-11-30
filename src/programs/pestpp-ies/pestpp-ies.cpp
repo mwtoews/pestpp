@@ -224,11 +224,13 @@ int main(int argc, char* argv[])
 			fout_rec << "             pestpp-ies.exe - a GLM iterative Ensemble Smoother" << endl << "for PEST(++) datasets " << endl << endl;
 			fout_rec << "                 by the PEST++ developement team" << endl << endl << endl;
 			fout_rec << endl;
-			fout_rec << "using control file: \"" << complete_path << "\"" << endl << endl;
+			fout_rec << "using control file: \"" << complete_path << "\"" << endl;
+			fout_rec << "in directory: \"" << OperSys::getcwd() << "\"" << endl << endl;
 		}
 
 		cout << endl;
-		cout << "using control file: \"" << complete_path << "\"" << endl << endl;
+		cout << "using control file: \"" << complete_path << "\"" << endl;
+		cout << "in directory: \"" << OperSys::getcwd() << "\"" << endl << endl;
 
 		// create pest run and process control file to initialize it
 		Pest pest_scenario;

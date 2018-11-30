@@ -138,6 +138,11 @@ void ModelInterface::initialize(vector<string> &_par_name_vec, vector<string> &_
 	int ntpl = tplfile_vec.size();
 	int nins = insfile_vec.size();
 
+	if (ntpl <= 0)
+		throw runtime_error("number of template files <= 0");
+	if (nins <= 0)
+		throw runtime_error("number of instructino files <=0");
+
 	mio_initialise_w_(&ifail, &ntpl, &nins, &npar, &nobs);
 	if (ifail != 0) throw_mio_error("initializing mio module");
 

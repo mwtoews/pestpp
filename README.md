@@ -5,7 +5,6 @@
 PEST++ is a software suite aimed at supporting complex numerical models in the decision-support context.  Much focus has been devoted to supporting environmental models (groundwater, surface water, etc) but these tools are readily applicable to any computer model.
 
 <br><br><br>
-
 builds and basic testing:
 
 [![Travis Status](https://travis-ci.org/jtwhite79/pestpp.svg?branch=master)](https://travis-ci.org/jtwhite79/pestpp)
@@ -22,7 +21,6 @@ builds and basic testing:
 
 [![Travis Status](https://travis-ci.org/jtwhite79/pestpp-ies_benchmarks.svg?branch=master)](https://travis-ci.org/jtwhite79/pestpp-ies_benchmarks)
 [![Build status](https://ci.appveyor.com/api/projects/status/20uhstpq8o2d5qlo?svg=true)](https://ci.appveyor.com/project/jtwhite79/pestpp-ies_benchmarks)
-
 
 ## Documentation
 
