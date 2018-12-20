@@ -1276,6 +1276,8 @@ void Covariance::from_uncertainty_file(const string &filename)
 						throw runtime_error("Cov::from_uncertainty_file() error:EOF encountered while reading covariance_matrix block\
 							from uncertainty file:" + filename);
 					pest_utils::upper_ip(line);
+					line.erase(remove(line.begin(), line.end(), '\"'), line.end());
+					line.erase(remove(line.begin(), line.end(), '\''), line.end());
 					if (line.find("END") != string::npos) break;
 
 					tokens.clear();
