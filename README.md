@@ -19,8 +19,15 @@ builds and basic testing:
 
 ``pestpp-ies`` benchmarks:
 
+[![Travis Status](https://travis-ci.org/jtwhite79/pestpp-ies_benchmarks_base.svg?branch=master)](https://travis-ci.org/jtwhite79/pestpp-ies_benchmarks_base.svg?branch=master) 
+[![Build status](https://ci.appveyor.com/api/projects/status/x1puy1w4bp5o6e7d?svg=true)](https://ci.appveyor.com/project/jtwhite79/pestpp-ies_benchmarks_base)(base functional tests)
+
 [![Travis Status](https://travis-ci.org/jtwhite79/pestpp-ies_benchmarks.svg?branch=master)](https://travis-ci.org/jtwhite79/pestpp-ies_benchmarks)
-[![Build status](https://ci.appveyor.com/api/projects/status/20uhstpq8o2d5qlo?svg=true)](https://ci.appveyor.com/project/jtwhite79/pestpp-ies_benchmarks)
+[![Build status](https://ci.appveyor.com/api/projects/status/20uhstpq8o2d5qlo?svg=true)](https://ci.appveyor.com/project/jtwhite79/pestpp-ies_benchmarks) (part 1)
+
+[![Travis Status](https://travis-ci.org/jtwhite79/pestpp-ies_benchmarks2.svg?branch=master)](https://travis-ci.org/jtwhite79/pestpp-ies_benchmarks2.svg?branch=master)
+[![Build status](https://ci.appveyor.com/api/projects/status/pmfoaagb7qgerwmn?svg=true)](https://ci.appveyor.com/project/jtwhite79/pestpp-ies_benchmarks2) (part 2)
+
 
 ## Documentation
 
