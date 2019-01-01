@@ -31,6 +31,8 @@ before_script:
   
 
 script:
+  - export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)
+  - echo "TRAVIS_BRANCH=$TRAVIS_BRANCH, PR=$PR, BRANCH=$BRANCH"
   - cd src
   - rm -r -f ../bin/linux/
   - make clean
@@ -59,9 +61,9 @@ script:
 
 after_success:
   - chmod +x trigger-travis.sh
-  - ./trigger-travis.sh jtwhite79 pestpp-opt_benchmarks $TRAVIS_ACCESS_TOKEN
-  - ./trigger-travis.sh jtwhite79 pestpp-ies_benchmarks $TRAVIS_ACCESS_TOKEN
-  - ./trigger-travis.sh jtwhite79 pestpp-ies_benchmarks2 $TRAVIS_ACCESS_TOKEN
-  - ./trigger-travis.sh jtwhite79 pestpp-ies_benchmarks_base $TRAVIS_ACCESS_TOKEN
+  - ./trigger-travis.sh --branch $BRANCH jtwhite79 pestpp-opt_benchmarks $TRAVIS_ACCESS_TOKEN
+  - ./trigger-travis.sh --branch $BRANCH jtwhite79 pestpp-ies_benchmarks $TRAVIS_ACCESS_TOKEN
+  - ./trigger-travis.sh --branch $BRANCH jtwhite79 pestpp-ies_benchmarks2 $TRAVIS_ACCESS_TOKEN
+  - ./trigger-travis.sh --branch $BRANCH jtwhite79 pestpp-ies_benchmarks_base $TRAVIS_ACCESS_TOKEN
 notifications:
   email: true
