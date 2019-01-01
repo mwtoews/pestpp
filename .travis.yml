@@ -62,7 +62,7 @@ before_script:
 
 script:
   - git clone -b master --depth 1 $TEST_REPO  
-  - cd $TEST_REPO
+  - cd $TEST_DIR
   - nosetests -v $TEST_SCRIPT
 
 
