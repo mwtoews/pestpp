@@ -15,11 +15,9 @@ cache:
 matrix:
   include:
     - name: "pestpp-opt tests"
-      env: TEST_REPO="https://github.com/jtwhite79/pestpp-opt_benchmarks"
-      env: TEST_SCRIPT="opt_test.py"
+      env: TEST_REPO="https://github.com/jtwhite79/pestpp-opt_benchmarks" TEST_SCRIPT="opt_test.py"
     - name: "pestpp-ies tests part 1"
-      env: TEST_REPO="https://github.com/jtwhite79/pestpp-ies_benchmarks"
-      env: TEST_SCRIPT="ies_test_part1.py"
+      env: TEST_REPO="https://github.com/jtwhite79/pestpp-ies_benchmarks" TEST_SCRIPT="ies_test_part1.py"
 
 
 addons:
