@@ -2344,7 +2344,7 @@ bool IterEnsembleSmoother::should_terminate()
 	message(0, "phi-based termination criteria check");
 	message(1, "phiredstp: ", phiredstp);
 	message(1, "nphistp: ", nphistp);
-	message(1, "nphinored (also used for consecutive bad lamdba cycles): ", nphinored);
+	message(1, "nphinored (also used for consecutive bad lambda cycles): ", nphinored);
 	if (best_mean_phis.size() > 0)
 	{
 		vector<double>::iterator idx = min_element(best_mean_phis.begin(), best_mean_phis.end());

@@ -5,12 +5,23 @@ language: python
 python:
   - "3.6"
 
-ache:
+cache:
   pip: true
   apt: true
   directories:
     - $HOME/.cache/pip
     - $HOME/.local
+
+matrix:
+  include:
+    - name: "pestpp-opt tests"
+      env: TEST_REPO="https://github.com/jtwhite79/pestpp-opt_benchmarks" TEST_SCRIPT="opt_test.py" TEST_DIR="pestpp-opt_benchmarks"
+    - name: "pestpp-ies tests part 1"
+      env: TEST_REPO="https://github.com/jtwhite79/pestpp-ies_benchmarks" TEST_SCRIPT="ies_test_part1.py" TEST_DIR="pestpp-ies_benchmarks"
+    - name: "pestpp-ies tests part 2"
+      env: TEST_REPO="https://github.com/jtwhite79/pestpp-ies_benchmarks" TEST_SCRIPT="ies_test_part2.py" TEST_DIR="pestpp-ies_benchmarks"
+    - name: "pestpp-ies tests baseline"
+      env: TEST_REPO="https://github.com/jtwhite79/pestpp-ies_benchmarks" TEST_SCRIPT="ies_test_base.py" TEST_DIR="pestpp-ies_benchmarks"
 
 addons:
   apt:
@@ -28,9 +39,6 @@ env:
     - MAKEFLAGS="-j 2"
 
 before_script:
-  
-
-script:
   - cd src
   - rm -r -f ../bin/linux/
   - make clean
@@ -54,12 +62,18 @@ script:
   - export PYTHONPATH=$PYTHONPATH:.
   - export PATH="./test_bin/linux:../test_bin/linux:../../test_bin/linux:$PATH"
   - nosetests -v -w ./benchmarks ci_prep.py
-  - #nosetests -v -w ./benchmarks ies_test.py
+
+script:
+  - git clone -b master --depth 1 $TEST_REPO  
+  - cd $TEST_DIR
+  - nosetests -v $TEST_SCRIPT
 
 
-after_success:
-  - chmod +x trigger-travis.sh
-  - ./trigger-travis.sh jtwhite79 pestpp-opt_benchmarks $TRAVIS_ACCESS_TOKEN
-  - ./trigger-travis.sh jtwhite79 pestpp-ies_benchmarks $TRAVIS_ACCESS_TOKEN
+# after_success:
+#   - chmod +x trigger-travis.sh
+#   - ./trigger-travis.sh jtwhite79 pestpp-opt_benchmarks $TRAVIS_ACCESS_TOKEN
+#   - ./trigger-travis.sh jtwhite79 pestpp-ies_benchmarks $TRAVIS_ACCESS_TOKEN
+#   - ./trigger-travis.sh jtwhite79 pestpp-ies_benchmarks2 $TRAVIS_ACCESS_TOKEN
+#   - ./trigger-travis.sh jtwhite79 pestpp-ies_benchmarks_base $TRAVIS_ACCESS_TOKEN
 notifications:
   email: true
