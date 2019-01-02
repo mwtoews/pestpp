@@ -1,5 +1,9 @@
 # PEST++
-Object Oriented Inverse Modeling Software
+
+## Tools for non-intrusive and scalable parameter estimation and uncertainty quantification
+
+PEST++ is a software suite aimed at supporting complex numerical models in the decision-support context.  Much focus has been devoted to supporting environmental models (groundwater, surface water, etc) but these tools are readily applicable to any computer model.
+
 <br><br><br>
 builds and basic testing:
 
@@ -15,8 +19,15 @@ builds and basic testing:
 
 ``pestpp-ies`` benchmarks:
 
+[![Travis Status](https://travis-ci.org/jtwhite79/pestpp-ies_benchmarks_base.svg?branch=master)](https://travis-ci.org/jtwhite79/pestpp-ies_benchmarks_base.svg?branch=master) 
+[![Build status](https://ci.appveyor.com/api/projects/status/x1puy1w4bp5o6e7d?svg=true)](https://ci.appveyor.com/project/jtwhite79/pestpp-ies_benchmarks_base)(base functional tests)
+
 [![Travis Status](https://travis-ci.org/jtwhite79/pestpp-ies_benchmarks.svg?branch=master)](https://travis-ci.org/jtwhite79/pestpp-ies_benchmarks)
-[![Build status](https://ci.appveyor.com/api/projects/status/20uhstpq8o2d5qlo?svg=true)](https://ci.appveyor.com/project/jtwhite79/pestpp-ies_benchmarks)
+[![Build status](https://ci.appveyor.com/api/projects/status/20uhstpq8o2d5qlo?svg=true)](https://ci.appveyor.com/project/jtwhite79/pestpp-ies_benchmarks) (part 1)
+
+[![Travis Status](https://travis-ci.org/jtwhite79/pestpp-ies_benchmarks2.svg?branch=master)](https://travis-ci.org/jtwhite79/pestpp-ies_benchmarks2.svg?branch=master)
+[![Build status](https://ci.appveyor.com/api/projects/status/pmfoaagb7qgerwmn?svg=true)](https://ci.appveyor.com/project/jtwhite79/pestpp-ies_benchmarks2) (part 2)
+
 
 ## Documentation
 
@@ -24,15 +35,19 @@ The lastest PEST++ manual is available [here](https://github.com/jtwhite79/pestp
 
 ## Links to latest binaries
 
-* [windows (users with current visual studio installed)](https://github.com/jtwhite79/pestpp/tree/develop/bin/win).  Direct zip download [here](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/jtwhite79/pestpp/tree/develop/bin/win)
-* [windows compiled with intel C++ (the 'i' prefix)](https://github.com/jtwhite79/pestpp/tree/develop/bin/iwin).  Direct zip download [here](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/jtwhite79/pestpp/tree/develop/bin/iwin)
-* [mac OS](https://github.com/jtwhite79/pestpp/tree/develop/bin/mac).  Direct zip download [here](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/jtwhite79/pestpp/tree/develop/bin/mac)
-* [linux static compiled with intel C++](https://github.com/jtwhite79/pestpp/tree/develop/bin/linux). Direct zip download [here](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/jtwhite79/pestpp/tree/develop/bin/linux). (makefiles for GCC provides in src/ directory)
+The lastest PEST++ manual is available [here](https://github.com/jtwhite79/pestpp/tree/master/documentation). Direct zip download [here](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/jtwhite79/pestpp/tree/master/documentation)
+
+## Links to latest binaries
+
+* [windows (users with current visual studio installed)](https://github.com/jtwhite79/pestpp/tree/master/bin/win).  Direct zip download [here](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/jtwhite79/pestpp/tree/master/bin/win)
+* [windows compiled with intel C++ (the 'i' prefix)](https://github.com/jtwhite79/pestpp/tree/master/bin/iwin).  Direct zip download [here](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/jtwhite79/pestpp/tree/master/bin/iwin)
+* [mac OS](https://github.com/jtwhite79/pestpp/tree/master/bin/mac).  Direct zip download [here](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/jtwhite79/pestpp/tree/master/bin/mac)
+* [linux static compiled with intel C++](https://github.com/jtwhite79/pestpp/tree/master/bin/linux). Direct zip download [here](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/jtwhite79/pestpp/tree/master/bin/linux). (makefiles for GCC provides in src/ directory).  These binaries are lagging behind until I can secure access to these compilers again...
 
 ## Overview
 The PEST++ software suite includes several stand-alone tools for model-independent (non-intrusive) computer model parameter estimation and uncertainty analysis.  Codes include:
 
-* ``pestpp``: deterministic GLM parameter estimation using "on-the-fly" subspace reparameterization, effectively reproducing the SVD-Assist methodology of PEST without any user intervention
+* ``pestpp``: deterministic GLM parameter estimation using "on-the-fly" subspace reparameterization, effectively reproducing the SVD-Assist methodology of PEST without any user intervention and FOSM-based parameter and (optional) forecast uncertainty estimation with support for generating posterior parameter realizations.
 
 * ``pestpp-gsa``: Global senitivity analysis using either Morris or Sobol
 
@@ -40,11 +55,17 @@ The PEST++ software suite includes several stand-alone tools for model-independe
 
 * ``pestpp-opt``: chance-constrainted linear programming
 
-* ``pestpp-ies``: iterative ensemble smoother implementation of GLM.
+* ``pestpp-ies``: iterative ensemble smoother implementation of GLM (based on the work Chen and Oliver 2013) with support for generic localization (local analysis and/or covariance localization)
 
 All members of the software suite can be compiled for PC, MAC, or Linux and have several run managers to support parallelization.  precompiled binaries are available in the "bin" folder.  Windows users with older OS versions should use the ``bin/iwin`` binaries (starting "i", compiled with intel C++) to avoid the dreaded MSVC missing runtime DLL issue
 
 ## Recent Updates
+
+<b> update 12 November 2018 </b>: ``pestpp-ies`` now supports localization available as combined local analysis/covariance localization.  This is controlled by a localization matrix which lists adjustable parameters and/or parameter groups as columns and non-zero weighted observations and/or observation groups as rows.  The format of this matrix can be PEST ascii, PEST binary or CSV.  
+
+<b> update 3 November 2018 </b>: The FOSM calculations in ``pestpp`` now also support generation and evaluation of a posterior parameter ensemble.  If you add ``++num_reals(50)`` to the end of the pest control file, once the GLM parameter estimation process of ``pestpp`` is complete, during the FOSM parameter uncertainty calculations, 50 posterior parameter realizations are generated from the Schur-based (bayes linear) posterior parameter covariance matrix.  These realizations are saved to a CSV file and are also evaluated (in parallel is ``pestpp`` is running in parallel).
+
+<b> update 3 November 2018 </b>: The repo structure has been significantly refactored in an effort to reduce the size the primary code and binaries.  The main culprit was the ``benchmarks`` directory, so the various benchmarks have now been split off into separate repos: [https://github.com/jtwhite79/pestpp_benchmarks](https://github.com/jtwhite79/pestpp_benchmarks), [https://github.com/jtwhite79/pestpp-ies_benchmarks](https://github.com/jtwhite79/pestpp-ies_benchmarks), and [https://github.com/jtwhite79/pestpp-opt_benchmarks](https://github.com/jtwhite79/pestpp-opt_benchmarks).  This makes the main repo (this repo) much smaller; the CI testing continues as before by using some tricks for automatically triggering downstream/dependent builds in travis - a commit against this repo will trigger a fake commit to each of those benchmark repos and subsuquently CI testing in travis and appveyor.
 
 <b> update 15 September 2018 </b>: An official PEST++ V4 manual is now available in the Documentation directory.  It is a docx file so any contributions (revisions/extensions/clarifications/etc) are greatly appreciated!
 
@@ -58,7 +79,7 @@ All members of the software suite can be compiled for PC, MAC, or Linux and have
 
 <b> update 09/20/2017</b>: the new optimization under uncertainty tool is ready!  A supporting publication is in the works and should be available soon (a link will be posted once it is accepted).  This new tool uses the same control file/template file/instruction file approach as other PEST(++) applications, so applying this tool to your problem should be seamless.  Optional "++" args for tool are available further done this page.
 
-<b>update 01/25/2017</b>: intel C++ builds are avaiable for mac and for windows.  For mac users, these are statically-linked so they do not require compilers to be installed.  For windows users, the intel build circumvents the "missing VCOMP140.DLL" error.  Note the intel windows builds are currently in the ``intel_c_windows`` branch.
+<b>update 01/25/2017</b>: intel C++ builds are avaiable for mac and for windows.  For mac users, these are statically-linked so they do not require compilers to be installed.  For windows users, the intel build circumvents the "missing VCOMP140.DLL" error.  Note the intel windows builds are currently in the ~~``intel_c_windows`` branch~~ ``bin/iwin/`` folder.
 
 <b>update 11/25/2016</b>: PEST++ version 3.6 is now available. Some of the many enhancements available in 3.6 include:
 
@@ -75,34 +96,38 @@ All members of the software suite can be compiled for PC, MAC, or Linux and have
 <b>Update 05/26/2016</b>: PEST++ V3 has been officially released.  It supports a number of really cool features, including global sensitivity analyses, and automatic Bayes linear (first-order, second-moment) parameter and forecast uncertainty estimates.  We also have a utility for fully-parallel parametric sweeps from csv-based parameter files, which is useful for Monte Carlo, design of experiments, surrogate construction, etc.  All of these tools are based on the model-independent communication framework of PEST, so if you have a problem already setup, these tools are ready for you!
 
 <b>Update 10/1/2014</b>: recent stable versions of PEST++ implement dynamic regularization, full restart capabilities, additional options for formulating the normal equations, and an iterative SVD algorithm for very-large problems.  Additionally the YAMR run manager has been improved to use threaded workers so that the master can more easily load balance.  
-##Latest Report and Documentation
-Welter, D.E., White, J.T., Hunt, R.J., and Doherty, J.E., 2015, Approaches in highly parameterized inversion— PEST++ Version 3, a Parameter ESTimation and uncertainty analysis software suite optimized for large environmental models: U.S. Geological Survey Techniques and Methods, book 7, chap. C12, 54 p., <a ref="http://dx.doi.org/10.3133/tm7C12">http://dx.doi.org/10.3133/tm7C12</a>.
-
 
 ## PEST++ References:
 
-Morris, M.D. 1991. "Factorial Sampling Plans for Preliminary Computational Experiments".  Technometrics 33(2)"161-174
+White, J. T., 2018, A model-independent iterative ensemble smoother for efficient history-matching and uncertainty quantification in very high dimensions. Environmental Modelling & Software. 109. 10.1016/j.envsoft.2018.06.009. <a ref="http://dx.doi.org/10.1016/j.envsoft.2018.06.009">http://dx.doi.org/10.1016/j.envsoft.2018.06.009</a>.
 
-Sobol, I.M. (1993), “Sensitivity Estimates for Nonlinear Mathematical Models,” Mathematical 
-Modeling and Computation, 1(4):407-414. 
+White, J. T., Fienen, M. N., Barlow, P. M., and Welter, D.E., 2017, A tool for efficient, model-independent management optimization under uncertainty. Environmental Modeling and Software.  <a ref="http://dx.doi.org/10.1016/j.envsoft.2017.11.019">http://dx.doi.org/10.1016/j.envsoft.2017.11.019</a>.
+
+Welter, D.E., White, J.T., Hunt, R.J., and Doherty, J.E., 2015, Approaches in highly parameterized inversion— PEST++ Version 3, a Parameter ESTimation and uncertainty analysis software suite optimized for large environmental models: U.S. Geological Survey Techniques and Methods, book 7, chap. C12, 54 p., <a ref="http://dx.doi.org/10.3133/tm7C12">http://dx.doi.org/10.3133/tm7C12</a>.
 
 Welter, D.E., Doherty, J.E., Hunt, R.J., Muffels, C.T., Tonkin, M.J., and Schreüder, W.A., 2012, Approaches in highly parameterized inversion—PEST++, a Parameter ESTimation code optimized for large environmental models: U.S. Geological Survey Techniques and Methods, book 7, section C5, 47 p., available only at <a ref="http://pubs.usgs.gov/tm/tm7c5">http://pubs.usgs.gov/tm/tm7c5</a>.
 
 ### Related Links:
 
 * <a ref="http://www.pesthomepage.org">http://www.pesthomepage.org </a>
-* <a ref="http://wi.water.usgs.gov/models/pestplusplus/">http://wi.water.usgs.gov/models/pestplusplus</a>
-* <a ref="http://wi.water.usgs.gov/models/genie/">http://wi.water.usgs.gov/models/genie/ </a>
 * <a ref="https://github.com/jtwhite79/pyemu">https://github.com/jtwhite79/pyemu </a>
 
 ## Compiling
-The master branch includes a Visual Studio 2015 project, as well as makefiles for linux and mac.
+The master branch includes a Visual Studio 2015 project, as well as makefiles for linux and mac. The suite has been succcessfully compiled with gcc (g++ and gfortran) 4,5,6 and 7 on ubuntu, fedora, and a slurm/MPI cluster - to use gcc, you need to have both ``lapack`` and ``blas`` libraries available in the path.
 
 ## Testing
-The benchmarks/ folder contain many full-worked test problems of varying problem size which are used to evaluate the performance of various aspects of the PEST++ suite.  
+The ``benchmarks`` folder contains a simple worked example that is used for basic CI testing.  Many full-worked test problems of varying problem sizes are now located in separate repos:
+
+* [https://github.com/jtwhite79/pestpp_benchmarks](https://github.com/jtwhite79/pestpp_benchmarks)
+* [https://github.com/jtwhite79/pestpp-ies_benchmarks](https://github.com/jtwhite79/pestpp-ies_benchmarks)
+* [https://github.com/jtwhite79/pestpp-opt_benchmarks](https://github.com/jtwhite79/pestpp-opt_benchmarks)
 
 ## Dependencies
-Much work has been done to avoid additional external dependencies in PEST++.  As currently designed, the project is fully self-contained and statically linked.  
+Much work has been done to avoid additional external dependencies in PEST++.  As currently designed, the project is fully self-contained and statically linked. ``lapack`` and ``blas`` are also required - these are included with the intel fortran compiler; those using gcc will need to have these libraries available. 
+
+# optional ``++`` arguments
+
+## please see the PEST++ version 4 manual in the ``docs`` directory for a more complete description of these options
 
 ## parallel run manager arguments
 These are the optional ``++`` args that can be used to control the parallel run manager
@@ -237,8 +262,9 @@ Here is a (more or less) complete list of ``++`` arguments that can be added to 
 
 * ``ies_subset_how(<subset_how>)``: choice for how the subset is selected.  Choices are "first" (use the first ``subset_size`` realizations),"last" (use the last ``subset_size`` realizations),"random" (randomly select ``subset_size`` realizations each iteration),"phi_based" (chose ``subset_size`` realizations spread across the composite phi from the last iteration). Default is "phi_based". If present, the ``base`` parameter realization will always be included in the subset.  
 
-* ``ies_localizer(<localizer>)``: an optional localizer to use to localize spurious cross-correlations between observations and parameters.  The file format is determined by the extension: "mat","cov","csv","jco"/"jcb".  The row names of the matrix are observation names and/or observation group names and columns are parameter names and/or parameter group names (each obs/par can only be include once even through groups).  Currently only zero vs nonzero entires are used to localize.  
+* ``ies_localizer(<localizer>)``: an optional localizer to use to localize spurious cross-correlations between observations and parameters.  The file format is determined by the extension: "mat","cov","csv","jco"/"jcb".  The row names of the matrix are observation names and/or observation group names and columns are parameter names and/or parameter group names (each obs/par can only be include once even through groups).  Values should range between 0.0 and 1.0 (although no check is made).  Adjustable parameters not listed in the columns are implicitly treated as ``fixed`` and non-zero weight observations not listed in the rows are implicitly treated as zero-weighted. 
 
+* ``ies_num_threads`` : the number of threads to use when calculating localized upgrades for large numbers of parameters.  Default is ``0``.
 ### USGS disclaimer
 
 This software has been approved for release by the U.S. Geological Survey (USGS). Although the software has been subjected to rigorous review, the USGS reserves the right to update the software as needed pursuant to further analysis and review. No warranty, expressed or implied, is made by the USGS or the U.S. Government as to the functionality of the software and related material nor shall the fact of release constitute any such warranty. Furthermore, the software is released on condition that neither the USGS nor the U.S. Government shall be held liable for any damages resulting from its authorized or unauthorized use
